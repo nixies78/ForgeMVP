@@ -5,6 +5,9 @@ This project has been initialized with Git. Follow these instructions to link th
 ---
 
 ## Step 1: Create a GitHub Repository
+
+**Already done** - the repository lives at <https://github.com/nixies78/ForgeMVP>.
+(Steps kept for reference if you ever start a fresh one):
 1. Open [GitHub: Create a New Repository](https://github.com/new?name=ForgeMVP).
 2. Set repository name to: `ForgeMVP`
 3. Choose **Private** or **Public**.
@@ -14,14 +17,17 @@ This project has been initialized with Git. Follow these instructions to link th
 ---
 
 ## Step 2: Link This Folder to GitHub
-Run the following commands in this directory (`C:\VibeCoding\ForgeMVP`):
+
+**Already done** - this repository is linked to <https://github.com/nixies78/ForgeMVP> and
+`main` tracks `origin/main`. Just run `git push` (or `sync.bat`) to publish changes.
+
+If you ever need to re-link (or clone onto another machine), the commands are:
 
 ```bash
-git remote add origin https://github.com/<YOUR-GITHUB-USERNAME>/ForgeMVP.git
+git remote add origin https://github.com/nixies78/ForgeMVP.git
 git branch -M main
 git push -u origin main
 ```
-*(Replace `<YOUR-GITHUB-USERNAME>` with your GitHub username)*
 
 ---
 
@@ -46,3 +52,12 @@ git push
 - Check modified files: `git status`
 - View commit history: `git log --oneline`
 - Pull updates from GitHub: `git pull`
+
+---
+
+## Living web page (Google Cloud)
+
+`Dockerfile` and `cloudbuild.yaml` are ready so a push to `main` can build and deploy the
+app to Cloud Run automatically. The one-time setup commands are at the top of
+`cloudbuild.yaml`. Until that trigger exists, `npm start` serves the site locally on
+<http://localhost:5173/> (and prints a LAN URL other people on your network can open).
