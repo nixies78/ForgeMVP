@@ -27,3 +27,6 @@ yarn-error.log*
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local scratch space (headless-browser renders, throwaway captures)
+.scratch/

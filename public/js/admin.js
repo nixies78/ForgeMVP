@@ -3,8 +3,8 @@
  * connection end to end.
  */
 
-import { DEFAULT_MODEL, checkKeyFormat, maskKey } from './config.js';
-import { getSettings, saveSettings, clearSettings } from './settings.js';
+import { DEFAULT_MODEL, checkKeyFormat, maskKey, pickLatestDeepSeek } from './config.js';
+import { getSettings, hasSavedModel, saveSettings, clearSettings } from './settings.js';
 import {
   buildModelOptions,
   listModels,
@@ -26,6 +26,8 @@ const ui = {
   customModel: el('customModel'),
   testConnection: el('testConnection'),
   pingModel: el('pingModel'),
+  resultCard: el('resultCard'),
+  dismissResult: el('dismissResult'),
   status: el('status'),
   steps: el('steps'),
 };
@@ -96,6 +98,14 @@ function setStatus(kind, title, body = '') {
     body ? `<div class="small">${escapeHtml(body)}</div>` : ''
   }`;
   ui.status.classList.remove('hidden');
+
+  // Always surface the answer at the top of the page: a Save pressed down in
+  // section 1 must not look like nothing happened.
+  ui.resultCard.classList.remove('hidden');
+  const rect = ui.resultCard.getBoundingClientRect();
+  if (rect.top < 0 || rect.bottom > window.innerHeight) {
+    ui.resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function renderSteps(steps) {
@@ -151,12 +161,26 @@ async function onRefreshModels() {
   busy(true, ui.refreshModels);
   try {
     liveModels = await listModels();
-    const selected = currentModel();
-    renderModelSelect(selected);
+
+    let picked = null;
+    if (!hasSavedModel()) {
+      picked = pickLatestDeepSeek(liveModels);
+      if (picked) saveSettings({ model: picked });
+    }
+
+    renderModelSelect(currentModel());
     persist();
+
     const deepseekCount = liveModels.filter((m) => m.id.startsWith('deepseek/')).length;
-    ui.modelState.textContent = `Loaded ${liveModels.length} live models (${deepseekCount} DeepSeek).`;
-    setStatus('ok', 'Model list refreshed', `OpenRouter returned ${liveModels.length} models; ${deepseekCount} are DeepSeek.`);
+    ui.modelState.textContent =
+      `Loaded ${liveModels.length} live models (${deepseekCount} DeepSeek).` +
+      (picked ? ` Newest DeepSeek selected: ${picked}.` : '');
+    setStatus(
+      'ok',
+      'Model list refreshed',
+      `OpenRouter returned ${liveModels.length} models; ${deepseekCount} are DeepSeek.` +
+        (picked ? ` Newest DeepSeek selected automatically: ${picked}.` : '')
+    );
   } catch (err) {
     setStatus('err', 'Could not load the model list', err.message);
   } finally {
@@ -221,6 +245,8 @@ async function onPing() {
 /* ---------------- init ---------------- */
 
 function init() {
+  document.documentElement.dataset.appReady = 'true';
+
   for (const button of [ui.testConnection, ui.pingModel, ui.refreshModels, ui.saveSettings]) {
     button.dataset.label = button.textContent;
   }
@@ -246,18 +272,55 @@ function init() {
   ui.testConnection.addEventListener('click', onTest);
   ui.pingModel.addEventListener('click', onPing);
 
-  // Quietly try to pull the live model list so the dropdown is accurate.
+  ui.dismissResult.addEventListener('click', () => {
+    ui.resultCard.classList.add('hidden');
+    ui.steps.innerHTML = '';
+  });
+
+  // Show something on arrival so the page proves its scripts are alive.
+  const existing = getSettings();
+  setStatus(
+    existing.apiKey ? 'ok' : 'warn',
+    existing.apiKey ? 'Ready' : 'Waiting for an API key',
+    existing.apiKey
+      ? `Saved key found. Active model: ${existing.model}. Press "Test connection" to verify it.`
+      : 'Paste your OpenRouter key in step 1 below and press Save.'
+  );
+  ui.steps.innerHTML = '';
+
+  // Quietly pull the live model list so the dropdown is accurate and the newest
+  // DeepSeek can be selected without anyone having to look up its slug.
   listModels()
     .then((models) => {
       liveModels = models;
-      renderModelSelect(currentModel());
+
+      // Only auto-choose while the user has not picked a model themselves.
+      let picked = null;
+      if (!hasSavedModel()) {
+        picked = pickLatestDeepSeek(models);
+        if (picked) saveSettings({ model: picked });
+      }
+
+      const selected = currentModel();
+      renderModelSelect(selected);
+
       const deepseek = models.filter((m) => m.id.startsWith('deepseek/'));
-      ui.modelState.textContent = `Live list loaded: ${models.length} models, ${deepseek.length} DeepSeek.${
-        deepseek[0] ? ` Newest entry: ${deepseek[0].id}.` : ''
-      }`;
+      ui.modelState.textContent =
+        `Live list loaded: ${models.length} models, ${deepseek.length} DeepSeek.` +
+        (picked ? ` Newest DeepSeek selected automatically: ${picked}.` : '');
+
+      if (picked) {
+        setStatus(
+          getSettings().apiKey ? 'ok' : 'warn',
+          'Newest DeepSeek selected',
+          `Chose "${picked}" from the live OpenRouter catalogue. Change it in step 2 if you prefer another model.` +
+            (getSettings().apiKey ? '' : ' Now paste your API key in step 1.')
+        );
+      }
     })
     .catch(() => {
-      ui.modelState.textContent = 'Offline or blocked: showing the built-in model list. Press "Refresh models" once you are online.';
+      ui.modelState.textContent =
+        'Could not reach OpenRouter: showing the built-in model list. Press "Refresh models" once you are online.';
     });
 }
 

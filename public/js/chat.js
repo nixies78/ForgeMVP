@@ -190,6 +190,8 @@ async function send() {
 }
 
 function init() {
+  document.documentElement.dataset.appReady = 'true';
+
   refreshHeader();
 
   ui.form.addEventListener('submit', (event) => {

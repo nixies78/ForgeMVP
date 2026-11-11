@@ -6,6 +6,13 @@
   <title>Chat test - ForgeMVP</title>
   <link rel="icon" href="assets/logo.svg" />
   <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    // Plain inline script on purpose: this still runs when the page is opened straight
+    // from disk (file://), where the browser blocks the module scripts below.
+    document.documentElement.classList.add(
+      location.protocol === 'file:' ? 'opened-from-disk' : 'served-over-http'
+    );
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -27,6 +34,28 @@
   </header>
 
   <main class="wide">
+    <div class="status warn local-server-warning" role="alert">
+      <div class="status-title">This page was opened straight from disk (file://) - nothing here can work</div>
+      <div class="small">
+        Your address bar starts with <span class="mono">file://</span>. Browsers block the page scripts that way,
+        which is why Send does nothing. Fix it in three steps:
+        <ol>
+          <li>Open <span class="mono">C:\VibeCoding\ForgeMVP</span> in File Explorer.</li>
+          <li>Double-click <strong>start.bat</strong> (or run <span class="mono">npm start</span> in this folder).</li>
+          <li>Open <a href="http://localhost:5173/chat.html">http://localhost:5173/chat.html</a>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div id="scriptFailure" class="status err" role="alert" hidden>
+      <div class="status-title">The page scripts did not load</div>
+      <div class="small">
+        Buttons on this page will do nothing until they do. Hard-refresh with
+        <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>, check the browser console for the error, and make sure
+        the site is being served by <span class="mono">npm start</span> rather than opened from a file path.
+      </div>
+    </div>
+
     <h1>Chat test</h1>
     <p class="lede">
       Live conversation with the model configured on the admin page - the quickest way to see the OpenRouter
@@ -77,5 +106,15 @@
   <footer>ForgeMVP &middot; UEFN game design documents</footer>
 
   <script type="module" src="js/chat.js"></script>
+  <script>
+    // Watchdog: js/chat.js marks <html data-app-ready="true"> when it starts. If that never
+    // happens (blocked, 404, cached failure) say so instead of leaving dead buttons.
+    setTimeout(function () {
+      if (location.protocol === 'file:') return; // the banner above already explains that case
+      if (document.documentElement.dataset.appReady !== 'true') {
+        document.getElementById('scriptFailure').hidden = false;
+      }
+    }, 1500);
+  </script>
 </body>
 </html>

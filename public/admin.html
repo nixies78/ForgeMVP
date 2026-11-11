@@ -6,6 +6,13 @@
   <title>Admin - ForgeMVP</title>
   <link rel="icon" href="assets/logo.svg" />
   <link rel="stylesheet" href="css/styles.css" />
+  <script>
+    // Plain inline script on purpose: this still runs when the page is opened straight
+    // from disk (file://), where the browser blocks the module scripts below.
+    document.documentElement.classList.add(
+      location.protocol === 'file:' ? 'opened-from-disk' : 'served-over-http'
+    );
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -27,8 +34,40 @@
   </header>
 
   <main class="wide">
+    <div class="status warn local-server-warning" role="alert">
+      <div class="status-title">This page was opened straight from disk (file://) - nothing here can work</div>
+      <div class="small">
+        Your address bar starts with <span class="mono">file://</span>. Browsers block the page scripts that way,
+        which is why Save, Show and the connection test do nothing. Fix it in three steps:
+        <ol>
+          <li>Open <span class="mono">C:\VibeCoding\ForgeMVP</span> in File Explorer.</li>
+          <li>Double-click <strong>start.bat</strong> (or run <span class="mono">npm start</span> in this folder).</li>
+          <li>Open <a href="http://localhost:5173/admin.html">http://localhost:5173/admin.html</a>.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div id="scriptFailure" class="status err" role="alert" hidden>
+      <div class="status-title">The page scripts did not load</div>
+      <div class="small">
+        Buttons on this page will do nothing until they do. Hard-refresh with
+        <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>, check the browser console for the error, and make sure
+        the site is being served by <span class="mono">npm start</span> rather than opened from a file path.
+      </div>
+    </div>
+
     <h1>Admin</h1>
     <p class="lede">Configure the OpenRouter connection and check it works. The API key is stored only in this browser.</p>
+
+    <!-- ============ Result of whatever you last clicked ============ -->
+    <section class="card hidden" id="resultCard">
+      <div class="card-head">
+        <h2>Result</h2>
+        <button type="button" class="link" id="dismissResult">Hide</button>
+      </div>
+      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+      <ul class="steps" id="steps"></ul>
+    </section>
 
     <!-- ============ 1. OpenRouter API key ============ -->
     <section class="card">
@@ -61,12 +100,12 @@
           <select class="grow" id="modelSelect"></select>
           <button type="button" class="secondary" id="refreshModels">Refresh models from OpenRouter</button>
         </div>
-        <p class="small muted" style="margin-top:8px" id="modelState">Default: DeepSeek V3.2 (latest DeepSeek release).</p>
+        <p class="small muted" style="margin-top:8px" id="modelState">Checking the live OpenRouter catalogue for the newest DeepSeek...</p>
       </div>
 
       <div class="field">
         <label for="customModel">Custom model id (optional - overrides the dropdown)</label>
-        <input type="text" id="customModel" placeholder="e.g. deepseek/deepseek-v3.2" autocomplete="off" spellcheck="false" />
+        <input type="text" id="customModel" placeholder="e.g. deepseek/deepseek-v4.1-flash" autocomplete="off" spellcheck="false" />
         <p class="small muted" style="margin-top:8px">Leave empty to use the dropdown. Paste any id from the OpenRouter model list here if the one you want is missing.</p>
       </div>
     </section>
@@ -87,8 +126,7 @@
         <a class="logo-link" href="chat.html" style="border-radius:8px">Open the chat test page &rarr;</a>
       </div>
 
-      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
-      <ul class="steps" id="steps"></ul>
+      <p class="small muted" style="margin:0">Results appear in the <strong>Result</strong> box at the top of this page.</p>
     </section>
 
     <!-- ============ 4. Notes ============ -->
@@ -105,5 +143,15 @@
   <footer>ForgeMVP &middot; UEFN game design documents</footer>
 
   <script type="module" src="js/admin.js"></script>
+  <script>
+    // Watchdog: js/admin.js marks <html data-app-ready="true"> when it starts. If that never
+    // happens (blocked, 404, cached failure) say so instead of leaving dead buttons.
+    setTimeout(function () {
+      if (location.protocol === 'file:') return; // the banner above already explains that case
+      if (document.documentElement.dataset.appReady !== 'true') {
+        document.getElementById('scriptFailure').hidden = false;
+      }
+    }, 1500);
+  </script>
 </body>
 </html>

@@ -13,6 +13,11 @@ export function getSettings() {
   };
 }
 
+/** True once the user (or an earlier auto-pick) has stored a model choice. */
+export function hasSavedModel() {
+  return Boolean(storage.get(STORAGE_KEYS.model));
+}
+
 export function saveSettings({ apiKey, model, stream } = {}) {
   if (typeof apiKey === 'string') storage.set(STORAGE_KEYS.apiKey, apiKey.trim());
   if (typeof model === 'string' && model) storage.set(STORAGE_KEYS.model, model);

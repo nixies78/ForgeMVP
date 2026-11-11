@@ -18,6 +18,11 @@ The admin page is reachable from the **logo in the top-right corner** of every p
 
 Requires Node.js 18+ (nothing to install - there are no dependencies).
 
+**Easiest:** double-click **`start.bat`** in this folder. It starts the server and opens
+your browser on the admin page.
+
+Or from a terminal:
+
 ```bash
 npm start
 ```
@@ -32,6 +37,12 @@ Then open:
 network can open the same pages from their machine.
 
 Change the port with `set PORT=8080 && npm start` (Windows) or `PORT=8080 npm start`.
+
+> **Do not open `public/admin.html` by double-clicking it.** That loads the page from a
+> `file://` path, and browsers block ES modules over `file://`, so the page scripts never
+> run - the buttons do nothing. Always go through `http://localhost:5173/...`. The pages
+> now detect this and show a red warning explaining it, and a watchdog reports it if the
+> scripts fail to load for any other reason.
 
 ## Test it
 
@@ -69,9 +80,14 @@ npm test
   site's server, never logged, and never committed - `.gitignore` blocks `.env` files too.
 - Because the key is per-browser, a hosted copy can be shared publicly: each visitor
   pastes their own key on the admin page. No shared secret is exposed.
-- Model dropdown: DeepSeek V3.2 (`deepseek/deepseek-v3.2`) is the default. **Refresh
-  models from OpenRouter** pulls the live catalogue so the list is never stale, and the
-  custom-model box accepts any model id by hand.
+- Model dropdown: the newest DeepSeek is selected **automatically** from the live
+  OpenRouter catalogue the first time the admin page loads - it was
+  `deepseek/deepseek-v4.1-flash` when this was written, and it will follow DeepSeek's
+  releases without a code change (`pickLatestDeepSeek()` in `public/js/config.js` ranks
+  by version, then tier, and skips `:batch` and experimental endpoints). **Refresh models
+  from OpenRouter** repulls the list, and the custom-model box accepts any id by hand.
+- Save and every action report into a **Result** panel pinned at the top of the admin page,
+  so feedback is never off-screen.
 
 ---
 

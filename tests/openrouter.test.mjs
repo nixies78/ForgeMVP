@@ -8,7 +8,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DEFAULT_MODEL, checkKeyFormat, maskKey, SEED_MODELS } from '../public/js/config.js';
+import { DEFAULT_MODEL, checkKeyFormat, maskKey, pickLatestDeepSeek, SEED_MODELS } from '../public/js/config.js';
 import { clearSettings, getSettings, saveSettings } from '../public/js/settings.js';
 import {
   buildModelOptions,
@@ -27,6 +27,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
 const FILE_MODELS = [
+  { id: 'deepseek/deepseek-v4.1-flash', name: 'DeepSeek V4.1 Flash', context_length: 200000 },
   { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2', context_length: 163840 },
   { id: 'deepseek/deepseek-r1', name: 'DeepSeek R1', context_length: 65536 },
   { id: 'openai/gpt-4o-mini', name: 'GPT-4o mini', context_length: 128000 },
@@ -56,9 +57,69 @@ function sseStream(frames) {
 
 /* ----------------------------- config ----------------------------- */
 
-test('default model is the current DeepSeek release', () => {
-  assert.equal(DEFAULT_MODEL, 'deepseek/deepseek-v3.2');
+test('the offline fallback model is DeepSeek V4.1 and heads the seed list', () => {
+  assert.equal(DEFAULT_MODEL, 'deepseek/deepseek-v4.1-flash');
   assert.equal(SEED_MODELS[0].id, DEFAULT_MODEL);
+});
+
+/* The DeepSeek ids OpenRouter actually returned, captured from a real
+   GET /api/v1/models on the day this was written. */
+const LIVE_DEEPSEEK = [
+  'deepseek/deepseek-chat',
+  'deepseek/deepseek-chat-v3-0324',
+  'deepseek/deepseek-chat-v3.1',
+  'deepseek/deepseek-r1-0528',
+  'deepseek/deepseek-v3.1-terminus',
+  'deepseek/deepseek-v3.2',
+  'deepseek/deepseek-v3.2-exp',
+  'deepseek/deepseek-v4-flash',
+  'deepseek/deepseek-v4-flash-0731',
+  'deepseek/deepseek-v4-flash-0731:batch',
+  'deepseek/deepseek-v4-flash-vision-exp',
+  'deepseek/deepseek-v4-pro',
+  'deepseek/deepseek-v4-pro-0813',
+  'deepseek/deepseek-v4.1-flash',
+  'deepseek/deepseek-v4.1-flash-1017',
+  'deepseek/deepseek-v4.1-flash-1017:batch',
+  'deepseek/deepseek-v4.1-flash:batch',
+  'deepseek/deepseek-chat-v3.2',
+  'deepseek/deepseek-r1',
+];
+
+test('pickLatestDeepSeek chooses the newest DeepSeek, not the alphabetically first', () => {
+  const models = LIVE_DEEPSEEK.map((id) => ({ id }));
+  // Naive "first match" would return deepseek/deepseek-chat; newest is V4.1 Flash.
+  assert.equal(pickLatestDeepSeek(models), 'deepseek/deepseek-v4.1-flash');
+});
+
+test('pickLatestDeepSeek ignores batch endpoints, experimental builds and dated pins', () => {
+  const models = LIVE_DEEPSEEK.map((id) => ({ id }));
+  const picked = pickLatestDeepSeek(models);
+
+  assert.ok(!picked.includes(':batch'), 'batch endpoints are not the live model');
+  assert.ok(!picked.includes('-exp'), 'experimental previews are not the default');
+  assert.ok(!/-\d{3,4}$/.test(picked), 'the undated alias is preferred over a pinned snapshot');
+
+  // With only pinned/experimental entries left, the pinned build is used.
+  assert.equal(pickLatestDeepSeek([{ id: 'deepseek/deepseek-v4.1-flash-1017' }]), 'deepseek/deepseek-v4.1-flash-1017');
+  // A newer version wins even when an older one has a "pro" tier.
+  assert.equal(
+    pickLatestDeepSeek([{ id: 'deepseek/deepseek-v4-pro' }, { id: 'deepseek/deepseek-v4.1-flash' }]),
+    'deepseek/deepseek-v4.1-flash'
+  );
+  // Within one version, pro outranks flash.
+  assert.equal(
+    pickLatestDeepSeek([{ id: 'deepseek/deepseek-v5-flash' }, { id: 'deepseek/deepseek-v5-pro' }]),
+    'deepseek/deepseek-v5-pro'
+  );
+});
+
+test('pickLatestDeepSeek returns null when nothing usable is available', () => {
+  assert.equal(pickLatestDeepSeek([]), null);
+  assert.equal(pickLatestDeepSeek([{ id: 'openai/gpt-4o-mini' }]), null);
+  // No version in the id means "newest" is undefined - fall back to DEFAULT_MODEL rather than guess.
+  assert.equal(pickLatestDeepSeek([{ id: 'deepseek/deepseek-chat' }, { id: 'deepseek/deepseek-r1' }]), null);
+  assert.equal(pickLatestDeepSeek([null, {}, { id: 42 }]), null);
 });
 
 test('checkKeyFormat flags empty, whitespace and non-OpenRouter keys', () => {
@@ -84,12 +145,12 @@ test('buildModelOptions puts DeepSeek first, dedupes and keeps a saved selection
   const options = buildModelOptions({ live: FILE_MODELS, selected: 'openai/gpt-4o-mini' });
   const ids = options.map((o) => o.id);
 
-  assert.equal(ids[0], 'deepseek/deepseek-v3.2');
+  assert.equal(ids[0], 'deepseek/deepseek-v4.1-flash');
   assert.ok(ids.indexOf('deepseek/deepseek-r1') < ids.indexOf('openai/gpt-4o-mini'));
   assert.equal(new Set(ids).size, ids.length, 'no duplicate ids');
   assert.ok(ids.includes('openai/gpt-4o-mini'), 'saved non-DeepSeek selection is preserved');
-  // The seed entry for v3.2 must not be duplicated by the live entry.
-  assert.equal(ids.filter((id) => id === 'deepseek/deepseek-v3.2').length, 1);
+  // Present in both the live catalogue and the seed list, so it must appear once.
+  assert.equal(ids.filter((id) => id === 'deepseek/deepseek-v4.1-flash').length, 1);
 });
 
 test('buildModelOptions never returns an empty dropdown', () => {
@@ -122,10 +183,10 @@ test('listModels sorts the catalogue and tolerates junk entries', async () => {
   const fetchImpl = makeFetch(() => json({ data: [...FILE_MODELS, null, { name: 'no id' }] }));
   const models = await listModels({ fetchImpl });
 
-  assert.equal(models.length, 3);
+  assert.equal(models.length, 4);
   assert.deepEqual(
     models.map((m) => m.id),
-    ['deepseek/deepseek-r1', 'deepseek/deepseek-v3.2', 'openai/gpt-4o-mini']
+    ['deepseek/deepseek-r1', 'deepseek/deepseek-v3.2', 'deepseek/deepseek-v4.1-flash', 'openai/gpt-4o-mini']
   );
 });
 
@@ -145,7 +206,7 @@ test('testConnection reports success when the key and model are both fine', asyn
 
   assert.equal(result.ok, true);
   assert.equal(result.modelAvailable, true);
-  assert.equal(result.models.length, 3);
+  assert.equal(result.models.length, 4);
   assert.equal(result.steps.length, 4);
   assert.ok(result.steps.every((s) => s.ok));
   assert.match(result.steps[1].detail, /forge/);

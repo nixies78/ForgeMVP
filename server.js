@@ -13,6 +13,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -84,7 +85,10 @@ export function createServer(publicDir = PUBLIC_DIR) {
       const ext = path.extname(target).toLowerCase();
       const headers = {
         'Content-Type': MIME_TYPES[ext] || 'application/octet-stream',
-        'Cache-Control': 'no-cache',
+        // no-store, not no-cache: this is a local dev server for files that change
+        // constantly, and without ETag/Last-Modified a "no-cache" response lets the
+        // browser heuristically reuse a stale page script, which looks like broken code.
+        'Cache-Control': 'no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
       };
 
@@ -105,7 +109,7 @@ function escapeHtml(value) {
   );
 }
 
-export function startServer({ port = Number(process.env.PORT) || 5173, host = process.env.HOST || '0.0.0.0' } = {}) {
+export function startServer({ port = Number(process.env.PORT) || 5173, host = process.env.HOST || '0.0.0.0', open = false } = {}) {
   const server = createServer();
   server.listen(port, host, () => {
     const actual = server.address().port;
@@ -119,10 +123,30 @@ export function startServer({ port = Number(process.env.PORT) || 5173, host = pr
       console.log(`  On your network (others can open this): http://${addr}:${actual}/`);
     }
     console.log('');
+    console.log('  Use these http:// addresses, not the file:// path - browsers block the');
+    console.log('  page scripts when a page is opened straight from disk.');
+    console.log('');
     console.log('  Press Ctrl+C to stop.');
     console.log('');
+    // Only reported as openable once the socket is genuinely listening, so no race.
+    if (open) openBrowser(`http://localhost:${actual}/admin.html`);
   });
   return server;
+}
+
+/** Hand a URL to the OS default browser. Best-effort - never throws. */
+export function openBrowser(url) {
+  const commands = {
+    win32: ['cmd', ['/c', 'start', '', url]],
+    darwin: ['open', [url]],
+  };
+  const [command, args] = commands[process.platform] || ['xdg-open', [url]];
+  try {
+    spawn(command, args, { detached: true, stdio: 'ignore' }).unref();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function lanAddresses() {
@@ -137,5 +161,5 @@ function lanAddresses() {
 
 // Only auto-start when executed directly, not when imported by a test.
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
-  startServer();
+  startServer({ open: process.argv.includes('--open') });
 }

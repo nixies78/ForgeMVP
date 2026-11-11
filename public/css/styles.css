@@ -164,6 +164,13 @@ button.link:hover { background: none; text-decoration: underline; }
 .status .status-title { font-weight: 650; margin-bottom: 4px; }
 .status code { font-family: var(--mono); font-size: 12.5px; }
 
+/* Shown only when the page was opened straight from disk (file://), where the
+   browser blocks ES modules - see the inline guard script in each page's <head>. */
+.local-server-warning { display: none; }
+html.opened-from-disk .local-server-warning { display: block; }
+.local-server-warning ol { margin: 6px 0 0; padding-left: 20px; }
+.local-server-warning li { margin-bottom: 2px; }
+
 .steps { list-style: none; margin: 12px 0 0; padding: 0; }
 .steps li { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); }
 .steps li:first-child { border-top: none; }
