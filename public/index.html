@@ -35,17 +35,23 @@
     <div class="status warn local-server-warning" role="alert">
       <div class="status-title">This page was opened straight from disk (file://)</div>
       <div class="small">
-        The admin page cannot work that way - browsers block its scripts. Start the local server first:
+        The admin page cannot work that way - browsers block its scripts. Fix it once and for all:
         <ol>
           <li>Open <span class="mono">C:\VibeCoding\ForgeMVP</span> in File Explorer.</li>
-          <li>Double-click <strong>start.bat</strong> (or run <span class="mono">npm start</span> in this folder).</li>
-          <li>Use <a href="http://localhost:5173/">http://localhost:5173/</a> instead of the file path.</li>
+          <li>Double-click <strong>install-startup.bat</strong> - the server then starts with Windows,
+              and a <strong>ForgeMVP Admin</strong> shortcut appears on your desktop.</li>
+          <li>From then on, use that shortcut or <a href="http://localhost:5173/">http://localhost:5173/</a>.</li>
         </ol>
+        <p class="small" id="probeNote" style="margin:8px 0 0"></p>
       </div>
     </div>
 
     <h1>Home Page</h1>
     <p><a href="admin.html">Go to the admin page</a></p>
   </main>
+
+  <!-- Plain script, not a module: this still loads on a file:// page and can hand the
+       browser over to the working http:// address. -->
+  <script src="js/local-server-check.js"></script>
 </body>
 </html>

@@ -18,10 +18,23 @@ The admin page is reachable from the **logo in the top-right corner** of every p
 
 Requires Node.js 18+ (nothing to install - there are no dependencies).
 
-**Easiest:** double-click **`start.bat`** in this folder. It starts the server and opens
-your browser on the admin page.
+### Option A - start automatically with Windows (recommended)
 
-Or from a terminal:
+Double-click **`install-startup.bat`** once. It:
+
+1. adds ForgeMVP to your **Startup** folder, so the server starts by itself at every logon;
+2. creates a **"ForgeMVP Admin"** shortcut on your desktop that opens the working URL;
+3. starts it there and then, so you can try it immediately.
+
+No administrator rights are needed, and nothing is written outside your own user account.
+Undo it any time with **`uninstall-startup.bat`**.
+
+From then on the admin page is always at <http://localhost:5173/admin.html> - just use the
+desktop shortcut.
+
+### Option B - start it by hand
+
+Double-click **`start.bat`**, or from a terminal:
 
 ```bash
 npm start
@@ -38,11 +51,21 @@ network can open the same pages from their machine.
 
 Change the port with `set PORT=8080 && npm start` (Windows) or `PORT=8080 npm start`.
 
-> **Do not open `public/admin.html` by double-clicking it.** That loads the page from a
-> `file://` path, and browsers block ES modules over `file://`, so the page scripts never
-> run - the buttons do nothing. Always go through `http://localhost:5173/...`. The pages
-> now detect this and show a red warning explaining it, and a watchdog reports it if the
-> scripts fail to load for any other reason.
+### If it ever looks broken
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Red "opened straight from disk" banner | The address bar starts with `file://`, where browsers block ES modules, so the page scripts never run | Use the desktop shortcut or <http://localhost:5173/admin.html>. A page opened from disk also tries to hand itself over to the server automatically. |
+| "This site can't be reached" | The server is not running | Double-click `start.bat`, or run `install-startup.bat` once so it always is |
+| Buttons do nothing, no banner | The page script failed to load for some other reason | The page shows a "page scripts did not load" notice; hard-refresh with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> and check the browser console |
+
+Diagnose the auto-start launcher without starting anything:
+
+```bash
+cscript //nologo autostart-forgemvp.vbs --check
+```
+
+It reports the folder it resolved, the node.exe it found and the exact command it would run.
 
 ## Test it
 
@@ -50,15 +73,19 @@ Change the port with `set PORT=8080 && npm start` (Windows) or `PORT=8080 npm st
 npm test
 ```
 
-26 automated tests, no network and no API key required:
+39 automated tests, no network and no API key required:
 
 - `tests/openrouter.test.mjs` — the OpenRouter client with a mocked `fetch`:
   key validation, model-list parsing, the connection test's success/failure paths,
   ping, non-streamed chat, streamed chat (SSE parsing, reasoning tokens, error frames),
-  and settings persistence.
+  newest-DeepSeek picking, and settings persistence.
 - `tests/server.test.mjs` — serves every real page and asset over HTTP, checks the
-  top-right admin logo link on each page, path-traversal safety, and that every element
-  id the scripts look up actually exists in the HTML.
+  top-right admin logo link on each page, path-traversal safety, that every element id the
+  scripts look up actually exists in the HTML, that nothing is served cacheable, and that
+  the launcher/installer scripts point at `http://` and never at a `file://` path.
+
+Dry-run the installer with `install-startup.bat test` — it prints the shortcuts it would
+create and writes nothing.
 
 ### The manual test (needs a key)
 
@@ -124,7 +151,12 @@ public/
   js/openrouter.js  API client (test, ping, chat, streaming) - DOM-free, unit tested
   js/admin.js       Admin page wiring
   js/chat.js        Chat page wiring
+  js/local-server-check.js  Classic script that rescues a page opened from disk
 server.js           Zero-dependency static server
+start.bat           Start the server by hand, opens the browser
+install-startup.bat   One-time: run ForgeMVP at every Windows logon
+uninstall-startup.bat Undo the above
+autostart-forgemvp.vbs  What the Startup entry actually runs (hidden server + browser)
 tests/              Node test-runner suites
 Dockerfile          Cloud Run image
 cloudbuild.yaml     Continuous deployment pipeline

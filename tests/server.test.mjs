@@ -8,7 +8,9 @@ import assert from 'node:assert/strict';
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
 
-import { createServer, resolveRequestPath, PUBLIC_DIR } from '../server.js';
+import { createServer, describeListenError, resolveRequestPath, PUBLIC_DIR } from '../server.js';
+
+const ROOT = path.dirname(PUBLIC_DIR);
 
 /* ----------------------------- path resolution ----------------------------- */
 
@@ -148,7 +150,7 @@ test('every page detects being opened from disk and warns the user', async () =>
     );
     assert.match(html, /class="status warn local-server-warning"/, `${page} must contain the warning banner`);
     assert.match(html, /href="http:\/\/localhost:5173\//, `${page} must link to the servable URL`);
-    assert.match(html, /start\.bat/, `${page} must tell the user about start.bat`);
+    assert.match(html, /install-startup\.bat/, `${page} must tell the user about the one-time installer`);
   }
 });
 
@@ -182,8 +184,75 @@ test('admin and chat pages detect a module that never loaded', async () => {
 });
 
 test('start.bat launches the server with a browser and no install step', async () => {
-  const bat = await readFile(path.join(path.dirname(PUBLIC_DIR), 'start.bat'), 'utf8');
+  const bat = await readFile(path.join(ROOT, 'start.bat'), 'utf8');
   assert.match(bat, /node server\.js --open/, 'start.bat runs the server in open mode');
   assert.match(bat, /where node/i, 'start.bat checks that Node is installed');
   assert.match(bat, /cd \/d "%~dp0"/, 'start.bat works from any working directory');
+});
+
+test('describeListenError turns a busy port into advice, not a crash', () => {
+  const busy = describeListenError(Object.assign(new Error('listen EADDRINUSE'), { code: 'EADDRINUSE' }), 5173);
+  assert.equal(busy.alreadyRunning, true);
+  assert.match(busy.message, /already in use/);
+  assert.match(busy.message, /http:\/\/localhost:5173\/admin\.html/);
+
+  const denied = describeListenError(Object.assign(new Error('listen EACCES'), { code: 'EACCES' }), 80);
+  assert.equal(denied.alreadyRunning, false);
+  assert.match(denied.message, /Permission denied/);
+
+  assert.equal(describeListenError(new Error('boom'), 5173).alreadyRunning, false);
+  assert.match(describeListenError(new Error('boom'), 5173).message, /boom/);
+});
+
+test('the logon launcher starts a hidden server and opens the admin page', async () => {
+  const vbs = await readFile(path.join(ROOT, 'autostart-forgemvp.vbs'), 'utf8');
+
+  assert.match(vbs, /server\.js"" --open/, 'launcher runs the server in open mode');
+  assert.match(vbs, /, 0, False/, 'the server window is hidden and not waited on');
+  assert.match(vbs, /GetParentFolderName\(WScript\.ScriptFullName\)/, 'repo folder is derived from the script location');
+  assert.match(vbs, /where node/, 'launcher looks up node.exe on PATH');
+  assert.match(vbs, /%ProgramFiles%\\nodejs\\node\.exe/, 'launcher falls back to the default install path');
+  assert.match(vbs, /MsgBox/, 'launcher reports a missing Node.js install');
+  // "file://" may appear in the comments explaining why this exists; a real file URL
+  // (file:///C:/...) must never be a target.
+  assert.doesNotMatch(vbs, /file:\/\/\//, 'the launcher must never use a file:// path');
+});
+
+test('the installer registers the launcher in Startup and adds a desktop shortcut', async () => {
+  const bat = await readFile(path.join(ROOT, 'install-startup.bat'), 'utf8');
+
+  assert.match(bat, /%APPDATA%\\Microsoft\\Windows\\Start Menu\\Programs\\Startup/, 'writes into the per-user Startup folder');
+  assert.match(bat, /CreateShortcut\('%LNK%'\)/, 'creates the Startup shortcut');
+  assert.match(bat, /TargetPath = 'wscript\.exe'/, 'the shortcut runs the launcher via wscript');
+  assert.match(bat, /autostart-forgemvp\.vbs/, 'the shortcut points at the launcher in the repo, so later edits still apply');
+  assert.match(bat, /ForgeMVP Admin\.url/, 'creates a desktop shortcut');
+  assert.match(bat, /URL=http:\/\/localhost:5173\/admin\.html/, 'the desktop shortcut opens the served admin page');
+  assert.match(bat, /TESTMODE/, 'supports a dry run so the installer can be checked safely');
+  assert.doesNotMatch(bat, /file:\/\/\//, 'the installer must never use a file:// path');
+});
+
+test('the uninstaller removes both shortcuts', async () => {
+  const bat = await readFile(path.join(ROOT, 'uninstall-startup.bat'), 'utf8');
+  assert.match(bat, /del "%LNK%"/, 'removes the Startup shortcut');
+  assert.match(bat, /del "%URLFILE%"/, 'removes the desktop shortcut');
+});
+
+test('a file:// page hands over to the server instead of dead-ending', async () => {
+  const rescue = await readFile(path.join(PUBLIC_DIR, 'js', 'local-server-check.js'), 'utf8');
+
+  assert.match(rescue, /location\.protocol !== 'file:'/, 'does nothing when already served over http');
+  assert.match(rescue, /mode: 'no-cors'/, 'probes the server without needing CORS headers');
+  assert.match(rescue, /location\.replace\(target\)/, 'redirects to the working URL when the server answers');
+  assert.match(rescue, /not answering|did not answer/, 'explains the problem when the server is down');
+  assert.doesNotMatch(rescue, /^\s*import\s/m, 'must stay a classic script: modules never load on file://');
+});
+
+test('every page loads the rescue script and names a probe target', async () => {
+  for (const page of ['index.html', 'admin.html', 'chat.html']) {
+    const html = await readFile(path.join(PUBLIC_DIR, page), 'utf8');
+    assert.match(html, /<script src="js\/local-server-check\.js"><\/script>/, `${page} loads the rescue script`);
+    assert.doesNotMatch(html, /<script type="module" src="js\/local-server-check\.js">/, `${page} must load it as a classic script`);
+    assert.match(html, /id="probeNote"/, `${page} needs somewhere to report the probe result`);
+    assert.match(html, /install-startup\.bat/, `${page} must tell the user about the one-time installer`);
+  }
 });

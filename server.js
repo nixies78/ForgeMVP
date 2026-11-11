@@ -109,8 +109,45 @@ function escapeHtml(value) {
   );
 }
 
+/**
+ * Turn a listen failure into something a human can act on.
+ * Pure, so it can be tested without stubbing process.exit.
+ */
+export function describeListenError(err, port) {
+  if (err?.code === 'EADDRINUSE') {
+    return {
+      alreadyRunning: true,
+      message:
+        `Port ${port} is already in use - ForgeMVP looks like it is already running, so this second copy will stop. ` +
+        `Open http://localhost:${port}/admin.html instead of starting another one.`,
+    };
+  }
+  if (err?.code === 'EACCES') {
+    return {
+      alreadyRunning: false,
+      message: `Permission denied binding port ${port}. Try another one, e.g. set PORT=8080 && npm start`,
+    };
+  }
+  return { alreadyRunning: false, message: `Could not start the server: ${err?.message || err}` };
+}
+
 export function startServer({ port = Number(process.env.PORT) || 5173, host = process.env.HOST || '0.0.0.0', open = false } = {}) {
   const server = createServer();
+
+  server.on('error', (err) => {
+    const info = describeListenError(err, port);
+    console.error('');
+    console.error(`  ${info.message}`);
+    console.error('');
+    // The logon auto-start racing an already-running server is normal, not a failure:
+    // open the browser anyway, then leave quietly.
+    if (info.alreadyRunning) {
+      if (open) openBrowser(`http://localhost:${port}/admin.html`);
+      process.exit(0);
+    }
+    process.exit(1);
+  });
+
   server.listen(port, host, () => {
     const actual = server.address().port;
     console.log('');
