@@ -11,6 +11,10 @@
 #     --build-config=cloudbuild.yaml
 #
 # After that, every push to main rebuilds and redeploys automatically.
+#
+# Note on the test step: the Dockerfile's verify stage runs the same suites while
+# building, so a failing test can never produce an image either way. This step stays
+# as a fast, cheap early failure that does not need a Docker build to report.
 
 substitutions:
   _REGION: us-central1
@@ -18,8 +22,18 @@ substitutions:
   _REPO: forgemvp
 
 steps:
+  # 1. Fast feedback: run the suites on plain Node before touching Docker.
+  - id: test
+    name: node:24-alpine
+    entrypoint: sh
+    args:
+      - "-c"
+      - "node tests/openrouter.test.mjs && node tests/server.test.mjs && node tests/container.test.mjs"
+
+  # 2. Build the production image (its verify stage re-runs the tests inside the image).
   - id: build
     name: gcr.io/cloud-builders/docker
+    waitFor: ["test"]
     args:
       - build
       - "-t"
@@ -28,13 +42,6 @@ steps:
       - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest"
       - "."
 
-  - id: test
-    name: node:22-alpine
-    entrypoint: sh
-    args:
-      - "-c"
-      - "node tests/openrouter.test.mjs && node tests/server.test.mjs"
-
   - id: push
     name: gcr.io/cloud-builders/docker
     args:
@@ -42,6 +49,8 @@ steps:
       - "--all-tags"
       - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}"
 
+  # 3. Deploy. PORT is injected by Cloud Run and read by server.js, and 8080 matches
+  #    both the platform default and the image's own fallback.
   - id: deploy
     name: gcr.io/google.com/cloudsdktool/cloud-sdk
     entrypoint: gcloud
@@ -54,6 +63,12 @@ steps:
       - "--platform=managed"
       - "--allow-unauthenticated"
       - "--port=8080"
+      - "--cpu=1"
+      - "--memory=256Mi"
+      - "--concurrency=250"
+      - "--min-instances=0"
+      - "--max-instances=4"
+      - "--cpu-boost"
       - "--quiet"
 
 images:

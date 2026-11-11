@@ -60,4 +60,4 @@ git push
 `Dockerfile` and `cloudbuild.yaml` are ready so a push to `main` can build and deploy the
 app to Cloud Run automatically. The one-time setup commands are at the top of
 `cloudbuild.yaml`. Until that trigger exists, `npm start` serves the site locally on
-<http://localhost:5173/> (and prints a LAN URL other people on your network can open).
+<http://localhost:8080/> (and prints a LAN URL other people on your network can open).

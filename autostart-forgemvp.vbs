@@ -14,7 +14,7 @@
 
 Option Explicit
 
-Const PORT = 5173
+Const PORT = 8080
 Const WAIT_MS = 800
 
 Dim shell, fso, home, nodeExe

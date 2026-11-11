@@ -1,7 +1,71 @@
+# ForgeMVP - Docker build context exclusions.
+#
+# Keep this list honest: anything excluded here can never be COPYed by the
+# Dockerfile. `tests/` is deliberately NOT excluded - the verify stage runs the
+# test suite inside the build, so the context has to include it.
+
+# --- version control and CI metadata ---
 .git
+.gitattributes
 .gitignore
+.github
+.gitlab-ci.yml
+
+# --- dependencies and package-manager noise ---
 node_modules
-tests
-*.md
+**/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm
+.pnpm-store
+.yarn
+package-lock.json.bak
+
+# --- secrets and local environment files (never ship these) ---
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+
+# --- build caches and generated output (this project has no build step) ---
+.cache
+.parcel-cache
+.next
+.nuxt
+.turbo
+.svelte-kit
+dist
+build
+out
+coverage
+.nyc_output
+*.tsbuildinfo
+.eslintcache
+.vite
+.scratch
+
+# --- editors and operating systems ---
+.vscode
+.idea
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- local Windows tooling that has no place in a Linux image ---
+start.bat
 sync.bat
+install-startup.bat
+uninstall-startup.bat
+autostart-forgemvp.vbs
+
+# --- docs and deployment config (not read at runtime) ---
+*.md
+Dockerfile
+.dockerignore
 cloudbuild.yaml

@@ -18,7 +18,7 @@ if errorlevel 1 (
 
 echo Starting the server and opening your browser at the admin page...
 echo.
-echo IMPORTANT: use the http://localhost:5173/ address it opens.
+echo IMPORTANT: use the http://localhost:8080/ address it opens.
 echo            Do NOT open public\admin.html directly - the file:// path
 echo            is blocked by the browser, which is why the buttons stop working.
 echo.

@@ -15,7 +15,7 @@
 
   var note = document.getElementById('probeNote');
   var page = location.pathname.split('/').pop() || 'index.html';
-  var origin = 'http://localhost:5173';
+  var origin = 'http://localhost:8080';
   var target = origin + '/' + page;
   var settled = false;
 

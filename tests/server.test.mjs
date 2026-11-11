@@ -60,8 +60,9 @@ test('the server serves every page and asset with the right content type', async
     assert.equal(res.status, 200, `${pathname} should load`);
     assert.ok(res.headers.get('content-type').includes(type), `${pathname} content type was ${res.headers.get('content-type')}`);
     assert.match(body, bodyMatch, `${pathname} contents`);
-    // Edits must show up on refresh: a heuristically cached script looks like a broken page.
-    assert.match(res.headers.get('cache-control'), /no-store/, `${pathname} must not be cached`);
+    // Must revalidate (no-cache + a strong ETag) rather than being blindly reused.
+    assert.match(res.headers.get('cache-control'), /no-cache/, `${pathname} must revalidate`);
+    assert.ok(res.headers.get('etag'), `${pathname} must carry an ETag or edits can go unseen`);
   }
 });
 
@@ -91,6 +92,27 @@ test('unknown paths return a helpful 404', async (t) => {
   const res = await fetch(`${base}/nope.html`);
   assert.equal(res.status, 404);
   assert.match(await res.text(), /Back to the home page/);
+});
+
+test('a revalidated request gets 304, so unchanged files are not resent', async (t) => {
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const first = await fetch(`${base}/js/config.js`);
+  const etag = first.headers.get('etag');
+  await first.text();
+  assert.ok(etag, 'the first response must expose an ETag');
+
+  const second = await fetch(`${base}/js/config.js`, { headers: { 'If-None-Match': etag } });
+  assert.equal(second.status, 304, 'an unchanged file must answer 304');
+  assert.equal((await second.text()).length, 0, 'a 304 must not carry a body');
+
+  // A stale validator must still get the real content.
+  const third = await fetch(`${base}/js/config.js`, { headers: { 'If-None-Match': '"stale"' } });
+  assert.equal(third.status, 200);
+  assert.ok((await third.text()).length > 0);
 });
 
 test('the Admin link in the markup matches the admin page filename', async (t) => {
@@ -149,7 +171,7 @@ test('every page detects being opened from disk and warns the user', async () =>
       `${page} must detect the file:// protocol with an inline script`
     );
     assert.match(html, /class="status warn local-server-warning"/, `${page} must contain the warning banner`);
-    assert.match(html, /href="http:\/\/localhost:5173\//, `${page} must link to the servable URL`);
+    assert.match(html, /href="http:\/\/localhost:8080\//, `${page} must link to the servable URL`);
     assert.match(html, /install-startup\.bat/, `${page} must tell the user about the one-time installer`);
   }
 });
@@ -191,17 +213,17 @@ test('start.bat launches the server with a browser and no install step', async (
 });
 
 test('describeListenError turns a busy port into advice, not a crash', () => {
-  const busy = describeListenError(Object.assign(new Error('listen EADDRINUSE'), { code: 'EADDRINUSE' }), 5173);
+  const busy = describeListenError(Object.assign(new Error('listen EADDRINUSE'), { code: 'EADDRINUSE' }), 8080);
   assert.equal(busy.alreadyRunning, true);
   assert.match(busy.message, /already in use/);
-  assert.match(busy.message, /http:\/\/localhost:5173\/admin\.html/);
+  assert.match(busy.message, /http:\/\/localhost:8080\/admin\.html/);
 
   const denied = describeListenError(Object.assign(new Error('listen EACCES'), { code: 'EACCES' }), 80);
   assert.equal(denied.alreadyRunning, false);
   assert.match(denied.message, /Permission denied/);
 
-  assert.equal(describeListenError(new Error('boom'), 5173).alreadyRunning, false);
-  assert.match(describeListenError(new Error('boom'), 5173).message, /boom/);
+  assert.equal(describeListenError(new Error('boom'), 8080).alreadyRunning, false);
+  assert.match(describeListenError(new Error('boom'), 8080).message, /boom/);
 });
 
 test('the logon launcher starts a hidden server and opens the admin page', async () => {
@@ -226,7 +248,7 @@ test('the installer registers the launcher in Startup and adds a desktop shortcu
   assert.match(bat, /TargetPath = 'wscript\.exe'/, 'the shortcut runs the launcher via wscript');
   assert.match(bat, /autostart-forgemvp\.vbs/, 'the shortcut points at the launcher in the repo, so later edits still apply');
   assert.match(bat, /ForgeMVP Admin\.url/, 'creates a desktop shortcut');
-  assert.match(bat, /URL=http:\/\/localhost:5173\/admin\.html/, 'the desktop shortcut opens the served admin page');
+  assert.match(bat, /URL=http:\/\/localhost:8080\/admin\.html/, 'the desktop shortcut opens the served admin page');
   assert.match(bat, /TESTMODE/, 'supports a dry run so the installer can be checked safely');
   assert.doesNotMatch(bat, /file:\/\/\//, 'the installer must never use a file:// path');
 });

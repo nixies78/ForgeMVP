@@ -7,7 +7,7 @@ set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
 set "LNK=%STARTUP%\ForgeMVP.lnk"
 set "DESKTOP=%USERPROFILE%\Desktop"
 set "URLFILE=%DESKTOP%\ForgeMVP Admin.url"
-set "SERVERURL=http://localhost:5173/admin.html"
+set "SERVERURL=http://localhost:8080/admin.html"
 set "TESTMODE="
 if /i "%~1"=="test" set "TESTMODE=1"
 
