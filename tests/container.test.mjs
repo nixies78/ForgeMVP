@@ -63,7 +63,7 @@ test('the verify stage runs the whole test suite during the build', async () => 
   for (const suite of ['tests/openrouter.test.mjs', 'tests/server.test.mjs', 'tests/container.test.mjs']) {
     assert.ok(verify.includes(suite), `the build must run ${suite}`);
   }
-  assert.match(verify, /COPY tests \.\/tests/, 'the verify stage needs the tests in the context');
+  assert.match(verify, /COPY \. \./, 'the verify stage must copy the repo so the suites can read what they assert on');
 });
 
 test('the runtime image satisfies the Cloud Run contract', async () => {
@@ -93,10 +93,14 @@ test('every path the Dockerfile copies exists in the repository', async () => {
     const parts = line.split(/\s+/).filter((part) => !part.startsWith('--'));
     const sources = parts.slice(1, -1);
     for (const source of sources) {
-      // For `COPY --from=<stage> /app/x`, only the in-stage path matters: the file
-      // was produced by an earlier COPY, which is checked on its own line.
-      if (/^--from=/.test(line) || line.includes('--from=')) {
-        assert.ok(source.startsWith('/') || source === '.', `stage copy source should be absolute: ${source}`);
+      // `COPY --from=verify /app/x ./y`: the verify stage does `COPY . .`, so its
+      // /app is the repo root and the source must exist here too.
+      if (line.includes('--from=')) {
+        assert.ok(source.startsWith('/app/'), `stage copy source should be under /app: ${source}`);
+        await assert.doesNotReject(
+          () => access(path.join(ROOT, source.replace('/app/', ''))),
+          `Dockerfile copies "${source}" from the build stage, which does not exist in the repo`
+        );
         continue;
       }
       await assert.doesNotReject(
@@ -117,10 +121,115 @@ function dockerignorePatterns(text) {
     .filter((line) => line && !line.startsWith('#'));
 }
 
+/** Does one dockerignore pattern cover this repo-relative path (or any parent dir)? */
+function patternCovers(pattern, relPath) {
+  const parts = relPath.split('/');
+  const ancestors = parts.map((_, i) => parts.slice(0, i + 1).join('/'));
+  const clean = pattern.replace(/^\*\*\//, '').replace(/\/$/, '');
+
+  return ancestors.some((candidate) => {
+    if (!clean.includes('*')) {
+      return candidate === clean || candidate.split('/').pop() === clean;
+    }
+    const rx = new RegExp(
+      '^' + clean.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '[^/]*') + '$'
+    );
+    return rx.test(candidate) || rx.test(candidate.split('/').pop());
+  });
+}
+
+function isDockerignored(relPath, patterns) {
+  return patterns.some((pattern) => patternCovers(pattern, relPath));
+}
+
+test('the dockerignore matcher itself works', () => {
+  const patterns = ['node_modules', '.env', '.env.*', '*.key', '.scratch', '**/node_modules', 'dist'];
+
+  // Excluded.
+  assert.equal(isDockerignored('node_modules', patterns), true);
+  assert.equal(isDockerignored('node_modules/express/index.js', patterns), true);
+  assert.equal(isDockerignored('.env', patterns), true);
+  assert.equal(isDockerignored('.env.local', patterns), true);
+  assert.equal(isDockerignored('secrets/server.key', patterns), true);
+  assert.equal(isDockerignored('deep/nested/node_modules/x.js', patterns), true);
+  assert.equal(isDockerignored('.scratch/render.dom.html', patterns), true);
+  assert.equal(isDockerignored('dist/bundle.js', patterns), true);
+
+  // Not excluded: the exact files the in-image test stage has to read.
+  for (const needed of ['start.bat', 'autostart-forgemvp.vbs', 'Dockerfile', 'cloudbuild.yaml', 'package.json', 'server.js', 'public/admin.html', 'tests/server.test.mjs']) {
+    assert.equal(isDockerignored(needed, patterns), false, `${needed} must not be ignored`);
+  }
+});
+
+test('nothing the test suite reads is excluded from the build context', async () => {
+  // The Dockerfile runs these same suites inside the build. If .dockerignore drops a
+  // file they read, the read throws ENOENT and the image build fails - which is
+  // exactly what happened once. Discover the reads from the test sources so this
+  // cannot silently regress as the suites grow.
+  const patterns = dockerignorePatterns(await readDockerignore());
+  const suites = ['openrouter.test.mjs', 'server.test.mjs', 'container.test.mjs'];
+
+  const needed = new Set();
+
+  for (const suite of suites) {
+    const source = await readFile(path.join(ROOT, 'tests', suite), 'utf8');
+
+    // Literal paths: path.join(ROOT, 'a', 'b') / path.join(PUBLIC_DIR, 'a', 'b').
+    const calls = source.matchAll(/path\.join\((ROOT|PUBLIC_DIR)((?:,\s*'[^']*')+)\)/g);
+    for (const [, base, args] of calls) {
+      const segments = [...args.matchAll(/'([^']*)'/g)].map((m) => m[1]);
+      if (segments.length === 0) continue;
+      const rel = base === 'PUBLIC_DIR' ? path.posix.join('public', ...segments) : segments.join('/');
+      needed.add(rel);
+    }
+  }
+
+  // Files referenced by name rather than by a path.join literal, plus the deployment
+  // files this suite asserts on.
+  for (const extra of [
+    'Dockerfile',
+    '.dockerignore',
+    'cloudbuild.yaml',
+    'package.json',
+    'server.js',
+    'start.bat',
+    'install-startup.bat',
+    'uninstall-startup.bat',
+    'autostart-forgemvp.vbs',
+  ]) {
+    needed.add(extra);
+  }
+
+  assert.ok(needed.size >= 8, `expected to discover the files the suites read, found ${needed.size}`);
+
+  let checked = 0;
+  for (const rel of needed) {
+    // Some discovered paths are computed expectations rather than files the suite
+    // opens (e.g. resolveRequestPath('/../../server.js') expects public/server.js,
+    // which deliberately does not exist). Only real files matter here.
+    let exists = true;
+    try {
+      await access(path.join(ROOT, rel));
+    } catch {
+      exists = false;
+    }
+    if (!exists) continue;
+
+    checked += 1;
+    assert.equal(
+      isDockerignored(rel, patterns),
+      false,
+      `.dockerignore excludes "${rel}", but the in-image test stage must be able to read it`
+    );
+  }
+
+  assert.ok(checked >= 8, `expected to check at least 8 real files, checked ${checked}`);
+});
+
 test('.dockerignore excludes dependencies, VCS, secrets and caches', async () => {
   const patterns = dockerignorePatterns(await readDockerignore());
 
-  for (const required of ['node_modules', '.git', '.env', '.cache', 'dist', 'coverage', '.DS_Store']) {
+  for (const required of ['node_modules', '.git', '.env', '.cache', 'dist', 'coverage', '.DS_Store', '.scratch']) {
     assert.ok(patterns.includes(required), `.dockerignore should exclude ${required}`);
   }
   assert.ok(

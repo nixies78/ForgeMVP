@@ -28,12 +28,13 @@ FROM node:24-alpine AS verify
 
 WORKDIR /app
 
-# No lockfile exists and there are no dependencies, so there is no `npm ci` step.
-# If dependencies are ever added, add: COPY package*.json ./ && npm ci --omit=dev
-COPY package.json ./
-COPY server.js ./
-COPY public ./public
-COPY tests ./tests
+# The whole repo, minus .dockerignore. The suite asserts on real repo files
+# (start.bat, autostart-forgemvp.vbs, Dockerfile, cloudbuild.yaml), so copying only
+# a subset made those reads throw ENOENT and the build failed. The runtime stage
+# below copies just what it needs, so nothing extra reaches the final image.
+# There are no dependencies, so there is no `npm ci` step - if any are ever added,
+# insert `COPY package*.json ./ && npm ci --omit=dev` before this line.
+COPY . .
 
 # node:test needs no external packages, so this runs on a clean image.
 RUN node --version \

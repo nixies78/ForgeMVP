@@ -76,7 +76,7 @@ It reports the folder it resolved, the node.exe it found and the exact command i
 npm test
 ```
 
-54 automated tests, no network and no API key required:
+56 automated tests, no network and no API key required:
 
 - `tests/openrouter.test.mjs` — the OpenRouter client with a mocked `fetch`:
   key validation, model-list parsing, the connection test's success/failure paths,
@@ -143,9 +143,16 @@ Detected from `package.json` and the tree, because it decides the whole image:
 | Build step | **none** - `public/` is served to the browser exactly as committed |
 | Server | `server.js`, a small zero-dependency static file server |
 
-So there is nothing to compile and no dependency layer to cache. The image is a
-two-stage build whose first stage is not a compiler but a **test gate**: `Dockerfile`
-runs all three suites while building, so a broken commit cannot produce an image.
+So there is nothing to compile and no dependency layer to cache. The image is a two-stage
+build whose first stage is not a compiler but a **test gate**: it runs all three suites
+while building, so a broken commit cannot produce an image. That stage copies the whole
+repo, because the suites assert on real repo files — so `.dockerignore` must not exclude
+them (a test enforces this; excluding them once broke the build).
+
+> **Handing the cloud setup to someone else (or another AI assistant)?** Give them
+> **[CLOUD_HANDOFF.md](CLOUD_HANDOFF.md)** — a self-contained brief covering what exists,
+> what has and has not been verified, the exact commands in order, the IAM roles Cloud
+> Build needs, and the security model.
 
 ### The container
 

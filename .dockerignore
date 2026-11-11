@@ -1,8 +1,18 @@
 # ForgeMVP - Docker build context exclusions.
 #
-# Keep this list honest: anything excluded here can never be COPYed by the
-# Dockerfile. `tests/` is deliberately NOT excluded - the verify stage runs the
-# test suite inside the build, so the context has to include it.
+# Rule of thumb: this file excludes what must NEVER enter the build context
+# (secrets, VCS metadata, dependencies, caches, editor cruft) and nothing else.
+#
+# It deliberately does NOT exclude the repo's own source, tests or deployment
+# files, even where they look "unnecessary" for a Linux image. The Dockerfile's
+# verify stage runs the full test suite inside the build, and those suites assert
+# on real repo files (start.bat, the Windows launcher, Dockerfile, cloudbuild.yaml).
+# Excluding them makes `readFile` throw ENOENT and fails the build - which is what
+# happened on the first attempt. tests/container.test.mjs now guards against
+# reintroducing that.
+#
+# The shipped runtime image stays lean regardless: its stage copies only
+# server.js, package.json and public/ from the verify stage.
 
 # --- version control and CI metadata ---
 .git
@@ -21,7 +31,6 @@ pnpm-debug.log*
 .npm
 .pnpm-store
 .yarn
-package-lock.json.bak
 
 # --- secrets and local environment files (never ship these) ---
 .env
@@ -56,16 +65,3 @@ coverage
 .DS_Store
 Thumbs.db
 desktop.ini
-
-# --- local Windows tooling that has no place in a Linux image ---
-start.bat
-sync.bat
-install-startup.bat
-uninstall-startup.bat
-autostart-forgemvp.vbs
-
-# --- docs and deployment config (not read at runtime) ---
-*.md
-Dockerfile
-.dockerignore
-cloudbuild.yaml
