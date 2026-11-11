@@ -40,7 +40,8 @@ test('the server serves every page and asset with the right content type', async
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const cases = [
-    ['/', 'text/html', /Home Page/],
+    ['/', 'text/html', /Less guessing/],
+    ['/', 'text/html', /css\/landing\.css/],
     ['/index.html', 'text/html', /href="admin\.html"/],
     ['/admin.html', 'text/html', /OpenRouter API key/],
     ['/admin.html', 'text/html', /choose the llm/i],

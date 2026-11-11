@@ -30,3 +30,8 @@ Thumbs.db
 
 # Local scratch space (headless-browser renders, throwaway captures)
 .scratch/
+
+# Local backup copies of working files. public/ is served as-is, so a stray
+# *.backup inside it would be published; the previous version of a file stays
+# recoverable in git history instead.
+*.backup

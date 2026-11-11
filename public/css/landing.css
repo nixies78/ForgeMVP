@@ -1,0 +1,599 @@
+/* ForgeMVP - landing page styling.
+ *
+ * Page-scoped: only index.html loads this file, and every rule hangs off
+ * `body.landing`, so the shared styles.css that admin.html and chat.html rely on
+ * is left untouched. Tokens were sampled from the Figma export (#101014 page,
+ * #18181c surfaces, #26bbff accent, #f4f4f5 design-file panel), and the type
+ * scale and section rhythm were tuned against ink measurements of that export.
+ */
+
+body.landing {
+  --lp-bg: #101014;
+  --lp-surface: #18181c;
+  --lp-surface-2: #202024;
+  --lp-surface-3: #1c1c21;
+  --lp-rail: #17171b;
+  --lp-bar: #151519;
+  --lp-line: #26262c;
+  --lp-text: #ffffff;
+  --lp-text-soft: #e4e4e7;
+  --lp-muted: #a1a1aa;
+  --lp-accent: #26bbff;
+  --lp-ink: #101014; /* text sitting on the accent bands */
+  --lp-ink-soft: rgba(16, 16, 20, 0.72);
+  --lp-paper: #f4f4f5; /* the light "design file" panel */
+  --lp-paper-2: #e4e4e7;
+  --lp-paper-line: #d4d4d8;
+  --lp-paper-muted: #71717a;
+
+  --lp-wrap: 1312px; /* content width at a 1440px viewport, as drawn */
+  --lp-gutter: 64px;
+
+  background: var(--lp-bg);
+  color: var(--lp-text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+html { scroll-behavior: smooth; }
+
+/* styles.css sets a centred 880px column for the app pages - the landing page
+   draws its own full-bleed bands, so it opts out of both. */
+body.landing main { max-width: none; margin: 0; padding: 0; }
+body.landing footer {
+  border-top: 0;
+  padding: 0;
+  text-align: left;
+  font-size: inherit;
+  color: inherit;
+}
+body.landing a { color: inherit; }
+body.landing :focus-visible { outline: 2px solid var(--lp-accent); outline-offset: 3px; border-radius: 4px; }
+
+/* ---------------------------------------------------------------- layout */
+
+.lp-wrap {
+  width: 100%;
+  max-width: calc(var(--lp-wrap) + var(--lp-gutter) * 2);
+  margin: 0 auto;
+  padding-left: var(--lp-gutter);
+  padding-right: var(--lp-gutter);
+}
+
+.lp-section { padding-bottom: 130px; }
+.lp-band { background: var(--lp-accent); color: var(--lp-ink); }
+
+/* ---------------------------------------------------------------- header */
+
+.lp-header { padding-top: 26px; }
+
+.lp-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--lp-line);
+}
+
+.lp-brand {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  color: var(--lp-text);
+}
+body.landing a.lp-brand { color: var(--lp-text); }
+
+.lp-nav { display: flex; align-items: center; gap: 34px; margin: 0 auto; }
+/* These carry `body.landing` so they outrank the page-wide `a { color: inherit }`. */
+body.landing .lp-nav a {
+  color: var(--lp-muted);
+  text-decoration: none;
+  font-size: 15px;
+  transition: color 0.15s;
+}
+body.landing .lp-nav a:hover { color: var(--lp-text); }
+
+.lp-header-actions { display: flex; align-items: center; gap: 18px; }
+
+/* The admin page entry point stays in the top-right corner, like every other
+   page in the app - the design has no slot for it, so it reads as a quiet link. */
+.lp-header .logo-link {
+  border: 0;
+  background: none;
+  padding: 6px 8px;
+  gap: 7px;
+  color: var(--lp-muted);
+  font-size: 13px;
+}
+.lp-header .logo-link:hover { color: var(--lp-text); background: var(--lp-surface); border: 0; }
+.lp-header .logo-link img { width: 18px; height: 18px; opacity: 0.8; }
+
+/* --------------------------------------------------------------- buttons */
+
+.lp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+body.landing a.lp-btn-primary { background: var(--lp-accent); color: var(--lp-ink); }
+body.landing a.lp-btn-primary:hover { background: #5ccdff; color: var(--lp-ink); }
+body.landing a.lp-btn-ghost {
+  background: transparent;
+  color: var(--lp-text);
+  border: 1px solid var(--lp-line);
+}
+body.landing a.lp-btn-ghost:hover { border-color: #3f3f46; background: var(--lp-surface); color: var(--lp-text); }
+body.landing a.lp-btn-dark { background: var(--lp-ink); color: var(--lp-text); }
+body.landing a.lp-btn-dark:hover { background: #26262c; color: var(--lp-text); }
+.lp-btn-sm { padding: 12px 20px; font-size: 14.5px; }
+
+/* ------------------------------------------------------------ type scale */
+
+.lp-h1 {
+  margin: 0 0 28px;
+  font-size: clamp(2.9rem, 5.5vw, 4.9rem); /* 78px at 1440 */
+  line-height: 1.09;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.lp-h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3.2vw, 2.85rem); /* 45px at 1440 */
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+/* The "vibes start games" band is set smaller than the content headings, and the
+   closing band larger - both as drawn. */
+.lp-band .lp-h2 { font-size: clamp(1.6rem, 2.65vw, 2.4rem); } /* 38px at 1440 */
+.lp-band-lg .lp-h2 { font-size: clamp(2rem, 3.9vw, 3.5rem); } /* 56px at 1440 */
+
+.lp-label {
+  margin: 0 0 20px;
+  color: var(--lp-accent);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lp-band .lp-label { color: var(--lp-ink); }
+.lp-body { color: var(--lp-muted); font-size: 16.5px; margin: 0; }
+.lp-lede { color: var(--lp-muted); font-size: 17px; line-height: 1.55; margin: 0; }
+.lp-mono {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lp-muted);
+}
+
+/* ------------------------------------------------------------------ hero */
+
+.lp-hero { padding: 52px 0 45px; }
+
+.lp-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.03fr);
+  gap: 66px;
+  align-items: start;
+}
+
+.lp-pill {
+  display: inline-block;
+  margin: 0 0 26px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--lp-surface-2);
+  color: var(--lp-text-soft);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lp-hero-sub {
+  margin: 0 0 20px;
+  font-size: clamp(1.2rem, 1.65vw, 1.45rem); /* 23px at 1440 */
+  line-height: 1.6;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+}
+.lp-hero-body {
+  max-width: 46ch;
+  margin-bottom: 44px;
+  font-size: 17.5px;
+  line-height: 1.7;
+}
+
+.lp-hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 17px; }
+
+.lp-hero-note { margin: 0 0 80px; color: var(--lp-muted); font-size: 15px; }
+
+.lp-kicker {
+  margin: 0;
+  color: var(--lp-muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------- hero: example project */
+
+.lp-card {
+  background: var(--lp-surface);
+  border: 1px solid var(--lp-line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.lp-card-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--lp-line);
+  background: var(--lp-bar);
+}
+
+.lp-card-inner { padding: 22px 20px 4px; }
+
+.lp-question { margin: 0 0 12px; font-size: 14px; font-weight: 600; }
+
+.lp-input {
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid var(--lp-line);
+  border-radius: 8px;
+  background: var(--lp-bg);
+  color: var(--lp-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.lp-tags {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0 0 18px;
+  border-bottom: 1px solid var(--lp-line);
+  color: var(--lp-accent);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lp-project-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0 18px;
+}
+.lp-project-name {
+  margin: 0 0 4px;
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.lp-badge {
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: var(--lp-accent);
+  color: var(--lp-ink);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lp-rows { display: grid; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.lp-rows li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--lp-surface-3);
+}
+.lp-rows .lp-num { color: var(--lp-accent); font-size: 12px; font-weight: 600; }
+.lp-rows .lp-row-title { margin: 0 0 2px; font-size: 14.5px; font-weight: 600; }
+.lp-rows .lp-row-sub { margin: 0; color: var(--lp-muted); font-size: 12.5px; }
+.lp-rows .lp-row-go { color: var(--lp-muted); font-size: 13px; }
+
+.lp-card-foot {
+  margin: 16px 0 0;
+  padding: 15px 20px 17px;
+  border-top: 1px solid var(--lp-line);
+  background: var(--lp-bar);
+  color: var(--lp-muted);
+  font-size: 12.5px;
+}
+
+/* -------------------------------------------------------------- blue band */
+
+.lp-band-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  gap: 64px;
+  padding-top: 44px;
+  padding-bottom: 106px;
+}
+.lp-band-lede { margin: 0 0 18px; font-size: 17.5px; font-weight: 600; line-height: 1.5; }
+.lp-band-lede + .lp-band-lede { font-weight: 400; color: var(--lp-ink-soft); margin-bottom: 0; }
+
+/* ------------------------------------------------------------ section head */
+
+.lp-head {
+  display: grid;
+  grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: center;
+}
+.lp-head .lp-lede { max-width: 34ch; }
+
+/* Section right after a band: the band already supplies the breathing room. */
+.lp-tight { padding-top: 65px; }
+#how-it-works { padding-bottom: 104px; }
+
+/* ------------------------------------------------------------------ cards */
+
+.lp-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 42px;
+}
+
+.lp-card-item {
+  display: flex;
+  flex-direction: column;
+  padding: 30px 28px 26px;
+  border: 1px solid var(--lp-line);
+  border-radius: 12px;
+  background: var(--lp-surface);
+}
+.lp-card-item .lp-num {
+  margin-bottom: 18px;
+  color: var(--lp-accent);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.lp-card-item h3 { margin: 0 0 12px; font-size: 24px; letter-spacing: -0.02em; font-weight: 600; }
+.lp-card-item p { margin: 0; }
+.lp-quote {
+  margin: 50px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--lp-line);
+  color: var(--lp-accent) !important;
+  font-size: 13.5px;
+}
+
+/* -------------------------------------------------- design-file preview UI */
+
+.lp-preview {
+  margin-top: 73px;
+  border: 1px solid var(--lp-line);
+  border-radius: 14px;
+  background: var(--lp-surface);
+  overflow: hidden;
+}
+.lp-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 44px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--lp-line);
+  font-size: 13px;
+}
+.lp-preview-bar .lp-mono:first-child { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 500; }
+.lp-preview-bar .lp-mono:first-child b { color: var(--lp-text); font-weight: 600; }
+
+.lp-preview-body { display: grid; grid-template-columns: 228px minmax(0, 1fr); align-items: stretch; }
+
+.lp-rail {
+  display: flex;
+  flex-direction: column;
+  padding: 26px 20px 22px;
+  border-right: 1px solid var(--lp-line);
+  background: var(--lp-rail);
+}
+.lp-rail-name {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.lp-rail-nav { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 4px; }
+.lp-rail-nav li {
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--lp-muted);
+  font-size: 13.5px;
+}
+.lp-rail-nav li.is-active { background: var(--lp-surface-2); color: var(--lp-accent); }
+.lp-rail-foot { margin: auto 0 0; padding-top: 46px; }
+.lp-rail-foot .lp-label { color: var(--lp-accent); margin-bottom: 6px; }
+.lp-rail-foot p { margin: 0; color: var(--lp-muted); font-size: 12.5px; }
+
+.lp-paper {
+  padding: 24px 40px 30px;
+  background: var(--lp-paper);
+  color: #18181b;
+}
+.lp-paper .lp-mono { color: var(--lp-paper-muted); }
+.lp-paper .lp-label { color: var(--lp-paper-muted); margin-bottom: 10px; }
+.lp-paper h3 {
+  margin: 0 0 18px;
+  font-size: clamp(1.4rem, 1.9vw, 1.7rem);
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+.lp-promise { margin: 0 0 16px; font-size: 15.5px; font-weight: 600; }
+
+.lp-flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 12px; margin: 0 0 22px; }
+.lp-flow div { padding: 12px 14px; border-radius: 6px; background: var(--lp-paper-2); }
+.lp-flow div.is-active { background: var(--lp-accent); }
+.lp-flow dt {
+  margin: 0 0 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lp-paper-muted);
+}
+.lp-flow dd { margin: 0; font-size: 13.5px; color: #52525b; }
+.lp-flow .is-active dt,
+.lp-flow .is-active dd { color: var(--lp-ink); }
+.lp-flow-arrow { align-self: center; color: var(--lp-paper-muted); font-size: 15px; }
+
+.lp-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.lp-table th {
+  padding: 14px 24px 10px 0;
+  border-bottom: 1px solid var(--lp-paper-line);
+  color: var(--lp-paper-muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: left;
+}
+.lp-table td {
+  padding: 13px 24px 13px 0;
+  border-bottom: 1px solid var(--lp-paper-line);
+  color: #52525b;
+  font-size: 13.5px;
+  vertical-align: top;
+}
+.lp-table td:first-child { color: #18181b; font-weight: 600; }
+
+/* --------------------------------------------------------------- audience */
+
+.lp-people {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 64px;
+  margin-top: 49px;
+}
+
+.lp-person { padding-top: 20px; border-top: 1px solid var(--lp-line); }
+.lp-person .lp-num {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--lp-accent);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.lp-person h3 { margin: 0 0 12px; font-size: 25px; letter-spacing: -0.025em; font-weight: 600; }
+
+.lp-people-section { padding-bottom: 71px; }
+
+/* -------------------------------------------------------------------- faq */
+
+.lp-faq { border-top: 1px solid var(--lp-line); }
+.lp-faq-inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 64px;
+  padding-top: 45px;
+  padding-bottom: 85px;
+}
+.lp-faq-lead { margin: 0; max-width: 17ch; }
+/* The answers line up with the small label, not with the heading below it. */
+.lp-qa {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px 40px;
+}
+.lp-qa h3 { margin: 0 0 12px; font-size: 19px; font-weight: 600; }
+.lp-qa p { font-size: 16.5px; }
+
+/* --------------------------------------------------------------- cta band */
+
+.lp-cta-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 600px) minmax(0, 1fr);
+  gap: 64px;
+  align-items: center;
+  padding-top: 51px;
+  padding-bottom: 65px;
+}
+.lp-cta-close { margin: 74px 0 0; font-size: 20px; font-weight: 600; }
+.lp-cta-action { justify-self: end; text-align: center; }
+.lp-cta-action .lp-btn { min-width: 320px; justify-content: center; }
+.lp-cta-note { margin: 16px 0 0; font-size: 13px; }
+
+/* ----------------------------------------------------------------- footer */
+
+.lp-footer { padding: 40px 0 42px; }
+.lp-footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.lp-footer-brand { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.lp-footer-tag { margin: 0; color: var(--lp-muted); font-size: 14px; }
+.lp-footer-right { text-align: right; }
+.lp-footer-note { margin: 0; color: var(--lp-muted); font-size: 12.5px; }
+body.landing .lp-footer-admin { display: inline-block; margin-top: 6px; color: var(--lp-muted); font-size: 12.5px; text-decoration: underline; text-underline-offset: 3px; }
+body.landing .lp-footer-admin:hover { color: var(--lp-text); }
+
+/* ------------------------------------------------------------ responsive */
+
+@media (max-width: 1180px) {
+  body.landing { --lp-gutter: 40px; }
+  .lp-hero-grid { grid-template-columns: minmax(0, 1fr); gap: 52px; }
+  .lp-hero-body { max-width: 60ch; }
+  .lp-hero-note { margin-bottom: 34px; }
+  .lp-head { grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; }
+  .lp-head .lp-lede { max-width: 56ch; }
+  .lp-band-inner { grid-template-columns: minmax(0, 1fr); gap: 28px; padding-bottom: 64px; }
+  .lp-people { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+  .lp-faq-inner { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .lp-faq-lead { max-width: 30ch; }
+  .lp-cta-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+  .lp-cta-action { justify-self: start; text-align: left; }
+}
+
+@media (max-width: 900px) {
+  body.landing { --lp-gutter: 32px; }
+  .lp-section { padding-bottom: 84px; }
+  #how-it-works { padding-bottom: 84px; }
+  .lp-people-section { padding-bottom: 56px; }
+  .lp-faq-inner { padding-bottom: 84px; }
+  .lp-cards,
+  .lp-people { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .lp-people { gap: 28px; }
+  .lp-preview { margin-top: 54px; }
+  .lp-quote { margin-top: 24px; }
+  /* The preview is a UI mock: below this width it scrolls sideways instead of
+     reflowing into something the design never drew. */
+  .lp-preview { overflow-x: auto; }
+  .lp-preview-bar,
+  .lp-preview-body { min-width: 880px; }
+}
+
+@media (max-width: 720px) {
+  .lp-nav { display: none; }
+  .lp-header-inner { gap: 16px; }
+  .lp-hero { padding: 36px 0 40px; }
+  .lp-hero-note { margin-bottom: 26px; }
+  .lp-kicker { display: none; }
+  .lp-cta-grid { padding-bottom: 48px; }
+  .lp-cta-action .lp-btn { min-width: 0; width: 100%; }
+  .lp-footer-inner { gap: 14px; }
+  .lp-footer-right { text-align: left; }
+}
