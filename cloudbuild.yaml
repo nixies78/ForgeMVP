@@ -1,0 +1,64 @@
+# ForgeMVP - continuous deployment to Google Cloud Run.
+#
+# One-time setup (replace the project id and region):
+#   gcloud config set project YOUR_PROJECT_ID
+#   gcloud artifacts repositories create forgemvp --repository-format=docker --location=us-central1
+#   gcloud builds triggers create github \
+#     --name=forgemvp-main \
+#     --repo-name=ForgeMVP \
+#     --repo-owner=nixies78 \
+#     --branch-pattern="^main$" \
+#     --build-config=cloudbuild.yaml
+#
+# After that, every push to main rebuilds and redeploys automatically.
+
+substitutions:
+  _REGION: us-central1
+  _SERVICE: forgemvp
+  _REPO: forgemvp
+
+steps:
+  - id: build
+    name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA"
+      - "-t"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest"
+      - "."
+
+  - id: test
+    name: node:22-alpine
+    entrypoint: sh
+    args:
+      - "-c"
+      - "node tests/openrouter.test.mjs && node tests/server.test.mjs"
+
+  - id: push
+    name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - "--all-tags"
+      - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}"
+
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - "${_SERVICE}"
+      - "--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA"
+      - "--region=${_REGION}"
+      - "--platform=managed"
+      - "--allow-unauthenticated"
+      - "--port=8080"
+      - "--quiet"
+
+images:
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:$SHORT_SHA"
+  - "${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPO}/${_SERVICE}:latest"
+
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ForgeMVP">
+  <defs>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8cc7ff"/>
+      <stop offset="100%" stop-color="#2f8ce0"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="30" height="30" rx="8" fill="#131922" stroke="#3b4756"/>
+  <path d="M16 5.5c2.6 3.1 5.4 5.6 5.4 9.6a5.4 5.4 0 0 1-10.8 0c0-2 .8-3.6 1.9-5 .3 1 .9 1.8 1.7 2.3-.3-2.6.4-5 1.8-6.9z" fill="url(#flame)"/>
+  <path d="M9 24.5h14" stroke="#3b4756" stroke-width="2" stroke-linecap="round"/>
+</svg>

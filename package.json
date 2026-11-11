@@ -1,0 +1,15 @@
+{
+  "name": "forgemvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ForgeMVP - web interface for creating UEFN game design documents (home page + admin page + LLM chat test).",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node tests/openrouter.test.mjs && node tests/server.test.mjs"
+  }
+}

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat test - ForgeMVP</title>
+  <link rel="icon" href="assets/logo.svg" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="" width="26" height="26" />
+      ForgeMVP <small>&middot; Chat test</small>
+    </a>
+
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="admin.html">Admin</a>
+      <a href="chat.html" aria-current="page">Chat test</a>
+      <!-- Logo in the top-right corner links back to the home page. -->
+      <a class="logo-link" href="index.html" title="Back to the home page" aria-label="Back to the home page">
+        <img src="assets/logo.svg" alt="Home" width="22" height="22" />
+        Home
+      </a>
+    </nav>
+  </header>
+
+  <main class="wide">
+    <h1>Chat test</h1>
+    <p class="lede">
+      Live conversation with the model configured on the admin page - the quickest way to see the OpenRouter
+      connection working.
+    </p>
+
+    <div id="keyWarning" class="status warn hidden" role="alert">
+      <div class="status-title">No API key saved yet</div>
+      <div class="small">Open the <a href="admin.html">admin page</a>, paste your OpenRouter key, press Save, then come back here.</div>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Conversation</h2>
+        <span>
+          Model: <span class="badge" id="modelBadge">-</span>
+          <a class="small" href="admin.html" style="margin-left:8px">change</a>
+        </span>
+      </div>
+
+      <div class="chat-log" id="chatLog">
+        <div class="empty-state" id="emptyState">No messages yet. Ask something like "Sketch a UEFN island concept in 3 bullet points."</div>
+      </div>
+
+      <form id="chatForm">
+        <div class="field">
+          <label for="chatInput">Your message</label>
+          <textarea id="chatInput" rows="3" placeholder="Type a message, then press Ctrl+Enter or click Send" autocomplete="off"></textarea>
+        </div>
+
+        <div class="row">
+          <button type="submit" id="sendButton">Send</button>
+          <button type="button" class="secondary" id="stopButton" disabled>Stop</button>
+          <button type="button" class="secondary" id="clearButton">Clear</button>
+          <label class="checkbox" style="margin:0 0 0 6px">
+            <input type="checkbox" id="streamToggle" checked />
+            Stream the reply
+          </label>
+        </div>
+      </form>
+
+      <p class="small muted" style="margin:12px 0 0" id="chatMeta">
+        Nothing sent yet. Each reply shows the model, latency and token usage reported by OpenRouter.
+      </p>
+    </section>
+  </main>
+
+  <footer>ForgeMVP &middot; UEFN game design documents</footer>
+
+  <script type="module" src="js/chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin - ForgeMVP</title>
+  <link rel="icon" href="assets/logo.svg" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img src="assets/logo.svg" alt="" width="26" height="26" />
+      ForgeMVP <small>&middot; Admin</small>
+    </a>
+
+    <nav class="main-nav">
+      <a href="index.html">Home</a>
+      <a href="admin.html" aria-current="page">Admin</a>
+      <a href="chat.html">Chat test</a>
+      <!-- Logo in the top-right corner links back to the home page. -->
+      <a class="logo-link" href="index.html" title="Back to the home page" aria-label="Back to the home page">
+        <img src="assets/logo.svg" alt="Home" width="22" height="22" />
+        Home
+      </a>
+    </nav>
+  </header>
+
+  <main class="wide">
+    <h1>Admin</h1>
+    <p class="lede">Configure the OpenRouter connection and check it works. The API key is stored only in this browser.</p>
+
+    <!-- ============ 1. OpenRouter API key ============ -->
+    <section class="card">
+      <div class="card-head">
+        <h2>1. OpenRouter API key</h2>
+        <a class="small" href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer">Get a key at openrouter.ai/keys &rarr;</a>
+      </div>
+
+      <div class="field">
+        <label for="apiKey">OpenRouter API key</label>
+        <div class="row">
+          <input class="grow" type="password" id="apiKey" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false" />
+          <button type="button" class="secondary" id="toggleKey" aria-label="Show or hide the key">Show</button>
+          <button type="button" id="saveSettings">Save</button>
+        </div>
+        <p class="small muted" id="keyState" style="margin-top:8px">No key saved yet.</p>
+      </div>
+    </section>
+
+    <!-- ============ 2. Model selection ============ -->
+    <section class="card">
+      <div class="card-head">
+        <h2>2. Model</h2>
+        <span class="badge" id="modelBadge">deepseek</span>
+      </div>
+
+      <div class="field">
+        <label for="modelSelect">Choose the LLM (dropdown)</label>
+        <div class="row">
+          <select class="grow" id="modelSelect"></select>
+          <button type="button" class="secondary" id="refreshModels">Refresh models from OpenRouter</button>
+        </div>
+        <p class="small muted" style="margin-top:8px" id="modelState">Default: DeepSeek V3.2 (latest DeepSeek release).</p>
+      </div>
+
+      <div class="field">
+        <label for="customModel">Custom model id (optional - overrides the dropdown)</label>
+        <input type="text" id="customModel" placeholder="e.g. deepseek/deepseek-v3.2" autocomplete="off" spellcheck="false" />
+        <p class="small muted" style="margin-top:8px">Leave empty to use the dropdown. Paste any id from the OpenRouter model list here if the one you want is missing.</p>
+      </div>
+    </section>
+
+    <!-- ============ 3. Connection test ============ -->
+    <section class="card">
+      <div class="card-head">
+        <h2>3. Test the connection</h2>
+      </div>
+      <p class="small muted">
+        <strong>Test connection</strong> checks the key against OpenRouter and confirms your chosen model exists (free, no tokens).
+        <strong>Send test prompt</strong> asks the model a one-word question - that really does generate, so it proves end-to-end access.
+      </p>
+
+      <div class="row" style="margin-bottom:14px">
+        <button type="button" id="testConnection">Test connection</button>
+        <button type="button" class="secondary" id="pingModel">Send test prompt</button>
+        <a class="logo-link" href="chat.html" style="border-radius:8px">Open the chat test page &rarr;</a>
+      </div>
+
+      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+      <ul class="steps" id="steps"></ul>
+    </section>
+
+    <!-- ============ 4. Notes ============ -->
+    <section class="card">
+      <h2>Where things are stored</h2>
+      <ul class="small muted" style="margin:0; padding-left:20px">
+        <li>Your key and model choice live in this browser's <span class="mono">localStorage</span> only - they are never written to the server or the git repository.</li>
+        <li>Every visitor of a hosted copy enters their own key, so no shared secret is exposed. (A future version can move the key server-side for a single shared key.)</li>
+        <li>Requests go straight from this page to <span class="mono">openrouter.ai/api/v1</span>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>ForgeMVP &middot; UEFN game design documents</footer>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
