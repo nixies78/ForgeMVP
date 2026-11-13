@@ -11,7 +11,7 @@
 import { h, frag, plural } from '../dom.js';
 import { categorySummaries } from '../data.js';
 import { UI } from '../content.js';
-import { badgeChip, choice, eyebrow, lead, pageTitle, paragraph } from '../render/ui.js';
+import { badgeChip, button, buttonRow, choice, eyebrow, lead, pageTitle, paragraph } from '../render/ui.js';
 
 export function renderCategory(ctx) {
   const { data, state, actions } = ctx;
@@ -57,7 +57,11 @@ export function renderCategory(ctx) {
             },
             'Turn on dev mode'
           )
-        )
+        ),
+
+    /* Every step of the wizard carries its own way back (architecture spec v2); Home does not, because
+     * there is nothing before it. */
+    buttonRow([button({ label: UI.back, iconName: 'arrowLeft', onClick: () => actions.back() })])
   );
 }
 

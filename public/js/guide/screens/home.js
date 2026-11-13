@@ -65,6 +65,15 @@ export function renderHome(ctx) {
         { class: 'g-muted g-small' },
         'Device names and Details-panel settings were researched against Epic\'s official UEFN documentation. ' +
           'This tool is guidance: it produces a plan you follow in the editor, not files or code.'
+      ),
+      /* The disclaimer used to sit in the page footer. The architecture spec (v2) gives the footer one
+       * job - the system status and the admin link - so the note moved here, to the end of the home
+       * screen, rather than being dropped. */
+      h(
+        'p',
+        { class: 'g-muted g-small' },
+        'Forge is an independent guide to building Fortnite islands in UEFN, and is not affiliated with ' +
+          'Epic Games. Fortnite, Unreal Engine and UEFN are trademarks of Epic Games, Inc.'
       )
     )
   );

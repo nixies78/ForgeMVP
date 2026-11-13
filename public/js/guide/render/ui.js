@@ -10,31 +10,32 @@ import { h, icon, richText } from '../dom.js';
 
 /* ----------------------------------- headings ----------------------------------- */
 
-/* The document outline is: <h1> the page's own title in the hero (index.html), then one <h2> per screen
- * (the heading focus lands on after every screen change), <h3> for sections inside a screen, <h4> for a
- * card's title. The hero owns the only h1 on the page, which is why the screen title is not one. */
+/* The document outline is: <h1> the screen's own title (which is also where focus lands after every
+ * screen change), <h2> for sections inside a screen, <h3> for a card's title. It was h2/h3/h4 while the
+ * hero owned the page's h1; the architecture spec v2 removes the hero, so the screen title is the only
+ * h1 in the document again. */
 
-/** The small uppercase label above a title. Poster style: Metadata, 10/14, bold, tracked out. */
+/** The small uppercase label above a title. Metadata, 10/14, bold, tracked out. */
 export function eyebrow(value) {
   return h('p', { class: 'g-eyebrow' }, value);
 }
 
-/** A screen's main title. Poster style: Display, uppercase, heavy italic. */
+/** A screen's main title. Sentence case in Inter, per the architecture spec (v2). */
 export function pageTitle(value, options = {}) {
   return h(
-    'h2',
+    'h1',
     { class: `g-title${options.small ? ' is-compact' : ''}`, tabindex: '-1', id: options.id || 'screen-title' },
     value
   );
 }
 
-/** A section heading inside a screen. Poster style: Section, uppercase, heavy italic. */
+/** A section heading inside a screen. */
 export function sectionHeading(value, options = {}) {
-  return h('h3', { class: `g-section${options.small ? ' is-small' : ''}` }, value);
+  return h('h2', { class: `g-section${options.small ? ' is-small' : ''}` }, value);
 }
 
 export function cardTitle(value) {
-  return h('h4', { class: 'g-cardtitle' }, value);
+  return h('h3', { class: 'g-cardtitle' }, value);
 }
 
 export function lead(value) {
@@ -45,12 +46,14 @@ export function paragraph(value) {
   return h('p', { class: 'g-body' }, value);
 }
 
-/** A breadcrumb line: "Combat › Elimination / Deathmatch · Question 2 of 4". */
+/** A breadcrumb line: "Combat › Elimination / Deathmatch · Question 2 of 4".
+ *  A crumb is a link exactly when it has somewhere to go; the trail's last item is where the user
+ *  already is, so it is text. The trail itself comes from state.js's trailFor(). */
 export function crumbs(items) {
   const children = [];
   items.forEach((item, i) => {
     if (i) children.push(h('span', { class: 'g-crumb-sep', 'aria-hidden': 'true' }, '›'));
-    if (item.route) {
+    if (item.href || item.route) {
       children.push(h('a', { class: 'g-crumb', href: item.href || '#' }, item.label));
     } else {
       children.push(h('span', { class: 'g-crumb is-current' }, item.label));

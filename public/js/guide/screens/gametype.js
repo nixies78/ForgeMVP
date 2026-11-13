@@ -10,7 +10,8 @@
 
 import { h, frag, plural } from '../dom.js';
 import { gameTypesInCategory, category as findCategory } from '../data.js';
-import { badgeChip, choice, eyebrow, lead, pageTitle, paragraph } from '../render/ui.js';
+import { UI } from '../content.js';
+import { badgeChip, button, buttonRow, choice, eyebrow, lead, pageTitle, paragraph } from '../render/ui.js';
 
 export function renderGameType(ctx) {
   const { data, state, actions } = ctx;
@@ -62,7 +63,11 @@ export function renderGameType(ctx) {
           ),
           ' to see them badged as drafts.'
         )
-      : null
+      : null,
+
+    /* Every step of the wizard carries its own way back (architecture spec v2). Home is the one screen
+     * without one, because there is nothing before it. */
+    buttonRow([button({ label: UI.back, iconName: 'arrowLeft', onClick: () => actions.back() })])
   );
 }
 

@@ -15,7 +15,7 @@ import { loadData } from './data.js';
 import { browserStorage, createStore } from './store.js';
 import { applySavedGame, createState, nextUnanswered, predecessor, progressFor, recordAnswer, savedGameNotice, trailFor, walkthroughSteps } from './state.js';
 import { applyRoute, parseHash, startRouter, toHash } from './router.js';
-import { measureHeader, wireHeroVideo, wirePriorityNav, wireSearch } from './chrome.js';
+import { measureHeader, wireSearch } from './chrome.js';
 import { parseShare, shareUrl } from './share.js';
 import { UI, WALKTHROUGH_STEPS } from './content.js';
 import { fill } from './dom.js';
@@ -70,15 +70,11 @@ const els = {
   crumbs: document.getElementById('crumbs'),
   appHead: document.getElementById('appHead'),
   footerStatus: document.getElementById('footerStatus'),
+  statusDot: document.getElementById('statusDot'),
   siteHeader: document.getElementById('siteHeader'),
   searchInput: document.getElementById('searchInput'),
   searchPanel: document.getElementById('searchPanel'),
   searchHint: document.getElementById('searchHint'),
-  navList: document.getElementById('navList'),
-  navMoreWrap: document.getElementById('navMoreWrap'),
-  navMoreButton: document.getElementById('navMoreButton'),
-  navMoreMenu: document.getElementById('navMoreMenu'),
-  heroVideo: document.getElementById('heroVideo'),
   bootError: document.getElementById('bootError'),
   bootErrorText: document.getElementById('bootErrorText')
 };
@@ -214,14 +210,7 @@ function wireShell(ctx) {
   }
 
   measureHeader(els.siteHeader);
-  wirePriorityNav({
-    list: els.navList,
-    moreWrap: els.navMoreWrap,
-    moreButton: els.navMoreButton,
-    moreMenu: els.navMoreMenu
-  });
   wireSearch({ input: els.searchInput, panel: els.searchPanel, hint: els.searchHint });
-  wireHeroVideo(els.heroVideo);
 }
 
 /* ------------------------------------ actions ------------------------------------ */
@@ -492,17 +481,9 @@ function renderScreen(ctx) {
   updateProgress(ctx);
   document.title = `${SCREEN_TITLES[state.screen] || 'Guide'} · ${UI.appName}`;
 
-  /* Where the page scrolls to when a screen changes. The hero belongs to the page, so home starts at
-   * the top of it; every other screen lands on the app container instead, with its sticky bar sitting
-   * just under the site header. Scrolling to the top there would show the hero again on every single
-   * step of a nine-screen flow, with the screen the user just moved to below the fold. */
-  if (state.screen === 'home') {
-    window.scrollTo(0, 0);
-  } else if (els.appHead) {
-    const headerHeight = els.siteHeader ? els.siteHeader.getBoundingClientRect().height : 0;
-    const top = els.appHead.getBoundingClientRect().top + window.scrollY - headerHeight;
-    window.scrollTo(0, Math.max(0, top));
-  }
+  /* The spec removes the hero, so a screen change simply returns to the top: there is nothing above the
+   * app container to scroll past any more. */
+  window.scrollTo(0, 0);
 
   /* Focus the screen's own title, by id rather than by tag, so the heading level can change without
    * quietly breaking the focus handoff. */
@@ -525,7 +506,8 @@ function syncDevMode(ctx) {
   if (els.devWrap) els.devWrap.hidden = !on;
 }
 
-/** The footer's status line: real numbers from the data that actually loaded, plus the health endpoint. */
+/** The footer's status line: real numbers from the data that actually loaded, plus the health endpoint.
+ *  It is a status indicator rather than a slogan, so the dot is only green when the data is live. */
 function renderFooterStatus(ctx) {
   if (!els.footerStatus) return;
   const { data } = ctx;
@@ -533,12 +515,13 @@ function renderFooterStatus(ctx) {
   const devices = Object.keys(data.deviceLibrary || {}).length;
   els.footerStatus.replaceChildren();
   els.footerStatus.append(
-    document.createTextNode(`${live} game types ready · ${data.draftCount} draft · ${devices} devices in the library. `)
+    document.createTextNode(`Guide data loaded: ${live} game types ready, ${data.draftCount} draft, ${devices} devices. `)
   );
   const health = document.createElement('a');
   health.href = 'healthz';
-  health.textContent = 'Server status';
+  health.textContent = 'Server health';
   els.footerStatus.append(health);
+  if (els.statusDot) els.statusDot.classList.add('is-ok');
 }
 
 function updateProgress(ctx) {

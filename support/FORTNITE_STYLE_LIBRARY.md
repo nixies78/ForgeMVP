@@ -101,13 +101,15 @@ requirement rather than a later retrofit.
 This palette governs **the workspace** — everything inside the app container: choice cards, question
 options, device cards, settings panels, the core-loop diagram, the walkthrough tracker.
 
-The **page shell** around it — site header, hero, footer, and the inset container's chrome (breadcrumb
-bar and progress bar) — follows `support/Forge--architecture_specification.md` instead: Unreal Navy
-`#0E1128`, the `#101014 → #202024 → #101014` body gradient, the `#18181C` footer, Panel Charcoal
-`#23253A` inputs, Outline Slate `#3A3D4D` borders, cyan `#1CB0F6` / `#26BBFF` for active states, and the
-cyan-to-yellow progress gradient. The two systems agree where they overlap — both use `#101014` as the
-dark canvas and `#F7FF19` as the action colour — and the shell is the only place a second hue (cyan) is
-allowed, because nothing in the shell carries content status.
+The **page shell** around it — site header, footer, and the inset container's chrome (breadcrumb bar and
+progress bar) — follows `support/Forge--architecture_specification_v2.md` instead: the
+`#101014 → #202024 → #101014` body gradient, the header as `#101014` at 95%, the `#18181C` footer, Panel
+Charcoal `#23253A`, Outline Slate `#3A3D4D`, UI Gray `#B2B5C2`, the cyan `#26BBFF` primary with a
+`#101014` label on it, the `#5B5B65` secondary action, the `#1e1e22` / `#404043` search field, and the
+`#26BBFF → #F7FF19` progress ramp. The two systems agree where they overlap — `#101014` as the dark
+canvas, `#18181C` as the footer/panel dark, `#F7FF19` as an accent — and the shell is the only place a
+second hue (cyan) is allowed, because nothing in the shell carries content status. v1's Unreal Navy
+`#0E1128` and its `#1CB0F6` cyan are gone; the tests assert they do not come back.
 
 The boundary is a cascade boundary too, not just a drawing convention: the shell's palette lives in
 `public/css/shell.css` (from the architecture spec) and the workspace's in `public/css/tokens.css` +
@@ -115,18 +117,25 @@ The boundary is a cascade boundary too, not just a drawing convention: the shell
 pages is wrapped in a `@layer chrome` block so its element selectors can never outrank the app's own
 component rules again.
 
-Two consequences that are worth knowing before editing either file:
+Three consequences that are worth knowing before editing either file:
 
 - **Hover discipline is a workspace rule.** It is asserted over `guide.css` only (`tests/guide.test.mjs`,
   "hover changes an edge and a lift, never a fill"). The shell's own controls change their fill on hover
-  — the navigation's wash, the secondary button's lift in value — because a wash toward white raises
-  contrast there rather than destroying it, and because the shell follows the architecture spec, which
-  specifies those states. The moment such a state is applied to something inside the container, the rule
-  applies again.
-- **Heading levels belong to the page, not to the components.** The hero owns the page's only `<h1>`, so
-  `pageTitle()` renders an `<h2>`, `sectionHeading()` an `<h3>` and `cardTitle()` an `<h4>`
-  (`public/js/guide/render/ui.js`). The screen's heading is focused after every route change by id
-  (`#screen-title`), not by tag.
+  — the secondary button's lift in value — because a wash toward white raises contrast there rather than
+  destroying it, and because the shell follows the architecture spec, which specifies those states. The
+  moment such a state is applied to something inside the container, the rule applies again.
+- **Heading levels belong to the page, not to the components.** v2 removes the hero, so the screen's own
+  title is the page's only `<h1>` again: `pageTitle()` renders an `<h1>`, `sectionHeading()` an `<h2>`
+  and `cardTitle()` an `<h3>` (`public/js/guide/render/ui.js`). The screen's heading is focused after
+  every route change by id (`#screen-title`), not by tag. A screen with no sections of its own goes
+  straight from `<h1>` to card `<h3>`s, which is normal for a flat list of choices.
+- **Typographic hierarchy stops at `guide.css`.** v2 names Inter for headings *and* for body/UI, in
+  sentence case, and the reference the spec came from is set the same way — so no rule in `guide.css`
+  uses `--fn-font-display` any more, and `.g-title` / `.g-section` / `.g-cardtitle` are Inter 700/700/600
+  in sentence case. The token, the `@font-face` and the woff2 are kept because section 2 below still
+  documents the poster's display face; the older admin and chat pages are the only things that still
+  render it. Uppercase survives only where it is a *label* rather than a heading: the 10/14 metadata
+  eyebrow and the status chips, which the poster defines that way.
 
 ---
 
@@ -150,17 +159,20 @@ actions and cards. Neutral sans-serif for supporting copy."*
 
 **[derived] How that becomes a rule set:**
 
-- **Display and Section are uppercase and italic**, always. They are the only italic text in the UI.
-  Use them for the app's screen titles and the big section headings.
+- **Display and Section are the poster's faces for the app's screen titles and section headings** —
+  uppercase and italic in the poster, and the only italic text in its UI. **[Superseded for this app's
+  headings]** by `support/Forge--architecture_specification_v2.md`, which names Inter in sentence case
+  for headings and for body/UI alike (see 1b). The poster's description stands as the record of what the
+  Fortnite site does; the app's own headings are Inter 700.
 - **Card title and Action are upright bold**, never italic, never uppercase (Action only *looks*
   uppercase in the poster because its example string is written that way).
-- **Everything readable is Inter** — lead, body, navigation, metadata. The UI face carries all
-  supporting copy, all paragraph text and all labels a user has to read carefully.
+- **Everything readable is Inter** — lead, body, navigation, card titles, buttons, metadata. The UI face
+  carries all supporting copy, all paragraph text and all labels a user has to read carefully.
 - **Metadata is the only tracked-out style**: 10/14, bold, uppercase, used for eyebrows, counts and
-  timestamps. It is the natural home for things like "QUESTION 2 OF 4" and "3 DEVICES · 2 NOTES".
+  timestamps. It is the natural home for things like "QUESTION 2 OF 4" and "3 DEVICES · 2 NOTES". It is
+  also the only uppercase left in the workspace.
 - **Weight does the work surfaces would otherwise do.** Because there is no drop shadow and no
-  coloured accent for grouping, hierarchy comes from the display face, from size, and from the
-  uppercase/italic contrast.
+  coloured accent for grouping, hierarchy comes from size, weight and the metadata labels.
 
 **[derived] Desktop sizes are a ceiling, not a fixed size.** The poster is a desktop screenshot. The
 app scales Display and Section down on narrow screens (see `--fn-type-*` clamps in `tokens.css`);

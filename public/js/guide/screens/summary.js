@@ -152,7 +152,12 @@ export function renderSummary(ctx) {
       'p',
       { class: 'g-meta-line g-small' },
       `Walkthrough: ${plural(WALKTHROUGH_STEPS.length, 'step')} (${plural(WALKTHROUGH_STEPS.length - 1, 'step')} unless you are a complete beginner).`
-    )
+    ),
+
+    /* The way back to the last step before the plan is committed (architecture spec v2). */
+    buttonRow([
+      button({ label: UI.back, iconName: 'arrowLeft', variant: 'secondary', onClick: () => actions.back() })
+    ])
   );
 }
 

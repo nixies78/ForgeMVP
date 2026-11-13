@@ -47,10 +47,12 @@ function findChrome() {
 const SHARE =
   '?play=combat_elimination_deathmatch&a=team_mode%3Affa%2Cloadout%3Afixed%2Crespawns%3Arespawn%2Czone%3Afixed&brand=star_wars';
 
-/** Every screen, what it must contain once rendered, and the width to capture it at. */
+/** Every screen, what it must contain once rendered, and the width to capture it at.
+ *  `back: false` marks the one screen with no step before it: the spec asks every screen of the wizard
+ *  for a visible way back, and home is the entry point. */
 const CHECKS = [
-  { name: 'home', url: `${BASE}`, desktop: 1440, mobile: 420,
-    must: ['Ready to make a game?', 'Answer Questions', 'Randomise', 'Chat with AI', 'researched game types'], mustNot: ['could not load its data'] },
+  { name: 'home', url: `${BASE}`, desktop: 1440, mobile: 420, back: false,
+    must: ['Ready to make a game?', 'Answer Questions', 'Randomise', 'Chat with AI', 'researched game types', 'not affiliated'], mustNot: ['could not load its data'] },
   { name: 'category', url: `${BASE}#/category`, desktop: 1440,
     must: ['What type of game do you want to make?', 'Combat', 'Researched', 'Basics only'] },
   { name: 'gametype-dev', url: `${BASE}${SHARE}&dev=1#/gametype`, desktop: 1440,
@@ -72,9 +74,9 @@ const CHECKS = [
     must: ['Make It Look Good', 'Star Wars', 'atmosphere devices'] },
   { name: 'walk-beginner', url: `${BASE}${SHARE}#/walk/1`, desktop: 1440, mobile: 420,
     must: ['Basic Navigation', 'Details panel'] },
-  { name: 'soon', url: `${BASE}#/soon/randomise`, desktop: 1440,
+  { name: 'soon', url: `${BASE}#/soon/randomise`, desktop: 1440, back: false,
     must: ['still being designed', 'What is missing'] },
-  { name: 'unknown-route', url: `${BASE}#/nonsense`, desktop: 1200,
+  { name: 'unknown-route', url: `${BASE}#/nonsense`, desktop: 1200, back: false,
     must: ['Ready to make a game?'] }
 ];
 
@@ -209,37 +211,56 @@ async function main() {
           options: screen ? screen.querySelectorAll('.g-option').length : 0,
           details: screen ? screen.querySelectorAll('details').length : 0,
           headings: screen ? [...screen.querySelectorAll('h1,h2,h3,h4')].map((h) => h.tagName).join(',') : '',
-          /* The page shell: the hero, the header, the app container's sticky bar and the footer. The
-           * architecture spec is a layout document, so these are the assertions that it was followed. */
+          /* The page shell: the fixed header, the app container's sticky bar and the footer. The
+           * architecture spec (v2) is a layout document, so these are the assertions that it was
+           * followed - including the things it removed, which are checked for absence. */
           shell: (() => {
             const h1s = [...document.querySelectorAll('h1')];
             const head = document.getElementById('appHead');
             const app = document.getElementById('appContainer');
-            const moreWrap = document.getElementById('navMoreWrap');
-            const moreMenu = document.getElementById('navMoreMenu');
-            const list = document.getElementById('navList');
+            const body = document.getElementById('appContainer').querySelector('.sh-app-body');
+            const nav = document.querySelector('.sh-nav');
             const panel = document.getElementById('searchPanel');
             const header = document.getElementById('siteHeader');
             const footer = document.querySelector('.sh-footer');
-            const video = document.getElementById('heroVideo');
-            const source = video ? video.querySelector('source') : null;
+            const bar = document.getElementById('progressBar');
+            const back = [...document.querySelectorAll('#screen button, #screen a')]
+              .filter((el) => /^(←\\s*)?(back|previous|let's go back)/i.test((el.textContent || '').trim()));
+            const admin = [...document.querySelectorAll('.sh-footer a')]
+              .filter((el) => /admin/i.test(el.getAttribute('href') || ''));
+            const headerRect = header ? header.getBoundingClientRect() : null;
+            const appRect = app ? app.getBoundingClientRect() : null;
             return {
               h1Count: h1s.length,
               h1Text: h1s.map((el) => el.textContent.trim()).join('|'),
+              h1InScreen: h1s.length === 1 ? (screen ? screen.contains(h1s[0]) : false) : false,
+              headingsInScreen: screen ? [...screen.querySelectorAll('h1,h2,h3')].map((h) => h.tagName).join(',') : '',
               crumbs: (document.getElementById('crumbs') || { textContent: '' }).textContent.replace(/\\s+/g, ' ').trim(),
-              navItems: list ? list.children.length : -1,
-              navMoreHidden: moreWrap ? moreWrap.hidden : null,
-              navMoreItems: moreMenu ? moreMenu.children.length : -1,
+              crumbLinks: document.querySelectorAll('#crumbs a.g-crumb').length,
+              navItems: nav ? nav.querySelectorAll('.sh-nav-link').length : -1,
+              navText: nav ? nav.textContent.replace(/\\s+/g, ' ').trim() : '',
               stickyTop: head ? getComputedStyle(head).position + ' ' + getComputedStyle(head).top : '',
-              inset: app ? getComputedStyle(app).paddingLeft : '',
+              inset: body ? getComputedStyle(body).paddingLeft : '',
               panelHidden: panel ? panel.hidden : null,
               devPressed: document.getElementById('devModeButton')
                 ? document.getElementById('devModeButton').getAttribute('aria-pressed')
                 : '',
+              headerPosition: header ? getComputedStyle(header).position : '',
               headerBg: header ? getComputedStyle(header).backgroundColor : '',
+              headerH: headerRect ? Math.round(headerRect.height) : 0,
+              declaredHeaderH: getComputedStyle(document.documentElement).getPropertyValue('--sh-header-h').trim(),
+              viewportWidth: window.innerWidth,
+              bodyTopPad: body ? getComputedStyle(document.body).paddingTop : '',
+              appTopBelowHeader: headerRect && appRect ? Math.round(appRect.top - headerRect.bottom) : -999,
               footerBg: footer ? getComputedStyle(footer).backgroundColor : '',
-              poster: video ? video.getAttribute('poster') : '',
-              videoSrc: source ? source.getAttribute('src') : ''
+              footerAdminLinks: admin.length,
+              footerText: footer ? footer.textContent.replace(/\\s+/g, ' ').trim() : '',
+              progressBg: bar ? getComputedStyle(bar).backgroundImage : '',
+              backButtons: back.length,
+              hero: !!document.querySelector('.sh-hero, #heroVideo, #heroTitle'),
+              logo: (document.querySelector('.sh-logo img') || {}).getAttribute
+                ? document.querySelector('.sh-logo img').getAttribute('src')
+                : ''
             };
           })(),
           title: document.title,
@@ -278,28 +299,66 @@ async function main() {
       if (state.text.includes(needle)) problems.push(`unexpected text: "${needle}"`);
     }
     if (check.hasSvg && state.svgs < 1) problems.push('expected the core-loop diagram');
-    /* The hero owns the page's only <h1>; a screen's own title is an <h2> and is where focus lands. */
+    /* One <h1> per screen, and it is the screen's own title: the spec removes the hero, so the title is
+     * the only h1 in the document and the thing focus lands on. */
     if (state.shell.h1Count !== 1) {
       problems.push(`the page should have exactly one <h1>, found ${state.shell.h1Count}: "${state.shell.h1Text}"`);
-    } else if (!/^forge$/i.test(state.shell.h1Text)) {
-      problems.push(`the page's <h1> should be the hero title, found "${state.shell.h1Text}"`);
+    } else if (!state.shell.h1InScreen) {
+      problems.push(`the <h1> should be the screen's title, found "${state.shell.h1Text}"`);
     }
-    if (state.focusTag !== 'H2' && state.rendered) problems.push(`focus landed on ${state.focusTag}, not the screen heading`);
+    if (state.focusTag !== 'H1' && state.rendered && state.focusText) {
+      problems.push(`focus landed on ${state.focusTag}, not the screen heading`);
+    }
+    if (state.shell.headingsInScreen.startsWith('H2')) {
+      problems.push(`a heading level comes before the screen's title: ${state.shell.headingsInScreen}`);
+    }
     if (!state.shell.crumbs) problems.push('the app container header shows no breadcrumb trail');
+    /* Every crumb but the current step is a link back to that step (the spec's "clickable
+     * breadcrumbs"). Screens with no step before them - home, and the stubs that render it - have a
+     * one-crumb trail that is entirely the current step, so there is nothing to link to. */
+    if (check.back !== false && state.shell.crumbLinks < 1) {
+      problems.push('the breadcrumb trail has no clickable crumbs');
+    }
     if (!state.shell.stickyTop.startsWith('sticky')) problems.push(`the app container header is not sticky (${state.shell.stickyTop})`);
     if (state.shell.panelHidden !== true) problems.push('the search panel is showing before anyone has searched');
-    if (state.shell.headerBg === 'rgba(0, 0, 0, 0)') problems.push('the site header has no background');
-    if (state.shell.footerBg === 'rgba(0, 0, 0, 0)') problems.push('the footer has no background');
-    /* The navigation must never lose a link: every item is either in the bar or behind More. */
-    const navTotal = state.shell.navItems + state.shell.navMoreItems;
-    if (navTotal !== 4) {
-      problems.push(`the navigation has ${state.shell.navItems} items in the bar and ${state.shell.navMoreItems} behind More, not 4`);
-    } else if (state.shell.navMoreItems > 0 && state.shell.navMoreHidden) {
-      problems.push('navigation items were collapsed with no More button to reach them');
+    /* v2: a fixed header, 72px, painted with the body colour at 95%, with no bottom border. */
+    if (state.shell.headerPosition !== 'fixed') problems.push(`the site header should be fixed, it is ${state.shell.headerPosition}`);
+    /* 72px wherever the row fits; the check is on the measured height against the width this dump was
+     * taken at, so a wrapped phone header is not mistaken for a broken desktop one. */
+    if (state.shell.viewportWidth > 760 && state.shell.headerH !== 72) {
+      problems.push(`the site header should be 72px tall at ${state.shell.viewportWidth}px, it is ${state.shell.headerH}px`);
     }
-    /* And at this width — 1440px, where these checks run — there is room for all of them. */
-    if (state.shell.navMoreItems > 0) {
-      problems.push(`the navigation collapsed ${state.shell.navMoreItems} item(s) into More at desktop width`);
+    if (state.shell.headerBg !== 'rgba(16, 16, 20, 0.95)') {
+      problems.push(`the site header should be rgba(16, 16, 20, 0.95), it is ${state.shell.headerBg}`);
+    }
+    if (parseInt(state.shell.bodyTopPad, 10) < 72) {
+      problems.push(`the page does not clear the fixed header (body padding-top ${state.shell.bodyTopPad})`);
+    }
+    if (state.shell.appTopBelowHeader < 0) {
+      problems.push(`the app container sits under the fixed header (${state.shell.appTopBelowHeader}px below it)`);
+    }
+    /* The spec's 64px inset. Phones are allowed to ease it down to 16px, so this only fails when the
+     * container is flush against the page edge at desktop width. */
+    if (parseInt(state.shell.inset, 10) < 16) problems.push(`the app container has no page inset (${state.shell.inset})`);
+    if (state.shell.footerBg === 'rgba(0, 0, 0, 0)') problems.push('the footer has no background');
+    /* The spec's navigation is one item, and the footer's only link is the admin entry point. */
+    if (state.shell.navItems !== 1 || !/^home$/i.test(state.shell.navText)) {
+      problems.push(`the header navigation should be the single item "Home", found ${state.shell.navItems}: "${state.shell.navText}"`);
+    }
+    if (state.shell.footerAdminLinks < 1) problems.push('the footer carries no "Go to admin page" link');
+    if (!/go to admin page/i.test(state.shell.footerText)) problems.push('the footer admin link is not labelled "Go to admin page"');
+    /* The progress bar is the spec's cyan-to-yellow ramp. */
+    if (!/rgb\(38,\s*187,\s*255\)/.test(state.shell.progressBg)) {
+      problems.push(`the progress bar does not start at #26BBFF (${state.shell.progressBg})`);
+    }
+    /* v2 removes the hero, its video and its still. */
+    if (state.shell.hero) problems.push('the hero is still in the document; the spec removes it');
+    if (!/EGS-Logotype-2023-Vertical-White\.svg$/.test(state.shell.logo)) {
+      problems.push(`the header logo is not the Epic Games Store logotype from the spec (${state.shell.logo})`);
+    }
+    /* Every screen of the wizard carries a visible way back (spec v2). */
+    if (check.back !== false && state.shell.backButtons < 1) {
+      problems.push(`the ${check.name} screen has no visible Back button`);
     }
     if (state.overflow !== 'none') problems.push(`content overflows its box — ${state.overflow}`);
 
@@ -329,39 +388,58 @@ async function main() {
         mobile: true
       });
       await sleep(400);
-      /* The priority+ navigation is the one piece of the spec that only shows up at a narrow width.
-       * The invariant is not "it collapses" — a phone in two rows has room for all four — it is that
-       * the bar is never squeezed to nothing and no destination is lost. */
+      /* The header is one 72px row while it fits and wraps into two when the row genuinely cannot hold
+       * the logo, the Home link, the search field and both actions. Either way the invariant is the
+       * same: nothing overflows, the destination survives, and whatever height the header ends up with
+       * is the height the page offsets itself by. */
       const nav = await send('Runtime.evaluate', {
         expression: `(() => {
           const nav = document.getElementById('siteNav');
-          const more = document.getElementById('navMoreWrap');
-          const menu = document.getElementById('navMoreMenu');
-          const list = document.getElementById('navList');
+          const header = document.getElementById('siteHeader');
+          const item = document.querySelector('.sh-nav-link');
+          const admin = document.querySelector('.sh-btn-admin');
+          const headerH = header ? Math.round(header.getBoundingClientRect().height) : 0;
+          const declared = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sh-header-h'));
           return {
             width: nav ? Math.round(nav.getBoundingClientRect().width) : 0,
-            inBar: list ? list.children.length : -1,
-            behind: menu ? menu.children.length : -1,
-            moreVisible: more ? !more.hidden : null,
-            listOverflows: list ? list.scrollWidth > list.clientWidth + 1 : false,
-            barOverflows: nav ? nav.scrollWidth > nav.clientWidth + 1 : false
+            items: item ? 1 : 0,
+            itemVisible: item ? item.getBoundingClientRect().width > 0 : false,
+            adminVisible: admin ? admin.getBoundingClientRect().width > 0 : false,
+            headerH,
+            declared: Math.round(declared),
+            bodyTopPad: Math.round(parseFloat(getComputedStyle(document.body).paddingTop)),
+            barOverflows: nav ? nav.scrollWidth > nav.clientWidth + 1 : false,
+            docOverflows: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+            /* Which element is wider than the viewport, so an overflow is a name and not a number. */
+            widest: [...document.querySelectorAll('body *')]
+              .filter((el) => el.getBoundingClientRect().right > document.documentElement.clientWidth + 1)
+              .slice(0, 3)
+              .map((el) => el.tagName.toLowerCase() + (el.className ? '.' + String(el.className).split(' ')[0] : '') +
+                ' →' + Math.round(el.getBoundingClientRect().right) + 'px')
+              .join(', ')
           };
         })()`,
         returnByValue: true
       });
       const navState = nav.result.value || {};
-      if (navState.width < 120) {
-        problems.push(`the navigation was squeezed to ${navState.width}px at ${check.mobile}px wide`);
-      } else if (navState.barOverflows || navState.listOverflows) {
-        problems.push(`the navigation overflows its row at ${check.mobile}px wide`);
-      } else if (navState.behind > 0 && !navState.moreVisible) {
-        problems.push(`items were collapsed with no More button at ${check.mobile}px wide`);
-      } else if (navState.inBar + navState.behind !== 4) {
-        problems.push(`only ${navState.inBar + navState.behind} of 4 navigation links survive at ${check.mobile}px wide`);
+      if (!navState.itemVisible) {
+        problems.push(`the Home link is not visible at ${check.mobile}px wide`);
+      } else if (!navState.adminVisible) {
+        problems.push(`the Admin action is not visible at ${check.mobile}px wide`);
+      } else if (navState.barOverflows || navState.docOverflows) {
+        problems.push(
+          `the page overflows the viewport at ${check.mobile}px wide` +
+            (navState.widest ? ` — widest: ${navState.widest}` : '')
+        );
+      } else if (Math.abs(navState.headerH - navState.declared) > 1 || Math.abs(navState.headerH - navState.bodyTopPad) > 1) {
+        problems.push(
+          `the header is ${navState.headerH}px tall but the page offsets it by ${navState.bodyTopPad}px ` +
+            `(--sh-header-h ${navState.declared}px) at ${check.mobile}px wide`
+        );
       } else {
         console.log(
-          `       · priority+ nav at ${check.mobile}px: ${navState.inBar} in the bar` +
-            (navState.behind ? `, ${navState.behind} behind More` : ', nothing collapsed')
+          `       · header at ${check.mobile}px: ${navState.headerH}px, nav row ${navState.width}px, ` +
+            `Home and Admin both visible, page offset matches`
         );
       }
       await send('Page.captureScreenshot', { format: 'png' }).then(({ data }) =>
@@ -457,8 +535,8 @@ async function driveTheWizard(send, results) {
     await step('home → answer questions', 'Ready to make a game?');
     await step('→ category', 'What type of game do you want to make?', () => click('.g-choice', 'Answer Questions'));
 
-    /* The hero is above the app, so where a screen change lands matters: on the hero again, and every
-     * step of the flow is below the fold. */
+    /* v2 removes the hero, so a screen change returns to the top of the page and the app's sticky
+     * header sits directly under the fixed site header. */
     const landing = await evaluate(`(() => {
       const head = document.getElementById('appHead');
       const header = document.getElementById('siteHeader');
@@ -469,13 +547,29 @@ async function driveTheWizard(send, results) {
         scrollY: Math.round(window.scrollY)
       };
     })()`);
-    if (landing && (landing.top < 0 || landing.top > landing.headerHeight + 24)) {
+    if (landing && landing.scrollY !== 0) {
+      problems.push(`a screen change left the page scrolled to ${landing.scrollY}px, not the top`);
+    } else if (landing && (landing.top < landing.headerHeight || landing.top > landing.headerHeight + 64)) {
       problems.push(
         `a screen change left the app header at ${landing.top}px (site header is ${landing.headerHeight}px tall, scrollY ${landing.scrollY})`
       );
     } else if (landing) {
-      console.log(`ok   flow · a screen change lands on the app container (scrollY ${landing.scrollY}), not the hero`);
+      console.log(`ok   flow · a screen change returns to the top, with the app header clear of the fixed site header`);
     }
+    /* Back has to work, not just exist: the spec asks each step to return to the previous one. */
+    await evaluate(`(() => {
+      const back = [...document.querySelectorAll('#screen button, #screen a')]
+        .find((el) => /^(\\u2190\\s*)?(back|previous|let's go back)/i.test((el.textContent || '').trim()));
+      if (back) back.click();
+    })()`);
+    await sleep(500);
+    const homeAgain = await evaluate("(document.getElementById('screen') || {}).textContent || ''");
+    if (!/Ready to make a game\\?/.test(homeAgain)) {
+      problems.push('the Back button on the first wizard step did not return to the previous screen');
+    } else {
+      console.log('ok   flow · the Back button on the category screen returns to the home screen');
+    }
+    await step('→ category again', 'What type of game do you want to make?', () => click('.g-choice', 'Answer Questions'));
     await step('→ game type', 'Which one exactly?', () => click('.g-choice', 'Combat'));
     await step('→ questions', 'Question 1 of', () => click('.g-choice', 'Elimination / Deathmatch'));
 
@@ -591,7 +685,8 @@ async function driveTheWizard(send, results) {
 
   results.push({
     name: 'wizard click-through',
-    state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none' },
+    state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none',
+      shell: { backButtons: 0, h1Count: 0, navItems: 0, crumbLinks: 0 } },
     problems,
     pageErrors: []
   });

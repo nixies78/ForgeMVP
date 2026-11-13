@@ -103,38 +103,45 @@ body.g-app {
   color: var(--fn-text-muted);
 }
 
+/* Titles, section headings and UI labels are Inter in sentence case, per the architecture spec (v2):
+ * "Headings (H1, H2): Inter (Standard sentence case; no forced full capitalization)" and "Body & UI:
+ * Inter". The Fortnite poster's heavy italic display face is no longer used by the app; the token and
+ * the @font-face stay in tokens.css because support/FORTNITE_STYLE_LIBRARY.md still documents it. */
 .g-title {
   margin: 0 0 var(--fn-space-3);
-  font-family: var(--fn-font-display);
-  font-style: italic;
+  font-family: var(--fn-font-ui);
+  font-weight: 700;
+  font-style: normal;
   font-size: var(--fn-display-size);
   line-height: var(--fn-display-line);
   letter-spacing: var(--fn-display-tracking);
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--fn-text);
-  max-width: 22ch;
+  max-width: 26ch;
   text-wrap: balance;
 }
 
 .g-section {
   margin: var(--fn-space-7) 0 var(--fn-space-4);
-  font-family: var(--fn-font-display);
-  font-style: italic;
+  font-family: var(--fn-font-ui);
+  font-weight: 700;
+  font-style: normal;
   font-size: var(--fn-section-size);
   line-height: var(--fn-section-line);
-  letter-spacing: var(--fn-display-tracking);
-  text-transform: uppercase;
+  letter-spacing: var(--fn-section-tracking);
+  text-transform: none;
   color: var(--fn-text);
-  max-width: 26ch;
+  max-width: 30ch;
 }
 .g-section.is-small { font-size: var(--fn-card-size); max-width: none; }
-/* An h1 used inside a panel: still the screen's title for focus and semantics, but sized like a
+/* A title used inside a panel: still the screen's title for focus and semantics, but sized like a
  * section so it sits inside a card rather than shouting over it. */
-.g-title.is-compact { font-size: var(--fn-section-size); line-height: var(--fn-section-line); max-width: 34ch; margin-bottom: 0; }
+.g-title.is-compact { font-size: var(--fn-section-size); line-height: var(--fn-section-line); max-width: 40ch; margin-bottom: 0; }
 
 .g-cardtitle {
   margin: 0;
-  font-family: var(--fn-font-display);
+  font-family: var(--fn-font-ui);
+  font-weight: 600;
   font-size: var(--fn-card-size);
   line-height: var(--fn-card-line);
   color: var(--fn-text);
@@ -192,7 +199,7 @@ body.g-app {
   padding: 0 var(--fn-space-5);
   border-radius: var(--fn-radius-button);
   border: 1px solid transparent;
-  font-family: var(--fn-font-display);
+  font-family: var(--fn-font-ui);
   font-size: var(--fn-action-size);
   line-height: var(--fn-action-line);
   text-decoration: none;
@@ -469,7 +476,7 @@ body.g-app {
 /* Small slots: a monogram, not a squeezed file path. The path and the size are in the tooltip. */
 .g-imgfallback.is-compact { padding: var(--fn-space-2); gap: 0; cursor: help; }
 .g-imgfallback-mark {
-  font-family: var(--fn-font-display);
+  font-family: var(--fn-font-ui);
   font-size: 22px;
   line-height: 1.1;
   color: var(--fn-text-muted);
@@ -648,7 +655,7 @@ body.g-app {
 }
 .g-rolegroup-title {
   margin: 0;
-  font-family: var(--fn-font-display);
+  font-family: var(--fn-font-ui);
   font-size: 20px;
   line-height: 1.2;
   color: var(--fn-text);
@@ -771,7 +778,7 @@ body.g-app {
 }
 .g-tracker-num {
   grid-area: num;
-  font-family: var(--fn-font-display);
+  font-family: var(--fn-font-ui);
   font-size: 22px;
   color: var(--fn-text-muted);
 }

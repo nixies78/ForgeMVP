@@ -3,14 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Forge - THINK, DESIGN, BUILD.</title>
+  <title>Forge - design a Fortnite island, then build it</title>
   <meta name="description" content="Take your game from idea to executable. Design in Forge, let AI tools bring it to life in Unreal Engine and tap into Fortnite's vibrant developer economy. The UEFN Game Guide turns your answers into an exact game type, the devices it needs and five build steps." />
-  <meta name="theme-color" content="#0E1128" />
+  <meta name="theme-color" content="#101014" />
   <link rel="icon" href="assets/logo.svg" />
   <!-- Load order matters. styles.css is the shared chrome for the older admin and chat pages and lives in
        a cascade layer, so it can never outrank the app's own rules. tokens.css + guide.css are the
        workspace (support/FORTNITE_STYLE_LIBRARY.md); shell.css is the page frame around it
-       (support/Forge--architecture_specification.md) and comes last so the frame wins on the frame. -->
+       (support/Forge--architecture_specification_v2.md) and comes last so the frame wins on the frame. -->
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/guide.css" />
@@ -28,30 +28,21 @@
   <a class="g-skip" href="#screen">Skip to content</a>
 
   <!-- ============================== header ==============================
-       Sticky, 72px, Unreal Navy, no bottom border; the app container's own header sticks below it. -->
+       Fixed at 72px with no bottom border, so it is the top edge of the page rather than a bar sitting
+       on it. The body is offset by the same 72px (published as --sh-header-h, measured at runtime so
+       the value stays true if the row ever wraps on a very narrow screen). -->
   <header class="sh-header" id="siteHeader">
     <div class="sh-header-inner">
 
-      <!-- Far left, and a reset to the start of the guide rather than a link to the admin tool. -->
+      <!-- Far left, and a reset to the start of the guide. -->
       <a class="logo-link sh-logo" href="#/home" title="Forge - back to the start">
-        <img src="assets/Header--Logo.png" alt="Forge" />
+        <img src="assets/EGS-Logotype-2023-Vertical-White.svg" alt="Epic Games Store" />
       </a>
 
-      <!-- Priority+ navigation: public/js/guide/chrome.js moves the tail of this list into the More menu
-           as the viewport narrows, measuring with a ResizeObserver rather than guessing breakpoints. -->
+      <!-- One item, as the spec asks. The app's own screens carry every other destination, so there is
+           no overflow menu to keep in step with them. -->
       <nav class="sh-nav" id="siteNav" aria-label="Guide">
-        <ul class="sh-nav-list" id="navList">
-          <li class="sh-nav-item"><a href="#/home">Home</a></li>
-          <li class="sh-nav-item"><a href="#/category">New game</a></li>
-          <li class="sh-nav-item"><a href="chat.html">Chat test</a></li>
-          <li class="sh-nav-item"><a href="data/uefn_device_logic.json">Device data</a></li>
-        </ul>
-        <div class="sh-more" id="navMoreWrap" hidden>
-          <button class="sh-more-button" id="navMoreButton" type="button" aria-expanded="false" aria-haspopup="true">
-            More <span class="sh-more-caret" aria-hidden="true">&#9662;</span>
-          </button>
-          <ul class="sh-more-menu" id="navMoreMenu" hidden></ul>
-        </div>
+        <a class="sh-nav-link" href="#/home">Home</a>
       </nav>
 
       <!-- Search is present and focusable, and says plainly that it is not built yet. The label is
@@ -83,6 +74,11 @@
         <img src="assets/admin-logo.svg" alt="" width="16" height="16" />
         <span>Admin</span>
       </a>
+
+      <!-- A zero-height line break, used only by the narrowest layout: below 760px it puts the
+           navigation and Dev mode on a second row instead of leaving "Home" dangling after the primary
+           action. Inert and invisible at every other width. -->
+      <span class="sh-break" aria-hidden="true"></span>
     </div>
 
     <!-- The honest answer when someone uses the search field. -->
@@ -91,37 +87,9 @@
 
   <main class="g-main sh-main" id="main">
 
-    <!-- ============================== hero ==============================
-         Looping video with a static fallback image. The video is decorative (aria-hidden) and is only
-         started by script, once, when the browser is idle and the user has not asked for less motion -
-         so a page with the media blocked still shows the poster frame and the text. -->
-    <section class="sh-hero" aria-labelledby="heroTitle">
-      <video
-        class="sh-hero-video"
-        id="heroVideo"
-        poster="assets/Hero--Fallback.png"
-        muted
-        loop
-        playsinline
-        preload="none"
-        aria-hidden="true"
-      >
-        <source src="assets/Hero--Video.mp4" type="video/mp4" />
-      </video>
-      <div class="sh-hero-scrim" aria-hidden="true"></div>
-      <div class="sh-hero-inner">
-        <h1 class="sh-hero-title" id="heroTitle">Forge</h1>
-        <h2 class="sh-hero-sub">THINK, DESIGN, BUILD.</h2>
-        <p class="sh-hero-text">
-          Take your game from idea to executable. Design in Forge, let AI tools bring it to life in
-          Unreal Engine and tap into Fortnite's vibrant developer economy.
-        </p>
-      </div>
-    </section>
-
     <!-- ============================== the app ==============================
-         The workspace. Its own header sticks below the site header, so the breadcrumb trail and the
-         progress bar stay visible while a long device plan scrolls. -->
+         The spec removes the hero: the workspace sits directly below the fixed header, inset from the
+         page edges, with its own sticky header holding the breadcrumb trail and the progress bar. -->
     <div class="sh-app" id="appContainer">
 
       <div class="sh-app-head" id="appHead">
@@ -129,7 +97,8 @@
           <p class="sh-app-name">UEFN Game Guide</p>
 
           <!-- Rendered by js/guide/app.js from the session, so every screen has one trail definition.
-               The container is a plain div: render/ui.js wraps the trail in its own labelled <nav>. -->
+               The container is a plain div: render/ui.js wraps the trail in its own labelled <nav>, and
+               every crumb but the last is a link straight back to that step. -->
           <div class="sh-crumbbar" id="crumbs"></div>
 
           <div class="sh-progress">
@@ -196,23 +165,15 @@
     </div>
   </main>
 
+  <!-- A utility bar: the system status, and the admin entry point inside it. The guide's own footer
+       content (the sources, the Epic disclaimer) lives at the end of the home screen, which is where a
+       reader is when it matters. -->
   <footer class="sh-footer">
     <div class="sh-footer-inner">
-      <div class="sh-footer-col">
-        <p class="sh-footer-title">Forge</p>
-        <p class="g-footer-note">
-          An independent guide to building Fortnite islands in UEFN. Not affiliated with Epic Games.
-          Device names and Details-panel settings follow Epic's official documentation.
-        </p>
-      </div>
-      <div class="sh-footer-col">
-        <p class="sh-footer-title">System status</p>
-        <p class="sh-footer-status" id="footerStatus">Loading the guide data&hellip;</p>
-      </div>
-      <div class="sh-footer-col">
-        <p class="sh-footer-title">More</p>
-        <p class="g-footer-note">Reserved for legal links and social icons.</p>
-        <a class="g-footer-admin" href="admin.html">Go to the admin page</a>
+      <div class="sh-status" id="systemStatus">
+        <span class="sh-status-dot" id="statusDot" aria-hidden="true"></span>
+        <p class="sh-status-text" id="footerStatus">Loading the guide data&hellip;</p>
+        <a class="sh-status-admin" href="admin.html">Go to admin page</a>
       </div>
     </div>
   </footer>

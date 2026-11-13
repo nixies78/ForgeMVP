@@ -80,7 +80,8 @@ test('every page links the admin page from its header', async (t) => {
    * this); the Admin entry point is the page's own primary call to action beside it. */
   assert.match(home, /<a class="logo-link[^"]*" href="#\/home"/, 'the home page logo resets to the start of the guide');
   assert.match(home, /<a class="sh-btn sh-btn-primary[^"]*" href="admin\.html"/, 'the Admin action reaches the admin page');
-  assert.match(home, /href="admin\.html"[^>]*>Go to the admin page</, 'home page has a plain admin link');
+  /* The footer's system status carries the plain admin link, in the wording the spec gives it. */
+  assert.match(home, /href="admin\.html"[^>]*>Go to admin page</, 'home page has a plain admin link');
 
   const admin = await (await fetch(`${base}/admin.html`)).text();
   assert.match(admin, /class="logo-link" href="index\.html"/, 'admin page logo links home');

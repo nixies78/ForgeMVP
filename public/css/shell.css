@@ -1,153 +1,107 @@
 /* ============================================================================
  * Forge - the page shell.
  *
- * This file is the page frame from support/Forge--architecture_specification.md:
- * the site header, the hero, the inset web-app container, and the footer. It is
- * the only place a second hue (cyan) is allowed, because nothing out here carries
- * content status - the workspace inside the container is governed by
- * support/FORTNITE_STYLE_LIBRARY.md instead, and never sees these colours.
+ * This file is the page frame from support/Forge--architecture_specification_v2.md:
+ * the fixed header, the inset web-app container, and the utility footer. The
+ * workspace inside the container is governed by support/FORTNITE_STYLE_LIBRARY.md.
  *
  * Every hex value from the specification is declared once, here, as a --sh-* token.
+ *
+ * v2 changed four things this file had from v1 and they are all visible below:
+ * the header is fixed rather than sticky and is painted with the body colour
+ * (#101014 at 95%) instead of Unreal Navy; the hero is gone; the primary action is
+ * Blueprint cyan with a dark label instead of electric yellow; and the type is
+ * Inter in sentence case everywhere - the spec is explicit that headings are Inter
+ * and that there is no forced full capitalisation.
  * ========================================================================== */
 
 :root {
   /* The specification's palette, verbatim. */
-  --sh-navy: #0E1128;            /* Unreal Navy - the header */
   --sh-body-1: #101014;          /* body gradient, stop 1 */
   --sh-body-2: #202024;          /* body gradient, stop 2 */
   --sh-body-3: #101014;          /* body gradient, stop 3 */
-  --sh-footer: #18181C;          /* Dark Charcoal - the footer */
+  --sh-header-bg: rgba(16, 16, 20, 0.95);  /* the header: #101014 at 95% opacity */
+  --sh-footer: #18181C;          /* the footer */
   --sh-panel: #23253A;           /* Panel Charcoal - dropdowns and inputs */
   --sh-outline: #3A3D4D;         /* Outline Slate - 1px structural borders */
-  --sh-cyan: #1CB0F6;            /* Blueprint Cyan - active states */
-  --sh-cyan-sky: #26BBFF;        /* Sky Cyan - highlights, start of the progress ramp */
-  --sh-yellow: #F7FF19;          /* Electric Yellow - primary actions, progress completion */
+  --sh-primary: #26BBFF;         /* the primary action's fill, and the start of the progress ramp */
   --sh-white: #FFFFFF;           /* Engine White - primary text */
   --sh-gray: #B2B5C2;            /* UI Gray - secondary text and links */
+  --sh-ink-on-primary: #101014;  /* the dark label the spec asks for on the primary fill (10.4:1) */
   --sh-secondary-btn: #5B5B65;   /* the Dev mode button's fill */
   --sh-input-bg: #1e1e22;        /* the search field */
   --sh-input-border: #404043;    /* the search field's edge */
+  --sh-progress-end: #F7FF19;    /* the far end of the progress gradient */
 
-  /* [derived] Not in the specification: values the spec's own rules need but does not name. */
-  --sh-header-h: 72px;           /* the spec's header height; re-measured by chrome.js on a phone */
-  --sh-ink-on-yellow: var(--sh-navy);   /* dark label on the yellow CTA: 15.8:1, and navy not black
-                                         * so the page keeps one dark tone */
+  /* [derived] Not in the specification: values its own rules need but it does not name. */
+  --sh-header-base: 72px;        /* the header's own minimum height, at every width above 760px */
+  --sh-header-h: var(--sh-header-base);  /* what the page offsets itself by; chrome.js re-measures it */
   --sh-track: color-mix(in srgb, var(--sh-white) 8%, transparent);
-  --sh-glow: 0 0 0 3px color-mix(in srgb, var(--sh-yellow) 30%, transparent);
+  --sh-glow: 0 0 0 3px color-mix(in srgb, var(--sh-primary) 32%, transparent);
   --sh-shadow-panel: 0 18px 40px color-mix(in srgb, #000000 55%, transparent);
   --sh-inset: clamp(16px, 5vw, 64px);   /* the spec asks for >= 64px; 64px of gutter each side on a
                                          * 360px phone would leave nothing to read, so it eases down */
   --sh-content-max: 1240px;
   --sh-ease: 160ms ease;
+  /* The spec names Inter for headings and for body/UI alike, so the shell has one face. */
+  --sh-font: var(--fn-font-ui, "Inter", "Segoe UI", system-ui, sans-serif),
+    "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 }
 
 /* ============================== header ============================== */
 
 .sh-header {
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 30;
-  background: color-mix(in srgb, var(--sh-navy) 88%, transparent);
-  backdrop-filter: blur(10px) saturate(1.2);
-  -webkit-backdrop-filter: blur(10px) saturate(1.2);
-  border-bottom: 0; /* the spec is explicit: no bottom border */
+  left: 0;
+  width: 100%;
+  z-index: 50;
+  background: var(--sh-header-bg);
+  border: 0; /* the spec is explicit: a clean edge, no border */
 }
 
+/* The header's own height must NOT be read from --sh-header-h. That variable is what the page offsets
+ * itself by, and chrome.js publishes the measured height into it - so a header sized from it would pin
+ * its own measurement: measured once on a phone, it would stay phone-height on a desktop, and because
+ * nothing would resize, the observer would never correct it. The header has a minimum instead, and the
+ * measurement follows it. */
 .sh-header-inner {
   display: flex;
   align-items: center;
   gap: var(--fn-space-4, 18px);
-  height: var(--sh-header-h);
+  min-height: var(--sh-header-base);
   max-width: var(--sh-content-max);
   margin: 0 auto;
   padding: 0 var(--sh-inset);
+  font-family: var(--sh-font);
 }
 
+/* The vertical Epic Games Store logotype, as named by the spec: 44px of the 72px bar. */
 .sh-logo {
   display: inline-flex;
   align-items: center;
   flex: none;
-  padding: 6px;
-  border: 1px solid transparent;
+  padding: 4px;
   border-radius: 8px;
   text-decoration: none;
 }
-.sh-logo img { display: block; height: 26px; width: auto; max-width: 180px; }
-.sh-logo:hover { border-color: var(--sh-outline); }
-.sh-logo:hover img { opacity: 0.92; }
-/* The class is kept from the older pages, where styles.css styles it; the shell restates only the
- * parts it needs so the two never fight. */
-.sh-header .logo-link { color: var(--sh-white); }
+.sh-logo img { display: block; height: 44px; width: auto; }
+.sh-logo:hover img { opacity: 0.85; }
 
-/* ---------- navigation, with the priority+ collapse ---------- */
+/* ---------- navigation: one item ---------- */
 
 .sh-nav { display: flex; align-items: center; gap: var(--fn-space-2, 8px); min-width: 0; flex: 1 1 auto; }
-.sh-nav-list {
-  display: flex;
-  align-items: center;
-  gap: var(--fn-space-1, 4px);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  min-width: 0;
-}
-.sh-nav-item { flex: none; }
-.sh-nav-item a {
-  display: inline-block;
-  padding: 8px 9px;
-  border-radius: 8px;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: 500;
-  color: var(--sh-gray);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.sh-nav-item a:hover { color: var(--sh-white); background: color-mix(in srgb, var(--sh-white) 7%, transparent); }
-
-.sh-more { position: relative; flex: none; }
-.sh-more-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.sh-nav-link {
   padding: 8px 10px;
-  border: 1px solid var(--sh-outline);
   border-radius: 8px;
-  background: transparent;
-  color: var(--sh-gray);
-  font: inherit;
   font-size: 14px;
   line-height: 20px;
   font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.sh-more-button:hover { color: var(--sh-white); border-color: var(--sh-cyan); }
-.sh-more-caret { font-size: 10px; line-height: 1; }
-.sh-more-menu {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  z-index: 40;
-  min-width: 190px;
-  margin: 0;
-  padding: 6px;
-  list-style: none;
-  background: var(--sh-panel);
-  border: 1px solid var(--sh-outline);
-  border-radius: 10px;
-  box-shadow: var(--sh-shadow-panel);
-}
-.sh-more-menu a {
-  display: block;
-  padding: 9px 10px;
-  border-radius: 7px;
   color: var(--sh-gray);
-  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
 }
-.sh-more-menu a:hover { color: var(--sh-white); background: color-mix(in srgb, var(--sh-cyan) 16%, transparent); }
+.sh-nav-link:hover { color: var(--sh-white); }
 
 /* ---------- search ---------- */
 
@@ -157,7 +111,7 @@
   align-items: center;
   gap: 8px;
   flex: none;
-  width: 210px;
+  width: 240px;
   height: 38px;
   padding: 0 10px;
   background: var(--sh-input-bg);
@@ -177,7 +131,7 @@
 }
 .sh-search-input::placeholder { color: var(--sh-gray); }
 .sh-search-input:focus { outline: none; }
-.sh-search:focus-within { border-color: var(--sh-cyan); }
+.sh-search:focus-within { border-color: var(--sh-primary); }
 .sh-search-input::-webkit-search-cancel-button { filter: invert(1) opacity(0.5); }
 .sh-kbd {
   flex: none;
@@ -194,12 +148,13 @@
   margin: 0 auto;
   padding: 10px var(--sh-inset) 14px;
   color: var(--sh-gray);
+  font-family: var(--sh-font);
   font-size: 14px;
   line-height: 20px;
 }
 .sh-search-panel strong { color: var(--sh-white); }
 
-/* ---------- the two calls to action ---------- */
+/* ---------- the two actions ---------- */
 
 .sh-btn {
   display: inline-flex;
@@ -209,17 +164,16 @@
   flex: none;
   height: 38px;
   padding: 0 14px;
-  border: 1px solid transparent;
+  border: 0;
   border-radius: 8px;
-  font-family: inherit;
+  font-family: var(--sh-font);
   font-size: 14px;
   line-height: 20px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--sh-ease), color var(--sh-ease), border-color var(--sh-ease),
-    box-shadow var(--sh-ease);
+  transition: background-color var(--sh-ease), color var(--sh-ease), box-shadow var(--sh-ease);
 }
 .sh-btn-state {
   padding: 1px 6px;
@@ -227,112 +181,48 @@
   background: color-mix(in srgb, var(--sh-white) 16%, transparent);
   font-size: 11px;
   line-height: 16px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 700;
 }
 
-/* Dev mode: secondary, no border, and the active state is stated in words as well as colour. */
+/* Dev mode: secondary, borderless, and its active state is carried by the chip rather than by the
+ * fill, so it never reads as a second primary action beside Admin. */
 .sh-btn-secondary { background: var(--sh-secondary-btn); color: var(--sh-white); }
-.sh-btn-secondary:hover { background: color-mix(in srgb, var(--sh-secondary-btn) 80%, var(--sh-white)); }
-.sh-btn-secondary[aria-pressed='true'] { background: var(--sh-cyan); color: var(--sh-navy); }
-.sh-btn-secondary[aria-pressed='true'] .sh-btn-state { background: color-mix(in srgb, var(--sh-navy) 22%, transparent); }
-.sh-btn-secondary[aria-pressed='true']:hover { background: var(--sh-cyan-sky); }
+.sh-btn-secondary:hover { background: color-mix(in srgb, var(--sh-secondary-btn) 78%, var(--sh-white)); }
+.sh-btn-secondary[aria-pressed='true'] .sh-btn-state {
+  background: var(--sh-primary);
+  color: var(--sh-ink-on-primary);
+}
 
-/* Admin: the page's one primary action, in the yellow the spec reserves for exactly this. */
-.sh-btn-primary { background: var(--sh-yellow); color: var(--sh-ink-on-yellow); font-weight: 700; }
-.sh-btn-primary:hover { box-shadow: var(--sh-glow); }
+/* Admin: the page's one primary action, in the spec's cyan with the spec's dark label. */
+.sh-btn-primary { background: var(--sh-primary); color: var(--sh-ink-on-primary); font-weight: 700; }
+.sh-btn-primary:hover { box-shadow: var(--sh-glow); background: color-mix(in srgb, var(--sh-primary) 88%, var(--sh-white)); }
 .sh-btn-primary img { display: block; }
 
-/* Focus in the shell is cyan, because the shell is where cyan is allowed. Focus inside the workspace
- * stays the Fortnite accent, so a keyboard user can see which system they are in. */
+/* Focus in the shell is the primary cyan, because the shell is where that hue lives. Focus inside the
+ * workspace stays the Fortnite accent, so a keyboard user can see which system they are in. */
 .sh-header :focus-visible,
-.sh-footer :focus-visible,
-.sh-hero :focus-visible {
-  outline: 2px solid var(--sh-cyan);
+.sh-footer :focus-visible {
+  outline: 2px solid var(--sh-primary);
   outline-offset: 2px;
-}
-
-/* ============================== hero ============================== */
-
-.sh-hero {
-  position: relative;
-  isolation: isolate;
-  display: flex;
-  align-items: flex-end;
-  min-height: clamp(260px, 42vh, 460px);
-  overflow: hidden;
-  background: var(--sh-body-1);
-}
-.sh-hero-video,
-.sh-hero-scrim {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-.sh-hero-video { object-fit: cover; z-index: 0; }
-/* The poster frame is also the background, so a blocked or unplayed video still shows art under the
- * text rather than a black band. */
-.sh-hero { background-image: url('../assets/Hero--Fallback.png'); background-size: cover; background-position: center; }
-.sh-hero-scrim {
-  z-index: 1;
-  /* Two gradients, because the hero art is a busy poster and the copy sits on top of it: a vertical
-   * one that hands the eye over to the container below, and a horizontal one that keeps the left-hand
-   * text off the brightest part of the art. */
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--sh-body-1) 78%, transparent) 0%, color-mix(in srgb, var(--sh-body-1) 52%, transparent) 45%, var(--sh-body-1) 100%),
-    linear-gradient(90deg, color-mix(in srgb, var(--sh-body-1) 88%, transparent) 0%, color-mix(in srgb, var(--sh-body-1) 45%, transparent) 55%, transparent 90%);
-}
-.sh-hero-inner {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: var(--sh-content-max);
-  margin: 0 auto;
-  padding: var(--fn-space-8, 64px) var(--sh-inset) var(--fn-space-7, 48px);
-}
-.sh-hero-title {
-  margin: 0;
-  font-family: var(--fn-font-display, "Archivo Black", sans-serif);
-  font-size: clamp(44px, 7vw, 88px);
-  line-height: 0.94;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  color: var(--sh-white);
-}
-.sh-hero-sub {
-  margin: var(--fn-space-3, 12px) 0 0;
-  font-family: var(--fn-font-display, "Archivo Black", sans-serif);
-  font-size: clamp(15px, 1.6vw, 20px);
-  line-height: 1.3;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--sh-cyan-sky);
-}
-.sh-hero-text {
-  margin: var(--fn-space-4, 16px) 0 0;
-  max-width: 62ch;
-  font-size: 18px;
-  line-height: 28px;
-  color: var(--sh-gray);
 }
 
 /* ============================== the app container ============================== */
 
-/* The spec's three-stop gradient is the page's own background, declared once, on the body: the hero,
- * the container and the footer all sit on it. `body.g-app` is unlayered and styles.css is not, so this
- * beats the older page chrome no matter what it says. */
+/* The spec's three-stop gradient is the page's own background, declared once, on the body, and the
+ * fixed header is accounted for by the body's top padding. `body.g-app` is unlayered and styles.css is
+ * not, so this beats the older page chrome no matter what it says. */
 body.g-app {
   background: linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
   color: var(--sh-white);
+  padding-top: var(--sh-header-h);
 }
 
-/* The inset lives on the inner wrappers, not on the container: that way the app's text column lines up
- * with the hero's and the header's (all three are a centred --sh-content-max box with a --sh-inset
- * gutter), while the container's background and its sticky bar still run edge to edge. */
+/* The inset lives on the inner wrappers, not on the container: the app's text column and the header's
+ * share one centred --sh-content-max box with a --sh-inset gutter, while the container's background and
+ * its sticky bar still run edge to edge. */
 .sh-app {
   position: relative;
-  padding-bottom: var(--fn-space-9, 96px);
+  padding: var(--fn-space-6, 32px) 0 var(--fn-space-9, 96px);
 }
 .sh-app-body {
   max-width: var(--sh-content-max);
@@ -340,7 +230,7 @@ body.g-app {
   padding: var(--fn-space-5, 24px) var(--sh-inset) 0;
 }
 
-/* Sticky below the site header, so the trail and the progress stay visible down a long device plan.
+/* Sticky below the fixed header, so the trail and the progress stay visible down a long device plan.
  * `--sh-header-h` is measured by chrome.js: the spec fixes 72px, and a phone may wrap taller. */
 .sh-app-head {
   position: sticky;
@@ -359,19 +249,19 @@ body.g-app {
   max-width: var(--sh-content-max);
   margin: 0 auto;
   padding: 10px var(--sh-inset);
+  font-family: var(--sh-font);
 }
 .sh-app-name {
   flex: none;
   margin: 0;
-  font-family: var(--fn-font-display, "Archivo Black", sans-serif);
   font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-weight: 600;
   color: var(--sh-white);
 }
 
 /* The breadcrumb bar. Content comes from js/guide/app.js, so there is one trail definition for the
- * whole app rather than one per screen. The <nav> itself is built by render/ui.js. */
+ * whole app rather than one per screen. The <nav> itself is built by render/ui.js, and every crumb but
+ * the last is a link back to that step. */
 .sh-crumbbar { flex: 1 1 auto; min-width: 0; }
 .sh-crumbbar .g-crumbs {
   display: flex;
@@ -395,7 +285,7 @@ body.g-app {
 .sh-crumbbar .g-crumb.is-current { color: var(--sh-white); font-weight: 600; }
 .sh-crumbbar .g-crumb-sep { color: color-mix(in srgb, var(--sh-gray) 60%, transparent); }
 
-/* Progress: Sky Cyan at the start ramping to Electric Yellow at completion. */
+/* Progress: cyan at the start ramping to the spec's #F7FF19 at completion. */
 .sh-progress { display: flex; align-items: center; gap: 10px; flex: none; }
 .sh-progress-track {
   position: relative;
@@ -409,7 +299,7 @@ body.g-app {
   height: 100%;
   width: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--sh-cyan-sky) 0%, var(--sh-yellow) 100%);
+  background: linear-gradient(90deg, var(--sh-primary) 0%, var(--sh-progress-end) 100%);
   transition: width var(--sh-ease);
 }
 .sh-progress-label {
@@ -422,52 +312,55 @@ body.g-app {
 .sh-progress-dev {
   padding: 1px 6px;
   border-radius: 999px;
-  background: var(--sh-cyan);
-  color: var(--sh-navy);
+  background: var(--sh-primary);
+  color: var(--sh-ink-on-primary);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
 }
 
 /* ============================== footer ============================== */
 
+/* A utility bar: the system status, with the admin entry point inside it. */
 .sh-footer { background: var(--sh-footer); border-top: 1px solid var(--sh-outline); }
 .sh-footer-inner {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: var(--fn-space-6, 32px);
+  display: flex;
+  align-items: center;
   max-width: var(--sh-content-max);
   margin: 0 auto;
-  padding: var(--fn-space-7, 48px) var(--sh-inset);
+  padding: var(--fn-space-4, 18px) var(--sh-inset);
+  font-family: var(--sh-font);
 }
-.sh-footer-title {
-  margin: 0 0 8px;
-  font-family: var(--fn-font-display, "Archivo Black", sans-serif);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--sh-white);
+.sh-status { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; row-gap: 6px; }
+.sh-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--sh-gray);
 }
-.sh-footer .g-footer-note { margin: 0; color: var(--sh-gray); font-size: 14px; line-height: 22px; }
-.sh-footer-status { margin: 0; color: var(--sh-gray); font-size: 14px; line-height: 22px; }
-.sh-footer-status a { color: var(--sh-cyan-sky); }
-.sh-footer .g-footer-admin {
-  display: inline-block;
-  margin-top: 8px;
+.sh-status-dot.is-ok { background: var(--sh-primary); }
+.sh-status-dot.is-warn { background: var(--sh-progress-end); }
+.sh-status-text { margin: 0; color: var(--sh-gray); font-size: 13px; line-height: 20px; }
+.sh-status-text a { color: var(--sh-white); }
+.sh-status-admin {
   color: var(--sh-gray);
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--sh-gray) 45%, transparent);
 }
-.sh-footer .g-footer-admin:hover { color: var(--sh-white); }
+.sh-status-admin:hover { color: var(--sh-white); border-bottom-color: var(--sh-white); }
 
 /* ============================== states ============================== */
 
 .sh-btn:focus-visible,
 .sh-search-input:focus-visible,
-.sh-more-button:focus-visible,
-.sh-more-menu a:focus-visible { outline: 2px solid var(--sh-cyan); outline-offset: 2px; }
+.sh-nav-link:focus-visible { outline: 2px solid var(--sh-primary); outline-offset: 2px; }
 
 [hidden] { display: none !important; }
+
+/* The header's line break: inert everywhere except the narrowest layout, which turns it on. */
+.sh-break { display: none; }
 
 .sh-visually-hidden {
   position: absolute;
@@ -483,19 +376,13 @@ body.g-app {
 
 /* ============================== responsive ============================== */
 
-/* The header is one 72px row while it fits, which is what the spec describes. Below this width the
- * row genuinely cannot hold the logo, the navigation, the search field and both calls to action, and
- * the failure mode of leaving it as one row is not "cramped" — it is that the navigation is squeezed
- * to zero width and its collapsed items become unreachable. So the header wraps into two rows:
-
- *   row 1  logo · search · Admin      (the primary action never leaves the header)
- *   row 2  navigation (+ More) · Dev mode
- *
- * The height is measured in chrome.js and published as --sh-header-h, so the app container's sticky
- * header follows the taller header instead of guessing 72px. */
+/* The header is one 72px row while it fits, which is what the spec describes. Below that the row
+ * genuinely cannot hold the logo, the navigation, the search field and both actions, so it wraps into
+ * two rows rather than squeezing the navigation to nothing - and the height is measured in chrome.js
+ * and published as --sh-header-h, so the container's sticky header follows it instead of guessing. */
 
 @media (max-width: 1080px) {
-  .sh-search { width: 180px; }
+  .sh-search { width: 200px; }
 }
 
 @media (max-width: 900px) {
@@ -504,41 +391,38 @@ body.g-app {
   .sh-search-input, .sh-kbd { display: none; }
   .sh-search:focus-within { width: 200px; }
   .sh-search:focus-within .sh-search-input { display: block; }
-  .sh-footer-inner { grid-template-columns: 1fr 1fr; }
+  .sh-footer-inner { padding-top: var(--fn-space-3, 12px); padding-bottom: var(--fn-space-3, 12px); }
 }
 
 @media (max-width: 760px) {
+  :root { --sh-header-base: 64px; }
   .sh-header-inner {
     flex-wrap: wrap;
-    height: auto;
-    min-height: 64px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    row-gap: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    row-gap: 6px;
   }
-  .sh-logo { padding: 2px; }
-  .sh-logo img { height: 20px; max-width: 132px; }
-  /* Row 1 keeps the logo, the search field and the primary action; the search is pushed right so the
-   * Admin action sits at the edge, where the spec puts it. */
-  .sh-search { order: 2; margin-left: auto; }
+  .sh-logo img { height: 34px; }
+  /* Row 1 keeps the logo, the search field and the primary action; row 2 takes the navigation and Dev
+   * mode together. The break is a zero-height flex item spanning the full line, which is the only
+   * reliable way to force the wrap: sizing rules alone cannot, because flex line-breaking uses each
+   * item's base size, so a growing search field still leaves room for one more short item on row 1. */
+  .sh-break { display: block; order: 4; flex: 0 0 100%; height: 0; }
+  .sh-search { order: 2; flex: 1 1 44px; }
   .sh-btn-primary { order: 3; }
-  /* Row 2. The navigation shares the row with Dev mode rather than claiming it: `flex-basis: 0` is what
-   * keeps the two on one line (a content-sized basis would make the row too wide to hold both, and
-   * flexbox wraps before it shrinks), and `min-width` guarantees the More button's own width, so
-   * collapsed items always have a way back into view instead of being clipped off the edge. */
-  .sh-nav { order: 4; flex: 1 1 0; min-width: min(150px, 100%); }
-  .sh-btn-secondary { order: 5; }
+  /* The nav sizes to its content (`min-width: min-content`) instead of shrinking below the width of its
+   * own link - the failure mode the v1 four-item bar had, caught by the same check. */
+  .sh-nav { order: 5; flex: 0 1 auto; min-width: min-content; }
+  .sh-btn-secondary { order: 6; margin-left: auto; }
   .sh-app-head-inner { flex-wrap: wrap; row-gap: 6px; }
   .sh-crumbbar { order: 3; flex-basis: 100%; }
-  /* Truncation is worse than omission on a phone: "Ho… › Com… › Elimin… › Summary" is four unusable
-   * fragments, so the bar keeps only the last three children — the step before this one, and where you
-   * are. */
+  /* Truncation is worse than omission on a phone: "Ho... > Com... > Elimin... > Summary" is four
+   * unusable fragments, so the bar keeps only the last three children - the step before this one, and
+   * where you are. */
   .sh-crumbbar .g-crumbs > *:not(:nth-last-child(1)):not(:nth-last-child(2)):not(:nth-last-child(3)) {
     display: none;
   }
   .sh-crumbbar .g-crumb { max-width: 16ch; }
-  .sh-hero-inner { padding-top: var(--fn-space-6, 32px); }
-  .sh-footer-inner { grid-template-columns: 1fr; gap: var(--fn-space-5, 24px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -548,6 +432,6 @@ body.g-app {
 /* ============================== print ============================== */
 /* A device plan is a checklist taken to another screen: the shell is dropped entirely. */
 @media print {
-  .sh-header, .sh-hero, .sh-footer, .sh-app-head { display: none !important; }
-  body.g-app { background: none; }
+  .sh-header, .sh-footer, .sh-app-head { display: none !important; }
+  body.g-app { background: none; padding-top: 0; }
 }

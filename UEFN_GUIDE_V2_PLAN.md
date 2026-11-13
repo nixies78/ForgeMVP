@@ -197,38 +197,51 @@ one-command restore).
 | Area | Where |
 |---|---|
 | Style library (workspace) | `support/FORTNITE_STYLE_LIBRARY.md` → `public/css/tokens.css` + `public/css/guide.css` (no hex value in `guide.css`; retheming is a token edit) |
-| Architecture spec (page shell) | `support/Forge--architecture_specification.md` → `public/css/shell.css` (every hex value from the spec declared once as a `--sh-*` token) |
+| Architecture spec (page shell) | `support/Forge--architecture_specification_v2.md` (current) and `..._v1.md` (the version it replaced) → `public/css/shell.css` (every hex value from the spec declared once as a `--sh-*` token) |
 | Data | `public/data/uefn_device_logic.json` (one copy, fetched once), `public/js/guide/data.js` |
 | Engine | `public/js/guide/resolve.js` (v1's five-step merge, provenance, appended overrides, memoised) |
 | Session | `public/js/guide/state.js`, `store.js` (schema 3, v1 import, quota/cap reporting), `router.js`, `share.js` |
-| Shell behaviour | `public/js/guide/chrome.js` (priority+ navigation, search field, hero video, header measurement) |
+| Shell behaviour | `public/js/guide/chrome.js` (search field, header measurement) |
 | Screens | `public/js/guide/screens/` — ten modules, one per screen |
 | Rendering | `public/js/guide/dom.js` (no `innerHTML` anywhere), `render/ui.js`, `render/devices.js`, `render/loop.js` |
-| Tests | `tests/guide.test.mjs` (52), `tests/server.test.mjs` (19, updated for the new page), `tests/browser-check.mjs` (`npm run verify`) |
+| Tests | `tests/guide.test.mjs` (54), `tests/server.test.mjs` (19, updated for the new page), `tests/browser-check.mjs` (`npm run verify`) |
 
-**The page around the app (architecture spec).** `public/index.html` is now the Forge page the spec
-describes: a 72px Unreal Navy header (backdrop blur, no bottom border) carrying the logo — a reset to the
-start of the guide rather than a link to the admin tool — the priority+ navigation, the search field, the
-Dev mode control and the yellow Admin action; the hero (`assets/Hero--Video.mp4` over
-`assets/Hero--Fallback.png`, `<h1>Forge</h1>`, "THINK, DESIGN, BUILD.", the spec's copy); the app
-container inset from the edges, with its own sticky header holding the breadcrumb trail and the
-cyan-to-yellow progress bar; and the `#18181C` footer. The older admin and chat pages and the file://
-rescue banner are untouched.
+**The page around the app (architecture spec v2).** `public/index.html` is the Forge page v2 describes:
+a **fixed** 72px header with no bottom border, painted with the body colour at 95% (`rgba(16,16,20,.95)`)
+rather than the v1 navy; the Epic Games Store logotype the spec names
+(`assets/EGS-Logotype-2023-Vertical-White.svg`, 44px of the 72px row) as a reset to the start of the
+guide; **one** navigation item, "Home", and therefore no priority+ overflow menu at all; the search field;
+the Dev mode secondary action (`#5B5B65`, no border, its on/off state carried by a chip that turns cyan
+when active, so it never competes with Admin); and Admin as the page's single primary action — **cyan
+`#26BBFF` with a `#101014` label**, replacing v1's yellow. **The hero is gone**, with it the video, its
+still, `<h1>Forge</h1>` and the "THINK, DESIGN, BUILD." strapline: the app container now sits directly
+below the fixed header (the body is offset by the measured `--sh-header-h`), inset from the page edges,
+with its own sticky header holding the clickable breadcrumb trail and a progress bar whose ramp runs from
+`#26BBFF` to `#F7FF19`. The footer is a utility bar and nothing else — the system status with the "Go to
+admin page" link inside it — so the guide's own footer copy (the Epic disclaimer) moved to the end of the
+home screen rather than being dropped. Type is Inter in sentence case throughout, headings included: v2
+is explicit about it, and the reference the spec was drawn from
+(`support/screencapture-unrealengine-2026-11-13-14_41_45.png`) is set the same way. That supersedes the
+poster's heavy italic display face for headings, so no rule in `guide.css` uses `--fn-font-display` any
+more; the token and the font file stay because the style library still documents them.
 
-Four things the spec did not settle, and how they were resolved: the inset eases to 16px below ~400px
-because 64px of gutter on each side of a phone leaves nothing to read (the header wraps into two rows at
-the same width, so nothing is ever squeezed to zero); the breadcrumb trail moved out of the ten screens
-into one session-level definition (`trailFor`) rendered by the shell, which is why the summary screen
-finally has a trail; a screen change scrolls to the app container rather than the top of the page, so the
-hero is not re-shown before every one of nine steps; and the search field is present, focuses on
-`Ctrl/Cmd+K`, and says in words that it is not built yet, like Randomise and the AI chat panel.
+Five things the spec did not settle, and how they were resolved: the inset eases to 16px on a phone
+because 64px of gutter each side leaves nothing to read, and the header wraps to a second row at 760px
+(measured, never assumed, so the page offset follows it); the search field is present, focuses on
+`Ctrl/Cmd+K`, and says in words that it is not built yet, like Randomise and the AI chat panel; the
+interim chat page is no longer linked from the header — v2 gives the header one item and the footer one
+link — so it is reached from the "Chat with AI" stub screen, and the admin page links it directly; every
+wizard step has a visible Back button, and home has none because there is nothing before it; and a screen
+change returns to the top of the page, since there is no longer a hero to scroll past.
 
-**Automated checks.** `npm test` runs 108 assertions across four files (21 + 52 + 19 + 16). `npm run verify` drives headless
+**Automated checks.** `npm test` runs 110 assertions across four files (21 + 54 + 19 + 16). `npm run verify` drives headless
 Chrome over the DevTools Protocol in two phases: all thirteen routes at desktop and phone width
-(asserting rendered text, heading structure, exactly one `<h1>` on the page and it being the hero's,
-focus landing on the screen `<h2>`, the sticky container header, a non-empty breadcrumb trail, no lost
-navigation links at either width, no content overflowing its box, no console errors, and a screenshot
-each), then a click-through of the whole wizard with no deep links at all — category to game type to four
+(asserting rendered text, heading structure, exactly one `<h1>` and it being the screen's own title,
+focus landing on it, the fixed 72px header painted `rgba(16,16,20,0.95)` and the page clearing it, the
+single "Home" nav item, the logotype from the spec, no trace of the hero, a breadcrumb trail with at
+least one working link, the footer's admin link, the cyan-to-yellow progress ramp, a visible Back button
+on every screen of the wizard, no content overflowing its box, no console errors, and a screenshot each),
+then a click-through of the whole wizard with no deep links at all — category to game type to four
 questions to brand to the usage-rules gate to the summary, naming and saving the game, the experience
 question, all five build steps, finishing, the saved game surviving a reload, the Dev mode button
 changing what the screens say, and deletion. Chrome's own `--dump-dom` is not enough: it snapshots before
@@ -244,9 +257,13 @@ card; badges were wrapped in a second, empty badge; the question and walkthrough
 `<h1>`, so focus stayed at the top of the document after every screen change; a file path crammed
 into a 64 px tile rendered as a wall of letters; **the shared chrome stylesheet's `button:hover` outranked
 the card rules and repainted every choice card light cyan with white text on it** (fixed by layering
-`styles.css` and by banning hover fills in the workspace, both pinned by tests); and, from this rebuild,
-the header squeezing the navigation to zero width at phone size — collapsed items had no visible More
-button to reach them.
+`styles.css` and by banning hover fills in the workspace, both pinned by tests); the header squeezing the
+navigation to zero width at phone size; and, from the v2 rebuild, three more that only the browser check
+could have found — the header's height was read from the very variable its own measurement was published
+into, so a phone-sized measurement stuck on desktop and (because nothing resized) the observer never
+corrected it; the mobile header's navigation collapsed below the width of its single link and the link
+spilled out of the box; and `gametype.js` called `UI.back` without importing `UI`, which broke that one
+screen completely.
 
 **Decisions taken from section 5.** Dev mode is a header toggle plus `?dev=1` (2). The basics entries
 stay visible with dev mode off and are badged honestly (3). The experience levels are reworded to say
@@ -260,8 +277,17 @@ content calls, not code. Level-specific material for Experienced and Expert (6) 
 
 **Asset and data notes for whoever picks this up.**
 
-- Eight brand logos and eight hero images are missing. Every slot names the exact path and size it
-  wants, so dropping correctly named files into `public/images/brands/` needs no code change.
+- All eight brand hero images arrived and are wired up unchanged (the picker is data-driven, so they
+  needed nothing but the right filenames). The eight brand *logos* are still missing, and one of them did
+  need a fix rather than a drop-in: the file shipped as `TMNT_hero.jpg` while the data asks for
+  `tmnt_hero.jpg` — which works on Windows and 404s in the container, so the filename was corrected and
+  `tests/guide.test.mjs` now checks each brand's art against the real directory entry instead of the
+  filesystem's forgiveness. `public/images/brands/Untitled-1.psd` is a 23 MB Photoshop working file; it
+  is not committed (`.gitignore` excludes `*.psd`) and it should really live outside `public/`, because
+  everything in there is served.
+- `public/assets/Hero--Video.mp4` (50 MB) and `Hero--Fallback.png` are no longer referenced by anything,
+  now that the spec removes the hero. They are still in the repository; deleting them saves ~52 MB
+  whenever that is confirmed.
 - One game type, `platforming_deathrun_obby`, sets an option on `Round Settings` without listing that
   device. The engine keeps it as an orphan with its provenance and the walkthrough reports it rather
   than dropping it silently; `tests/guide.test.mjs` pins that it is the only such case, so the test

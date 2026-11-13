@@ -67,17 +67,23 @@
   --fn-shadow-hover-tight: 0 4px 12px color-mix(in srgb, var(--fn-on-action) 45%, transparent);
 
   /* ---------- 02 typography: the eight reconstructed text styles ---------- */
+
+  /* The display face is kept because support/FORTNITE_STYLE_LIBRARY.md documents it as the poster's
+   * editable substitute, and the older admin and chat pages still use it. The app itself no longer
+   * does: the architecture spec (v2) names Inter for headings and for body/UI alike, in sentence case,
+   * so every heading and label in guide.css uses --fn-font-ui. */
   --fn-font-display: "Archivo Black", "Arial Black", "Segoe UI", system-ui, sans-serif;
   --fn-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 
-  /* Display 48/48 and Section 36/40 as drawn; [derived] clamped down for narrow screens. Lead,
-   * Body, Navigation, Action and Metadata keep their poster size at every width. */
-  --fn-display-size: clamp(30px, 5.4vw, 48px);
-  --fn-display-line: 1;
-  --fn-section-size: clamp(23px, 3.2vw, 36px);
-  --fn-section-line: 1.11;
-  --fn-card-size: 24px;
-  --fn-card-line: 1.17;
+  /* [derived] Sizes for headlines set in Inter, sentence case rather than in the poster's heavy caps:
+   * the same steps, tightened a little because sentence case reads larger at the same px. Clamped down
+   * for narrow screens. Lead, Body, Navigation, Action and Metadata keep their poster size. */
+  --fn-display-size: clamp(28px, 4.6vw, 44px);
+  --fn-display-line: 1.14;
+  --fn-section-size: clamp(21px, 2.6vw, 30px);
+  --fn-section-line: 1.2;
+  --fn-card-size: 20px;
+  --fn-card-line: 1.3;
   --fn-lead-size: 18px;
   --fn-lead-line: 1.56;
   --fn-body-size: 16px;
@@ -89,8 +95,9 @@
   --fn-meta-size: 10px;
   --fn-meta-line: 1.4;
 
-  /* [derived] Display is uppercase and heavily tracked in, as drawn. Metadata is tracked out. */
-  --fn-display-tracking: -0.015em;
+  /* [derived] Inter wants almost no tracking at display sizes; uppercase metadata is tracked out. */
+  --fn-display-tracking: -0.012em;
+  --fn-section-tracking: -0.008em;
   --fn-meta-tracking: 0.14em;
 
   /* ---------- 03 treatments ---------- */

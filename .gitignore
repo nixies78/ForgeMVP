@@ -31,6 +31,16 @@ Thumbs.db
 # Local scratch space (headless-browser renders, throwaway captures)
 .scratch/
 
+# macOS resource-fork junk (the logo pack shipped with a __MACOSX/ directory of
+# AppleDouble stubs next to the real files).
+__MACOSX/
+
+# Source artwork. The PSD in public/images/brands/ is a 23 MB working file: it is
+# not what the page renders (the exported .jpg beside it is), nothing links to it,
+# and public/ is served as-is, so committing it would both bloat history and
+# publish it at /images/brands/Untitled-1.psd.
+*.psd
+
 # Local backup copies of working files. public/ is served as-is, so a stray
 # *.backup inside it would be published; the previous version of a file stays
 # recoverable in git history instead.

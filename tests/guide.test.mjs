@@ -831,9 +831,16 @@ test('no guide script can inject markup: the app never sets HTML from a string',
 });
 
 test('the chat page keeps working as an interim entry point', async () => {
+  /* The header used to carry the link. The architecture spec (v2) gives the header one item - Home -
+   * and the footer one link, so the interim chat page is reached from the app instead: the "Chat with
+   * AI" panel on the home screen leads to the stub, and the stub links to the page itself. */
   const html = await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
-  assert.match(html, /href="chat\.html"/, 'the guide links to the working chat page');
-  assert.match(html, /data\/uefn_device_logic\.json/, 'and exposes the data file for anyone without JavaScript');
+  assert.ok(!/href="chat\.html"/.test(html), 'the shell no longer links the chat page from its header');
+  const placeholder = await readFile(path.join(GUIDE_DIR, 'screens', 'placeholder.js'), 'utf8');
+  assert.match(placeholder, /href: 'chat\.html'/, 'the stub screen links the working chat page');
+  assert.match(html, /data\/uefn_device_logic\.json/, 'and the page exposes the data file for anyone without JavaScript');
+  const header = await readFile(path.join(PUBLIC_DIR, 'admin.html'), 'utf8');
+  assert.match(header, /href="chat\.html"/, 'and the admin page still reaches it directly');
 });
 
 test('the guide stays reachable without dev mode, and dev mode stays discoverable', async () => {
@@ -938,16 +945,21 @@ test('the shell palette and the workspace palette never mix', async () => {
   const guide = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
   const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
 
-  /* The spec's palette, declared once, in the shell stylesheet. */
-  for (const colour of ['#0E1128', '#18181C', '#23253A', '#3A3D4D', '#1CB0F6', '#26BBFF', '#F7FF19', '#B2B5C2']) {
-    assert.ok(shell.includes(colour.toUpperCase()), `shell.css declares ${colour} from the architecture spec`);
+  /* The spec's palette, declared once, in the shell stylesheet. v2's values: the body gradient, the
+   * header tint, the footer, Panel Charcoal, Outline Slate, the cyan primary, the progress ramp's yellow
+   * end, UI Gray, the secondary fill and the two search-field values. */
+  for (const colour of ['#101014', '#202024', '#18181C', '#23253A', '#3A3D4D', '#26BBFF', '#F7FF19', '#B2B5C2', '#5B5B65', '#1e1e22', '#404043']) {
+    assert.ok(shell.toLowerCase().includes(colour.toLowerCase()), `shell.css declares ${colour} from the architecture spec`);
   }
+  /* And the hues v2 retired are gone rather than left behind: the navy header of v1, and its cyan. */
+  assert.ok(!shell.toUpperCase().includes('#0E1128'), 'the v1 navy header is gone');
+  assert.ok(!shell.toUpperCase().includes('#1CB0F6'), 'and so is the v1 cyan');
 
-  /* And nowhere else. The two palettes do overlap in two values — #18181C and #F7FF19 are in both, which
-   * is unsurprising given where both come from — but every hue unique to the shell must stay out of the
-   * workspace, and cyan above all: nothing inside the container is allowed to use it. */
+  /* And nowhere else. The two palettes overlap in three values — #101014, #18181C and #F7FF19 are in
+   * both, which is unsurprising given where both come from — but every hue unique to the shell must stay
+   * out of the workspace, and cyan above all: nothing inside the container is allowed to use it. */
   for (const [name, source] of [['guide.css', guide], ['tokens.css', tokens]]) {
-    for (const shellOnly of ['#1CB0F6', '#26BBFF', '#0E1128', '#23253A', '#3A3D4D', '#1e1e22', '#404043', '#5B5B65']) {
+    for (const shellOnly of ['#1CB0F6', '#26BBFF', '#0E1128', '#23253A', '#3A3D4D', '#B2B5C2', '#5B5B65', '#1e1e22', '#404043']) {
       assert.ok(
         !source.toLowerCase().includes(shellOnly.toLowerCase()),
         `${name} uses ${shellOnly}, which belongs to the shell`
@@ -989,12 +1001,13 @@ test('hover changes an edge and a lift, never a fill', async () => {
 test('the page follows the architecture spec it was rebuilt from', async () => {
   const html = await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
   const chrome = await readFile(path.join(GUIDE_DIR, 'chrome.js'), 'utf8');
+  const app = await readFile(path.join(GUIDE_DIR, 'app.js'), 'utf8');
 
-  /* One <h1>, in the hero, and the app container is labelled rather than headed. */
-  assert.equal((html.match(/<h1/g) || []).length, 1, 'a page has exactly one h1');
-  assert.match(html, /<h1 class="sh-hero-title" id="heroTitle">Forge<\/h1>/, 'the hero owns it');
-  assert.match(html, /<h2 class="sh-hero-sub">THINK, DESIGN, BUILD\.<\/h2>/, 'with the spec\'s strapline under it');
-  assert.match(html, /UEFN Game Guide<\/p>/, 'and the app container names the guide');
+  /* v2 removes the hero, so the shell has no headings at all: every <h1> on the page belongs to the
+   * screen the app is showing, and render/ui.js builds it. */
+  assert.equal((html.match(/<h1/g) || []).length, 0, 'the shell has no heading of its own');
+  assert.ok(!/sh-hero|heroTitle|Hero--Video|Hero--Fallback/.test(html), 'and no trace of the hero it removed');
+  assert.match(html, /UEFN Game Guide<\/p>/, 'the app container names the guide');
 
   /* Load order is the cascade: the older shared chrome first, then the workspace, then the frame. */
   const order = ['css/styles.css', 'css/tokens.css', 'css/guide.css', 'css/shell.css'].map((href) =>
@@ -1003,26 +1016,80 @@ test('the page follows the architecture spec it was rebuilt from', async () => {
   assert.ok(order.every((i) => i > -1), 'all four stylesheets are linked');
   assert.deepEqual([...order].sort((a, b) => a - b), order, 'and in the documented order');
 
-  /* The header, the hero and the container the spec describes. */
-  assert.match(html, /class="sh-header" id="siteHeader"/, 'a sticky site header');
-  assert.match(html, /id="navMoreWrap" hidden/, 'with a More menu for the collapsed items');
+  /* The header the spec describes: fixed, 72px in the stylesheet, and carrying exactly one navigation
+   * item, the search field, the Dev mode toggle and the Admin action. */
+  assert.match(html, /class="sh-header" id="siteHeader"/, 'a site header');
+  assert.match(html, /EGS-Logotype-2023-Vertical-White\.svg/, 'with the logotype the spec names');
+  assert.ok(!/navMore|navList/.test(html), 'and no overflow menu, because there is one nav item');
+  const navItems = html.match(/class="sh-nav-link"/g) || [];
+  assert.equal(navItems.length, 1, 'the navigation is a single item');
+  assert.match(html, /class="sh-nav-link" href="#\/home">Home</, 'and the item is Home');
   assert.match(html, /id="appHead"/, 'the app container has its own header');
   assert.match(html, /src="js\/guide\/app\.js"/, 'and the app itself is one module');
-  assert.match(html, /poster="assets\/Hero--Fallback\.png"/, 'the hero video has a still behind it');
-  assert.match(html, /<source src="assets\/Hero--Video\.mp4"/, 'and the video itself');
 
-  /* The spec asks for a resize observer rather than breakpoints for the priority+ navigation. */
-  assert.match(chrome, /ResizeObserver/, 'the navigation collapses by measurement');
+  /* The one primary action in the shell is the cyan Admin button with a dark label. */
+  assert.match(html, /class="sh-btn sh-btn-primary sh-btn-admin" href="admin\.html"/, 'Admin is the primary action');
+  const shell = await readFile(path.join(PUBLIC_DIR, 'css', 'shell.css'), 'utf8');
+  assert.match(shell, /--sh-primary:\s*#26BBFF/, 'the primary fill is the spec\'s cyan');
+  assert.match(shell, /--sh-ink-on-primary:\s*#101014/, 'and its label is the spec\'s dark ink');
+  assert.match(shell, /--sh-header-bg:\s*rgba\(16, 16, 20, 0\.95\)/, 'the header is the body colour at 95%');
+  assert.match(shell, /position:\s*fixed/, 'the header is fixed');
+  /* The header's own height is a minimum, and the page offset is a separate variable that chrome.js
+   * publishes the measured height into. They are deliberately not the same property: a header sized
+   * from the variable that holds its own measurement pins that measurement. */
+  assert.match(shell, /--sh-header-base:\s*72px/, 'and 72px tall');
+  /* The progress ramp runs from the primary cyan to the spec's yellow. */
+  assert.match(shell, /--sh-progress-end:\s*#F7FF19/, 'the progress ramp ends at the spec\'s yellow');
 
   /* The search field says it is not built yet instead of doing nothing quietly. */
   assert.match(chrome, /not built yet/i, 'the search field is honest about being unbuilt');
   assert.match(chrome, /ctrlKey \|\| event\.metaKey/, 'and Ctrl/Cmd+K focuses it');
+  /* The header height is measured, not assumed: the page offsets itself by it and the app's sticky bar
+   * positions itself from it. */
+  assert.match(chrome, /ResizeObserver/, 'the header height is measured');
+  assert.match(app, /measureHeader/, 'and published for the layout to use');
+  assert.ok(!/wirePriorityNav|wireHeroVideo/.test(chrome + app), 'the priority+ nav and hero video are gone with the hero');
+});
+
+test('every wizard screen carries a visible way back, and home does not', async () => {
+  const screens = await readdir(path.join(GUIDE_DIR, 'screens'));
+  const withBack = [];
+  for (const file of screens.filter((f) => f.endsWith('.js'))) {
+    const src = await readFile(path.join(GUIDE_DIR, 'screens', file), 'utf8');
+    /* A step's way back is either the shared previousStep() affordance or a button that calls
+     * actions.back() - the stub screens walk back with go({screen:'home'}) instead, which is still a
+     * way back. What matters is that the screen builds one. */
+    if (/actions\.back\(\)/.test(src) || /label: '(←\s*)?Back/.test(src)) withBack.push(file.replace('.js', ''));
+  }
+  for (const screen of ['category', 'gametype', 'question', 'brand', 'restriction', 'summary', 'experience', 'walkthrough', 'placeholder']) {
+    assert.ok(withBack.includes(screen), `the ${screen} screen has no Back control`);
+  }
+  assert.ok(!withBack.includes('home'), 'home has no Back control, because there is nothing before it');
+});
+
+test('every brand hero the data names is on disk, with the exact case it is spelled with', async () => {
+  /* A Windows filesystem is case-insensitive and the deployment is not, so a file named TMNT_hero.jpg
+   * resolves in development and 404s in the container. The check is on the real directory entry. */
+  const dataPath = path.join(PUBLIC_DIR, 'data', 'uefn_device_logic.json');
+  const data = JSON.parse(await readFile(dataPath, 'utf8'));
+  const dir = path.join(PUBLIC_DIR, 'images', 'brands');
+  const entries = await readdir(dir).catch(() => []);
+  const missing = [];
+  for (const brand of data.brand_templates) {
+    const rel = brand.images && brand.images.hero;
+    if (!rel) continue;
+    const name = path.basename(rel);
+    if (!entries.includes(name)) missing.push(`${brand.id}: ${name}`);
+  }
+  assert.deepEqual(missing, [], `brand art is named differently on disk:\n  ${missing.join('\n  ')}`);
 });
 
 test('every asset the page promises is on disk', async () => {
   const html = await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
   const referenced = [...html.matchAll(/(?:src|href|poster)="(assets\/[^"]+)"/g)].map((m) => m[1]);
-  assert.ok(referenced.length >= 4, 'the page references its own assets');
+  /* v2 removes the hero, so the shell references its two marks and the favicon rather than a poster, a
+   * video and a logo. What is asserted is that nothing it references is missing. */
+  assert.ok(referenced.length >= 2, 'the page references its own assets');
   for (const rel of new Set(referenced)) {
     const full = path.join(PUBLIC_DIR, rel);
     const info = await stat(full).catch(() => null);
