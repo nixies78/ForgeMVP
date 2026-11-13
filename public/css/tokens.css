@@ -1,0 +1,140 @@
+/* Fortnite style library — tokens.
+ *
+ * Every value here is transcribed from support/FORTNITE_STYLE_LIBRARY.md, which in turn comes from
+ * support/Library--Styles--Fortnite.png. guide.css consumes these names and hardcodes no hex value,
+ * so retheming the app means editing this file alone.
+ *
+ * Values marked [derived] are not on the poster: they are this project's decisions, made where an
+ * application needs a state the marketing page never showed (hover, focus, pressed) or a size that
+ * has to survive a phone screen.
+ */
+
+/* ---------- the two substitute faces, bundled so the app is offline and CDN-free ----------
+ * The poster labels both as "editable font substitutes": Archivo Black approximates the heavy
+ * display face, Inter the UI face. Archivo Black ships upright only, so the poster's italic display
+ * styles are the browser's synthetic oblique. Licences travel with the files (assets/fonts). */
+@font-face {
+  font-family: "Archivo Black";
+  src: url("../assets/fonts/archivo-black-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("../assets/fonts/inter-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  /* ---------- 01 colour: the twelve sampled styles, under the poster's own role names ---------- */
+  --fn-canvas: #101014;            /* Canvas — page background */
+  --fn-surface-quiet: #18181C;     /* Surface / Footer */
+  --fn-surface-card: #26262A;      /* Surface / Card — news & resource cards */
+  --fn-surface-control: #3A3A3E;   /* Surface / Control — utility controls */
+  --fn-action: #F7FF19;            /* Action / Primary — the only bright fill in the UI */
+  --fn-action-secondary: #E2E2E3;  /* Action / Secondary */
+  --fn-text: #FFFFFF;              /* Text / Primary — headings & strong labels */
+  --fn-text-secondary: #C3C3C4;    /* Text / Secondary — supporting body copy */
+  --fn-text-muted: #AEAEB0;        /* Text / Muted — links & metadata */
+  --fn-on-action: #000000;         /* Text / On action — labels on bright buttons */
+  --fn-border: #3A3A3E;            /* Border / Subtle — dividers & outlines. Decorative only:
+                                    * at 1.7:1 it is below the 3:1 WCAG asks of a meaningful
+                                    * boundary, so anything that carries meaning uses
+                                    * --fn-border-strong instead (8.6:1). */
+  --fn-text-disabled: #505053;     /* Text / Disabled. WCAG exempts disabled controls from
+                                    * contrast minimums, so this must only ever label a control
+                                    * that is genuinely disabled. */
+
+  /* [derived] States the poster has no colour for. The palette offers no second hue, so hover and
+   * pressed are steps of the same surface rather than a new colour.
+   *
+   * Hover needs no colour at all any more: it strengthens the border and lifts the element, so the four
+   * fill-step tokens it used to need were removed rather than left lying around. Only the pressed fill
+   * of the accent remains a colour. */
+  --fn-border-strong: #AEAEB0;
+  --fn-action-pressed: #D2DA00;
+  --fn-canvas-inset: #0A0A0D;
+  --fn-selected: #1C1C20;
+
+  /* [derived] Hover is a border colour and a lift, never a fill. A hover that repaints the surface is
+   * what made card text unreadable, and it is the one state change that can move text onto a
+   * background it was never measured against — so it is not allowed to change any fill at all. */
+  --fn-lift: 3px;
+  --fn-shadow-hover: 0 8px 20px color-mix(in srgb, var(--fn-on-action) 50%, transparent);
+  --fn-shadow-hover-tight: 0 4px 12px color-mix(in srgb, var(--fn-on-action) 45%, transparent);
+
+  /* ---------- 02 typography: the eight reconstructed text styles ---------- */
+  --fn-font-display: "Archivo Black", "Arial Black", "Segoe UI", system-ui, sans-serif;
+  --fn-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+
+  /* Display 48/48 and Section 36/40 as drawn; [derived] clamped down for narrow screens. Lead,
+   * Body, Navigation, Action and Metadata keep their poster size at every width. */
+  --fn-display-size: clamp(30px, 5.4vw, 48px);
+  --fn-display-line: 1;
+  --fn-section-size: clamp(23px, 3.2vw, 36px);
+  --fn-section-line: 1.11;
+  --fn-card-size: 24px;
+  --fn-card-line: 1.17;
+  --fn-lead-size: 18px;
+  --fn-lead-line: 1.56;
+  --fn-body-size: 16px;
+  --fn-body-line: 1.5;
+  --fn-nav-size: 14px;
+  --fn-nav-line: 1.43;
+  --fn-action-size: 16px;
+  --fn-action-line: 1.25;
+  --fn-meta-size: 10px;
+  --fn-meta-line: 1.4;
+
+  /* [derived] Display is uppercase and heavily tracked in, as drawn. Metadata is tracked out. */
+  --fn-display-tracking: -0.015em;
+  --fn-meta-tracking: 0.14em;
+
+  /* ---------- 03 treatments ---------- */
+  --fn-radius-button: 8px;   /* poster rule: 8 px button radius */
+  --fn-radius-card: 10px;    /* poster rule: 10 px card radius */
+
+  /* [derived] 4 px base step. The poster fixes no spacing scale, only "generous negative space". */
+  --fn-space-1: 4px;
+  --fn-space-2: 8px;
+  --fn-space-3: 12px;
+  --fn-space-4: 16px;
+  --fn-space-5: 24px;
+  --fn-space-6: 32px;
+  --fn-space-7: 48px;
+  --fn-space-8: 64px;
+  --fn-space-9: 96px;
+
+  --fn-screen-top: clamp(28px, 6vw, 56px); /* [derived] room above a screen title, desktop down to
+                                            * phone width; the poster fixes no vertical rhythm */
+  --fn-measure: 68ch;       /* [derived] comfortable line length for body copy */
+  --fn-content-max: 1120px; /* [derived] the wizard's content column */
+
+  /* The core-loop diagram (js/guide/render/loop.js) reads these, so the drawing inherits the
+   * palette instead of carrying its own copy of it. */
+  --loop-fill: var(--fn-surface-quiet);
+  --loop-stroke: var(--fn-border);
+  --loop-text: var(--fn-text);
+  --loop-muted: var(--fn-text-secondary);
+  --loop-accent: var(--fn-action);
+  --loop-accent-ink: var(--fn-on-action);
+  --loop-font: var(--fn-font-ui);
+}
+
+/* [derived] Anyone who has asked their system for less motion gets none of the transitions. */
+@media (prefers-reduced-motion: reduce) {
+  :root { --fn-motion: 0s; }
+}
+:root { --fn-motion: 0.15s; }
+
+/* [derived] Paper is not the Fortnite palette. Printing a device plan means maximum contrast on white,
+ * so the screen colours are overridden wholesale — but the values still live here rather than in
+ * guide.css, so every raw colour in the app is defined in exactly one file. */
+:root {
+  --fn-print-ink: #000000;
+  --fn-print-paper: #FFFFFF;
+  --fn-print-rule: #999999;
+}

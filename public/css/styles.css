@@ -1,4 +1,14 @@
-/* ForgeMVP - shared styling. Deliberately plain; design comes later. */
+/* ForgeMVP - shared styling. Deliberately plain; design comes later.
+ *
+ * Everything here lives in the `chrome` cascade layer. This file is loaded by all three pages, and it
+ * styles bare elements (`a`, `button`, `input`, `select`) for the admin and chat pages. Unlayered, those
+ * element selectors outrank the guide's class-based rules: `button:hover:not(:disabled)` (0,2,1) beat
+ * `.g-choice:hover` (0,2,0) and repainted every card light cyan under the cursor with white text on it.
+ * A layer loses to unlayered styles whatever the specificity, so wrapping this file puts the app back in
+ * charge of its own components without touching the admin or chat pages - nothing else competes with
+ * these rules there, so their cascade is unchanged.
+ */
+@layer chrome {
 
 :root {
   --bg: #0e1116;
@@ -209,3 +219,5 @@ kbd { font-family: var(--mono); font-size: 12px; background: #222c38; border: 1p
 .empty-state { color: var(--text-dim); text-align: center; padding: 60px 20px; }
 
 footer { border-top: 1px solid var(--border); padding: 14px 20px; color: var(--text-dim); font-size: 13px; text-align: center; }
+
+} /* end @layer chrome */

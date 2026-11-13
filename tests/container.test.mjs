@@ -167,7 +167,7 @@ test('nothing the test suite reads is excluded from the build context', async ()
   // exactly what happened once. Discover the reads from the test sources so this
   // cannot silently regress as the suites grow.
   const patterns = dockerignorePatterns(await readDockerignore());
-  const suites = ['openrouter.test.mjs', 'server.test.mjs', 'container.test.mjs'];
+  const suites = ['openrouter.test.mjs', 'server.test.mjs', 'container.test.mjs', 'guide.test.mjs'];
 
   const needed = new Set();
 

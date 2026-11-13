@@ -40,8 +40,10 @@ test('the server serves every page and asset with the right content type', async
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const cases = [
-    ['/', 'text/html', /Less guessing/],
-    ['/', 'text/html', /css\/landing\.css/],
+    ['/', 'text/html', /UEFN Game Guide/],
+    ['/', 'text/html', /css\/guide\.css/],
+    ['/', 'text/html', /js\/guide\/app\.js/],
+    ['/data/uefn_device_logic.json', 'application/json', /"game_types"/],
     ['/index.html', 'text/html', /href="admin\.html"/],
     ['/admin.html', 'text/html', /OpenRouter API key/],
     ['/admin.html', 'text/html', /choose the llm/i],
@@ -67,14 +69,17 @@ test('the server serves every page and asset with the right content type', async
   }
 });
 
-test('every page links the admin page from the top-right logo', async (t) => {
+test('every page links the admin page from its header', async (t) => {
   const server = createServer();
   await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const home = await (await fetch(`${base}/`)).text();
-  assert.match(home, /<a class="logo-link" href="admin\.html"/, 'home page logo links to admin');
+  /* The header logo is the reset to the start of the guide (the architecture spec is explicit about
+   * this); the Admin entry point is the page's own primary call to action beside it. */
+  assert.match(home, /<a class="logo-link[^"]*" href="#\/home"/, 'the home page logo resets to the start of the guide');
+  assert.match(home, /<a class="sh-btn sh-btn-primary[^"]*" href="admin\.html"/, 'the Admin action reaches the admin page');
   assert.match(home, /href="admin\.html"[^>]*>Go to the admin page</, 'home page has a plain admin link');
 
   const admin = await (await fetch(`${base}/admin.html`)).text();
@@ -123,18 +128,25 @@ test('the Admin link in the markup matches the admin page filename', async (t) =
   t.after(() => new Promise((resolve) => server.close(resolve)));
 
   const home = await (await fetch(`${base}/`)).text();
-  const target = home.match(/logo-link" href="([^"]+)"/)?.[1];
-  assert.ok(target, 'home page contains a top-right logo link');
+
+  /* The header's Admin action is the admin entry point, and its target has to be a real file. */
+  const target = home.match(/class="sh-btn sh-btn-primary[^"]*" href="([^"]+)"/)?.[1];
+  assert.ok(target, 'the home page header carries an Admin action');
 
   const res = await fetch(`${base}/${target}`);
   await res.text();
-  assert.equal(res.status, 200, 'the logo link target exists');
+  assert.equal(res.status, 200, 'the Admin action target exists');
+
+  /* The logo no longer names a file: it resets to the start of the guide, so there is nothing to 404. */
+  const logo = home.match(/<a class="logo-link[^"]*" href="([^"]+)"/)?.[1];
+  assert.equal(logo, '#/home', 'the logo is a reset to the home route');
 });
 
 test('every element id the page scripts look up exists in its markup', async () => {
   const pairs = [
     ['js/admin.js', 'admin.html'],
     ['js/chat.js', 'chat.html'],
+    ['js/guide/app.js', 'index.html'],
   ];
 
   for (const [script, page] of pairs) {
@@ -154,9 +166,8 @@ test('the pages load their scripts as ES modules', async () => {
   for (const page of ['index.html', 'admin.html', 'chat.html']) {
     const html = await readFile(path.join(PUBLIC_DIR, page), 'utf8');
     assert.match(html, /<link rel="stylesheet" href="css\/styles\.css"/, `${page} loads the stylesheet`);
-    if (page !== 'index.html') {
-      assert.match(html, /<script type="module" src="js\/[a-z]+\.js"><\/script>/, `${page} loads a module script`);
-    }
+    // index.html's app is the guide, whose module lives under js/guide/.
+    assert.match(html, /<script type="module" src="js\/[a-z/]+\.js"><\/script>/, `${page} loads a module script`);
   }
 });
 
@@ -183,8 +194,9 @@ test('the banner is hidden when the page is served over http', async () => {
   assert.match(css, /html\.opened-from-disk \.local-server-warning \{ display: block; \}/);
 });
 
-test('admin and chat pages detect a module that never loaded', async () => {
+test('admin, chat and the guide detect a module that never loaded', async () => {
   const pages = [
+    ['index.html', 'js/guide/app.js'],
     ['admin.html', 'js/admin.js'],
     ['chat.html', 'js/chat.js'],
   ];

@@ -3,12 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Forge - Less guessing. More game.</title>
-  <meta name="description" content="Forge extends Unreal Engine with a clear game design workflow. Turn a rough concept into a design file, connect your systems, and know what to build next." />
-  <meta name="theme-color" content="#101014" />
+  <title>Forge - THINK, DESIGN, BUILD.</title>
+  <meta name="description" content="Take your game from idea to executable. Design in Forge, let AI tools bring it to life in Unreal Engine and tap into Fortnite's vibrant developer economy. The UEFN Game Guide turns your answers into an exact game type, the devices it needs and five build steps." />
+  <meta name="theme-color" content="#0E1128" />
   <link rel="icon" href="assets/logo.svg" />
+  <!-- Load order matters. styles.css is the shared chrome for the older admin and chat pages and lives in
+       a cascade layer, so it can never outrank the app's own rules. tokens.css + guide.css are the
+       workspace (support/FORTNITE_STYLE_LIBRARY.md); shell.css is the page frame around it
+       (support/Forge--architecture_specification.md) and comes last so the frame wins on the frame. -->
   <link rel="stylesheet" href="css/styles.css" />
-  <link rel="stylesheet" href="css/landing.css" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/guide.css" />
+  <link rel="stylesheet" href="css/shell.css" />
   <script>
     // Plain inline script on purpose: this still runs when the page is opened straight
     // from disk (file://), where the browser blocks the module scripts the other pages need.
@@ -17,365 +23,211 @@
     );
   </script>
 </head>
-<body class="landing">
+<body class="g-app">
 
-  <header class="lp-header">
-    <div class="lp-wrap lp-header-inner">
-      <a class="lp-brand" href="index.html">Forge</a>
+  <a class="g-skip" href="#screen">Skip to content</a>
 
-      <nav class="lp-nav" aria-label="Sections">
-        <a href="#the-tool">The tool</a>
-        <a href="#how-it-works">How it works</a>
-        <a href="#faq">FAQ</a>
+  <!-- ============================== header ==============================
+       Sticky, 72px, Unreal Navy, no bottom border; the app container's own header sticks below it. -->
+  <header class="sh-header" id="siteHeader">
+    <div class="sh-header-inner">
+
+      <!-- Far left, and a reset to the start of the guide rather than a link to the admin tool. -->
+      <a class="logo-link sh-logo" href="#/home" title="Forge - back to the start">
+        <img src="assets/Header--Logo.png" alt="Forge" />
+      </a>
+
+      <!-- Priority+ navigation: public/js/guide/chrome.js moves the tail of this list into the More menu
+           as the viewport narrows, measuring with a ResizeObserver rather than guessing breakpoints. -->
+      <nav class="sh-nav" id="siteNav" aria-label="Guide">
+        <ul class="sh-nav-list" id="navList">
+          <li class="sh-nav-item"><a href="#/home">Home</a></li>
+          <li class="sh-nav-item"><a href="#/category">New game</a></li>
+          <li class="sh-nav-item"><a href="chat.html">Chat test</a></li>
+          <li class="sh-nav-item"><a href="data/uefn_device_logic.json">Device data</a></li>
+        </ul>
+        <div class="sh-more" id="navMoreWrap" hidden>
+          <button class="sh-more-button" id="navMoreButton" type="button" aria-expanded="false" aria-haspopup="true">
+            More <span class="sh-more-caret" aria-hidden="true">&#9662;</span>
+          </button>
+          <ul class="sh-more-menu" id="navMoreMenu" hidden></ul>
+        </div>
       </nav>
 
-      <div class="lp-header-actions">
-        <!-- Admin stays reachable from the top-right corner, as on every other page. -->
-        <a class="logo-link" href="admin.html" title="Open the admin page" aria-label="Open the admin page">
-          <img src="assets/admin-logo.svg" alt="" width="18" height="18" />
-          Admin
-        </a>
-        <a class="lp-btn lp-btn-primary lp-btn-sm" href="#waitlist">
-          Join the waitlist <span aria-hidden="true">&#8599;</span>
-        </a>
+      <!-- Search is present and focusable, and says plainly that it is not built yet. The label is
+           visually hidden; the shortcut hint is real and wired. -->
+      <div class="sh-search">
+        <label class="sh-visually-hidden" for="searchInput">Search the guide</label>
+        <svg class="sh-search-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8" />
+          <path d="M12.8 12.8 L17 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        </svg>
+        <input
+          class="sh-search-input"
+          id="searchInput"
+          type="search"
+          placeholder="Search"
+          autocomplete="off"
+          spellcheck="false"
+          aria-describedby="searchPanel"
+        />
+        <kbd class="sh-kbd" id="searchHint">Ctrl K</kbd>
       </div>
+
+      <button class="sh-btn sh-btn-secondary" id="devModeButton" type="button" aria-pressed="false">
+        <span>Dev mode</span>
+        <span class="sh-btn-state" id="devModeState">off</span>
+      </button>
+
+      <a class="sh-btn sh-btn-primary sh-btn-admin" href="admin.html">
+        <img src="assets/admin-logo.svg" alt="" width="16" height="16" />
+        <span>Admin</span>
+      </a>
     </div>
+
+    <!-- The honest answer when someone uses the search field. -->
+    <div class="sh-search-panel" id="searchPanel" role="status" hidden></div>
   </header>
 
-  <main>
-    <div class="lp-wrap">
-      <div class="status warn local-server-warning" role="alert">
-        <div class="status-title">This page was opened straight from disk (file://)</div>
-        <div class="small">
-          The admin page cannot work that way - browsers block its scripts. Fix it once and for all:
-          <ol>
-            <li>Open <span class="mono">C:\VibeCoding\ForgeMVP</span> in File Explorer.</li>
-            <li>Double-click <strong>install-startup.bat</strong> - the server then starts with Windows,
-                and a <strong>ForgeMVP Admin</strong> shortcut appears on your desktop.</li>
-            <li>From then on, use that shortcut or <a href="http://localhost:8080/">http://localhost:8080/</a>.</li>
-          </ol>
-          <p class="small" id="probeNote" style="margin:8px 0 0"></p>
+  <main class="g-main sh-main" id="main">
+
+    <!-- ============================== hero ==============================
+         Looping video with a static fallback image. The video is decorative (aria-hidden) and is only
+         started by script, once, when the browser is idle and the user has not asked for less motion -
+         so a page with the media blocked still shows the poster frame and the text. -->
+    <section class="sh-hero" aria-labelledby="heroTitle">
+      <video
+        class="sh-hero-video"
+        id="heroVideo"
+        poster="assets/Hero--Fallback.png"
+        muted
+        loop
+        playsinline
+        preload="none"
+        aria-hidden="true"
+      >
+        <source src="assets/Hero--Video.mp4" type="video/mp4" />
+      </video>
+      <div class="sh-hero-scrim" aria-hidden="true"></div>
+      <div class="sh-hero-inner">
+        <h1 class="sh-hero-title" id="heroTitle">Forge</h1>
+        <h2 class="sh-hero-sub">THINK, DESIGN, BUILD.</h2>
+        <p class="sh-hero-text">
+          Take your game from idea to executable. Design in Forge, let AI tools bring it to life in
+          Unreal Engine and tap into Fortnite's vibrant developer economy.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================== the app ==============================
+         The workspace. Its own header sticks below the site header, so the breadcrumb trail and the
+         progress bar stay visible while a long device plan scrolls. -->
+    <div class="sh-app" id="appContainer">
+
+      <div class="sh-app-head" id="appHead">
+        <div class="sh-app-head-inner">
+          <p class="sh-app-name">UEFN Game Guide</p>
+
+          <!-- Rendered by js/guide/app.js from the session, so every screen has one trail definition.
+               The container is a plain div: render/ui.js wraps the trail in its own labelled <nav>. -->
+          <div class="sh-crumbbar" id="crumbs"></div>
+
+          <div class="sh-progress">
+            <div
+              class="sh-progress-track"
+              id="progressTrack"
+              role="progressbar"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow="0"
+              aria-label="Progress through the guide"
+            >
+              <div class="sh-progress-bar" id="progressBar"></div>
+            </div>
+            <span class="sh-progress-label" id="progressLabel">0%</span>
+            <span class="sh-progress-dev" id="devModeWrap" hidden>dev</span>
+          </div>
         </div>
+      </div>
+
+      <div class="sh-app-body">
+        <div class="status warn local-server-warning" role="alert">
+          <div class="status-title">This page was opened straight from disk (file://)</div>
+          <div class="small">
+            The guide cannot work that way - browsers block its scripts. Fix it once and for all:
+            <ol>
+              <li>Open <span class="mono">C:\VibeCoding\ForgeMVP</span> in File Explorer.</li>
+              <li>Double-click <strong>install-startup.bat</strong> - the server then starts with Windows,
+                  and a <strong>ForgeMVP Admin</strong> shortcut appears on your desktop.</li>
+              <li>From then on, use that shortcut or <a href="http://localhost:8080/">http://localhost:8080/</a>.</li>
+            </ol>
+            <p class="small" id="probeNote" style="margin:8px 0 0"></p>
+          </div>
+        </div>
+
+        <div class="status err" id="scriptFailure" role="alert" hidden>
+          <div class="status-title">The guide's scripts did not load</div>
+          <div class="small">
+            Nothing below this notice can work without them. Reload the page, and if that changes
+            nothing, open it from <a href="http://localhost:8080/">http://localhost:8080/</a> instead
+            of from a file on disk.
+          </div>
+        </div>
+
+        <div class="status err" id="bootError" role="alert" hidden>
+          <div class="status-title">The guide could not load its data</div>
+          <div class="small" id="bootErrorText"></div>
+        </div>
+
+        <!-- The whole app renders inside here, one screen at a time. -->
+        <div id="screen"></div>
+
+        <noscript>
+          <div class="status err" role="alert">
+            <div class="status-title">This guide needs JavaScript</div>
+            <div class="small">
+              Every screen is built in the browser from a data file, so there is nothing to show
+              without it. The data itself is readable at
+              <a href="data/uefn_device_logic.json">data/uefn_device_logic.json</a>.
+            </div>
+          </div>
+        </noscript>
       </div>
     </div>
-
-    <!-- ------------------------------------------------------------- hero -->
-    <section class="lp-hero">
-      <div class="lp-wrap lp-hero-grid">
-        <div>
-          <p class="lp-pill">The Unreal design extension</p>
-          <h1 class="lp-h1">Less guessing.<br />More game.</h1>
-          <p class="lp-hero-sub">Your idea has potential.<br />Give it a plan.</p>
-          <p class="lp-body lp-hero-body">
-            Forge extends Unreal Engine with a clear game design workflow. Turn a rough concept into a
-            design file, connect your systems, and know what to build next.
-          </p>
-          <div class="lp-hero-actions">
-            <a class="lp-btn lp-btn-primary" href="#waitlist">
-              Get early access <span aria-hidden="true">&#8599;</span>
-            </a>
-            <a class="lp-btn lp-btn-ghost" href="#how-it-works">
-              Explore the blueprint <span aria-hidden="true">&#8595;</span>
-            </a>
-          </div>
-          <p class="lp-hero-note">No blank-page panic. No Unreal expertise needed to start.</p>
-          <p class="lp-kicker">Your idea is the input. A buildable plan is the output.</p>
-        </div>
-
-        <div class="lp-card">
-          <div class="lp-card-bar">
-            <span class="lp-mono">Forge / Unreal extension</span>
-            <span class="lp-mono">Example project</span>
-          </div>
-
-          <div class="lp-card-inner">
-            <p class="lp-question">What do you want to make?</p>
-            <p class="lp-input">
-              A cozy exploration game where a tiny forest spirit restores an abandoned world, one garden
-              at a time.
-            </p>
-
-            <ul class="lp-tags">
-              <li>Third person</li>
-              <li>Exploration</li>
-              <li>Unreal engine</li>
-            </ul>
-
-            <div class="lp-project-head">
-              <div>
-                <h2 class="lp-project-name">Mosslight</h2>
-                <p class="lp-mono">Game design blueprint</p>
-              </div>
-              <span class="lp-badge">Ready to explore</span>
-            </div>
-
-            <ol class="lp-rows">
-              <li>
-                <span class="lp-num">01</span>
-                <div>
-                  <p class="lp-row-title">Core loop</p>
-                  <p class="lp-row-sub">Explore &#8594; Grow &#8594; Restore</p>
-                </div>
-                <span class="lp-row-go" aria-hidden="true">&#8599;</span>
-              </li>
-              <li>
-                <span class="lp-num">02</span>
-                <div>
-                  <p class="lp-row-title">Player systems</p>
-                  <p class="lp-row-sub">Movement, tools &amp; abilities</p>
-                </div>
-                <span class="lp-row-go" aria-hidden="true">&#8599;</span>
-              </li>
-              <li>
-                <span class="lp-num">03</span>
-                <div>
-                  <p class="lp-row-title">World &amp; progression</p>
-                  <p class="lp-row-sub">3 biomes. One living world.</p>
-                </div>
-                <span class="lp-row-go" aria-hidden="true">&#8599;</span>
-              </li>
-            </ol>
-          </div>
-
-          <p class="lp-card-foot">Game design, connected to your Unreal workflow.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- -------------------------------------------------------- blue band -->
-    <section class="lp-band">
-      <div class="lp-wrap lp-band-inner">
-        <div>
-          <p class="lp-label">The missing layer</p>
-          <h2 class="lp-h2">Vibes start games.<br />Design makes them hold together.</h2>
-        </div>
-        <div>
-          <p class="lp-band-lede">AI can help you make a mechanic.<br />But what connects it to the rest of your game?</p>
-          <p class="lp-band-lede">
-            Forge turns scattered ideas into one shared blueprint &#8212; so you build with intent, not just
-            momentum.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------- how it works ----- -->
-    <section class="lp-section lp-tight" id="how-it-works">
-      <div class="lp-wrap">
-        <div class="lp-head">
-          <div>
-            <p class="lp-label">A low barrier, a solid foundation.</p>
-            <h2 class="lp-h2">Start with a sentence.<br />Leave with a direction.</h2>
-          </div>
-          <p class="lp-lede">You bring the spark. Forge helps you ask the right questions and connect the dots.</p>
-        </div>
-
-        <div class="lp-cards">
-          <article class="lp-card-item">
-            <span class="lp-num">01</span>
-            <h3>Describe the game</h3>
-            <p class="lp-body">A genre, a feeling, a wild what-if. Start in plain language, not a technical specification.</p>
-            <p class="lp-quote">&ldquo;A tiny spirit brings a forest back to life.&rdquo;</p>
-          </article>
-          <article class="lp-card-item">
-            <span class="lp-num">02</span>
-            <h3>Make it yours</h3>
-            <p class="lp-body">Refine the core loop, player abilities, and world. Make the important decisions before they become expensive.</p>
-            <p class="lp-quote">Your choices, connected into one plan.</p>
-          </article>
-          <article class="lp-card-item">
-            <span class="lp-num">03</span>
-            <h3>Build with a blueprint</h3>
-            <p class="lp-body">Create a structured game design file with Forge, an extension for your Unreal Engine workflow.</p>
-            <p class="lp-quote">From open-ended idea to first playable.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------- the design file ------- -->
-    <section class="lp-section" id="the-tool">
-      <div class="lp-wrap">
-        <div>
-          <p class="lp-label">Not just another chat thread</p>
-          <h2 class="lp-h2">The whole game. On the same page.</h2>
-          <p class="lp-lede" style="margin-top:17px">
-            A living design file for the decisions that make your game work &#8212; before you make it run.
-          </p>
-        </div>
-
-        <div class="lp-preview">
-          <div class="lp-preview-bar">
-            <span class="lp-mono"><b>Forge</b> / Mosslight</span>
-            <span class="lp-mono">Design file preview</span>
-          </div>
-
-          <div class="lp-preview-body">
-            <div class="lp-rail">
-              <p class="lp-rail-name">Mosslight</p>
-              <p class="lp-mono">Game design file</p>
-              <ul class="lp-rail-nav">
-                <li>Overview</li>
-                <li class="is-active">Core gameplay loop</li>
-                <li>Player systems</li>
-                <li>World &amp; progression</li>
-                <li>Unreal build plan</li>
-              </ul>
-              <div class="lp-rail-foot">
-                <p class="lp-label">One source of truth</p>
-                <p>Less drift. More direction.</p>
-              </div>
-            </div>
-
-            <div class="lp-paper">
-              <p class="lp-mono">02 / Gameplay</p>
-              <h3>A small action. A world that changes.</h3>
-
-              <p class="lp-label">Player promise</p>
-              <p class="lp-promise">Every garden you restore makes the forest feel alive again.</p>
-
-              <dl class="lp-flow">
-                <div>
-                  <dt>Explore</dt>
-                  <dd>Find forgotten gardens</dd>
-                </div>
-                <span class="lp-flow-arrow" aria-hidden="true">&#8594;</span>
-                <div class="is-active">
-                  <dt>Grow</dt>
-                  <dd>Gather, plant, nurture</dd>
-                </div>
-                <span class="lp-flow-arrow" aria-hidden="true">&#8594;</span>
-                <div>
-                  <dt>Restore</dt>
-                  <dd>Bring the forest to life</dd>
-                </div>
-              </dl>
-
-              <table class="lp-table">
-                <colgroup>
-                  <col style="width:23%" />
-                  <col style="width:47%" />
-                  <col style="width:30%" />
-                </colgroup>
-                <thead>
-                  <tr>
-                    <th scope="col">System</th>
-                    <th scope="col">Design decision</th>
-                    <th scope="col">Unreal starting point</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>Spirit movement</td>
-                    <td>Gentle traversal; short glide; no combat</td>
-                    <td>Character + input actions</td>
-                  </tr>
-                  <tr>
-                    <td>Garden restoration</td>
-                    <td>Plant &#8594; nurture &#8594; unlock a new route</td>
-                    <td>Interactable actors + save data</td>
-                  </tr>
-                  <tr>
-                    <td>First playable scope</td>
-                    <td>One clearing. One garden. One full loop.</td>
-                    <td>One level + core interactions</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------- audience --- -->
-    <section class="lp-section lp-people-section">
-      <div class="lp-wrap">
-        <div>
-          <p class="lp-label">For the people with a game in their head</p>
-          <h2 class="lp-h2">Keep the spark. Lose the guesswork.</h2>
-        </div>
-
-        <div class="lp-people">
-          <div class="lp-person">
-            <span class="lp-num">01</span>
-            <h3>Starting your first game?</h3>
-            <p class="lp-body">You don&rsquo;t need all the answers. Turn &ldquo;where do I even start?&rdquo; into a focused first playable.</p>
-          </div>
-          <div class="lp-person">
-            <span class="lp-num">02</span>
-            <h3>Building at the speed of AI?</h3>
-            <p class="lp-body">Give every generated feature a job. Keep the core loop, progression, and player experience connected.</p>
-          </div>
-          <div class="lp-person">
-            <span class="lp-num">03</span>
-            <h3>Making it with a small team?</h3>
-            <p class="lp-body">Put the important decisions in one place. Align on the game before everyone builds a different one.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------------ faq --- -->
-    <section class="lp-faq" id="faq">
-      <div class="lp-wrap lp-faq-inner">
-        <div>
-          <p class="lp-label">A few things, up front</p>
-          <h2 class="lp-h2">Good questions.</h2>
-          <p class="lp-body lp-faq-lead" style="margin-top:22px">A little clarity before your next big idea.</p>
-        </div>
-
-        <div class="lp-qa">
-          <div>
-            <h3>Do I need to know Unreal Engine?</h3>
-            <p class="lp-body">Start with an idea in everyday language. Forge extends your Unreal workflow with a design file that makes the next steps clear.</p>
-          </div>
-          <div>
-            <h3>Does Forge build the game for me?</h3>
-            <p class="lp-body">No. It creates the design blueprint, not a finished game. You stay in control of what gets built and how.</p>
-          </div>
-          <div>
-            <h3>What&rsquo;s in the design file?</h3>
-            <p class="lp-body">The game concept, core loop, player systems, world, progression, and a focused plan for your first playable.</p>
-          </div>
-          <div>
-            <h3>When can I try it?</h3>
-            <p class="lp-body">Join the early-access waitlist. You&rsquo;ll hear when there&rsquo;s a chance to try Forge and help shape what comes next.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ------------------------------------------------------ cta band ---- -->
-    <section class="lp-band lp-band-lg" id="waitlist">
-      <div class="lp-wrap lp-cta-grid">
-        <div>
-          <p class="lp-label">Less &ldquo;what now?&rdquo; More &ldquo;let&rsquo;s build.&rdquo;</p>
-          <h2 class="lp-h2">Your game deserves more than a vibe.</h2>
-          <p class="lp-cta-close">Start with an idea. Build with intention.</p>
-        </div>
-        <div class="lp-cta-action">
-          <!-- No waitlist backend yet: this points at the working prototype page. -->
-          <a class="lp-btn lp-btn-dark" href="chat.html">
-            Join the waitlist <span aria-hidden="true">&#8599;</span>
-          </a>
-          <p class="lp-cta-note">Be there for the first playable chapter.</p>
-        </div>
-      </div>
-    </section>
   </main>
 
-  <footer class="lp-footer">
-    <div class="lp-wrap lp-footer-inner">
-      <span class="lp-footer-brand">Forge</span>
-      <p class="lp-footer-tag">The blueprint before the build.</p>
-      <div class="lp-footer-right">
-        <p class="lp-footer-note">Independent Unreal Engine extension. Not affiliated with Epic Games.</p>
-        <a class="lp-footer-admin" href="admin.html">Go to the admin page</a>
+  <footer class="sh-footer">
+    <div class="sh-footer-inner">
+      <div class="sh-footer-col">
+        <p class="sh-footer-title">Forge</p>
+        <p class="g-footer-note">
+          An independent guide to building Fortnite islands in UEFN. Not affiliated with Epic Games.
+          Device names and Details-panel settings follow Epic's official documentation.
+        </p>
+      </div>
+      <div class="sh-footer-col">
+        <p class="sh-footer-title">System status</p>
+        <p class="sh-footer-status" id="footerStatus">Loading the guide data&hellip;</p>
+      </div>
+      <div class="sh-footer-col">
+        <p class="sh-footer-title">More</p>
+        <p class="g-footer-note">Reserved for legal links and social icons.</p>
+        <a class="g-footer-admin" href="admin.html">Go to the admin page</a>
       </div>
     </div>
   </footer>
 
+  <script type="module" src="js/guide/app.js"></script>
+  <script>
+    // Watchdog: js/guide/app.js marks <html data-app-ready="true"> when it starts. If that never
+    // happens (blocked, 404, cached failure) say so instead of leaving a blank page.
+    setTimeout(function () {
+      if (location.protocol === 'file:') return; // the banner above already explains that case
+      if (document.documentElement.dataset.appReady !== 'true') {
+        document.getElementById('scriptFailure').hidden = false;
+      }
+    }, 1500);
+  </script>
   <!-- Plain script, not a module: this still loads on a file:// page and can hand the
        browser over to the working http:// address. -->
   <script src="js/local-server-check.js"></script>

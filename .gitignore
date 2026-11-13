@@ -35,3 +35,9 @@ Thumbs.db
 # *.backup inside it would be published; the previous version of a file stays
 # recoverable in git history instead.
 *.backup
+
+# The source drop for the hero art, the header logo and the Unreal Engine marks.
+# It is kept on disk but is byte-for-byte what public/assets/ already serves, and
+# the hero video alone is ~50 MB: versioning both copies would put ~100 MB of the
+# same binary into history. What ships is public/assets/.
+/assets/
