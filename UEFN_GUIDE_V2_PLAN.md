@@ -196,17 +196,17 @@ one-command restore).
 
 | Area | Where |
 |---|---|
-| Style library (workspace) | `support/FORTNITE_STYLE_LIBRARY.md` → `public/css/tokens.css` + `public/css/guide.css` (no hex value in `guide.css`; retheming is a token edit) |
-| Architecture spec (page shell) | `support/Forge--architecture_specification_v2.md` (current) and `..._v1.md` (the version it replaced) → `public/css/shell.css` (every hex value from the spec declared once as a `--sh-*` token) |
+| Style library (workspace) | `support/library.html` (the palette, as of 1.2.0) → `public/css/tokens.css` + `public/css/guide.css` (no hex value in `guide.css`; retheming is a token edit). `support/FORTNITE_STYLE_LIBRARY.md` is the record of the palette used up to 1.1.0 |
+| Architecture spec (page shell) | `support/Forge--architecture_specification_v2.md` (current, revised in place to 1.2.0) and `..._v1.md` (the version it replaced) → `public/css/shell.css` (frame geometry and aliases onto the one palette; the progress ramp's yellow is the only colour it still declares) |
 | Data | `public/data/uefn_device_logic.json` (one copy, fetched once), `public/js/guide/data.js` |
 | Engine | `public/js/guide/resolve.js` (v1's five-step merge, provenance, appended overrides, memoised) |
 | Session | `public/js/guide/state.js`, `store.js` (schema 3, v1 import, quota/cap reporting), `router.js`, `share.js` |
-| Shell behaviour | `public/js/guide/chrome.js` (search field, header measurement) |
+| Shell behaviour | `public/js/guide/chrome.js` (header measurement; the search field it used to wire left in 1.2.0) |
 | Screens | `public/js/guide/screens/` — ten modules, one per screen |
 | Rendering | `public/js/guide/dom.js` (no `innerHTML` anywhere), `render/ui.js`, `render/devices.js`, `render/loop.js` |
-| Tests | `tests/guide.test.mjs` (54), `tests/server.test.mjs` (19, updated for the new page), `tests/browser-check.mjs` (`npm run verify`) |
+| Tests | `tests/guide.test.mjs` (55), `tests/server.test.mjs` (19, updated for the new page), `tests/browser-check.mjs` (`npm run verify`) |
 
-**The page around the app (architecture spec v2).** `public/index.html` is the Forge page v2 describes:
+**The page around the app (as v2 described it, the day v2 landed).** `public/index.html` is the Forge page v2 describes:
 a **fixed** 72px header with no bottom border, painted with the body colour at 95% (`rgba(16,16,20,.95)`)
 rather than the v1 navy; the Epic Games Store logotype the spec names
 (`assets/EGS-Logotype-2023-Vertical-White.svg`, 44px of the 72px row) as a reset to the start of the
@@ -223,23 +223,67 @@ home screen rather than being dropped. Type is Inter in sentence case throughout
 is explicit about it, and the reference the spec was drawn from
 (`support/screencapture-unrealengine-2026-11-13-14_41_45.png`) is set the same way. That supersedes the
 poster's heavy italic display face for headings, so no rule in `guide.css` uses `--fn-font-display` any
-more; the token and the font file stay because the style library still documents them.
+more; the token and the font file stay because the style library still documents them. (One exception was
+found while landing 1.2.0: `guide.css` **does** still use `--fn-font-display`, for `.g-notes-title` on the
+device notes. It is the last piece of the poster's typography in the app, left in place because 1.2.0 is a
+colour release — flagged here rather than changed quietly.)
+
+**1.2.0 reconciled the page with the library.** The shell no longer carries a palette of its own: there is
+one palette, the authentic Unreal/Epic one, declared once in `public/css/tokens.css` under the `--ue-*`
+names, with `shell.css` reduced to frame geometry and aliases onto it (`guide.css` still names roles, and
+still contains no hex value at all). The search field and the Dev mode control left the header: search is
+gone entirely, and Dev mode is a link in the footer that keeps its on/off state and its `aria-pressed`. That
+leaves Admin as the header's only action, restyled as the library's secondary control — a 15% white fill, no
+border, no icon, and the library's own text colour (which the workspace's link rule had been quietly
+overriding until that selector was scoped to the app's own region). The sticky app header is borderless and
+semi-transparent: the canvas at 85%, with a blur. Panels take the library's subtle hairline, an interactive
+surface repaints its whole fill on hover by one published step, and a control only brightens — no lift, no
+hover border. The progress ramp is unchanged and deliberate: it is Forge's own, and it is the one colour
+`shell.css` still declares.
+
+**1.2.1 settled the surface.** The mark in the header is the Epic logo itself
+(`public/assets/logo_epic.svg`, sourced from the repo's `assets/` folder) rather than the store's vertical
+logotype, it is sized to 44px, it draws no border in any state — the legacy `logo-link` pill class, whose
+hover painted the outline accent and the fill a navy, is gone from the app's markup — and it hovers with the
+library's translucent wash. The control heights are split: navigation CTAs 32px, body CTAs 40px, with the
+recap row's table-sized Edit button the one documented 32px body control. Panels and cards became a single
+box: `#1C1C20` at rest, `#28282C` under the pointer, `#343437` as the subtle edge — and on a card that edge
+strengthens to the accessible 35% under the pointer, which is what makes a 1.5:1 resting border defensible.
+The progress ramp moved off Forge's own cyan-to-yellow onto the published blue-400 and indigo-400, so
+`shell.css` now declares no colour of its own anywhere. The footer lost its top border, which turned out to
+need `border: 0` rather than a deleted declaration: the older chrome draws that line from a bare `footer`
+rule inside its cascade layer, and a layered element selector nothing contradicts is exactly how a border
+survives a rule that was removed on purpose.
+
+**1.2.2 set the box's radius and the frame's frost.** Boxes — panels, cards, options, tiles, image slots —
+took the published 16px container radius (`--fn-radius-card`), while controls kept the library's 8px, since
+a 32px button at 16px is a pill and the library's own buttons measure 8–10px. A chosen box came down from a
+2px accent edge to 1px, which also stopped selection from shifting a card's contents by a pixel. The fixed
+header now carries the same backdrop blur as the sticky app bar — one `--sh-blur` for both, and the tint
+eased from 95% to 90% so the blur has something to show. The mark lost the hover box 1.2.1 had given it:
+a translucent wash on a 44px square reads as a grey button appearing under the pointer, so the hover is now
+the mark changing its own shade. And the blue box that appeared around the screen title on load is gone —
+not by dropping the heading's `tabindex`, which is what the changelog asked for and would have cost the
+screen-change announcement a screen reader depends on, but by fixing the ring exemption that had named
+`<h2>` since before the hero was removed and stopped matching when the title became the page's only `<h1>`.
 
 Five things the spec did not settle, and how they were resolved: the inset eases to 16px on a phone
 because 64px of gutter each side leaves nothing to read, and the header wraps to a second row at 760px
-(measured, never assumed, so the page offset follows it); the search field is present, focuses on
-`Ctrl/Cmd+K`, and says in words that it is not built yet, like Randomise and the AI chat panel; the
-interim chat page is no longer linked from the header — v2 gives the header one item and the footer one
+(measured, never assumed, so the page offset follows it); the search field was present and focused on
+`Ctrl/Cmd+K` until 1.2.0 removed it, having said in words that it was not built yet, like Randomise and the
+AI chat panel; the interim chat page is no longer linked from the header — v2 gives the header one item and the footer one
 link — so it is reached from the "Chat with AI" stub screen, and the admin page links it directly; every
 wizard step has a visible Back button, and home has none because there is nothing before it; and a screen
 change returns to the top of the page, since there is no longer a hero to scroll past.
 
-**Automated checks.** `npm test` runs 110 assertions across four files (21 + 54 + 19 + 16). `npm run verify` drives headless
+**Automated checks.** `npm test` runs 111 assertions across four files (21 + 55 + 19 + 16). `npm run verify` drives headless
 Chrome over the DevTools Protocol in two phases: all thirteen routes at desktop and phone width
 (asserting rendered text, heading structure, exactly one `<h1>` and it being the screen's own title,
-focus landing on it, the fixed 72px header painted `rgba(16,16,20,0.95)` and the page clearing it, the
-single "Home" nav item, the logotype from the spec, no trace of the hero, a breadcrumb trail with at
-least one working link, the footer's admin link, the cyan-to-yellow progress ramp, a visible Back button
+focus landing on it with no ring drawn around it, the fixed 72px header painted `rgba(16,16,20,0.9)` with a
+backdrop blur and the page clearing it, the single "Home" nav item, the Epic mark from the spec with
+`0px` of border, the panel trio (`#1c1c20` on `#343437`), the control heights (32px in the navigation, 40px
+in the body), no trace of the hero, a breadcrumb trail with at least one working link, the footer's admin
+link, the blue-to-indigo progress ramp, a visible Back button
 on every screen of the wizard, no content overflowing its box, no console errors, and a screenshot each),
 then a click-through of the whole wizard with no deep links at all — category to game type to four
 questions to brand to the usage-rules gate to the summary, naming and saving the game, the experience

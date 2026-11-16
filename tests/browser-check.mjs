@@ -84,6 +84,20 @@ const CHECKS = [
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** The alpha of a computed colour, so a translucent fill can be asserted as a number. A hex byte does
+ * not round-trip exactly: #ffffff26 is 38/255, which Chrome reports as 0.149 rather than as 0.15. */
+function alphaOf(colour) {
+  const match = /rgba?\(([^)]+)\)/.exec(colour || '');
+  if (!match) return NaN;
+  const parts = match[1].split(',').map((p) => Number(p.trim()));
+  return parts.length === 4 ? parts[3] : 1;
+}
+
+/** True when a computed colour is the given rgb triple at (about) the given alpha. */
+function isColour(colour, rgb, alpha) {
+  return new RegExp(`^rgba\\(${rgb},`).test(colour || '') && Math.abs(alphaOf(colour) - alpha) < 0.01;
+}
+
 async function cdp(wsUrl) {
   const ws = new WebSocket(wsUrl);
   const pending = new Map();
@@ -220,10 +234,11 @@ async function main() {
             const app = document.getElementById('appContainer');
             const body = document.getElementById('appContainer').querySelector('.sh-app-body');
             const nav = document.querySelector('.sh-nav');
-            const panel = document.getElementById('searchPanel');
             const header = document.getElementById('siteHeader');
             const footer = document.querySelector('.sh-footer');
             const bar = document.getElementById('progressBar');
+            const devToggle = document.getElementById('devModeButton');
+            const adminButton = document.querySelector('.sh-btn-admin');
             const back = [...document.querySelectorAll('#screen button, #screen a')]
               .filter((el) => /^(←\\s*)?(back|previous|let's go back)/i.test((el.textContent || '').trim()));
             const admin = [...document.querySelectorAll('.sh-footer a')]
@@ -241,26 +256,87 @@ async function main() {
               navText: nav ? nav.textContent.replace(/\\s+/g, ' ').trim() : '',
               stickyTop: head ? getComputedStyle(head).position + ' ' + getComputedStyle(head).top : '',
               inset: body ? getComputedStyle(body).paddingLeft : '',
-              panelHidden: panel ? panel.hidden : null,
-              devPressed: document.getElementById('devModeButton')
-                ? document.getElementById('devModeButton').getAttribute('aria-pressed')
-                : '',
+              /* 1.2.0 removed the search field and the Dev mode control from the header. Both are
+               * asserted absent, so the release cannot half-happen: markup gone but wiring left behind. */
+              headerSearch: !!header.querySelector('input, .sh-search, .sh-kbd'),
+              headerDevMode: !!(header && devToggle && header.contains(devToggle)),
+              devPressed: devToggle ? devToggle.getAttribute('aria-pressed') : '',
+              devInFooter: !!(footer && devToggle && footer.contains(devToggle)),
+              devLabel: devToggle ? devToggle.textContent.replace(/\\s+/g, ' ').trim() : '',
+              /* The one action left in the header, and the library's secondary control rather than a
+               * primary one: a translucent fill, and no icon. */
+              adminInHeader: !!(header && adminButton && header.contains(adminButton)),
+              adminClasses: adminButton ? adminButton.className : '',
+              adminIcons: adminButton ? adminButton.querySelectorAll('img, svg').length : -1,
+              adminBg: adminButton ? getComputedStyle(adminButton).backgroundColor : '',
+              /* The label colour matters as much as the fill: guide.css's workspace link rule used to
+               * reach into the header and repaint it with the workspace's muted colour. */
+              adminColor: adminButton ? getComputedStyle(adminButton).color : '',
+              footerAdminColor: (() => {
+                const link = footer ? footer.querySelector('.sh-footer-admin') : null;
+                return link ? getComputedStyle(link).color : '';
+              })(),
               headerPosition: header ? getComputedStyle(header).position : '',
               headerBg: header ? getComputedStyle(header).backgroundColor : '',
+              headerBorder: header ? getComputedStyle(header).borderBottomWidth : '',
               headerH: headerRect ? Math.round(headerRect.height) : 0,
               declaredHeaderH: getComputedStyle(document.documentElement).getPropertyValue('--sh-header-h').trim(),
               viewportWidth: window.innerWidth,
               bodyTopPad: body ? getComputedStyle(document.body).paddingTop : '',
               appTopBelowHeader: headerRect && appRect ? Math.round(appRect.top - headerRect.bottom) : -999,
+              /* The sticky app header is borderless and translucent as of 1.2.0; 1.2.2 gave the site
+               * header the same blur. */
+              headBorder: head ? getComputedStyle(head).borderTopWidth + '/' + getComputedStyle(head).borderBottomWidth : '',
+              headBg: head ? getComputedStyle(head).backgroundColor : '',
+              headBackdrop: head ? getComputedStyle(head).backdropFilter : '',
+              headerBackdrop: (() => {
+                const el = document.querySelector('.sh-header');
+                return el ? getComputedStyle(el).backdropFilter : '';
+              })(),
+              footerBorder: (() => {
+                const el = document.querySelector('.sh-footer');
+                return el ? getComputedStyle(el).borderTopWidth : '';
+              })(),
               footerBg: footer ? getComputedStyle(footer).backgroundColor : '',
               footerAdminLinks: admin.length,
+              footerLinks: footer ? footer.querySelectorAll('.sh-footer-link').length : -1,
               footerText: footer ? footer.textContent.replace(/\\s+/g, ' ').trim() : '',
               progressBg: bar ? getComputedStyle(bar).backgroundImage : '',
               backButtons: back.length,
               hero: !!document.querySelector('.sh-hero, #heroVideo, #heroTitle'),
               logo: (document.querySelector('.sh-logo img') || {}).getAttribute
                 ? document.querySelector('.sh-logo img').getAttribute('src')
-                : ''
+                : '',
+              /* 1.2.1's numbers, measured rather than read out of the stylesheet: the mark carries no
+               * border, the header's control is 32px, and the box is the panel trio. */
+              logoBorder: (() => {
+                const el = document.querySelector('.sh-logo');
+                return el ? getComputedStyle(el).borderTopWidth : '';
+              })(),
+              navCtaHeight: (() => {
+                const el = document.querySelector('.sh-btn');
+                return el ? Math.round(el.getBoundingClientRect().height) : -1;
+              })(),
+              panel: (() => {
+                /* A .g-panel-loop is the diagram's inset well (the scrim over whatever is behind it), not a
+                 * raised box, so the trio is measured on a panel that is one. */
+                const el = document.querySelector('.g-panel:not(.g-panel-loop)');
+                if (!el) return null;
+                const cs = getComputedStyle(el);
+                return { bg: cs.backgroundColor, border: cs.borderTopColor };
+              })()
+            };
+          })(),
+          /* The first body CTA the screen shows, if it shows one. The recap row's Edit buttons are a
+           * documented exception - a 32px control in a table cell - so they are not what this measures. */
+          bodyCta: (() => {
+            const el = screen && [...screen.querySelectorAll('.g-btn')].find((b) => !b.closest('.g-recap-value'));
+            if (!el) return null;
+            const cs = getComputedStyle(el);
+            return {
+              label: (el.textContent || '').trim().slice(0, 40),
+              height: Math.round(el.getBoundingClientRect().height),
+              minHeight: cs.minHeight
             };
           })(),
           title: document.title,
@@ -270,6 +346,15 @@ async function main() {
           scriptFailure: !document.getElementById('scriptFailure').hidden,
           focusTag: document.activeElement ? document.activeElement.tagName : '',
           focusText: document.activeElement ? (document.activeElement.textContent || '').trim().slice(0, 60) : '',
+          /* 1.2.2: the heading still takes focus on a screen change, but it must not draw a ring while it
+           * holds it. That box around the title on load is the thing this release removed, so it is
+           * measured rather than trusted to a rule name. */
+          focusOutline: (() => {
+            const el = document.activeElement;
+            if (!el) return '';
+            const cs = getComputedStyle(el);
+            return cs.outlineStyle === 'none' ? 'none' : cs.outlineWidth + ' ' + cs.outlineStyle + ' ' + cs.outlineColor;
+          })(),
           whiteSpace: (() => {
             const el = screen && screen.querySelector('.g-choice, .g-option');
             return el ? getComputedStyle(el).whiteSpace : '';
@@ -309,6 +394,11 @@ async function main() {
     if (state.focusTag !== 'H1' && state.rendered && state.focusText) {
       problems.push(`focus landed on ${state.focusTag}, not the screen heading`);
     }
+    /* The heading still takes that focus - it is how a screen reader learns the screen changed - but it
+     * must not draw the focus ring while it holds it. 1.2.2: no blue box around the title on load. */
+    if (state.focusTag === 'H1' && state.focusOutline !== 'none' && state.focusOutline !== '0px none rgb(0, 0, 0)') {
+      problems.push(`the screen heading draws a focus ring (${state.focusOutline}); 1.2.2 removes it`);
+    }
     if (state.shell.headingsInScreen.startsWith('H2')) {
       problems.push(`a heading level comes before the screen's title: ${state.shell.headingsInScreen}`);
     }
@@ -320,7 +410,17 @@ async function main() {
       problems.push('the breadcrumb trail has no clickable crumbs');
     }
     if (!state.shell.stickyTop.startsWith('sticky')) problems.push(`the app container header is not sticky (${state.shell.stickyTop})`);
-    if (state.shell.panelHidden !== true) problems.push('the search panel is showing before anyone has searched');
+    /* 1.2.0: the sticky bar is borderless and translucent, so content reads through it as it scrolls
+     * under. The material is the canvas at 85%, which is not fully opaque. */
+    if (state.shell.headBorder !== '0px/0px') {
+      problems.push(`the app container header should be borderless, it has ${state.shell.headBorder} top/bottom`);
+    }
+    if (!isColour(state.shell.headBg, '16, 16, 20', 0.85)) {
+      problems.push(`the app container header should be the canvas at 85%, it is ${state.shell.headBg}`);
+    }
+    if (!/blur/.test(state.shell.headBackdrop)) {
+      problems.push(`the app container header should blur what scrolls under it (${state.shell.headBackdrop})`);
+    }
     /* v2: a fixed header, 72px, painted with the body colour at 95%, with no bottom border. */
     if (state.shell.headerPosition !== 'fixed') problems.push(`the site header should be fixed, it is ${state.shell.headerPosition}`);
     /* 72px wherever the row fits; the check is on the measured height against the width this dump was
@@ -328,8 +428,41 @@ async function main() {
     if (state.shell.viewportWidth > 760 && state.shell.headerH !== 72) {
       problems.push(`the site header should be 72px tall at ${state.shell.viewportWidth}px, it is ${state.shell.headerH}px`);
     }
-    if (state.shell.headerBg !== 'rgba(16, 16, 20, 0.95)') {
-      problems.push(`the site header should be rgba(16, 16, 20, 0.95), it is ${state.shell.headerBg}`);
+    if (state.shell.headerBg !== 'rgba(16, 16, 20, 0.9)') {
+      problems.push(`the site header should be rgba(16, 16, 20, 0.9), it is ${state.shell.headerBg}`);
+    }
+    /* 1.2.2 frosts the header with the same blur as the sticky app bar above. Both are checked, because
+     * "the same effect in two places" is exactly what drifts. */
+    if (!/blur/.test(state.shell.headerBackdrop)) {
+      problems.push(`the site header should blur what scrolls under it (${state.shell.headerBackdrop})`);
+    }
+    if (state.shell.headerBorder !== '0px') {
+      problems.push(`the site header should have no bottom border, it has ${state.shell.headerBorder}`);
+    }
+    /* 1.2.0 took the search field and the Dev mode control out of the header. Asserted both ways: gone
+     * from the header, and present in the footer, so neither can be lost in the move. */
+    if (state.shell.headerSearch) problems.push('the header still carries the search field; 1.2.0 removes it');
+    if (state.shell.headerDevMode) problems.push('the header still carries the Dev mode control; 1.2.0 moves it to the footer');
+    if (!state.shell.devInFooter) problems.push('the footer does not carry the Dev mode control');
+    if (!/dev mode\s*(on|off)/i.test(state.shell.devLabel)) {
+      problems.push(`the Dev mode link does not state its state in words (${state.shell.devLabel})`);
+    }
+    /* The one action left in the header is Admin, as the library's secondary control. */
+    if (!state.shell.adminInHeader) problems.push('the header does not carry the Admin action');
+    if (!/sh-btn-secondary/.test(state.shell.adminClasses)) {
+      problems.push(`Admin should be the secondary control, its classes are "${state.shell.adminClasses}"`);
+    }
+    if (state.shell.adminIcons !== 0) problems.push(`the Admin action should carry no icon, it has ${state.shell.adminIcons}`);
+    if (!isColour(state.shell.adminBg, '255, 255, 255', 0.15)) {
+      problems.push(`the Admin fill should be the library's 15% secondary step, it is ${state.shell.adminBg}`);
+    }
+    /* The label colours, computed: this is the assertion that would have caught guide.css's link rule
+     * reaching into the shell. A declaration in shell.css is not proof of what the page paints. */
+    if (!isColour(state.shell.adminColor, '255, 255, 255', 0.95)) {
+      problems.push(`the Admin label should be the library's text colour (95% white), it is ${state.shell.adminColor}`);
+    }
+    if (!isColour(state.shell.footerAdminColor, '255, 255, 255', 0.75)) {
+      problems.push(`the footer's admin link should be the library's secondary text colour, it is ${state.shell.footerAdminColor}`);
     }
     if (parseInt(state.shell.bodyTopPad, 10) < 72) {
       problems.push(`the page does not clear the fixed header (body padding-top ${state.shell.bodyTopPad})`);
@@ -341,20 +474,60 @@ async function main() {
      * container is flush against the page edge at desktop width. */
     if (parseInt(state.shell.inset, 10) < 16) problems.push(`the app container has no page inset (${state.shell.inset})`);
     if (state.shell.footerBg === 'rgba(0, 0, 0, 0)') problems.push('the footer has no background');
-    /* The spec's navigation is one item, and the footer's only link is the admin entry point. */
+    /* The spec's navigation is one item, and the footer is the utility bar: the status, the Dev mode
+     * link 1.2.0 moved down here, and the admin entry point. */
     if (state.shell.navItems !== 1 || !/^home$/i.test(state.shell.navText)) {
       problems.push(`the header navigation should be the single item "Home", found ${state.shell.navItems}: "${state.shell.navText}"`);
     }
     if (state.shell.footerAdminLinks < 1) problems.push('the footer carries no "Go to admin page" link');
     if (!/go to admin page/i.test(state.shell.footerText)) problems.push('the footer admin link is not labelled "Go to admin page"');
-    /* The progress bar is the spec's cyan-to-yellow ramp. */
-    if (!/rgb\(38,\s*187,\s*255\)/.test(state.shell.progressBg)) {
-      problems.push(`the progress bar does not start at #26BBFF (${state.shell.progressBg})`);
+    if (state.shell.footerLinks !== 2) {
+      problems.push(`the footer should carry exactly two utility links (Dev mode and Admin), it carries ${state.shell.footerLinks}`);
+    }
+    if (!/dev mode/i.test(state.shell.footerText)) problems.push('the footer does not mention Dev mode, which 1.2.0 moved into it');
+    /* And nothing of the old footer content came back with it. */
+    if (/not affiliated|epic games|sources?/i.test(state.shell.footerText.replace(/go to admin page|dev mode/gi, ''))) {
+      problems.push(`the footer carries content beyond the status and the two links: "${state.shell.footerText}"`);
+    }
+    /* The progress bar is the published blue-to-indigo ramp as of 1.2.1, replacing Forge's own yellow. */
+    if (!/rgb\(51,\s*191,\s*255\)/.test(state.shell.progressBg)) {
+      problems.push(`the progress bar does not start at the palette's blue-400 #33BFFF (${state.shell.progressBg})`);
+    }
+    if (!/rgb\(134,\s*138,\s*253\)/.test(state.shell.progressBg)) {
+      problems.push(`the progress bar does not end at the palette's indigo-400 #868AFD (${state.shell.progressBg})`);
     }
     /* v2 removes the hero, its video and its still. */
     if (state.shell.hero) problems.push('the hero is still in the document; the spec removes it');
-    if (!/EGS-Logotype-2023-Vertical-White\.svg$/.test(state.shell.logo)) {
-      problems.push(`the header logo is not the Epic Games Store logotype from the spec (${state.shell.logo})`);
+    if (!/logo_epic\.svg$/.test(state.shell.logo)) {
+      problems.push(`the header mark is not the Epic logo 1.2.1 names (${state.shell.logo})`);
+    }
+    /* 1.2.1: no border on the mark, and the two control heights it settled. */
+    if (parseFloat(state.shell.logoBorder) !== 0) {
+      problems.push(`the header mark draws a ${state.shell.logoBorder} border; 1.2.1 removes it`);
+    }
+    /* The footer's top border is gone too - and this one is a trap worth naming: the older chrome's bare
+     * `footer` rule draws it from inside its cascade layer, so deleting the declaration is not enough,
+     * the frame has to say `border: 0`. */
+    if (parseFloat(state.shell.footerBorder) !== 0) {
+      problems.push(`the footer still draws a ${state.shell.footerBorder} top border; 1.2.1 removes it`);
+    }
+    if (state.shell.navCtaHeight !== 32) {
+      problems.push(`the navigation CTA is ${state.shell.navCtaHeight}px; 1.2.1 makes it 32px`);
+    }
+    /* The body CTA height is checked from the workspace's own stylesheet plus the rendered control: the
+     * home screen has no .g-btn of its own, so the wizard screens are where this is measured. */
+    if (state.bodyCta && state.bodyCta.height !== 40) {
+      problems.push(`a body CTA measures ${state.bodyCta.height}px; 1.2.1 makes it 40px (${state.bodyCta.label})`);
+    }
+    if (state.bodyCta && parseFloat(state.bodyCta.minHeight) < 40) {
+      problems.push(`a body CTA declares min-height ${state.bodyCta.minHeight}: ${state.bodyCta.label}`);
+    }
+    /* The panel trio: base, hover step and subtle edge, all three from the palette. */
+    if (state.shell.panel && state.shell.panel.bg !== 'rgb(28, 28, 32)') {
+      problems.push(`a panel rests on ${state.shell.panel.bg}; 1.2.1's base panel is #1c1c20`);
+    }
+    if (state.shell.panel && state.shell.panel.border !== 'rgb(52, 52, 55)') {
+      problems.push(`a panel's edge is ${state.shell.panel.border}; 1.2.1's subtle border is #343437`);
     }
     /* Every screen of the wizard carries a visible way back (spec v2). */
     if (check.back !== false && state.shell.backButtons < 1) {

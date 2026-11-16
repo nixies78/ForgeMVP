@@ -1,0 +1,102 @@
+[
+ {
+  "slug": "unreal-engine",
+  "label": "Unreal Engine",
+  "url": "https://www.unrealengine.com/",
+  "scrapedAt": "2026-11-16T07:28:54.963Z",
+  "title": "The most powerful real-time 3D creation tool - Unreal Engine",
+  "nodes": 1131,
+  "fonts": [
+   "Inter",
+   "Inter",
+   "Inter Tight"
+  ],
+  "topBackgrounds": [
+   "rgba(255, 255, 255, 0.05)",
+   "rgba(255, 255, 255, 0.15)",
+   "rgb(38, 187, 255)",
+   "rgba(16, 16, 20, 0.7)",
+   "rgb(16, 16, 20)",
+   "rgb(32, 32, 36)"
+  ],
+  "topText": [
+   "rgb(255, 255, 255)",
+   "rgba(255, 255, 255, 0.65)",
+   "rgba(255, 255, 255, 0.95)",
+   "rgb(38, 187, 255)",
+   "rgb(0, 0, 238)",
+   "rgba(255, 255, 255, 0.75)"
+  ],
+  "buttons": 7,
+  "cards": 4,
+  "cssVariables": 1,
+  "images": 24
+ },
+ {
+  "slug": "epic-games-store",
+  "label": "Epic Games Store",
+  "url": "https://store.epicgames.com/",
+  "scrapedAt": "2026-11-16T07:29:03.938Z",
+  "title": "Epic Games Store | Download & Play PC Games, Mods, DLC & More – Epic Games",
+  "nodes": 1190,
+  "fonts": [
+   "Inter",
+   "Arial",
+   "Arial"
+  ],
+  "topBackgrounds": [
+   "rgb(16, 16, 20)",
+   "rgb(51, 191, 255)",
+   "rgba(255, 255, 255, 0.15)",
+   "rgb(255, 255, 255)",
+   "rgb(20, 24, 30)",
+   "rgba(16, 16, 20, 0.7)"
+  ],
+  "topText": [
+   "rgba(255, 255, 255, 0.95)",
+   "rgba(255, 255, 255, 0.65)",
+   "rgb(0, 0, 0)",
+   "rgb(10, 38, 51)",
+   "rgb(255, 255, 255)",
+   "rgb(0, 0, 238)"
+  ],
+  "buttons": 5,
+  "cards": 2,
+  "cssVariables": 2668,
+  "images": 60
+ },
+ {
+  "slug": "fortnite-developer",
+  "label": "Fortnite for Developers",
+  "url": "https://www.fortnite.com/developer",
+  "scrapedAt": "2026-11-16T07:29:11.695Z",
+  "title": "Fortnite for Developers: Build, Publish, Monetize Games",
+  "nodes": 720,
+  "fonts": [
+   "Inter",
+   "sans-serif",
+   "HeadingNowVariable",
+   "HeadingNowVariableItalic"
+  ],
+  "topBackgrounds": [
+   "rgba(255, 255, 255, 0.65)",
+   "rgba(255, 255, 255, 0.35)",
+   "rgb(247, 255, 25)",
+   "rgba(255, 255, 255, 0.15)",
+   "rgba(255, 255, 255, 0.05)",
+   "rgba(16, 16, 20, 0.7)"
+  ],
+  "topText": [
+   "rgb(255, 255, 255)",
+   "rgba(255, 255, 255, 0.65)",
+   "rgb(0, 0, 238)",
+   "rgb(0, 0, 0)",
+   "rgba(255, 255, 255, 0.75)",
+   "rgba(255, 255, 255, 0.35)"
+  ],
+  "buttons": 5,
+  "cards": 1,
+  "cssVariables": 2258,
+  "images": 13
+ }
+]

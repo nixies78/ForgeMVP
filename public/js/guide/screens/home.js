@@ -18,10 +18,9 @@ export function renderHome(ctx) {
   return frag(
     eyebrow('Design a Fortnite island, then build it'),
     pageTitle('Ready to make a game?'),
-    lead(
-      'Answer a short set of questions about the game you want. The guide narrows it to an exact game type, ' +
-        'lists the UEFN devices it needs with the settings to change, and shows how the loop fits together.'
-    ),
+    /* 1.2.0 replaced the three-clause explanation with the line that matches the screen: the choices are
+     * above it, and the saved games are below it. */
+    lead("Pick how you'd like to design it — or scroll down to pick up where you left off."),
 
     h(
       'div',

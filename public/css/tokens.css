@@ -1,18 +1,27 @@
-/* Fortnite style library — tokens.
+/* Unreal Forge — the palette, the scale and the treatments.
  *
- * Every value here is transcribed from support/FORTNITE_STYLE_LIBRARY.md, which in turn comes from
- * support/Library--Styles--Fortnite.png. guide.css consumes these names and hardcodes no hex value,
- * so retheming the app means editing this file alone.
+ * 1.2.0 reconciled the two colour systems this project used to carry. Until this release the shell
+ * declared its own spec palette in css/shell.css while this file carried the Fortnite poster palette
+ * (support/FORTNITE_STYLE_LIBRARY.md), which left the app with two palettes that were merely similar.
+ * There is now ONE palette, declared once, below, under the --ue-* names: the authentic Unreal/Epic
+ * values, read off the live library (support/library.html, written up from unrealengine.com,
+ * store.epicgames.com and fortnite.com/developer).
  *
- * Values marked [derived] are not on the poster: they are this project's decisions, made where an
- * application needs a state the marketing page never showed (hover, focus, pressed) or a size that
- * has to survive a phone screen.
+ * The layering is:
+ *   --ue-*  the palette itself. These are the only hex values in the app, with one deliberate
+ *           exception: shell.css keeps the Forge progress ramp's far end, which is not a library
+ *           colour and is retained on purpose.
+ *   --fn-*  the workspace's role tokens. They alias the palette, so guide.css still names roles
+ *           rather than colours - and guide.css still hardcodes nothing at all.
+ *
+ * Values marked [derived] are this project's own decisions, made where the library has no value: the
+ * type scale, the spacing step, the motion duration, the focus ring, and the 3px hover lift.
  */
 
-/* ---------- the two substitute faces, bundled so the app is offline and CDN-free ----------
- * The poster labels both as "editable font substitutes": Archivo Black approximates the heavy
- * display face, Inter the UI face. Archivo Black ships upright only, so the poster's italic display
- * styles are the browser's synthetic oblique. Licences travel with the files (assets/fonts). */
+/* ---------- the two faces, bundled so the app is offline and CDN-free ----------
+ * Inter is the library's UI and body face and ships here as one variable file. Archivo Black stands in
+ * for the display face the older admin and chat pages still use; the app itself is Inter throughout, in
+ * sentence case. Licences travel with the files (assets/fonts). */
 @font-face {
   font-family: "Archivo Black";
   src: url("../assets/fonts/archivo-black-latin.woff2") format("woff2");
@@ -29,55 +38,112 @@
 }
 
 :root {
-  /* ---------- 01 colour: the twelve sampled styles, under the poster's own role names ---------- */
-  --fn-canvas: #101014;            /* Canvas — page background */
-  --fn-surface-quiet: #18181C;     /* Surface / Footer */
-  --fn-surface-card: #26262A;      /* Surface / Card — news & resource cards */
-  --fn-surface-control: #3A3A3E;   /* Surface / Control — utility controls */
-  --fn-action: #F7FF19;            /* Action / Primary — the only bright fill in the UI */
-  --fn-action-secondary: #E2E2E3;  /* Action / Secondary */
-  --fn-text: #FFFFFF;              /* Text / Primary — headings & strong labels */
-  --fn-text-secondary: #C3C3C4;    /* Text / Secondary — supporting body copy */
-  --fn-text-muted: #AEAEB0;        /* Text / Muted — links & metadata */
-  --fn-on-action: #000000;         /* Text / On action — labels on bright buttons */
-  --fn-border: #3A3A3E;            /* Border / Subtle — dividers & outlines. Decorative only:
-                                    * at 1.7:1 it is below the 3:1 WCAG asks of a meaningful
-                                    * boundary, so anything that carries meaning uses
-                                    * --fn-border-strong instead (8.6:1). */
-  --fn-text-disabled: #505053;     /* Text / Disabled. WCAG exempts disabled controls from
-                                    * contrast minimums, so this must only ever label a control
-                                    * that is genuinely disabled. */
+  /* ============================== 01 the palette, declared once ==============================
+   * Every value below is published by Epic: the neutrals are the store's neutral ramp, the white
+   * steps are its text and fill alphas, and the accent is the primary action measured on
+   * unrealengine.com. Nothing here is invented, and nothing here is Fortnite's. */
 
-  /* [derived] States the poster has no colour for. The palette offers no second hue, so hover and
-   * pressed are steps of the same surface rather than a new colour.
-   *
-   * Hover needs no colour at all any more: it strengthens the border and lifts the element, so the four
-   * fill-step tokens it used to need were removed rather than left lying around. Only the pressed fill
-   * of the accent remains a colour. */
-  --fn-border-strong: #AEAEB0;
-  --fn-action-pressed: #D2DA00;
-  --fn-canvas-inset: #0A0A0D;
-  --fn-selected: #1C1C20;
+  /* Neutrals: the surfaces the interface actually sits on. This is the semantic subset of the store's
+   * published neutral ramp rather than the whole of it - support/library.html writes up every published
+   * step - and every step kept here is read by one of the two stylesheets, because a token nothing reads
+   * is how a palette turns into folklore. */
+  --ue-canvas: #101014;            /* the page */
+  --ue-elevated-low: #18181C;      /* the footer, which is a band rather than a box */
+  --ue-elevated-medium: #202024;   /* controls, wells, and the body gradient's middle stop */
+  --ue-selected: #28282C;          /* what the store paints a current nav item with */
 
-  /* [derived] Hover is a border colour and a lift, never a fill. A hover that repaints the surface is
-   * what made card text unreadable, and it is the one state change that can move text onto a
-   * background it was never measured against — so it is not allowed to change any fill at all. */
+  /* The box, as 1.2.1 reconciled it against the store's own metrics: one base fill for every panel and
+   * every interactive surface, one hover step, one subtle edge. These two are the library's translucent
+   * steps flattened onto the canvas - 5% and 10% white over #101014 - which is why they read as new greys
+   * rather than as alphas; being opaque, a panel also stops drifting as it crosses the body gradient. */
+  --ue-surface-panel: #1C1C20;       /* a panel, a card, a list row, at rest */
+  --ue-surface-panel-hover: #28282C; /* and the same box under the pointer */
+
+  /* Translucent layers. Depth on a dark canvas is drawn with alphas, not with new greys. */
+  --ue-material: #101014D9;        /* the canvas at 85%: the sticky bar's material */
+  --ue-scrim: #00000059;           /* 35% black: an inset well, composited over whatever is behind */
+  /* The fixed header's tint. Written as an rgba() triple rather than as a color-mix() of the canvas,
+   * because the architecture spec names this exact value and a mix serialises as color(srgb ...) - the
+   * same colour on screen, a different value in the DOM, and the spec and its checks both read it.
+   * 1.2.2 eased it from 95% to 90%: the header now carries the same backdrop blur as the sticky app
+   * sub-header, and a blur behind an almost-opaque tint is a blur nobody can see. */
+  --ue-canvas-header: rgba(16, 16, 20, 0.90);
+
+  /* Text: the library's four steps, which are also what keeps contrast predictable. */
+  --ue-white: #FFFFFF;
+  --ue-text: #FFFFFFF2;            /* 95% - strong labels and headings (17.1:1 on the canvas) */
+  --ue-text-secondary: #FFFFFFBF;  /* 75% - supporting copy (10.8:1) */
+  --ue-text-muted: #FFFFFFA6;      /* 65% - links and metadata (8.3:1) */
+  --ue-text-disabled: #FFFFFF59;   /* 35% - genuinely disabled controls only */
+
+  /* Fills: the published translucent steps that are not a box's own surface. "Subtle" carries secondary
+   * controls. Hover strengthens the fill and the press returns it to rest, so a press reads as a down
+   * rather than as a further up. */
+  --ue-fill-subtle: #FFFFFF26;       /* 15% - a secondary control at rest */
+  --ue-fill-subtle-hover: #FFFFFF59; /* 35% - and on hover */
+
+  /* Borders. The subtle step is 1.2.1's panel edge: 15% white over the canvas, flattened, which is 1.5:1 -
+   * decoration, and it may never be the only thing that says "this is a control". That job belongs to the
+   * strong step (3.5:1), whose hover step is 8.3:1. */
+  --ue-border-subtle: #343437;
+  --ue-border-strong: #FFFFFF59;
+  --ue-border-strong-hover: #FFFFFFA6;
+
+  /* The accent: Unreal Engine's primary action, with the library's hover and press steps. */
+  --ue-accent: #26BBFF;
+  --ue-accent-hover: #69D0FF;
+  --ue-accent-press: #33BFFF;
+  --ue-on-accent: #101014;         /* the dark label: 8.7:1 at rest, 11.5:1 on the hover fill */
+
+  /* The two published hue families the progress ramp runs between, named the way the library names them
+   * (family + weight). 1.2.1 moved the ramp off Forge's own cyan-to-yellow onto blue-400 and indigo-400,
+   * which makes these the only two hue steps the app takes from the palette rather than from a role. */
+  --ue-palette-blue-400: #33BFFF;
+  --ue-palette-indigo-400: #868AFD;
+
+  /* Status. The workspace states status in words rather than in hue; this is the shell's indicator. */
+  --ue-warning: #F7D82B;
+
+  /* ============================== 02 the workspace's roles ==============================
+   * What the guide calls each surface and each step. Aliases only - no values. */
+
+  --fn-canvas: var(--ue-canvas);
+  --fn-canvas-inset: var(--ue-scrim);
+
+  --fn-surface-panel: var(--ue-surface-panel);         /* a panel, a card, a tracker row */
+  --fn-surface-panel-hover: var(--ue-surface-panel-hover);
+  --fn-surface-control: var(--ue-elevated-medium);     /* inputs, wells, image slots */
+  --fn-surface-subtle: var(--ue-fill-subtle);          /* a secondary control's fill */
+  --fn-surface-subtle-hover: var(--ue-fill-subtle-hover);
+  --fn-selected: var(--ue-selected);
+
+  --fn-action: var(--ue-accent);
+  --fn-action-hover: var(--ue-accent-hover);
+  --fn-action-pressed: var(--ue-accent-press);
+  --fn-on-action: var(--ue-on-accent);
+  --fn-action-secondary: var(--ue-border-strong);      /* the informational left rule */
+
+  --fn-text: var(--ue-text);
+  --fn-text-secondary: var(--ue-text-secondary);
+  --fn-text-muted: var(--ue-text-muted);
+  --fn-text-disabled: var(--ue-text-disabled);
+
+  --fn-border: var(--ue-border-subtle);                /* a panel's edge, and a card's at rest */
+  --fn-border-strong: var(--ue-border-strong);         /* anything that carries meaning, and a card on hover */
+  --fn-border-strong-hover: var(--ue-border-strong-hover);
+
+  /* [derived] The interactive-surface hover: the surface repaints, so it lifts as well. A control
+   * does not lift - the library's controls change their fill and nothing else. */
   --fn-lift: 3px;
-  --fn-shadow-hover: 0 8px 20px color-mix(in srgb, var(--fn-on-action) 50%, transparent);
-  --fn-shadow-hover-tight: 0 4px 12px color-mix(in srgb, var(--fn-on-action) 45%, transparent);
+  --fn-shadow-hover: 0 8px 20px color-mix(in srgb, var(--ue-canvas) 80%, transparent);
+  --fn-shadow-hover-tight: 0 4px 12px color-mix(in srgb, var(--ue-canvas) 70%, transparent);
 
-  /* ---------- 02 typography: the eight reconstructed text styles ---------- */
-
-  /* The display face is kept because support/FORTNITE_STYLE_LIBRARY.md documents it as the poster's
-   * editable substitute, and the older admin and chat pages still use it. The app itself no longer
-   * does: the architecture spec (v2) names Inter for headings and for body/UI alike, in sentence case,
-   * so every heading and label in guide.css uses --fn-font-ui. */
+  /* ============================== 03 typography ==============================
+   * The library's scale in the sizes this app needs. [derived] below the first two steps: the poster's
+   * steps were set in heavy caps, and sentence case in Inter reads larger at the same px. */
   --fn-font-display: "Archivo Black", "Arial Black", "Segoe UI", system-ui, sans-serif;
   --fn-font-ui: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
 
-  /* [derived] Sizes for headlines set in Inter, sentence case rather than in the poster's heavy caps:
-   * the same steps, tightened a little because sentence case reads larger at the same px. Clamped down
-   * for narrow screens. Lead, Body, Navigation, Action and Metadata keep their poster size. */
   --fn-display-size: clamp(28px, 4.6vw, 44px);
   --fn-display-line: 1.14;
   --fn-section-size: clamp(21px, 2.6vw, 30px);
@@ -95,16 +161,20 @@
   --fn-meta-size: 10px;
   --fn-meta-line: 1.4;
 
-  /* [derived] Inter wants almost no tracking at display sizes; uppercase metadata is tracked out. */
+  /* The library's tracking rule: type loses letterspace as it grows, and gains it as it shrinks. */
   --fn-display-tracking: -0.012em;
   --fn-section-tracking: -0.008em;
   --fn-meta-tracking: 0.14em;
 
-  /* ---------- 03 treatments ---------- */
-  --fn-radius-button: 8px;   /* poster rule: 8 px button radius */
-  --fn-radius-card: 10px;    /* poster rule: 10 px card radius */
+  /* ============================== 04 treatments ============================== */
+  --fn-radius-button: 8px;   /* the library's control radius: buttons, inputs, list chips */
+  /* 1.2.2 raised the box radius to the published 16px container step (the store's own "parent" radii are
+   * 16px: navigation-radius-object-parent, selection-radius-parent-xl). Controls stay at 8px, which is what
+   * the library measures for its buttons and nav items - and what keeps a 32px-tall button from reading as
+   * a pill. */
+  --fn-radius-card: 16px;
 
-  /* [derived] 4 px base step. The poster fixes no spacing scale, only "generous negative space". */
+  /* [derived] 4 px base step: a spacing scale is 4 px based in every Epic surface measured. */
   --fn-space-1: 4px;
   --fn-space-2: 8px;
   --fn-space-3: 12px;
@@ -115,14 +185,15 @@
   --fn-space-8: 64px;
   --fn-space-9: 96px;
 
-  --fn-screen-top: clamp(28px, 6vw, 56px); /* [derived] room above a screen title, desktop down to
-                                            * phone width; the poster fixes no vertical rhythm */
-  --fn-measure: 68ch;       /* [derived] comfortable line length for body copy */
-  --fn-content-max: 1120px; /* [derived] the wizard's content column */
+  --fn-screen-top: clamp(28px, 6vw, 56px);
+  --fn-measure: 68ch;
+  /* The column itself belongs to the frame (--sh-content-max, in shell.css) and reaches into the
+   * workspace through .sh-app-body. The 1120px token that used to sit here was read by nothing and
+   * contradicted the real column, so it is gone rather than left to mislead. */
 
-  /* The core-loop diagram (js/guide/render/loop.js) reads these, so the drawing inherits the
-   * palette instead of carrying its own copy of it. */
-  --loop-fill: var(--fn-surface-quiet);
+  /* The core-loop diagram (js/guide/render/loop.js) reads these, so the drawing inherits the palette
+   * instead of carrying its own copy of it. */
+  --loop-fill: var(--fn-surface-panel);
   --loop-stroke: var(--fn-border);
   --loop-text: var(--fn-text);
   --loop-muted: var(--fn-text-secondary);
@@ -137,8 +208,8 @@
 }
 :root { --fn-motion: 0.15s; }
 
-/* [derived] Paper is not the Fortnite palette. Printing a device plan means maximum contrast on white,
- * so the screen colours are overridden wholesale — but the values still live here rather than in
+/* [derived] Paper is not the Unreal palette. Printing a device plan means maximum contrast on white, so
+ * the screen colours are overridden wholesale - but the values still live here rather than in
  * guide.css, so every raw colour in the app is defined in exactly one file. */
 :root {
   --fn-print-ink: #000000;

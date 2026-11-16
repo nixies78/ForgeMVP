@@ -1,0 +1,2002 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Epic front-end design library — Unreal Engine, Epic Games Store, Fortnite for Developers</title>
+<meta name="description" content="A design library extracted by inspecting unrealengine.com, store.epicgames.com and fortnite.com/developer: named colour tokens, typography, components, remote asset links and copy-paste CSS.">
+<style>
+  /* The document wears the library. These three faces are hotlinked from Epic's component host, which
+   * serves them with `Access-Control-Allow-Origin: *` — the same files the three sites use. If the CDN is
+   * unreachable the stack falls through to a locally installed Inter. */
+  @font-face {
+    font-family: Inter;
+    font-weight: 400;
+    font-display: swap;
+    src: local("Inter Regular"), url("https://components.unrealengine.com/fonts/inter/Inter-Regular.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: Inter;
+    font-weight: 500;
+    font-display: swap;
+    src: local("Inter Medium"), url("https://components.unrealengine.com/fonts/inter/Inter-Medium.woff2") format("woff2");
+  }
+  @font-face {
+    font-family: "Inter Tight";
+    font-weight: 700;
+    font-display: swap;
+    src: local("Inter Tight Bold"), url("https://components.unrealengine.com/fonts/inter/InterTight-Bold.woff2") format("woff2");
+  }
+
+  /* The document is its own specimen: it is built from the palette, type scale and component
+   * treatments it documents. Every value below is one of the extracted values, cross-referenced in
+   * the tables, so if a swatch here looks wrong the entry that produced it is wrong too. */
+  :root {
+    /* Canvas — Epic Games Store published tokens, verbatim names */
+    --l-bg: #101014;
+    --l-bg-raised: #18181c;
+    --l-bg-raised-2: #202024;
+    --l-bg-raised-3: #303034;
+    --l-line: #ffffff26;
+    --l-line-strong: #ffffff59;
+    --l-fill-subtle: #ffffff0d;
+    --l-fill-subtle-2: #ffffff1a;
+    /* Text */
+    --l-text: #fffffff2;
+    --l-text-2: #ffffffa6;
+    --l-text-3: #ffffff59;
+    /* Per-property accents, as measured on each site */
+    --l-ue: #26bbff;
+    --l-store: #33bfff;
+    --l-fortnite: #f7ff19;
+    --l-ok: #5fe367;
+    --l-warn: #f7d82b;
+    --l-bad: #fd5e5e;
+    /* Type — Unreal Engine / Store scale */
+    --l-ui: 14px;
+    --l-tracking: .02em;
+    --l-radius: 8px;
+    --l-radius-card: 12px;
+    --l-ease: cubic-bezier(.65, 0, .35, 1);
+    --l-fast: .12s;
+    --l-font: Inter, "Inter Tight", ui-sans-serif, system-ui, "Segoe UI", Arial, sans-serif;
+    --l-mono: ui-monospace, "Cascadia Mono", "SF Mono", Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  body {
+    margin: 0;
+    background: var(--l-bg);
+    color: var(--l-text);
+    font-family: var(--l-font);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Layout: single column that grows a sticky table of contents when there is room for one. */
+  .doc { display: grid; grid-template-columns: 1fr; gap: 0 48px; max-width: 1560px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 1100px) { .doc { grid-template-columns: 264px minmax(0, 1fr); padding: 0 40px; } }
+
+  .toc { align-self: start; position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 28px 0 40px; font-size: 13px; line-height: 1.5; }
+  @media (max-width: 1099.9px) { .toc { position: static; max-height: none; padding-bottom: 0; } }
+
+  main { min-width: 0; padding: 28px 0 96px; }
+
+  /* Header band */
+  .doc-head { border-bottom: 1px solid var(--l-line); padding: 56px 0 32px; margin-bottom: 8px; }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--l-ue); border: 1px solid #26bbff4d; background: #26bbff14; border-radius: 9999px; padding: 4px 12px; margin: 0 0 20px; }
+  .brands { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 24px; font-size: 12px; color: var(--l-text-2); }
+  .brands img { display: block; height: 20px; width: auto; }
+  h1 { font-family: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif; font-size: clamp(28px, 3.2vw, 40px); line-height: 1.15; letter-spacing: -.02em; font-weight: 700; margin: 0 0 16px; max-width: 22ch; }
+  .lede { font-size: 18px; line-height: 1.6; color: var(--l-text-2); max-width: 68ch; margin: 0 0 28px; }
+
+  h2 { font-family: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif; font-size: 24px; line-height: 1.25; letter-spacing: -.015em; font-weight: 700; margin: 64px 0 4px; padding-top: 24px; border-top: 1px solid var(--l-line); }
+  h2:first-of-type { margin-top: 40px; }
+  h3 { font-size: 18px; line-height: 1.35; font-weight: 700; letter-spacing: -.005em; margin: 40px 0 4px; }
+  h4 { font-size: 14px; font-weight: 500; letter-spacing: .02em; text-transform: uppercase; color: var(--l-text-2); margin: 28px 0 8px; }
+  h2 + p, h3 + p, h4 + p { margin-top: 8px; }
+  p { margin: 12px 0; max-width: 76ch; }
+  a { color: var(--l-store); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  a:focus-visible, summary:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+  code { font-family: var(--l-mono); font-size: .88em; background: var(--l-fill-subtle); border: 1px solid var(--l-line); border-radius: 4px; padding: 1px 5px; }
+  ul, ol { max-width: 76ch; padding-left: 22px; }
+  li { margin: 6px 0; }
+  strong { font-weight: 700; }
+  .muted { color: var(--l-text-2); }
+  .small { font-size: 13px; line-height: 1.55; }
+  hr { border: 0; border-top: 1px solid var(--l-line); margin: 40px 0; }
+
+  /* Code blocks: the payload of this document, so they get the most contrast and the least chrome. */
+  pre { position: relative; background: #0b0b0b; border: 1px solid var(--l-line); border-radius: var(--l-radius); padding: 14px 16px; overflow-x: auto; margin: 12px 0 4px; }
+  pre code { background: none; border: 0; padding: 0; font-size: 12.5px; line-height: 1.65; color: #e8e8ea; white-space: pre; }
+  .code-note { font-size: 12px; color: var(--l-text-3); margin: 6px 0 0; }
+  .copy { position: absolute; top: 8px; right: 8px; font: inherit; font-size: 11px; letter-spacing: .02em; color: var(--l-text-2); background: var(--l-fill-subtle-2); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 9px; cursor: pointer; opacity: 0; transition: opacity var(--l-fast) var(--l-ease), color var(--l-fast) var(--l-ease), border-color var(--l-fast) var(--l-ease); }
+  pre:hover .copy, .copy:focus-visible { opacity: 1; }
+  .copy:hover { color: #fff; border-color: var(--l-line-strong); }
+  .copy[data-copied="true"] { color: var(--l-fill-subtle); color: #fff; border-color: #26bbff; opacity: 1; }
+
+  /* Tables: hairline rows, no zebra, numbers align right where they are numbers. */
+  .table-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--l-line); border-radius: var(--l-radius); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.5; }
+  caption { caption-side: top; text-align: left; font-size: 12px; color: var(--l-text-3); padding: 0 0 8px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--l-line); vertical-align: top; }
+  thead th { font-weight: 500; font-size: 12px; letter-spacing: .02em; text-transform: uppercase; color: var(--l-text-2); background: var(--l-fill-subtle); position: sticky; top: 0; }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td code { white-space: nowrap; }
+
+  /* Swatches */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 10px; margin: 16px 0; }
+  .sw { border: 1px solid var(--l-line); border-radius: var(--l-radius); overflow: hidden; background: var(--l-fill-subtle); }
+  .sw-chip { height: 56px; }
+  .sw-body { padding: 8px 10px 10px; }
+  .sw-name { display: block; font-size: 12px; font-weight: 500; word-break: break-word; }
+  .sw-hex { display: block; font-family: var(--l-mono); font-size: 11.5px; color: var(--l-text-2); }
+  .sw-use { display: block; font-size: 11px; color: var(--l-text-3); margin-top: 4px; }
+  /* Palette ramp: one row per hue, seven steps left to right, 100 → 700. */
+  .ramp { display: block; margin: 16px 0 8px; }
+  .ramp-row { display: grid; grid-template-columns: 76px minmax(0, 1fr); align-items: center; gap: 10px; font-size: 12px; margin-bottom: 3px; }
+  .ramp-cells { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+  .ramp-cell { height: 36px; border-radius: 3px; display: block; }
+  .ramp-labels { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; font-size: 10px; color: var(--l-text-3); margin-top: 4px; }
+  .ramp-labels .ramp-cells span { text-align: center; }
+  .ramp-hex { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 10px; font-size: 10px; color: var(--l-text-3); margin: 2px 0 12px; }
+  .ramp-hex .ramp-cells { font-family: var(--l-mono); }
+  .ramp-hex .ramp-cells span { text-align: center; overflow: hidden; }
+
+  /* Callouts: the same status palette the library documents. */
+  .note { border: 1px solid var(--l-line); border-left: 3px solid var(--l-ue); background: var(--l-fill-subtle); border-radius: 0 var(--l-radius) var(--l-radius) 0; padding: 12px 16px; margin: 16px 0; font-size: 14px; }
+  .note.warn { border-left-color: var(--l-warn); }
+  .note.bad { border-left-color: var(--l-bad); }
+  .note.ok { border-left-color: var(--l-ok); }
+  .note p:first-child { margin-top: 0; }
+  .note p:last-child { margin-bottom: 0; }
+  .note strong { display: block; margin-bottom: 2px; }
+
+  /* Live specimens. The header specimen is the extracted component rebuilt in the document. */
+  .specimen { border: 1px solid var(--l-line); border-radius: var(--l-radius-card); overflow: hidden; margin: 16px 0; background: var(--l-bg); }
+  .specimen-label { font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--l-text-3); padding: 8px 12px; border-bottom: 1px solid var(--l-line); background: var(--l-fill-subtle); }
+  .specimen-stage { padding: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .specimen-stage.dark { background: #0b0b0b; }
+  .specimen-stage.stack { display: block; }
+
+  /* Component primitives, named as in the library (these are the doc's own components, matching
+   * the extracted measurements). */
+  .x-btn { font: inherit; font-size: var(--l-ui); font-weight: 500; letter-spacing: var(--l-tracking); border: 0; border-radius: var(--l-radius); padding: 8px 16px; cursor: pointer; }
+  .x-btn-primary-ue { background: var(--l-ue); color: var(--l-bg); }
+  .x-btn-primary-store { background: #fff; color: #000000f2; border-radius: 10px; }
+  .x-btn-primary-fn { background: var(--l-fortnite); color: #000; border-radius: 6px; }
+  .x-btn-secondary { background: var(--l-fill-subtle-2); color: var(--l-text); }
+  .x-btn-ghost { background: transparent; border: 1px solid var(--l-line-strong); color: #fff; }
+  .x-chip { font: inherit; font-size: 12px; border: 0; border-radius: 9999px; padding: 4px 12px; background: var(--l-fill-subtle-2); color: #fff; cursor: pointer; }
+  .x-search { display: inline-flex; align-items: center; gap: 8px; background: var(--l-bg-raised-2); border-radius: 9999px; padding: 0 16px; height: 40px; width: 230px; font-size: 14px; color: var(--l-text-2); }
+  .x-card { width: 100%; max-width: 320px; background: #ffffff0d; border: 1px solid #ffffff0d; border-radius: 24px; padding: 20px; }
+  .x-card h5 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+  .x-card p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--l-text-2); }
+  .x-card-store { background: #14181e; border-color: var(--l-line); border-radius: 12px; }
+  .x-header { display: flex; align-items: center; gap: 16px; height: 72px; padding: 0 20px; background: rgba(16, 16, 20, .95); border-bottom: 1px solid var(--l-line); }
+  .x-header img { height: 22px; }
+  .x-header .spacer { flex: 1 1 auto; }
+  .x-header-nav { display: flex; gap: 4px; }
+  .x-header-nav a { color: #fff; font-size: 16px; padding: 4px 12px; border-radius: 6px; }
+  .x-header-nav a:hover { background: var(--l-fill-subtle-2); text-decoration: none; }
+  .x-signin { font-size: 14px; font-weight: 500; letter-spacing: var(--l-tracking); color: #fff; background: var(--l-fill-subtle-2); border-radius: 6px; padding: 6px 12px; }
+  .x-iconbtn { width: 32px; height: 32px; display: grid; place-items: center; border: 0; background: transparent; border-radius: 6px; color: #fff; cursor: pointer; }
+  .x-iconbtn:hover { background: var(--l-fill-subtle-2); }
+  .x-focus:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px; }
+
+  /* Type specimens */
+  .type-specimen { border-bottom: 1px solid var(--l-line); padding: 16px 0; }
+  .type-specimen:last-child { border-bottom: 0; }
+  .type-specimen .meta { font-family: var(--l-mono); font-size: 11.5px; color: var(--l-text-3); margin-top: 6px; }
+
+  /* Remote asset gallery */
+  .assets { display: grid; grid-template-columns: repeat(auto-fill, minmax(252px, 1fr)); gap: 12px; margin: 16px 0; }
+  .asset { border: 1px solid var(--l-line); border-radius: var(--l-radius); background: var(--l-fill-subtle); padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .asset-stage { min-height: 64px; display: grid; place-items: center; background: #0b0b0b; border-radius: 6px; padding: 8px; }
+  .asset-stage img { max-width: 100%; max-height: 56px; }
+  .asset-meta { font-size: 11px; line-height: 1.55; color: var(--l-text-2); overflow-wrap: anywhere; }
+  .asset-meta b { color: var(--l-text); font-weight: 500; }
+  .pill { display: inline-block; font-size: 10.5px; letter-spacing: .03em; text-transform: uppercase; border-radius: 9999px; padding: 1px 7px; border: 1px solid var(--l-line); color: var(--l-text-2); }
+  .pill.ok { color: var(--l-ok); border-color: #5fe3674d; background: #5fe36714; }
+  .pill.warn { color: var(--l-warn); border-color: #f7d82b4d; background: #f7d82b14; }
+  .pill.bad { color: var(--l-bad); border-color: #fd5e5e4d; background: #fd5e5e14; }
+
+  .toc h2 { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--l-text-3); border: 0; margin: 0 0 8px; padding: 0; }
+  .toc ol { list-style: none; margin: 0 0 18px; padding: 0; }
+  .toc li { margin: 0; }
+  .toc a { display: block; color: var(--l-text-2); padding: 3px 0; }
+  .toc a:hover { color: #fff; text-decoration: none; }
+  .toc .sub a { padding-left: 12px; font-size: 12px; color: var(--l-text-3); }
+
+  footer.doc-foot { border-top: 1px solid var(--l-line); margin-top: 64px; padding: 24px 0 0; font-size: 12px; color: var(--l-text-3); max-width: 76ch; }
+
+  @media print {
+    .toc, .copy { display: none; }
+    body { background: #fff; color: #000; }
+    pre { background: #f4f4f5; border-color: #ccc; }
+    pre code { color: #111; }
+    h2 { border-top-color: #ccc; }
+    a { color: #000; text-decoration: underline; }
+  }
+</style>
+</head>
+<body>
+<div class="doc">
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#method">1 · How this was collected</a></li>
+      <li><a href="#shared">2 · The shared layer</a></li>
+      <li class="sub"><a href="#shared-nav">2.1 The global header component</a></li>
+      <li class="sub"><a href="#shared-theme">2.2 Its theming API</a></li>
+      <li class="sub"><a href="#shared-geometry">2.3 Measured geometry</a></li>
+      <li class="sub"><a href="#shared-state">2.4 State, breakpoints, motion</a></li>
+      <li><a href="#colour">3 · Colour</a></li>
+      <li class="sub"><a href="#colour-store">3.1 The published token system</a></li>
+      <li class="sub"><a href="#colour-observed">3.2 Observed per-site palettes</a></li>
+      <li class="sub"><a href="#colour-contrast">3.3 Contrast</a></li>
+      <li class="sub"><a href="#colour-rules">3.4 Rules of use</a></li>
+      <li><a href="#type">4 · Typography</a></li>
+      <li class="sub"><a href="#type-families">4.1 Families</a></li>
+      <li class="sub"><a href="#type-scale">4.2 Scales</a></li>
+      <li class="sub"><a href="#type-rules">4.3 Rules of use</a></li>
+      <li><a href="#components">5 · Components</a></li>
+      <li class="sub"><a href="#comp-buttons">5.1 Buttons and actions</a></li>
+      <li class="sub"><a href="#comp-inputs">5.2 Inputs and search</a></li>
+      <li class="sub"><a href="#comp-surfaces">5.3 Surfaces and cards</a></li>
+      <li class="sub"><a href="#comp-nav">5.4 Navigation and sub-navigation</a></li>
+      <li class="sub"><a href="#comp-chrome">5.5 Footer, badges, overlay, avatar</a></li>
+      <li class="sub"><a href="#comp-focus">5.6 Focus, states and motion</a></li>
+      <li class="sub"><a href="#comp-glow">5.7 The ambient image glow</a></li>
+      <li><a href="#assets">6 · Remote assets</a></li>
+      <li><a href="#forge">7 · Where this meets Forge</a></li>
+      <li><a href="#appendix">8 · Method, files, reproduction</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="doc-head">
+      <p class="eyebrow">Design library · v1</p>
+      <p class="brands">
+        Extracted from
+        <img src="https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R" alt="Unreal Engine">
+        <span class="muted">www.unrealengine.com · store.epicgames.com · www.fortnite.com/developer</span>
+      </p>
+      <h1>What Epic's front ends are actually built from</h1>
+      <p class="lede">
+        Three properties, one component library. This is a measured study of the colour tokens, type scales and
+        components behind Unreal Engine, the Epic Games Store and Fortnite for Developers — the names the systems
+        use for themselves, the values the browser computes, the CSS that recreates each entry, and the rules for
+        using it. Everything here was read off the live pages in a real browser, not copied from a brand guide.
+      </p>
+      <p class="small muted">
+        Collected 16 November 2026 · headless Chrome 157 at 1440×1000 and 390×1000 CSS px · 4,041 rendered elements
+        inspected across the three pages · 2,668 + 2,258 published custom properties read · 61 remote asset URLs
+        checked, 42 of them confirmed loaded by the browser.
+      </p>
+    </header>
+
+    <h2 id="method">1 · How this was collected</h2>
+    <p>
+      The three pages were loaded in headless Chrome, allowed to hydrate, and then read through the DOM and the
+      CSSOM. Nothing was inferred from screenshots alone and nothing was taken from documentation: every value
+      below is either a declaration found on a live stylesheet or a <code>getComputedStyle</code> result on a
+      rendered element. The scraper that does this is <code>tools/design-library-scrape.mjs</code>, and the raw
+      dumps it produced are in <code>support/library-data/</code>.
+    </p>
+
+    <h4>What was measured</h4>
+    <ul>
+      <li><strong>Declarations</strong> — every custom property on every readable stylesheet, with the selector that declares it, so a token can be attributed to <code>:root</code> or to one component's class.</li>
+      <li><strong>Computed styles</strong> — font family, size, weight, line-height, letter-spacing and text-transform for headings, body copy, links, buttons and inputs; colour, background, border, radius, padding and shadow for every rendered element, tallied by frequency.</li>
+      <li><strong>Components</strong> — button, input, card and navigation treatments grouped by their full computed signature, so two buttons are "the same button" only if every property matches.</li>
+      <li><strong>Assets</strong> — favicons, manifests, social images, <code>@font-face</code> files, inline SVG marks and CSS-drawn art, each then re-requested to confirm it resolves.</li>
+      <li><strong>The composed tree</strong> — shadow roots included. This turned out to matter more than anything else in the study; see §2.</li>
+    </ul>
+
+    <h4>Known limits, stated plainly</h4>
+    <ul>
+      <li><strong>This is a derived study, not an Epic Games brand kit.</strong> Trademarks, logos and typefaces belong to Epic Games. The names in §3.1 and the CSS in §2.2 are quoted from public stylesheets for reference and comparison; treat hotlinked assets in §6 as reference material, not as licensed production dependencies.</li>
+      <li><strong>OneTrust was excluded.</strong> All three sites load the same OneTrust consent overlay, which injects its own palette and type (12.25px headings, <code>#555</code> text, its own buttons). It appears in every page's DOM and would have contaminated the census; its nodes are filtered out by id and class.</li>
+      <li><strong>Two viewports, not a matrix.</strong> The type tables give 1440px and 390px values. Two of the three sites derive some sizes fluidly, so intermediate widths sit between the two columns; Fortnite's fluid sizes are reported as the fractional pixels the browser computed.</li>
+      <li><strong>Page-specific chrome is labelled as such.</strong> Where a value comes from one property's own page layout rather than the shared library — the store's 100px department bar, the Fortnite sub-nav — the entry says so.</li>
+      <li><strong>Bot-walled files.</strong> Files served from <code>www.unrealengine.com</code>, <code>store.epicgames.com</code> and <code>www.fortnite.com</code> answer a scripted request with 403 while loading normally in a browser. Those URLs were verified from inside the page instead, and are marked in §6.</li>
+    </ul>
+
+    <h2 id="shared">2 · The shared layer</h2>
+    <p>
+      The headline finding is structural. The header on all three sites is the <em>same web component</em>, shipped
+      from <code>components.unrealengine.com</code> and mounted under a different tag name on each property:
+      <code>&lt;unrealengine-navigation&gt;</code>, <code>&lt;egs-navigation&gt;</code>,
+      <code>&lt;fortnite-navigation&gt;</code>. Each renders its contents inside a shadow root, which is why a
+      conventional scrape of the page — including the one this document started from — sees a header-sized gap and
+      an unstyled nav.
+    </p>
+    <p>
+      Inside the shadow root the structure is identical, and so are the custom properties the component declares.
+      The component is themed from outside by those properties, and each property passes in its own accent: the
+      Fortnite page sets <code>--color-fill-primary-default: #f7ff19</code> on the host and the same component
+      turns yellow.
+    </p>
+
+    <h3 id="shared-nav">2.1 The global header component</h3>
+    <p>
+      Read verbatim from the shadow stylesheet (<code>support/library-data/*-navigation.css</code>), this is the
+      host contract. One rule sets the height the whole ecosystem uses:
+    </p>
+<pre><code>:host {
+  --header-height: 4.5rem;   /* 72px — measured on all three sites */
+  width: 100%;
+  height: var(--header-height);
+  font-family: Inter, sans-serif;
+  display: flex;
+}
+
+:host([sticky="true"]), :host([sticky=""]) {
+  z-index: var(--header-z-index, 9000);
+  position: sticky;
+  top: 0;
+}
+
+.global-header  { /* the flex row inside the shadow root */
+  --header-padding-block: 1.25rem;      /* 20px */
+  --header-padding-inline: 1.25rem;     /* 20px */
+  --drawer-main-cta-height: 5.875rem;
+  --drawer-toolbar-height: 3.25rem;
+  --drawer-padding-inline: 4rem;
+}
+@media (max-width: 719.9px) {
+  .global-header { --header-padding-block: 0; --header-padding-inline: 1rem; }
+}
+.toolbar {
+  padding-block: .25rem;
+  padding-inline: var(--header-padding-inline);
+}</code></pre>
+    <p class="code-note">Every declaration above is quoted from the captured component stylesheet; the comments give the measured pixel value.</p>
+
+    <div class="specimen">
+      <p class="specimen-label">Specimen — the extracted component rebuilt with its own measurements</p>
+      <div class="specimen-stage" style="padding:0">
+        <div class="x-header" style="width:100%">
+          <img src="https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R" alt="Brand mark">
+          <nav class="x-header-nav"><a href="#shared-nav">Products</a><a href="#shared-nav">Community</a><a href="#shared-nav">Learning</a></nav>
+          <span class="spacer"></span>
+          <span class="x-search" role="img" aria-label="Search field, 230×40, pill">Search</span>
+          <button class="x-iconbtn x-focus" type="button" aria-label="Account">
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M4.8 20.2a7.6 7.6 0 0 1 14.4 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+          <span class="x-signin">Sign in</span>
+          <button class="x-btn x-btn-primary-ue x-focus" type="button">Get Unreal Engine</button>
+        </div>
+      </div>
+    </div>
+    <p class="small muted">
+      The order on every property is: mark, primary nav, spacer, search, icon buttons, secondary action, primary
+      action. The mark is a separate component (<code>&lt;epic-wf-property-logo&gt;</code>) so a property can
+      co-brand without touching the header.
+    </p>
+
+    <h3 id="shared-theme">2.2 Its theming API</h3>
+    <p>
+      The component never hard-codes a colour it might need to change. It reads themed values through
+      <code>var(--token, fallback)</code>, which means it renders correctly with no styling at all and is
+      re-skinned from the outside. These are all 22 hooks it declared, with the fallbacks it ships:
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Every custom property the shared header reads, as declared in its shadow stylesheet.</caption>
+        <thead><tr><th>Property</th><th>Built-in fallback</th><th>What it controls</th></tr></thead>
+        <tbody>
+          <tr><td><code>--header-height</code></td><td><code>4.5rem</code></td><td>Host height, and the basis of the drawer's height. 72px everywhere.</td></tr>
+          <tr><td><code>--header-z-index</code></td><td><code>9000</code></td><td>Stacking for the sticky variant; the skip-link sits above it at 9001.</td></tr>
+          <tr><td><code>--color-background-default</code></td><td><code>#101014</code></td><td>Header and drawer surface, and the toolbar back-strip.</td></tr>
+          <tr><td><code>--color-background-transparent-default</code></td><td><code>#101014b3</code></td><td>Translucent header over hero art.</td></tr>
+          <tr><td><code>--color-text-primary</code></td><td><code>#fff</code></td><td>Nav labels, icon buttons.</td></tr>
+          <tr><td><code>--color-text-secondary</code></td><td><code>#ffffffa6</code></td><td>Hover state for icon buttons and parent items.</td></tr>
+          <tr><td><code>--color-text-on-accent</code></td><td><code>#000</code></td><td>Label on a filled (accent) action.</td></tr>
+          <tr><td><code>--color-icon-primary</code></td><td><code>#fff</code></td><td>Glyph fill where the icon is not <code>currentColor</code>.</td></tr>
+          <tr><td><code>--color-fill-secondary-default</code></td><td><code>#ffffff26</code></td><td>Rest fill of the secondary action.</td></tr>
+          <tr><td><code>--color-fill-secondary-hover</code></td><td><code>#ffffff59</code></td><td>Hover fill of the secondary action.</td></tr>
+          <tr><td><code>--color-background-transparent-elevated-high-hover</code></td><td><code>#ffffff26</code></td><td>Hover fill for nav rows and dropdown items.</td></tr>
+          <tr><td><code>--color-fill-primary-default</code></td><td><em>none — supplied by the property</em></td><td>The accent. Fortnite passes <code>#f7ff19</code> here.</td></tr>
+          <tr><td><code>--link-inline-padding</code></td><td><code>.75rem</code></td><td>Nav label padding on the inline axis.</td></tr>
+          <tr><td><code>--link-block-padding</code></td><td><code>var(--link-block-padding-fallback)</code></td><td>Nav label padding on the block axis; the fallback token exists so a dense row can override one without the other.</td></tr>
+          <tr><td><code>--link-inline-padding-fallback</code></td><td><code>1rem</code></td><td>Default used when the toolbar wants roomier links.</td></tr>
+          <tr><td><code>--link-block-padding-fallback</code></td><td><code>.625rem</code></td><td>As above, block axis.</td></tr>
+          <tr><td><code>--link-outline-offset</code></td><td><code>-.5rem</code></td><td>Pulls the focus ring inside the row so adjacent links do not overlap rings.</td></tr>
+          <tr><td><code>--search-box-width</code></td><td><code>100%</code></td><td>Width of the search slot when search is open.</td></tr>
+          <tr><td><code>--easing</code></td><td><code>cubic-bezier(.65, 0, .35, 1)</code></td><td>The house curve — an eased in-out, used across the ecosystem.</td></tr>
+          <tr><td><code>--easing-duration</code></td><td><code>.12s</code></td><td>Hover and colour transitions.</td></tr>
+          <tr><td><code>--effect-material-blur</code></td><td><code>blur(50px)</code></td><td>Backdrop blur for the material layer.</td></tr>
+          <tr><td><code>--shadow-top-md</code></td><td><code>0 -2px 1px #0000001a, 0 -4px 2px #0000001a, 0 -8px 4px #0000001a, 0 -16px 8px #0000001a, 0 -32px 16px #0000001a</code></td><td>Shadow cast upward from the drawer, in five ramped layers.</td></tr>
+          <tr><td><code>--top-offset</code></td><td><code>0px</code></td><td>How far below the viewport top the header sits, so a drawer can size itself against it.</td></tr>
+          <tr><td><code>--eg-global-nav-color-scheme</code></td><td><code>dark</code></td><td>Chooses the component's internal light/dark assumptions.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>The pattern worth stealing</strong>
+      <p>
+        A component that ships a fallback for every themed value can be dropped into any page and look finished,
+        then be re-skinned by one declaration on the host. That is how three brands share one header without a
+        single conditional in the component's CSS. It is also the reason the Fortnite page can turn the shared
+        header yellow with two lines that never mention the header.
+      </p>
+    </div>
+
+    <h3 id="shared-geometry">2.3 Measured geometry</h3>
+    <p>Same component, three placement decisions. These are the numbers the browser reported:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Header and navigation geometry, measured at 1440px.</caption>
+        <thead><tr><th>Element</th><th>Unreal Engine</th><th>Epic Games Store</th><th>Fortnite for Developers</th></tr></thead>
+        <tbody>
+          <tr><td>Global header host</td><td><code>unrealengine-navigation</code></td><td><code>egs-navigation</code></td><td><code>fortnite-navigation</code></td></tr>
+          <tr><td>Host height</td><td class="num">72px</td><td class="num">72px</td><td class="num">72px</td></tr>
+          <tr><td>Positioning</td><td><code>sticky</code>, z 9000</td><td><code>static</code> on the host</td><td><code>sticky</code>, z 9000</td></tr>
+          <tr><td>Second bar</td><td>none</td><td>department nav, 100px, <code>sticky</code>, z 200</td><td>section nav, 48px, <code>relative</code>, transparent</td></tr>
+          <tr><td>Second bar surface</td><td>—</td><td><code>#101014</code>, no border, 5px vertical padding</td><td>none, sits on the page</td></tr>
+          <tr><td>Second bar links</td><td>—</td><td>16px/400, 10px padding, no radius, no fill</td><td>16px/400, 0 padding</td></tr>
+          <tr><td>Search field</td><td>in the shadow toolbar</td><td>230×40, pill, <code>#202024</code></td><td>in the shadow toolbar</td></tr>
+          <tr><td>Content column</td><td>fluid, hero bleeds full width</td><td>1049px inner at 1440px viewport</td><td>100% with 24px inline padding</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">
+      The store is the only one of the three that stacks two sticky bars; Fortnite's second bar scrolls away with
+      the page. Both approaches keep the section nav visible at rest, which is the point of the pattern.
+    </p>
+
+    <h3 id="shared-state">2.4 State, breakpoints, motion</h3>
+    <p>
+      The component holds its state in attributes on the host rather than in classes, and the stylesheet reacts to
+      them. These are the attributes observed in use:
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Attribute-driven state on the shared header.</caption>
+        <thead><tr><th>Attribute</th><th>Values seen</th><th>Effect in the stylesheet</th></tr></thead>
+        <tbody>
+          <tr><td><code>sticky</code></td><td><code>true</code> / absent</td><td>Switches the host to <code>position: sticky; top: 0</code> with the header z-index.</td></tr>
+          <tr><td><code>data-mobile-drawer-open</code></td><td><code>true</code></td><td>Paints header, main nav and toolbar with the canvas colour so the drawer is not translucent over page art; hides the blur filter.</td></tr>
+          <tr><td><code>data-search-open</code></td><td><code>true</code></td><td>Hides the primary nav (<code>display: none</code>), grows the toolbar, allows the search slot to take the full width.</td></tr>
+          <tr><td><code>data-property-logo-valid</code></td><td><code>true</code> / <code>false</code></td><td>When the property has no mark, pushes the nav to the end and drops the mobile CTA slot.</td></tr>
+          <tr><td><code>data-mobile-top-cta</code>, <code>data-mobile-top-secondary-cta</code>, <code>data-mobile-cta-hidden</code>, <code>data-mobile-secondary-cta-hidden</code></td><td><code>true</code></td><td>Recompute <code>--drawer-main-cta-height</code> (0 / 5.5rem / 9.375rem) so the drawer reserves exactly the room its CTAs need.</td></tr>
+          <tr><td><code>data-cta-has-icon</code>, <code>data-secondary-cta-has-icon</code></td><td><code>true</code> / <code>false</code></td><td>Hide the label and keep only the glyph in tight mobile rows.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Breakpoints</h4>
+    <p>The component's own breakpoints are narrower and more numerous than a marketing site usually needs. The primary mobile boundary is 720px:</p>
+<pre><code>/* from the shared navigation stylesheet, by number of blocks */
+@media (max-width: 719.9px)  { /* 25 blocks — the primary mobile layout */ }
+@media (min-width: 720px)    { /* 19 blocks — desktop layout */ }
+@media (max-width: 1279.9px) { /*  6 blocks */ }
+@media (min-width: 1280px)   { /*  2 blocks */ }
+@media (max-width: 560px), (max-width: 480px), (max-width: 420px), (max-width: 350px) { /* tightening of the toolbar */ }
+@media (min-width: 350.1px) and (max-width: 959.9px) { /* intermediate tablet band */ }
+@media (prefers-reduced-motion: reduce) { /* one block: transitions off */ }</code></pre>
+    <p class="code-note">Fractional bounds (<code>719.9px</code>) rather than <code>720px</code> on the "up to" side, so the two sides can never both match.</p>
+
+    <h4>Focus ring</h4>
+    <p>
+      Focus is a white 2px outline with a 2px offset and a tightened radius, on every interactive element across
+      all three properties:
+    </p>
+<pre><code>.dropdown__button:focus-visible {
+  border-radius: .125rem;                    /* 2px, so the ring reads as a rectangle, not a pill */
+  outline: rgb(255, 255, 255) solid .125rem; /* 2px white */
+}
+.secondary-cta:focus-visible {
+  outline-offset: .125rem;                   /* 2px out from the edge */
+  outline-color: rgb(255, 255, 255);
+}</code></pre>
+
+    <h4>Motion</h4>
+    <p>
+      Two durations carry the whole system: <code>.12s</code> for state changes on colour, background and border,
+      and <code>.3s</code> for the brand mark's transform and width as the header reflows. Both use the same
+      curve. The store publishes the same idea as tokens — see §3.1.
+    </p>
+<pre><code>/* the house curve, and the two durations, exactly as the shared component uses them */
+:root {
+  --easing: cubic-bezier(.65, 0, .35, 1);
+  --easing-duration: .12s;
+}
+.global-header epic-wf-property-logo {
+  transition-property: transform, width;
+  transition-duration: .3s;
+  transition-timing-function: cubic-bezier(.65, 0, .35, 1);
+}
+.dropdown__button svg {
+  transition-duration: var(--easing-duration, .12s);
+  transition-property: color;
+  transition-timing-function: var(--easing, cubic-bezier(.65, 0, .35, 1));
+}</code></pre>
+
+    <h2 id="colour">3 · Colour</h2>
+    <p>
+      There are two colour systems in play, and it is worth keeping them apart. The Epic Games Store publishes a
+      complete, named token architecture on <code>:root</code> — 784 root-level custom properties out of 2,668 on
+      the page. Unreal Engine and Fortnite for Developers publish almost nothing by name: their variables are
+      compiler-generated hashes (<code>--ue0mn5</code>, <code>--_1m8v6gs0</code>), so their palettes have to be
+      read off computed styles. §3.1 is therefore quoted, and §3.2 is derived and labelled as such.
+    </p>
+
+    <h3 id="colour-store">3.1 The published token system</h3>
+    <p>
+      The store's system is three layers deep and entirely mechanical, which is what makes it usable: a raw palette
+      of twelve hues at seven steps each, a neutral ramp, then semantic names that describe a job rather than a
+      colour, then component slots built from the semantics. Nothing consumes a palette step directly except the
+      semantic layer.
+    </p>
+
+    <h4>The palette — twelve hues, seven steps</h4>
+    <div class="ramp">
+      <div class="ramp-row"><span class="muted">red</span><span class="ramp-cells"><i class="ramp-cell" style="background:#331313"></i><i class="ramp-cell" style="background:#762c2c"></i><i class="ramp-cell" style="background:#ba4545"></i><i class="ramp-cell" style="background:#fd5e5e"></i><i class="ramp-cell" style="background:#fe8989"></i><i class="ramp-cell" style="background:#feb4b4"></i><i class="ramp-cell" style="background:#ffdfdf"></i></span></div>
+      <div class="ramp-row"><span class="muted">pink</span><span class="ramp-cells"><i class="ramp-cell" style="background:#2d1424"></i><i class="ramp-cell" style="background:#693055"></i><i class="ramp-cell" style="background:#a54b85"></i><i class="ramp-cell" style="background:#e166b6"></i><i class="ramp-cell" style="background:#e98fc9"></i><i class="ramp-cell" style="background:#f1b8dd"></i><i class="ramp-cell" style="background:#f9e0f0"></i></span></div>
+      <div class="ramp-row"><span class="muted">purple</span><span class="ramp-cells"><i class="ramp-cell" style="background:#251530"></i><i class="ramp-cell" style="background:#573270"></i><i class="ramp-cell" style="background:#894eb0"></i><i class="ramp-cell" style="background:#bb6bf0"></i><i class="ramp-cell" style="background:#cd92f4"></i><i class="ramp-cell" style="background:#dfbaf8"></i><i class="ramp-cell" style="background:#f1e1fc"></i></span></div>
+      <div class="ramp-row"><span class="muted">indigo</span><span class="ramp-cells"><i class="ramp-cell" style="background:#1b1c33"></i><i class="ramp-cell" style="background:#3f4076"></i><i class="ramp-cell" style="background:#6265ba"></i><i class="ramp-cell" style="background:#868afd"></i><i class="ramp-cell" style="background:#a6a9fe"></i><i class="ramp-cell" style="background:#c7c8fe"></i><i class="ramp-cell" style="background:#e7e8ff"></i></span></div>
+      <div class="ramp-row"><span class="muted">blue</span><span class="ramp-cells"><i class="ramp-cell" style="background:#0a2633"></i><i class="ramp-cell" style="background:#185977"></i><i class="ramp-cell" style="background:#258cbb"></i><i class="ramp-cell" style="background:#33bfff"></i><i class="ramp-cell" style="background:#69d0ff"></i><i class="ramp-cell" style="background:#a0e1ff"></i><i class="ramp-cell" style="background:#d6f2ff"></i></span></div>
+      <div class="ramp-row"><span class="muted">cyan</span><span class="ramp-cells"><i class="ramp-cell" style="background:#0e2b26"></i><i class="ramp-cell" style="background:#206359"></i><i class="ramp-cell" style="background:#329c8c"></i><i class="ramp-cell" style="background:#44d5bf"></i><i class="ramp-cell" style="background:#76e0d0"></i><i class="ramp-cell" style="background:#a8ebe1"></i><i class="ramp-cell" style="background:#daf7f2"></i></span></div>
+      <div class="ramp-row"><span class="muted">green</span><span class="ramp-cells"><i class="ramp-cell" style="background:#132d15"></i><i class="ramp-cell" style="background:#2c6a30"></i><i class="ramp-cell" style="background:#46a64c"></i><i class="ramp-cell" style="background:#5fe367"></i><i class="ramp-cell" style="background:#8aea90"></i><i class="ramp-cell" style="background:#b4f2b8"></i><i class="ramp-cell" style="background:#dff9e1"></i></span></div>
+      <div class="ramp-row"><span class="muted">lime</span><span class="ramp-cells"><i class="ramp-cell" style="background:#222e11"></i><i class="ramp-cell" style="background:#4f6c28"></i><i class="ramp-cell" style="background:#7da93e"></i><i class="ramp-cell" style="background:#aae755"></i><i class="ramp-cell" style="background:#c1ed82"></i><i class="ramp-cell" style="background:#d7f4b0"></i><i class="ramp-cell" style="background:#eefadd"></i></span></div>
+      <div class="ramp-row"><span class="muted">yellow</span><span class="ramp-cells"><i class="ramp-cell" style="background:#312b09"></i><i class="ramp-cell" style="background:#736514"></i><i class="ramp-cell" style="background:#b59e20"></i><i class="ramp-cell" style="background:#f7d82b"></i><i class="ramp-cell" style="background:#f9e264"></i><i class="ramp-cell" style="background:#fbed9c"></i><i class="ramp-cell" style="background:#fdf7d5"></i></span></div>
+      <div class="ramp-row"><span class="muted">amber</span><span class="ramp-cells"><i class="ramp-cell" style="background:#322206"></i><i class="ramp-cell" style="background:#744f0e"></i><i class="ramp-cell" style="background:#b77c17"></i><i class="ramp-cell" style="background:#f9a91f"></i><i class="ramp-cell" style="background:#fbc05b"></i><i class="ramp-cell" style="background:#fcd796"></i><i class="ramp-cell" style="background:#feeed2"></i></span></div>
+      <div class="ramp-row"><span class="muted">orange</span><span class="ramp-cells"><i class="ramp-cell" style="background:#331b0b"></i><i class="ramp-cell" style="background:#773e1b"></i><i class="ramp-cell" style="background:#ba622a"></i><i class="ramp-cell" style="background:#fe8539"></i><i class="ramp-cell" style="background:#fea66e"></i><i class="ramp-cell" style="background:#ffc6a3"></i><i class="ramp-cell" style="background:#ffe7d7"></i></span></div>
+      <div class="ramp-row"><span class="muted">brown</span><span class="ramp-cells"><i class="ramp-cell" style="background:#221a14"></i><i class="ramp-cell" style="background:#4f3c30"></i><i class="ramp-cell" style="background:#7c5e4b"></i><i class="ramp-cell" style="background:#a98166"></i><i class="ramp-cell" style="background:#c0a28f"></i><i class="ramp-cell" style="background:#d7c4b8"></i><i class="ramp-cell" style="background:#eee6e0"></i></span></div>
+      <div class="ramp-labels"><span></span><span class="ramp-cells"><span>100</span><span>200</span><span>300</span><span>400</span><span>500</span><span>600</span><span>700</span></span></div>
+    </div>
+    <p class="small muted">
+      Step 400 is the hue's identity — it is what the semantic layer reaches for first — and 100–300 are the dark
+      end used for tinted surfaces rather than for text. No hue jumps more than about 20% in lightness between
+      steps, so any two adjacent steps can hold a hover or pressed state without a jarring shift.
+    </p>
+<pre><code>/* store.epicgames.com — published verbatim, all 84 palette steps */
+:root {
+  --color-palette-red-100:#331313; --color-palette-red-200:#762c2c; --color-palette-red-300:#ba4545;
+  --color-palette-red-400:#fd5e5e; --color-palette-red-500:#fe8989; --color-palette-red-600:#feb4b4; --color-palette-red-700:#ffdfdf;
+  --color-palette-pink-100:#2d1424; --color-palette-pink-200:#693055; --color-palette-pink-300:#a54b85;
+  --color-palette-pink-400:#e166b6; --color-palette-pink-500:#e98fc9; --color-palette-pink-600:#f1b8dd; --color-palette-pink-700:#f9e0f0;
+  --color-palette-purple-100:#251530; --color-palette-purple-200:#573270; --color-palette-purple-300:#894eb0;
+  --color-palette-purple-400:#bb6bf0; --color-palette-purple-500:#cd92f4; --color-palette-purple-600:#dfbaf8; --color-palette-purple-700:#f1e1fc;
+  --color-palette-indigo-100:#1b1c33; --color-palette-indigo-200:#3f4076; --color-palette-indigo-300:#6265ba;
+  --color-palette-indigo-400:#868afd; --color-palette-indigo-500:#a6a9fe; --color-palette-indigo-600:#c7c8fe; --color-palette-indigo-700:#e7e8ff;
+  --color-palette-blue-100:#0a2633; --color-palette-blue-200:#185977; --color-palette-blue-300:#258cbb;
+  --color-palette-blue-400:#33bfff; --color-palette-blue-500:#69d0ff; --color-palette-blue-600:#a0e1ff; --color-palette-blue-700:#d6f2ff;
+  --color-palette-cyan-100:#0e2b26; --color-palette-cyan-200:#206359; --color-palette-cyan-300:#329c8c;
+  --color-palette-cyan-400:#44d5bf; --color-palette-cyan-500:#76e0d0; --color-palette-cyan-600:#a8ebe1; --color-palette-cyan-700:#daf7f2;
+  --color-palette-green-100:#132d15; --color-palette-green-200:#2c6a30; --color-palette-green-300:#46a64c;
+  --color-palette-green-400:#5fe367; --color-palette-green-500:#8aea90; --color-palette-green-600:#b4f2b8; --color-palette-green-700:#dff9e1;
+  --color-palette-lime-100:#222e11; --color-palette-lime-200:#4f6c28; --color-palette-lime-300:#7da93e;
+  --color-palette-lime-400:#aae755; --color-palette-lime-500:#c1ed82; --color-palette-lime-600:#d7f4b0; --color-palette-lime-700:#eefadd;
+  --color-palette-yellow-100:#312b09; --color-palette-yellow-200:#736514; --color-palette-yellow-300:#b59e20;
+  --color-palette-yellow-400:#f7d82b; --color-palette-yellow-500:#f9e264; --color-palette-yellow-600:#fbed9c; --color-palette-yellow-700:#fdf7d5;
+  --color-palette-amber-100:#322206; --color-palette-amber-200:#744f0e; --color-palette-amber-300:#b77c17;
+  --color-palette-amber-400:#f9a91f; --color-palette-amber-500:#fbc05b; --color-palette-amber-600:#fcd796; --color-palette-amber-700:#feeed2;
+  --color-palette-orange-100:#331b0b; --color-palette-orange-200:#773e1b; --color-palette-orange-300:#ba622a;
+  --color-palette-orange-400:#fe8539; --color-palette-orange-500:#fea66e; --color-palette-orange-600:#ffc6a3; --color-palette-orange-700:#ffe7d7;
+  --color-palette-brown-100:#221a14; --color-palette-brown-200:#4f3c30; --color-palette-brown-300:#7c5e4b;
+  --color-palette-brown-400:#a98166; --color-palette-brown-500:#c0a28f; --color-palette-brown-600:#d7c4b8; --color-palette-brown-700:#eee6e0;
+
+  /* the neutral ramp the interface actually lives on */
+  --color-neutral-100:#101014;  /* canvas */
+  --color-neutral-150:#18181c;  /* elevated, low */
+  --color-neutral-200:#202024;  /* elevated, medium */
+  --color-neutral-250:#28282c;  /* elevated, high */
+  --color-neutral-300:#303034;  /* elevated, higher */
+  --color-neutral-400:#404044;  /* boundary */
+}</code></pre>
+
+    <h4>Semantic layer — names that describe a job</h4>
+    <p>
+      The semantics are worth reading as a set, because the state model is built into the names: anything
+      interactive gets <code>default</code>, <code>hover</code> and <code>press</code> variants, and fills come in
+      <code>strong</code> / <code>subtle</code> / <code>subdued</code> / <code>faint</code> strengths rather than
+      as arbitrary greys.
+    </p>
+<pre><code>/* store.epicgames.com — published verbatim. Palette values are inlined here for readability; the
+   original file references var(--color-palette-*) instead. */
+:root {
+  /* surfaces */
+  --color-background-default:                 #101014;
+  --color-background-elevated-low:            #18181c;
+  --color-background-elevated-medium:         #202024;
+  --color-background-elevated-high:           #303034;
+  --color-background-backdrop-primary:        #000000a6;  /* 65% black scrim */
+  --color-background-backdrop-secondary:      #00000059;  /* 35% black scrim */
+
+  /* translucent fills: the primary way depth is drawn on a dark canvas */
+  --color-background-fill-strong-default:     #fff;
+  --color-background-fill-strong-hover:       #a6a6a6;
+  --color-background-fill-subtle-default:     #ffffff26;  /* 15% — rest */
+  --color-background-fill-subtle-hover:       #ffffff59;  /* 35% — hover */
+  --color-background-fill-subtle-press:       #ffffff26;  /* 15% — press returns to rest */
+  --color-background-fill-subdued-default:    #ffffff1a;  /* 10% */
+  --color-background-fill-subdued-hover:      #ffffff26;  /* 15% */
+  --color-background-fill-faint:              #ffffff0d;  /*  5% — the faintest step in use */
+  --color-background-fill-input:              #ffffff0d;
+
+  /* accents and status */
+  --color-background-fill-accent-primary-default:#33bfff;
+  --color-background-fill-accent-primary-hover:  #69d0ff;
+  --color-background-fill-accent-secondary:      #69d0ff;
+  --color-background-fill-success-primary:    #5fe367;
+  --color-background-fill-warning-primary:    #f7d82b;
+  --color-background-fill-critical-primary-default:#fd5e5e;
+  --color-background-fill-critical-primary-hover:  #fe8989;
+
+  /* disabled is a fill strength, not a separate colour */
+  --color-background-fill-disabled-primary:   #ffffff26;
+  --color-background-fill-disabled-secondary: #ffffff59;
+  --color-background-fill-disabled-tertiary:  #0000;
+
+  /* text */
+  --color-foreground-primary:                 #fffffff2;  /* 95% white, not pure */
+  --color-foreground-secondary:               #ffffffa6;  /* 65% */
+  --color-foreground-inverse:                 #000000f2;
+  --color-foreground-inverseSecondary:        #000000a6;
+  --color-foreground-accent:                  #33bfff;
+  --color-foreground-onAccent-primary:        #0a2633;   /* dark blue, not black, on an accent fill */
+  --color-foreground-success:                 #5fe367;
+  --color-foreground-onSuccess-primary:       #132d15;
+  --color-foreground-warning:                 #f7d82b;
+  --color-foreground-onWarning-primary:       #312b09;
+  --color-foreground-critical:                #fd5e5e;
+  --color-foreground-onCritical-primary:      #331313;
+  --color-foreground-disabled-default:        #ffffffa6;
+
+  /* boundaries */
+  --color-border-strong-default:              #ffffff59;
+  --color-border-strong-hover:                #ffffffa6;
+  --color-border-subtle:                      #ffffff26;
+  --color-border-subdued:                     #ffffff1a;
+  --color-border-faint:                       #ffffff0d;
+  --color-border-focus-default:               #fff;
+  --color-border-focus-inverse:               #000;
+  --color-border-critical-default:            #fd5e5e;
+  --color-border-disabled:                    #ffffff59;
+
+  /* materials: a surface colour plus an alpha, for layers that are deliberately see-through */
+  --color-material-100:                       #101014d9;  /* 85% */
+  --color-material-200:                       #202024b3;  /* 70% */
+  --color-material-300:                       #303034b3;
+  --color-material-default-strong:            #101014b3;
+  --color-material-default-weak:              #10101466;  /* 40% */
+}</code></pre>
+    <div class="note">
+      <strong>Note the on-accent colours</strong>
+      <p>
+        A yellow or green fill never takes black text. Each status fill has a matching dark tint of its own hue for
+        the label — <code>#312b09</code> on yellow, <code>#132d15</code> on green, <code>#0a2633</code> on blue.
+        It costs nothing and it keeps the label from looking like a hole punched in the fill.
+      </p>
+    </div>
+
+    <h4>Motion, elevation and blur as tokens</h4>
+<pre><code>:root {
+  /* duration scale */
+  --animation-duration-125: .125s;
+  --animation-duration-150: .15s;
+  --animation-duration-300: .3s;
+  --animation-duration-625: .625s;
+  --animation-duration-750: .75s;
+  --animation-duration-1000: 1s;
+  --animation-easing-linear:        cubic-bezier(0, 0, 1, 1);
+  --animation-easing-easeInOutQuad: cubic-bezier(.45, 0, .55, 1);
+  --animation-easing-easeOutQuart:  cubic-bezier(.25, 1, .5, 1);
+
+  /* opacity */
+  --opacity-disabled: .5;
+  --opacity-highlight: .2;
+  --opacity-imageHover: .8;
+  --opacity-loading: .8;
+  --opacity-readOnly: .8;
+
+  /* blur */
+  --effect-material-blur-25:  blur(12.5px);
+  --effect-material-blur-75:  blur(37.5px);
+  --effect-material-blur-150: blur(75px);
+
+  /* directional elevation: five ramped layers, not one soft shadow */
+  --shadow-bottom-sm: 0 1px 1px #0000001a, 0 2px 2px #0000001a, 0 4px 4px #0000001a, 0 6px 8px #0000001a, 0 8px 16px #0000001a;
+  --shadow-bottom-md: 0 2px 1px #0000001a, 0 4px 2px #0000001a, 0 8px 4px #0000001a, 0 16px 8px #0000001a, 0 32px 16px #0000001a;
+  --shadow-top-sm:    0 -1px 1px #0000001a, 0 -2px 2px #0000001a, 0 -4px 4px #0000001a, 0 -6px 8px #0000001a, 0 -8px 16px #0000001a;
+  --shadow-top-md:    0 -2px 1px #0000001a, 0 -4px 2px #0000001a, 0 -8px 4px #0000001a, 0 -16px 8px #0000001a, 0 -32px 16px #0000001a;
+  --shadow-left-sm:   -1px 0 1px #0000001a, -2px 0 2px #0000001a, -4px 0 4px #0000001a, -6px 0 8px #0000001a, -8px 0 16px #0000001a;
+  --shadow-left-md:   -2px 0 1px #0000001a, -4px 0 2px #0000001a, -8px 0 4px #0000001a, -16px 0 8px #0000001a, -32px 0 16px #0000001a;
+  --shadow-right-sm:  1px 0 1px #0000001a, 2px 0 2px #0000001a, 4px 0 4px #0000001a, 6px 0 8px #0000001a, 8px 0 16px #0000001a;
+  --shadow-right-md:  2px 0 1px #0000001a, 4px 0 2px #0000001a, 8px 0 4px #0000001a, 16px 0 8px #0000001a, 32px 0 16px #0000001a;
+}</code></pre>
+    <p class="small muted">
+      The shadows are the most interesting entry here. Instead of one blurred shadow, each direction is a five-step
+      ramp whose blur and offset double at every layer, all at 10% black. The result reads as contact shadow close
+      to the edge and ambient occlusion further out, and it stays smooth on a dark canvas where a single soft
+      shadow turns to mud. The shared header uses exactly this construction for the drawer.
+    </p>
+
+    <h4>Brand gradients</h4>
+<pre><code>:root {
+  --gradient-blue:   linear-gradient(225deg, #dfbaf8 0%, #33bfff 100%);
+  --gradient-indigo: linear-gradient(225deg, #f1b8dd 0%, #868afd 100%);
+  --gradient-purple: linear-gradient(225deg, #feb4b4 0%, #bb6bf0 100%);
+  --gradient-pink:   linear-gradient(225deg, #ffc6a3 0%, #e166b6 100%);
+  --gradient-red:    linear-gradient(225deg, #fcd796 0%, #fd5e5e 100%);
+  --gradient-orange: linear-gradient(225deg, #fbed9c 0%, #fe8539 100%);
+  --gradient-amber:  linear-gradient(225deg, #d7f4b0 0%, #f9a91f 100%);
+  --gradient-yellow: linear-gradient(225deg, #b4f2b8 0%, #f7d82b 100%);
+  --gradient-lime:   linear-gradient(225deg, #a8ebe1 0%, #aae755 100%);
+  --gradient-green:  linear-gradient(225deg, #a0e1ff 0%, #5fe367 100%);
+  --gradient-cyan:   linear-gradient(225deg, #c7c8fe 0%, #44d5bf 100%);
+}</code></pre>
+    <p class="small muted">
+      Every one is <code>225deg</code> — top-right to bottom-left — running from the hue's 600 down to its 400. A
+      single direction across the whole set is why the gradients feel like one family.
+    </p>
+
+    <h3 id="colour-observed">3.2 Observed per-site palettes</h3>
+    <p>
+      Unreal Engine and Fortnite for Developers publish no usable colour names, so the entries below are the values
+      the browser computed most often on each page, with names assigned here (prefixed <code>derived-</code> in the
+      CSS to keep them distinct from published names). Each row records where the value was actually seen.
+    </p>
+
+    <h4>Unreal Engine — <code>www.unrealengine.com</code></h4>
+    <div class="swatches">
+      <div class="sw"><div class="sw-chip" style="background:#0b0b0b"></div><div class="sw-body"><span class="sw-name">canvas</span><span class="sw-hex">#0B0B0B</span><span class="sw-use">page base, behind everything</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff0d;border-bottom:1px solid #ffffff1a"></div><div class="sw-body"><span class="sw-name">surface + hairline</span><span class="sw-hex">#FFFFFF0D / #FFFFFF0D</span><span class="sw-use">cards: fill and border are the same 5% white</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#26bbff"></div><div class="sw-body"><span class="sw-name">accent</span><span class="sw-hex">#26BBFF</span><span class="sw-use">primary button fill, links, eyebrow text</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#101014"></div><div class="sw-body"><span class="sw-name">on-accent</span><span class="sw-hex">#101014</span><span class="sw-use">label on the cyan button</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#404043"></div><div class="sw-body"><span class="sw-name">boundary</span><span class="sw-hex">#404043</span><span class="sw-use">input border, dividers</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff"></div><div class="sw-body"><span class="sw-name">text</span><span class="sw-hex">#FFFFFF</span><span class="sw-use">headings and body by default</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffffa6"></div><div class="sw-body"><span class="sw-name">text, secondary</span><span class="sw-hex">#FFFFFFA6</span><span class="sw-use">standfirsts, meta lines</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff26"></div><div class="sw-body"><span class="sw-name">fill, rest</span><span class="sw-hex">#FFFFFF26</span><span class="sw-use">chip and tile buttons, tags</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#767676"></div><div class="sw-body"><span class="sw-name">muted</span><span class="sw-hex">#767676</span><span class="sw-use">disabled and tertiary text</span></div></div>
+    </div>
+<pre><code>/* Unreal Engine — observed palette. Names are assigned here, the values are what the page computes. */
+:root {
+  --derived-ue-canvas:        #0b0b0b;
+  --derived-ue-surface:       #ffffff0d;  /*  5% white — cards, tiles */
+  --derived-ue-surface-line:  #ffffff0d;  /*  the card border is the same value as its fill */
+  --derived-ue-fill-rest:     #ffffff26;  /* 15% white — chips, small tile buttons */
+  --derived-ue-fill-subtle:   #ffffff1a;  /* 10% white */
+  --derived-ue-accent:        #26bbff;
+  --derived-ue-on-accent:     #101014;
+  --derived-ue-boundary:      #404043;
+  --derived-ue-text:          #ffffff;
+  --derived-ue-text-secondary:#ffffff95;  /*  rgba(255,255,255,.65) flattened over the canvas */
+  --derived-ue-muted:         #767676;
+}
+/* how they are actually applied */
+.ue-primary-button { background: var(--derived-ue-accent); color: var(--derived-ue-on-accent); }
+.ue-card           { background: var(--derived-ue-surface); border: 1px solid var(--derived-ue-surface-line); border-radius: 24px; }
+.ue-chip           { background: var(--derived-ue-fill-rest); color: #fff; border-radius: 9999px; padding: 4px 12px; }</code></pre>
+
+    <h4>Epic Games Store — <code>store.epicgames.com</code></h4>
+    <p>
+      The store's computed colours line up exactly with the tokens published in §3.1, which is a useful check on the
+      other two sites' derived entries: where a site publishes names, the browser agrees with them.
+    </p>
+    <div class="swatches">
+      <div class="sw"><div class="sw-chip" style="background:#101014"></div><div class="sw-body"><span class="sw-name">background-default</span><span class="sw-hex">#101014</span><span class="sw-use">canvas — the most common fill on the page</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#18181c"></div><div class="sw-body"><span class="sw-name">elevated-low</span><span class="sw-hex">#18181C</span><span class="sw-use">bars and panels sitting on the canvas</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#202024"></div><div class="sw-body"><span class="sw-name">elevated-medium</span><span class="sw-hex">#202024</span><span class="sw-use">the search field, raised cards</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#28282c"></div><div class="sw-body"><span class="sw-name">elevated-high</span><span class="sw-hex">#28282C</span><span class="sw-use">active nav item fill</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#14181e"></div><div class="sw-body"><span class="sw-name">card tint (page-local)</span><span class="sw-hex">#14181E</span><span class="sw-use">navy-tinted card, not a published token</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#33bfff"></div><div class="sw-body"><span class="sw-name">accent</span><span class="sw-hex">#33BFFF</span><span class="sw-use">accent fills and accent text</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#0a2633"></div><div class="sw-body"><span class="sw-name">on-accent</span><span class="sw-hex">#0A2633</span><span class="sw-use">label on an accent fill</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff"></div><div class="sw-body"><span class="sw-name">primary action</span><span class="sw-hex">#FFFFFF</span><span class="sw-use">the store's strongest button is white</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff26"></div><div class="sw-body"><span class="sw-name">fill-subtle</span><span class="sw-hex">#FFFFFF26</span><span class="sw-use">secondary button, borders</span></div></div>
+    </div>
+<pre><code>/* Epic Games Store — the computed values, expressed with the published token names */
+:root {
+  --store-canvas:     var(--color-background-default);          /* #101014 */
+  --store-raised:     var(--color-background-elevated-low);     /* #18181c */
+  --store-raised-2:   var(--color-background-elevated-medium);  /* #202024 */
+  --store-accent:     var(--color-background-fill-accent-primary-default); /* #33bfff */
+  --store-on-accent:  var(--color-foreground-onAccent-primary); /* #0a2633 */
+  --store-text:       var(--color-foreground-primary);          /* #fffffff2 */
+  --store-text-2:     var(--color-foreground-secondary);        /* #ffffffa6 */
+}
+/* The store's primary action is white, which is the one place it diverges from the shared accent. */
+.store-primary-button { background: #fff; color: #000000f2; border-radius: 10px; padding: 0 20px; height: 40px; }
+.store-secondary-button { background: var(--color-background-fill-subtle-default); color: var(--color-foreground-primary); border-radius: 8px; padding: 0 16px; height: 40px; }</code></pre>
+
+    <h4>Fortnite for Developers — <code>www.fortnite.com/developer</code></h4>
+    <p>
+      This is the only one of the three with a warm accent, and it is not a new colour: <code>#F7FF19</code> is the
+      Fortnite yellow, and the page hands it to the shared header through
+      <code>--color-fill-primary-default</code> (see §2.2).
+    </p>
+    <div class="swatches">
+      <div class="sw"><div class="sw-chip" style="background:#f7ff19"></div><div class="sw-body"><span class="sw-name">accent (primary CTA)</span><span class="sw-hex">#F7FF19</span><span class="sw-use">"Get Unreal Editor for Fortnite", "Learn More"</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#000"></div><div class="sw-body"><span class="sw-name">on-accent</span><span class="sw-hex">#000000</span><span class="sw-use">label on the yellow fill</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#101014"></div><div class="sw-body"><span class="sw-name">canvas</span><span class="sw-hex">#101014</span><span class="sw-use">the shared canvas, unchanged</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff59"></div><div class="sw-body"><span class="sw-name">secondary fill</span><span class="sw-hex">#FFFFFF59</span><span class="sw-use">"Documentation" chip, black label</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffff"></div><div class="sw-body"><span class="sw-name">text</span><span class="sw-hex">#FFFFFF</span><span class="sw-use">headings and body</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#ffffffbf"></div><div class="sw-body"><span class="sw-name">text, secondary</span><span class="sw-hex">#FFFFFFBF</span><span class="sw-use">rgba(255,255,255,.75) — most common body colour</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#555"></div><div class="sw-body"><span class="sw-name">muted</span><span class="sw-hex">#555555</span><span class="sw-use">least important text</span></div></div>
+      <div class="sw"><div class="sw-chip" style="background:#26bbff"></div><div class="sw-body"><span class="sw-name">link</span><span class="sw-hex">#26BBFF</span><span class="sw-use">the shared link blue appears here too</span></div></div>
+    </div>
+<pre><code>/* Fortnite for Developers — observed palette, and the two lines that re-skin the shared header */
+:root {
+  --derived-fn-accent:      #f7ff19;
+  --derived-fn-on-accent:   #000000;
+  --derived-fn-canvas:      #101014;
+  --derived-fn-fill-rest:   #ffffff59;  /* 35% white — the secondary chip */
+  --derived-fn-fill-subtle: #ffffff26;
+  --derived-fn-text:        #ffffff;
+  --derived-fn-text-2:      rgba(255, 255, 255, .75);
+  --derived-fn-muted:       #555555;
+  --derived-fn-link:        #26bbff;
+}
+
+/* co-branding the shared global header: this is all the page sets on the host */
+fortnite-navigation {
+  --color-fill-primary-default: var(--derived-fn-accent);
+  --color-fill-primary-hover:   var(--derived-fn-accent);
+}
+
+/* the page's own buttons */
+.fn-btn-primary  { background: var(--derived-fn-accent); color: var(--derived-fn-on-accent); border-radius: 6px; padding: 0 20px; height: 40px; font-size: 16px; font-weight: 400; }
+.fn-btn-secondary{ background: var(--derived-fn-fill-rest);  color: #000; border-radius: 8px; padding: 0 24px; height: 40px; }
+.fn-btn-ghost    { background: transparent; color: #fff; border-radius: 6px; padding: 0 20px; height: 40px; }</code></pre>
+
+    <h3 id="colour-contrast">3.3 Contrast</h3>
+    <p>
+      Ratios below are computed from the extracted values, with translucent foregrounds flattened over their
+      backdrop the way the browser paints them. Every text pair in use passes WCAG AA at normal size; the only
+      failure is a boundary, and it is a deliberate one.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Contrast ratios computed from the extracted values (WCAG 2.1 relative luminance).</caption>
+        <thead><tr><th>Pair</th><th>Where</th><th class="num">Ratio</th><th>AA text</th><th>AA non-text</th></tr></thead>
+        <tbody>
+          <tr><td>#FFFFFF on #101014</td><td>body text on the canvas</td><td class="num">18.98</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#FFFFFF on #202024</td><td>text on an elevated surface</td><td class="num">16.24</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>rgba(255,255,255,.95) on #101014</td><td>store body text (its default)</td><td class="num">17.11</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>rgba(255,255,255,.75) on #101014</td><td>secondary body copy</td><td class="num">10.78</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>rgba(255,255,255,.65) on #101014</td><td>meta and standfirsts</td><td class="num">8.28</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>rgba(255,255,255,.5) on #101014</td><td>the floor: never used for text</td><td class="num">5.37</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#101014 on #26BBFF</td><td>Unreal Engine primary button</td><td class="num">8.71</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#33BFFF on #101014</td><td>store accent text</td><td class="num">9.07</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#0A2633 on #33BFFF</td><td>text on a store accent fill</td><td class="num">7.5</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#000000 on #F7FF19</td><td>Fortnite primary button</td><td class="num">19.27</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#000000 on #FFFFFF</td><td>store primary button</td><td class="num">21.00</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#5FE367 on #101014</td><td>success</td><td class="num">11.45</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#F7D82B on #101014</td><td>warning</td><td class="num">13.39</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#FD5E5E on #101014</td><td>critical</td><td class="num">6.27</td><td><span class="pill ok">pass</span></td><td><span class="pill ok">pass</span></td></tr>
+          <tr><td>#404043 on #101014</td><td>input border on the canvas</td><td class="num">1.84</td><td>—</td><td><span class="pill bad">fail</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note warn">
+      <strong>The one failing pair is intentional</strong>
+      <p>
+        An input's <code>#404043</code> border has only 1.84:1 against the canvas, so the border alone cannot mark
+        the field. It does not have to: every input on these pages also carries a lighter fill
+        (<code>#1E1E22</code> on Unreal Engine, <code>#202024</code> on the store), so the boundary is carried by
+        the change in surface, and the border is a refinement. If you copy the border without the fill, the field
+        disappears.
+      </p>
+    </div>
+
+    <h3 id="colour-rules">3.4 Rules of use</h3>
+    <ul>
+      <li><strong>One accent per property, chosen at the top.</strong> Cyan on Unreal Engine, a brighter cyan on the store, yellow on Fortnite. The shared component reads the accent from a single custom property, so the accent is never hard-coded in a component.</li>
+      <li><strong>Depth is alpha, not new greys.</strong> Rest, hover and pressed states are 5% → 15% → 35% white fills on the canvas. The store's token names encode this directly (<code>faint</code>, <code>subdued</code>, <code>subtle</code>, <code>strong</code>).</li>
+      <li><strong>Fills lighten on hover; they do not swap colour.</strong> Both the store's tokens and the shared header move from a 15% fill to a 35% fill. Nothing in the census changes hue on hover.</li>
+      <li><strong>Cards use near-invisible borders.</strong> Unreal Engine's card border is the same 5% white as its fill; the store's is 15% white on a <code>#14181E</code> card. A visible border on a dark canvas reads as a box, not a surface.</li>
+      <li><strong>Text is white at four strengths, never four greys.</strong> 100%, 95%, 75–65%, and a muted grey for genuinely tertiary content.</li>
+      <li><strong>Status colours come in pairs.</strong> A bright fill for the surface plus a dark tint of the same hue for the label — never black on colour.</li>
+      <li><strong>Scrims are 35% and 65% black</strong> (<code>#00000059</code>, <code>#000000a6</code>), not a blur, when content must stay legible behind an overlay.</li>
+    </ul>
+
+    <h2 id="type">4 · Typography</h2>
+    <p>
+      All three properties are Inter-based, and two of them add a second face for display. The interesting part is
+      not the families — it is the discipline around them: a single type scale with tracking that changes by size,
+      sentence case everywhere except one deliberate exception, and a UI text size that never moves.
+    </p>
+
+    <h3 id="type-families">4.1 Families</h3>
+    <div class="table-wrap">
+      <table>
+        <caption>Every font family found in use, with the weights observed and where each is used.</caption>
+        <thead><tr><th>Family</th><th>Weights seen</th><th>Where</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Inter</strong></td><td>400, 500, 700</td>
+            <td>All three</td>
+            <td>Body copy, UI text, buttons, links, inputs, and the store's headings.</td>
+          </tr>
+          <tr>
+            <td><strong>Inter Tight</strong></td><td>700, 900</td>
+            <td>Unreal Engine, Epic Games Store</td>
+            <td>Display headings on Unreal Engine (<code>h1</code>, <code>h2</code>, section <code>h3</code>). The store declares it too, for the same role.</td>
+          </tr>
+          <tr>
+            <td><strong>HeadingNowVariable</strong></td><td>300, 550, 650, 750 (variable axis)</td>
+            <td>Fortnite for Developers</td>
+            <td>Section headings and body copy — one variable face doing both jobs.</td>
+          </tr>
+          <tr>
+            <td><strong>HeadingNowVariableItalic</strong></td><td>750</td>
+            <td>Fortnite for Developers</td>
+            <td>The display voice: page and section titles, set uppercase and italic.</td>
+          </tr>
+          <tr>
+            <td><strong>Recursive Mono</strong></td><td>—</td><td>Epic Games Store (declared)</td>
+            <td>Code and tokens, via <code>--font-family-code</code>. Not seen on the rendered homepage.</td>
+          </tr>
+          <tr>
+            <td><strong>Inter Fallback</strong></td><td>400</td><td>Unreal Engine</td>
+            <td>Not a real family: a <code>local()</code> metric-matched fallback declared so text does not reflow before Inter loads (607 elements computed it).</td>
+          </tr>
+          <tr>
+            <td><strong>Arial / sans-serif</strong></td><td>400</td><td>Epic Games Store, Fortnite</td>
+            <td>Fallback leakage, not intent — see the gotcha below.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Unreal Engine's own stack, as declared in its <code>@font-face</code> rules — note the <code>local()</code> probe first, so a visitor who already has Inter installed downloads nothing:</p>
+<pre><code>/* unrealengine.com and fortnite.com — served from components.unrealengine.com */
+@font-face {
+  font-family: Inter;
+  font-weight: 400;
+  src: local("Inter Regular"), local("Inter-Regular"),
+       url("https://components.unrealengine.com/fonts/inter/Inter-Regular.woff2") format("woff2");
+}
+@font-face {
+  font-family: Inter;
+  font-weight: 500;
+  src: local("Inter Medium"), local("Inter-Medium"),
+       url("https://components.unrealengine.com/fonts/inter/Inter-Medium.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-weight: 700;
+  src: local("Inter Tight Bold"), local("InterTight-Bold"),
+       url("https://components.unrealengine.com/fonts/inter/InterTight-Bold.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter Tight";
+  font-weight: 900;
+  src: local("Inter Tight Black"), local("InterTight-Black"),
+       url("https://components.unrealengine.com/fonts/inter/InterTight-Black.woff2") format("woff2");
+}
+
+/* the fallback stack, in the order the sites use it */
+:root {
+  --font-body:    Inter, "Inter Fallback", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: "Inter Tight", Inter, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-code:    "Recursive Mono", ui-monospace, "SF Mono", Consolas, monospace;
+}</code></pre>
+    <p class="small muted">
+      Those four <code>components.unrealengine.com</code> files answer <code>Access-Control-Allow-Origin: *</code>,
+      so a <code>@font-face</code> pointing at them works from any origin. The store's and Fortnite's own font files
+      do not send CORS headers, so they can be linked but not embedded as webfonts from another site — see §6.
+    </p>
+    <div class="note warn">
+      <strong>Gotcha found on the store: two Is don't match</strong>
+      <p>
+        The store's search input computes to <code>13.3333px Arial</code> — the browser default. Its Inter stack is
+        applied to the page but never to that <code>&lt;input&gt;</code>, so the field's text does not match the
+        placeholder around it. If you copy the store's input treatment, restate
+        <code>font: inherit</code> on the control.
+      </p>
+    </div>
+
+    <h3 id="type-scale">4.2 Scales</h3>
+    <p>
+      These are the distinct type styles the browser computed on each page — every combination of family, size,
+      line-height, weight, tracking and case that was actually painted, with the number of elements using it.
+    </p>
+
+    <h4>Unreal Engine — 11 distinct styles</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>Type census, unrealengine.com at 1440px.</caption>
+        <thead><tr><th>Role</th><th>Family</th><th class="num">Size / line-height</th><th class="num">Weight</th><th class="num">Tracking</th><th class="num">Count</th><th>Sample</th></tr></thead>
+        <tbody>
+          <tr><td>Display <code>h1</code></td><td>Inter Tight</td><td class="num">40 / 48px</td><td class="num">700</td><td class="num">normal</td><td class="num">8</td><td>"We make the engine. You make it Unreal."</td></tr>
+          <tr><td>Section <code>h2</code></td><td>Inter Tight</td><td class="num">24 / 28.8px</td><td class="num">700</td><td class="num">normal</td><td class="num">7</td><td>"Unreal Engine news"</td></tr>
+          <tr><td>Card title <code>h3</code></td><td>Inter</td><td class="num">16 / 26.4px</td><td class="num">700</td><td class="num">normal</td><td class="num">4</td><td>"Unreal Engine 5.8 is now available"</td></tr>
+          <tr><td>Link title <code>h3</code></td><td>Inter Tight</td><td class="num">16 / 19.2px</td><td class="num">700</td><td class="num">normal</td><td class="num">15</td><td>"Tutorials"</td></tr>
+          <tr><td>Body</td><td>Inter</td><td class="num">16 / 26.4px</td><td class="num">400</td><td class="num">normal</td><td class="num">7</td><td>"Unreal Engine is built by developers, for developers"</td></tr>
+          <tr><td>List item, large</td><td>Inter</td><td class="num">16 / 24px</td><td class="num">400</td><td class="num">normal</td><td class="num">51</td><td>"Unreal Engine 5.8 is now available"</td></tr>
+          <tr><td>Body, compact</td><td>Inter</td><td class="num">14 / 23.1px</td><td class="num">400</td><td class="num">0.28px</td><td class="num">11</td><td>"Whether you're an artist, a designer, or a programmer"</td></tr>
+          <tr><td>Body, dense list</td><td>Inter</td><td class="num">14 / 21px</td><td class="num">400</td><td class="num">0.28px</td><td class="num">7</td><td>"Before you can install and run Unreal Editor"</td></tr>
+          <tr><td>Button label</td><td>Inter</td><td class="num">14 / 14px</td><td class="num">500</td><td class="num">0.28px</td><td class="num">16</td><td>"Get Unreal Engine"</td></tr>
+          <tr><td>Tag</td><td>Inter</td><td class="num">12 / 18px</td><td class="num">400</td><td class="num">0.24px</td><td class="num">10</td><td>"84element84"</td></tr>
+          <tr><td>Eyebrow chip</td><td>Inter</td><td class="num">12 / 15.6px</td><td class="num">400</td><td class="num">0.36px</td><td class="num">4</td><td>"News"</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">
+      Note that Unreal Engine runs tracking <em>in pixels</em> on small text (0.28px on a 14px label is 2% of the
+      size) rather than in <code>em</code>. It is the same idea as the store's token scale, expressed differently.
+    </p>
+
+    <h4>Epic Games Store — 10 distinct styles</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>Type census, store.epicgames.com at 1440px.</caption>
+        <thead><tr><th>Role</th><th>Family</th><th class="num">Size / line-height</th><th class="num">Weight</th><th class="num">Tracking</th><th class="num">Count</th><th>Sample</th></tr></thead>
+        <tbody>
+          <tr><td>Page title <code>h1</code></td><td>Inter</td><td class="num">32px</td><td class="num">700</td><td class="num">normal</td><td class="num">1</td><td>"Discover"</td></tr>
+          <tr><td>Section <code>h2</code></td><td>Inter</td><td class="num">24px</td><td class="num">700</td><td class="num">normal</td><td class="num">2</td><td>"Discover Something New"</td></tr>
+          <tr><td>Feature <code>h5</code></td><td>Inter</td><td class="num">20 / 24px</td><td class="num">700</td><td class="num">-0.3px</td><td class="num">4</td><td>"This Week In Fortnite"</td></tr>
+          <tr><td>Card title <code>h6</code></td><td>Inter</td><td class="num">14 / 17.5px</td><td class="num">700</td><td class="num">0.28px</td><td class="num">48</td><td>"The Wolf Among Us Remastered"</td></tr>
+          <tr><td>Micro heading <code>h6</code></td><td>Inter</td><td class="num">10.72px</td><td class="num">700</td><td class="num">normal</td><td class="num">1</td><td>"Epic Savings"</td></tr>
+          <tr><td>Nav link</td><td>Inter</td><td class="num">16px</td><td class="num">400</td><td class="num">normal</td><td class="num">5</td><td>"Discover"</td></tr>
+          <tr><td>Body</td><td>Inter</td><td class="num">16 / 26.4px</td><td class="num">400</td><td class="num">0.16px</td><td class="num">1</td><td>"See what's new in Fortnite, all in one place"</td></tr>
+          <tr><td>Button label</td><td>Inter</td><td class="num">14 / 19.6px</td><td class="num">500</td><td class="num">0.28px</td><td class="num">5</td><td>"Save Now"</td></tr>
+          <tr><td>Unstyled link</td><td>Arial</td><td class="num">13.33px</td><td class="num">400</td><td class="num">normal</td><td class="num">5</td><td>"Honkai: Star Rail" — fallback leak</td></tr>
+          <tr><td>Input</td><td>Arial</td><td class="num">13.33 / 18.67px</td><td class="num">400</td><td class="num">normal</td><td class="num">1</td><td>the search field — see the gotcha in §4.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Fortnite for Developers — 6 distinct styles</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>Type census, fortnite.com/developer at 1440px. Sizes are the fractional pixels a fluid scale resolved to.</caption>
+        <thead><tr><th>Role</th><th>Family</th><th class="num">Size / line-height</th><th class="num">Weight</th><th>Case</th><th class="num">Count</th><th>Sample</th></tr></thead>
+        <tbody>
+          <tr><td>Page / section title</td><td>HeadingNowVariable<span class="muted">Italic</span></td><td class="num">36.39 / 36px</td><td class="num">750</td><td>uppercase</td><td class="num">3</td><td>"FORTNITE FOR DEVELOPERS"</td></tr>
+          <tr><td>Sub-section title</td><td>HeadingNowVariable<span class="muted">Italic</span></td><td class="num">32.35 / 32px</td><td class="num">750</td><td>uppercase</td><td class="num">6</td><td>"DEVELOPER TOOLS"</td></tr>
+          <tr><td>Card title</td><td>HeadingNowVariable</td><td class="num">20.22 / 24px</td><td class="num">650</td><td>none</td><td class="num">14</td><td>"Get Unreal Editor for Fortnite"</td></tr>
+          <tr><td>Body</td><td>HeadingNowVariable</td><td class="num">16.17 / 28px</td><td class="num">300</td><td>none</td><td class="num">6</td><td>"Every day, millions of players come to Fortnite"</td></tr>
+          <tr><td>Body, small</td><td>HeadingNowVariable</td><td class="num">13.48 / 24px</td><td class="num">300</td><td>none</td><td class="num">5</td><td>"Download everything you need to get started"</td></tr>
+          <tr><td>Nav link</td><td>sans-serif</td><td class="num">16px</td><td class="num">400</td><td>none</td><td class="num">25</td><td>"Overview" — the system sans, not Inter</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>Fortnite's line-heights are the story</strong>
+      <p>
+        Display type is set at a line-height <em>slightly smaller than its font size</em> (36 / 36.39px — a ratio of
+        0.99) because the face's caps are short and the page wants stacked lines to touch. Body copy then opens up to
+        1.73. That is a bigger contrast between display and body than either of the other two properties, and it is
+        what makes the page read as a poster rather than a document.
+      </p>
+    </div>
+
+    <h4>How the scale moves between 1440px and 390px</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>The same styles measured at both widths. Only display sizes are fluid; UI text is fixed.</caption>
+        <thead><tr><th>Element</th><th>Unreal Engine</th><th>Epic Games Store</th><th>Fortnite for Developers</th></tr></thead>
+        <tbody>
+          <tr><td>Display <code>h1</code></td><td>40 → <strong>32px</strong></td><td>32 → 32px</td><td>36.39 → <strong>28.3px</strong></td></tr>
+          <tr><td>Section <code>h2</code></td><td>24 → 24px</td><td>24 → 24px</td><td>36.39 → <strong>28.3px</strong></td></tr>
+          <tr><td>Sub-heading <code>h3</code></td><td>16 → 16px</td><td>—</td><td>32.35 → <strong>24.26px</strong></td></tr>
+          <tr><td>Body</td><td>14 → 14px</td><td>16 → <strong>14px</strong></td><td>16.17 → <strong>13.48px</strong></td></tr>
+          <tr><td>Button label</td><td>14 → 14px</td><td>14 → 14px</td><td>16 → 16px</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre><code>/* Unreal Engine — the only fluid step on the page, and a fixed UI size beneath it */
+.ue-display  { font-family: "Inter Tight", Inter, sans-serif; font-weight: 700;
+               font-size: clamp(32px, 2.8vw, 40px); line-height: 1.2; }
+.ue-section  { font-family: "Inter Tight", Inter, sans-serif; font-weight: 700;
+               font-size: 24px; line-height: 1.2; }
+.ue-body     { font-family: Inter, sans-serif; font-weight: 400;
+               font-size: 16px; line-height: 1.65; }
+.ue-body-sm  { font-family: Inter, sans-serif; font-weight: 400;
+               font-size: 14px; line-height: 1.65; letter-spacing: .02em; }
+.ue-button   { font-family: Inter, sans-serif; font-weight: 500;
+               font-size: 14px; line-height: 1; letter-spacing: .02em; }
+
+/* Fortnite for Developers — display in a heavy italic variable face, body in a light one */
+.fn-display  { font-family: HeadingNowVariableItalic, "HeadingNowVariable", Inter, sans-serif;
+               font-weight: 750; font-style: italic; text-transform: uppercase;
+               font-size: clamp(28.3px, 2.53vw, 36.39px); line-height: .99; }
+.fn-subhead  { font-family: HeadingNowVariableItalic, Inter, sans-serif; font-weight: 750; font-style: italic;
+               text-transform: uppercase; font-size: clamp(24.26px, 2.25vw, 32.35px); line-height: .99; }
+.fn-cardtitle{ font-family: HeadingNowVariable, Inter, sans-serif; font-weight: 650;
+               font-size: clamp(17.4px, 1.4vw, 20.22px); line-height: 1.19; }
+.fn-body     { font-family: HeadingNowVariable, Inter, sans-serif; font-weight: 300;
+               font-size: clamp(13.48px, 1.12vw, 16.17px); line-height: 1.73; }</code></pre>
+    <p class="code-note">The clamp() middle terms are derived from the two measured widths, so they reproduce the observed 1440px and 390px values and interpolate between them.</p>
+
+    <h4>The store's published type tokens</h4>
+    <p>
+      Only the store publishes its scale by name, and the names show the system's intent: headings get negative
+      tracking that eases off as they shrink, body text stays near zero, and UI text gets positive tracking that
+      <em>grows</em> as it gets smaller.
+    </p>
+<pre><code>/* store.epicgames.com — published verbatim */
+:root {
+  /* headings: rem-based, negative tracking, easing toward zero as the size drops */
+  --typography-heading-size-4xl: 4rem;        /*  64px */
+  --typography-heading-size-3xl: 3.25rem;     /*  52px */
+  --typography-heading-size-2xl: 2.5rem;      /*  40px */
+  --typography-heading-size-xl:  2rem;        /*  32px */
+  --typography-heading-size-lg:  1.5rem;      /*  24px */
+  --typography-heading-size-md:  1.25rem;     /*  20px */
+  --typography-heading-size-sm:  1rem;        /*  16px */
+  --typography-heading-letterSpacing-4xl: -.035em;
+  --typography-heading-letterSpacing-3xl: -.035em;
+  --typography-heading-letterSpacing-2xl: -.035em;
+  --typography-heading-letterSpacing-xl:  -.035em;
+  --typography-heading-letterSpacing-lg:  -.025em;
+  --typography-heading-letterSpacing-md:  -.015em;
+  --typography-heading-letterSpacing-sm:  -.005em;
+
+  /* body text */
+  --typography-text-size-2xl: 1.5rem;   --typography-text-letterSpacing-2xl: -.02em;
+  --typography-text-size-xl:  1.25rem;  --typography-text-letterSpacing-xl:  -.01em;
+  --typography-text-size-lg:  1.125rem; --typography-text-letterSpacing-lg:  0em;
+  --typography-text-size-md:  1rem;     --typography-text-letterSpacing-md:  .01em;
+  --typography-text-size-sm:  .875rem;  --typography-text-letterSpacing-sm:  .02em;
+  --typography-text-size-xs:  .75rem;   --typography-text-letterSpacing-xs:  .03em;
+
+  /* interface text: small, tight line-heights, positive tracking */
+  --typography-ui-size-lg: 1rem;         --typography-ui-lineHeight-lg: 150%; --typography-ui-letterSpacing-lg: .01em;
+  --typography-ui-size-md: .875rem;      --typography-ui-lineHeight-md: 140%; --typography-ui-letterSpacing-md: .02em;
+  --typography-ui-size-sm: .75rem;       --typography-ui-lineHeight-sm: 130%; --typography-ui-letterSpacing-sm: .03em;
+  --typography-ui-size-xs: .625rem;      --typography-ui-lineHeight-xs: 120%; --typography-ui-letterSpacing-xs: .04em;
+
+  /* the raw step list, and weights */
+  --size-font-10: .625rem;  --size-font-11: .6875rem; --size-font-12: .75rem;   --size-font-14: .875rem;
+  --size-font-16: 1rem;     --size-font-18: 1.125rem; --size-font-20: 1.25rem;  --size-font-24: 1.5rem;
+  --size-font-28: 1.75rem;  --size-font-32: 2rem;     --size-font-36: 2.25rem;  --size-font-40: 2.5rem;
+  --size-font-52: 3.25rem;  --size-font-64: 4rem;     --size-font-base: 16px;
+  --font-family-base: Inter;  --font-family-code: "Recursive Mono";
+  --font-weight-regular: 400; --font-weight-medium: 500; --font-weight-bold: 700; --font-weight-black: 900;
+}</code></pre>
+    <p class="small muted">
+      This is the whole scale — 14 steps, no arbitrary sizes. Unreal Engine's and Fortnite's scales are smaller
+      subsets of the same idea, and the store's own headings (32 / 24 / 20px) land exactly on
+      <code>--typography-heading-size-xl / lg / md</code>.
+    </p>
+
+    <h3 id="type-rules">4.3 Rules of use</h3>
+    <ul>
+      <li><strong>Tracking moves opposite to size.</strong> Big type loses letterspace (-0.035em at 64px), small type gains it (+0.04em at 10px). This is the single most reproducible rule in the study, and the only one the store bothered to publish per step.</li>
+      <li><strong>Line-height follows role, not size.</strong> Display ≈ 1.2 (or 0.99 in the poster-like Fortnite case), headings 1.2, body 1.65–1.73, UI text 1.3–1.5.</li>
+      <li><strong>Only display sizes scale with the viewport.</strong> Buttons stay 14px and nav links stay 16px at both 1440px and 390px on all three sites. Body copy may step down one notch (16 → 14px) at the mobile breakpoint.</li>
+      <li><strong>Two weights per family is enough.</strong> 400 and 500/700. The 900 weight is declared everywhere and used nowhere on these pages; the variable faces use 300 / 650 / 750 to hit intermediate weights instead of loading a second file.</li>
+      <li><strong>Sentence case by default.</strong> The only exceptions are Fortnite's display headings, which are uppercased with <code>text-transform</code> so the copy underneath stays readable and searchable, and the small labels that are genuinely labels ("STEP 1").</li>
+      <li><strong>No italics except as voice.</strong> The only italic in the entire study is Fortnite's display face, where the slanted variable cut <em>is</em> the brand.</li>
+      <li><strong>Text is never pure white on these pages except for headings.</strong> Body copy sits at 95% or 65% white; the store's token default is <code>#fffffff2</code>.</li>
+      <li><strong>Set <code>font: inherit</code> on form controls.</strong> The one place the system visibly breaks is an input that inherited the browser's default font (see §4.1).</li>
+    </ul>
+
+    <h2 id="components">5 · Components</h2>
+    <p>
+      Everything below is grouped by the computed signature the scraper found — two elements are the same component
+      only if fill, text colour, radius, border, padding, type and shadow all match. Measurements are at rest; the
+      state rules come from the tokens and the declared hover rules quoted in each entry.
+    </p>
+
+    <h3 id="comp-buttons">5.1 Buttons and actions</h3>
+    <p>Twelve distinct treatments across the three sites, in five roles. This table is the whole inventory:</p>
+    <div class="table-wrap">
+      <table>
+        <caption>Every button treatment measured, grouped by computed style.</caption>
+        <thead><tr><th>Site</th><th>Role and label</th><th>Fill → text</th><th class="num">Box</th><th class="num">Radius</th><th>Type</th><th class="num">Count</th></tr></thead>
+        <tbody>
+          <tr><td>UE</td><td>Primary — "Get Unreal Engine"</td><td><code>#26BBFF</code> → <code>#101014</code></td><td class="num">157×40, pad 8/16</td><td class="num">8px</td><td>14/500, +0.28px</td><td class="num">4</td></tr>
+          <tr><td>UE</td><td>Tile — "Browse more tutorials"</td><td><code>#FFFFFF26</code> → <code>#FFF</code></td><td class="num">176×32, pad 4/12</td><td class="num">6px</td><td>14/500, +0.28px</td><td class="num">4</td></tr>
+          <tr><td>UE</td><td>Secondary tile — "Watch how to install"</td><td><code>#FFFFFF26</code> → <code>#FFF</code></td><td class="num">204×40, pad 8/16</td><td class="num">8px</td><td>14/500, +0.28px</td><td class="num">2</td></tr>
+          <tr><td>UE</td><td>Ghost — "Learn about licensing"</td><td>transparent, 1px <code>#FFFFFF59</code> → <code>#FFF</code></td><td class="num">183×40, pad 8/16</td><td class="num">8px</td><td>14/500, +0.28px</td><td class="num">3</td></tr>
+          <tr><td>UE</td><td>Pill tag — "News"</td><td><code>#FFFFFF26</code> → <code>#FFFFFFF2</code></td><td class="num">54×24, pad 0/10</td><td class="num">9999px</td><td>12/400, +0.36px</td><td class="num">4</td></tr>
+          <tr><td>UE</td><td>Step chip — "STEP 1"</td><td>transparent → <code>#FFF</code></td><td class="num">65×26, pad 4/12</td><td class="num">9999px</td><td>16/400</td><td class="num">3</td></tr>
+          <tr><td>Store</td><td>Primary — "Save Now"</td><td><code>#FFFFFF</code> → <code>#000000F2</code></td><td class="num">109×48, pad 0/20</td><td class="num">10px</td><td>14/500, +0.28px</td><td class="num">3</td></tr>
+          <tr><td>Store</td><td>Primary, compact — "Discover Now"</td><td><code>#FFFFFF</code> → <code>#000000F2</code></td><td class="num">128×40, pad 0/16</td><td class="num">8px</td><td>14/500, +0.28px</td><td class="num">1</td></tr>
+          <tr><td>Store</td><td>Secondary — "Browse"</td><td><code>#FFFFFF26</code> → <code>#FFFFFFF2</code></td><td class="num">118×40, pad 0/16</td><td class="num">8px</td><td>14/500, +0.28px</td><td class="num">1</td></tr>
+          <tr><td>Store</td><td>Nav item, active — "Epic Savings"</td><td><code>#28282C</code> → <code>#FFFFFFF2</code></td><td class="num">176×78</td><td class="num">8px</td><td>16/400</td><td class="num">1</td></tr>
+          <tr><td>FN</td><td>Primary — "Learn More"</td><td><code>#F7FF19</code> → <code>#000</code></td><td class="num">154×32, pad 0/20</td><td class="num">6px</td><td>16/400</td><td class="num">3</td></tr>
+          <tr><td>FN</td><td>Primary hero — "Get Unreal Editor for Fortnite"</td><td><code>#F7FF19</code> → <code>#000</code></td><td class="num">435×44, pad 0/24</td><td class="num">8px</td><td>16/400</td><td class="num">1</td></tr>
+          <tr><td>FN</td><td>Secondary — "Documentation"</td><td><code>#FFFFFF59</code> → <code>#000</code></td><td class="num">238×44, pad 0/24</td><td class="num">8px</td><td>16/400</td><td class="num">1</td></tr>
+          <tr><td>FN</td><td>Ghost — "View more"</td><td>transparent → <code>#FFF</code></td><td class="num">143×32, pad 0/20</td><td class="num">6px</td><td>16/400</td><td class="num">1</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>The five roles, with their state model</h4>
+<pre><code>/* Primary — one per view. The fill is the property's accent, which is why it is a variable. */
+.btn-primary {
+  background: var(--color-background-fill-accent-primary-default, #33bfff);
+  color: #000000f2;                     /* the store uses near-black, not pure black */
+  border: 0;
+  border-radius: 8px;                   /* 10px on the store's largest size */
+  padding: 0 20px;
+  height: 40px;
+  font: 500 14px/1.4 Inter, sans-serif;
+  letter-spacing: .02em;
+  cursor: pointer;
+  transition: background-color .12s cubic-bezier(.65, 0, .35, 1);
+}
+.btn-primary:hover  { background: var(--color-background-fill-accent-primary-hover, #69d0ff); }
+.btn-primary:active { background: var(--color-background-fill-accent-primary-press,   #33bfff); }
+
+/* Secondary — a translucent fill, no border. The fill strengthens on hover; the hue never changes. */
+.btn-secondary {
+  background: #ffffff26;                /* 15% white */
+  color: #fffffff2;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  height: 40px;
+}
+.btn-secondary:hover  { background: #ffffff59; }   /* 35% white */
+.btn-secondary:active { background: #ffffff26; }
+
+/* Ghost — for the second action in a row that already has a filled button. */
+.btn-ghost {
+  background: transparent;
+  color: #fff;
+  border: 1px solid #ffffff59;
+  border-radius: 8px;
+  padding: 8px 16px;
+}
+.btn-ghost:hover { border-color: #ffffffa6; }      /* border-strong-hover */
+
+/* Chip / tag — small, fully round, for metadata and filters rather than for actions. */
+.chip {
+  background: #ffffff26;
+  color: #fff;
+  border: 0;
+  border-radius: 9999px;
+  padding: 4px 12px;
+  font: 400 12px/1.5 Inter, sans-serif;
+  letter-spacing: .03em;                /* small text gains tracking */
+}
+
+/* Disabled is an opacity, not a colour swap. */
+.btn-primary[disabled], .btn-secondary[disabled], .btn-ghost[disabled] {
+  opacity: .5;                          /* --opacity-disabled */
+  pointer-events: none;
+}
+
+/* Icon button — 24px glyph in a 32px hit area, colour inherited so it themes with the header. */
+.icon-button {
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  background: transparent; border: 0; border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+}
+.icon-button:hover { background: #ffffff26; }
+.icon-button svg { width: 24px; height: 24px; fill: currentColor; }</code></pre>
+
+    <h4>How sizes and radii are kept in step</h4>
+    <p>
+      The store publishes the control geometry as a family of parallel scales, and the naming shows the intent:
+      every control size has an area, a padding, a gap, an icon size, an inner radius and — separately — a
+      <em>focus</em> radius that is exactly 4px larger, because the focus ring is drawn outside the control.
+    </p>
+<pre><code>:root {
+  /* control heights */
+  --action-area-sm: .75rem;  --action-area-md: 1rem;    --action-area-lg: 1.25rem;
+  --action-area-xl: 1.5rem;  --action-area-2xl: 1.75rem; --action-area-3xl: 2rem;
+  --action-area-4xl: 2.5rem; --action-area-5xl: 3rem;    /* 40px and 48px are the ones in use */
+  --input-area-standard-sm: 2rem;   --input-area-standard-md: 2.5rem;   --input-area-standard-lg: 3rem;
+
+  /* padding and gaps that go with them */
+  --action-padding-xl: .5rem;  --action-padding-3xl: .75rem; --action-padding-4xl: 1rem; --action-padding-5xl: 1.25rem;
+  --action-gap-3xl: .375rem;   --action-gap-4xl: .5rem;
+
+  /* icons and adornments scale with the control, not with the font */
+  --action-xIcon-xl: .875rem;  --action-xIcon-2xl: 1rem;  --action-xIcon-3xl: 1.125rem;
+  --action-adornment-xl: 1rem; --action-adornment-3xl: 1.25rem;
+
+  /* radius: the object, then the ring drawn around it */
+  --action-radius-object-xl: 4px;   --action-radius-object-3xl: 6px;
+  --action-radius-object-4xl: 8px;  --action-radius-object-5xl: 10px;
+  --action-radius-focus-xl: 8px;    --action-radius-focus-3xl: 10px;
+  --action-radius-focus-4xl: 12px;  --action-radius-focus-5xl: 14px;
+  --action-radius-focus-md: 6px;    --action-radius-focus-lg: 7px;  --action-radius-focus-2xl: 9px;
+}</code></pre>
+    <p class="small muted">
+      Read the last pair together: <code>object-5xl: 10px</code> with <code>focus-5xl: 14px</code>. The focus radius
+      is the control's radius plus the ring's offset, so a focus ring never fights the corner it wraps — a small
+      detail that is the difference between a ring that hugs a button and one that clips through its corner.
+    </p>
+
+    <h4>Usage spec</h4>
+    <ul>
+      <li><strong>One primary per view.</strong> Every page in the study has exactly one filled accent button in its hero or toolbar.</li>
+      <li><strong>The accent is a variable, never a literal.</strong> The same component renders cyan on Unreal Engine and yellow on Fortnite because only the variable changes.</li>
+      <li><strong>Pick the height from the scale, not the content.</strong> 24px (tag) → 32px (tile) → 40px (standard, and the most common) → 44px (hero on Fortnite) → 48px (store hero).</li>
+      <li><strong>Radius is property identity.</strong> Unreal Engine 8px, store 8–10px, Fortnite 6px. A pill (9999px) is reserved for tags, filters and step chips, never for an action.</li>
+      <li><strong>Label type differs by brand and is not negotiable.</strong> Unreal Engine and the store use 14px/500 with +0.02em tracking; Fortnite uses 16px/400 with no tracking because its display face is already heavy.</li>
+      <li><strong>Hover strengthens a fill or a border; it never moves the button.</strong> No lift, no scale, no shadow appearing on hover anywhere in the three sites' rest states.</li>
+      <li><strong>Disabled is 50% opacity plus a pointer-events guard</strong> — the fill is not swapped for grey.</li>
+      <li><strong>Icon-only buttons keep a 24px glyph in a 32px target</strong>, and the glyph inherits <code>currentColor</code> so it themes with its container.</li>
+    </ul>
+
+    <div class="specimen">
+      <p class="specimen-label">Specimen — the measured treatments, side by side</p>
+      <div class="specimen-stage">
+        <button class="x-btn x-btn-primary-ue x-focus" type="button">Get Unreal Engine</button>
+        <button class="x-btn x-btn-primary-store x-focus" type="button">Save Now</button>
+        <button class="x-btn x-btn-primary-fn x-focus" type="button">Learn More</button>
+        <button class="x-btn x-btn-secondary x-focus" type="button">Browse</button>
+        <button class="x-btn x-btn-ghost x-focus" type="button">Learn about licensing</button>
+        <button class="x-chip x-focus" type="button">News</button>
+        <button class="x-signin x-focus" type="button">Sign in</button>
+        <button class="x-iconbtn x-focus" type="button" aria-label="Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M4.8 20.2a7.6 7.6 0 0 1 14.4 0" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <h3 id="comp-inputs">5.2 Inputs and search</h3>
+    <p>
+      The store's search field is the only fully-styled input that renders at rest on these pages, and it is a
+      good one: a pill that sits on the canvas as a lighter surface, with the leading icon accounted for by
+      <em>asymmetric</em> padding.
+    </p>
+<pre><code>/* store.epicgames.com, measured: 230×40, radius 9999px, fill #202024, no border */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: .5rem;                          /* --input-gap-horizontal-standard-md */
+  width: 230px;
+  height: 40px;                        /* --input-area-standard-md */
+  background: #202024;                 /* --color-background-elevated-medium */
+  border: 0;
+  border-radius: 9999px;
+  padding: 0 13.6px 0 39.95px;         /* left padding leaves room for the 20px icon + gap */
+  color: #fffffff2;
+  font: 400 13.33px/1.4 Inter, sans-serif;  /* the store forgets this line — see the §4.1 gotcha */
+  letter-spacing: .02em;
+  transition: box-shadow .12s cubic-bezier(.65, 0, .35, 1);
+}
+.search-field::placeholder { color: #ffffffa6; }
+.search-field:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 14px;                 /* --action-radius-focus-5xl, not the object radius */
+}
+.search-field[disabled] { opacity: .5; }</code></pre>
+    <p>
+      The shared header does not ship a search field of its own; it reserves a slot. It reads
+      <code>--search-box-width</code> (declared as <code>100%</code>), and when the host carries
+      <code>data-search-open="true"</code> it hides the primary nav and lets the toolbar grow so the field can take
+      the width it just asked for. The field itself is a nested component
+      (<code>&lt;epic-wf-search-box&gt;</code>) mounted into that slot.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Input geometry from the store's published tokens.</caption>
+        <thead><tr><th>Token</th><th class="num">Value</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td><code>--input-area-standard-sm / md / lg</code></td><td class="num">2 / 2.5 / 3rem</td><td>32, 40 and 48px control heights — the same 40px the buttons use.</td></tr>
+          <tr><td><code>--input-gap-horizontal-standard-*</code></td><td class="num">.5rem</td><td>Space between an adornment and the value; the same at every size.</td></tr>
+          <tr><td><code>--input-gap-vertical</code></td><td class="num">.5rem</td><td>Space between a field and its label or message.</td></tr>
+          <tr><td><code>--input-icon-lg</code></td><td class="num">1.25rem</td><td>Leading and trailing icons: 20px, inside a 40px field.</td></tr>
+          <tr><td><code>--input-divider</code></td><td class="num">1rem</td><td>Inset for a dividing line inside a field group.</td></tr>
+          <tr><td><code>--input-dev-valueContainerPadding-lg / md / sm</code></td><td class="num">14 / 10 / 6px</td><td>Padding inside the value container, by size.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">
+      No search field was captured on the Unreal Engine or Fortnite pages themselves — theirs live inside a nested
+      component inside the header's shadow root and are not present until the search is engaged. Where a value was
+      not observed, this document does not guess one.
+    </p>
+
+    <h3 id="comp-surfaces">5.3 Surfaces and cards</h3>
+    <p>
+      The three cards below are the same idea with three different budgets. None of them uses a strong border, and
+      two of them use a border that is the <em>same colour as the fill</em> — visible only where the card overlaps
+      something.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Card treatments measured on each page.</caption>
+        <thead><tr><th>Site</th><th>Fill</th><th>Border</th><th class="num">Radius</th><th class="num">Padding</th><th>Shadow</th><th class="num">Size</th></tr></thead>
+        <tbody>
+          <tr><td>UE — feature card</td><td><code>#FFFFFF0D</code></td><td>1px <code>#FFFFFF0D</code></td><td class="num">24px</td><td class="num">12 / 16 / 20 / 32px</td><td>none</td><td class="num">418×525</td></tr>
+          <tr><td>UE — news row</td><td><code>#FFFFFF0D</code></td><td>1px <code>#FFFFFF0D</code></td><td class="num">24px</td><td class="num">12px</td><td>none</td><td class="num">630×185</td></tr>
+          <tr><td>Store — product tile</td><td><code>#14181E</code></td><td>1px <code>#FFFFFF26</code></td><td class="num">12px</td><td class="num">0</td><td><code>0 0 6px #00000099</code></td><td class="num">360×360</td></tr>
+          <tr><td>Store — wide banner</td><td>transparent</td><td>1px <code>#FFFFFF1A</code></td><td class="num">12px</td><td class="num">0</td><td>none</td><td class="num">1049×400</td></tr>
+          <tr><td>FN — content card</td><td><code>#FFFFFF0D</code></td><td>1px <code>#FFFFFF0D</code></td><td class="num">8px</td><td class="num">16px</td><td><code>0 0 16px #00000020</code></td><td class="num">360×106</td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre><code>/* Unreal Engine: no shadow at all — the homepage has zero box-shadows on content. */
+.card-ue {
+  background: #ffffff0d;                        /*  5% white */
+  border: 1px solid #ffffff0d;                  /*  the same value: a hairline, not an outline */
+  border-radius: 24px;
+  padding: 32px;
+}
+
+/* Store: a tinted fill, a visible hairline and a tight shadow, all three at once. */
+.card-store {
+  background: #14181e;                          /* navy-tinted, so it reads as art rather than chrome */
+  border: 1px solid #ffffff26;                  /* 15% white */
+  border-radius: 12px;
+  box-shadow: 0 0 6px #00000099;                /* 60% black, 6px blur, no offset */
+  overflow: hidden;                             /* art bleeds to the radius */
+}
+
+/* Fortnite: the smallest budget — 8px radius, 5% fill, and a wide soft glow instead of a contact shadow. */
+.card-fn {
+  background: #ffffff0d;
+  border: 1px solid #ffffff0d;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 0 16px #00000020;               /* 12.5% black, 16px blur */
+}
+
+/* The radius vocabulary, counted from every rendered element on each page */
+/* Unreal Engine  8px ×68  16px ×34  24px ×28  9999px ×18  6px ×8  12px ×4
+   Epic Store     8px ×153 50%   ×48  4px  ×30  9999px ×22  16px ×6  10px ×3  12px ×3
+   Fortnite       8px ×26  12px ×17  6px ×16  24px ×1   9999px ×1                             */</code></pre>
+    <p class="small muted">
+      Two of the three properties put their most-used radius at 8px and give cards one step up. The store is the
+      only one with a large family of perfectly round (50%) elements — avatars and game badges.
+    </p>
+
+    <h4>Usage spec</h4>
+    <ul>
+      <li><strong>Fill plus hairline, not border alone.</strong> On a <code>#101014</code> canvas a 1px border cannot carry a boundary by itself (1.84:1 — see §3.3); the fill does the work and the border sharpens it.</li>
+      <li><strong>Cards get a radius one step above controls.</strong> Controls 8px → cards 12–24px on all three sites; the card is never rounder than the thing inside it.</li>
+      <li><strong>Shadow is optional and quiet.</strong> Unreal Engine uses none, Fortnite uses a 12.5% glow, the store uses a tight 60% shadow under art. None of them uses the five-layer directional ramp on a card — that is reserved for the drawer.</li>
+      <li><strong>Padding comes from a small set</strong> — 12 / 16 / 20 / 32px — rather than from the content's natural width.</li>
+      <li><strong>Art bleeds to the radius</strong> (<code>overflow: hidden</code>) rather than being clipped per element.</li>
+    </ul>
+
+    <h3 id="comp-nav">5.4 Navigation and sub-navigation</h3>
+    <p>
+      The global header is documented in §2. What sits under it differs per property, and the two patterns are
+      worth naming: a <em>sticky department bar</em> (the store) and a <em>section bar that scrolls away</em>
+      (Fortnite).
+    </p>
+<pre><code>/* Epic Games Store — a second sticky bar under the global header. 100px tall, no border. */
+.department-bar {
+  position: sticky;
+  top: 72px;                      /* --header-height: the bar parks under the header */
+  z-index: 200;
+  height: 100px;
+  padding: 5px 0;
+  background: #101014;            /* opaque: content must not show through while scrolling */
+}
+.department-bar a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px;
+  color: #fffffff2;
+  font: 400 16px/1.5 Inter, sans-serif;
+  border-radius: 0;               /* flat: the nav's active state uses a fill, not a pill */
+}
+.department-bar a[aria-current="page"] {
+  background: #28282c;            /* --color-neutral-250 */
+  border-radius: 8px;
+}
+
+/* Fortnite for Developers — a 48px section bar that scrolls with the page. */
+.section-bar {
+  position: relative;             /* deliberately not sticky */
+  height: 48px;
+  padding: 0 24px;
+  background: transparent;
+}
+.section-bar a { color: #fff; font: 400 16px/1.5 Inter, sans-serif; }</code></pre>
+    <div class="table-wrap">
+      <table>
+        <caption>What each property puts under its global header.</caption>
+        <thead><tr><th></th><th>Unreal Engine</th><th>Epic Games Store</th><th>Fortnite for Developers</th></tr></thead>
+        <tbody>
+          <tr><td>Second bar</td><td>none — the header carries the nav</td><td>department bar, 100px, sticky</td><td>section bar, 48px, scrolls</td></tr>
+          <tr><td>Active state</td><td>fill behind the current nav item</td><td><code>#28282C</code> fill, 8px radius</td><td>colour change only</td></tr>
+          <tr><td>Breadcrumbs</td><td>none</td><td>none</td><td>none</td></tr>
+          <tr><td>Back control</td><td>none at page level</td><td>none at page level</td><td>none at page level</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>No breadcrumbs, and no page-level back button</strong>
+      <p>
+        This is a finding, not an omission in the study: the strings "breadcrumb" and "back" appear nowhere in the
+        DOM or CSS of the three pages, apart from the mobile drawer's own back control inside the shared header.
+        These properties navigate by a single always-visible nav bar and by scrolling, and they rely on the
+        browser's own history for going back. If depth needs to be shown, they use a section bar instead.
+      </p>
+    </div>
+
+    <h3 id="comp-chrome">5.5 Footer, badges, overlay and avatar</h3>
+    <p>
+      All three pages mount their footer as a second shared web component —
+      <code>&lt;unrealengine-footer&gt;</code>, <code>&lt;egs-footer&gt;</code>,
+      <code>&lt;fortnite-footer&gt;</code> — from the same host as the header. Its internals were not the subject of
+      this pass; the component's tag name and mounting pattern are what the study records.
+    </p>
+    <p>
+      What the store <em>does</em> publish is a complete set of small-component geometry, which is where the
+      "additional design components" of this library mostly live. Four families are worth having:
+    </p>
+<pre><code>:root {
+  /* Selection controls — checkbox, radio, toggle. The "internal" and "external" pairs are the control's own
+     box versus the label area that makes the whole row clickable. */
+  --selection-area-external-xl: 2.5rem;  --selection-area-external-lg: 2rem;
+  --selection-area-internal-xl: 34px;    --selection-area-internal-lg: 26px;
+  --selection-area-child-xl: 2.5rem;     --selection-area-header-xl: 2.5rem;
+  --selection-gap-internal-xl: .5rem;    --selection-gap-internal-md: .25rem;
+  --selection-gap-external-sm: .25rem;   --selection-adornment: 1.25rem;
+
+  /* Status — badges, dots, counters. A dot and a rectangle have their own padding scales because a circle
+     needs less padding to look the same size. */
+  --status-area-sm: 1rem;  --status-area-md: 1.25rem;  --status-area-lg: 1.5rem;
+  --status-area-xl: 1.75rem; --status-area-2xl: 2rem;
+  --status-padding-circle-lg: .375rem;
+  --status-padding-rectangle-md: .5rem; --status-padding-rectangle-lg: .625rem; --status-padding-rectangle-2xl: .875rem;
+  --status-icon-primary-md: 1rem;  --status-icon-secondary-md: .75rem;  --status-icon-error: 1rem;
+  --status-gap-2xl: .375rem;  --status-track-area: 1.5rem;  --status-track-areaMobile: 4rem;
+
+  /* Feedback — toasts and modals. */
+  --feedback-area-sm: 3rem;  --feedback-area-md: 4rem;  --feedback-area-lg: 5rem;
+  --feedback-padding-sm: .75rem; --feedback-padding-md: 1rem; --feedback-padding-lg: 1.5rem;
+  --feedback-icon-sm: 1.25rem; --feedback-icon-md: 1.5rem; --feedback-icon-xl: 1.75rem;
+  --feedback-gap: 1rem;
+  --feedback-modal-radius: 24px;  --feedback-modal-padding: 2rem;
+  --feedback-cardMultiImage-radius-object: 24px;   /* image grids reuse the card radius */
+  --feedback-cardMultiImage-radius-focus: 28px;    /*  + 4px for the ring, as everywhere else */
+
+  /* Identity — avatars, with the shape as a mask path rather than a border-radius. */
+  --identity-icon-sm: 1rem;    --identity-icon-md: 1.25rem;  --identity-icon-lg: 1.5rem;
+  --identity-indicator-sm: .375rem; --identity-indicator-md: .5rem; --identity-indicator-lg: .625rem;
+  --identity-initial-sm: .75rem;    --identity-initial-md: 1rem;    --identity-initial-lg: 1.25rem;
+  --identity-gap-sm: .5rem;         --identity-gap-md: .625rem;
+}</code></pre>
+<pre><code>/* A status badge: a bright fill with a dark tint of the same hue for the label, never black on colour. */
+.badge-success { background: #5fe367; color: #132d15; border-radius: 9999px; padding: .5rem .625rem; }
+.badge-warning { background: #f7d82b; color: #312b09; border-radius: 9999px; padding: .5rem .625rem; }
+.badge-critical{ background: #fd5e5e; color: #331313; border-radius: 9999px; padding: .5rem .625rem; }
+.badge-neutral { background: #ffffff1a; color: #fffffff2; border-radius: 9999px; padding: .5rem .625rem; }
+.badge svg     { width: .75rem; height: .75rem; fill: currentColor; }   /* secondary icon size */
+
+/* A toast, from the feedback tokens. */
+.toast {
+  display: flex; gap: 1rem;                 /* --feedback-gap */
+  align-items: flex-start;
+  padding: 1rem;                            /* --feedback-padding-md */
+  min-height: 4rem;                         /* --feedback-area-md */
+  background: #202024b3;                    /* --color-material-200 */
+  border: 1px solid #ffffff26;
+  border-radius: 12px;
+  backdrop-filter: blur(37.5px);            /* --effect-material-blur-75 */
+}
+
+/* An avatar. The squircle is a mask path, which is why it never needs a matching border-radius. */
+.avatar {
+  width: 2rem; height: 2rem;                /* --identity-icon-2xl */
+  overflow: hidden;
+  -webkit-mask-image: var(--identity-thumbMask-lg);
+          mask-image: var(--identity-thumbMask-lg);
+  mask-size: 100% 100%;
+}
+.avatar__initial { font-size: 1rem; font-weight: 500; }   /* --identity-initial-md */
+.avatar__indicator { width: .5rem; height: .5rem; border-radius: 50%; }  /* --identity-indicator-md */</code></pre>
+    <p class="small muted">
+      The avatar mask is a real superellipse path published as <code>--identity-thumbMask-{sm..2xl}</code> at five
+      sizes. Using a mask rather than <code>border-radius</code> is what lets the shape stay correct while an image
+      is cropped inside it — and it is the only place in the whole study where a shape is not a radius.
+    </p>
+
+    <h4>The mobile drawer, from the shared header</h4>
+<pre><code>/* The drawer is a sibling of the toolbar inside the header's shadow root. Its height is derived from the
+   header rather than from the viewport, so it always meets the header exactly. */
+.global-header__drawer {
+  height: calc(100dvh - var(--header-height) - var(--top-offset, 0px));
+  display: flex; flex-direction: column-reverse; justify-content: start; align-items: stretch;
+  background: var(--color-background-default, #101014);
+  box-shadow: var(--shadow-top-md);        /* the five-layer upward ramp from §3.1 */
+}
+.global-header[data-mobile-drawer-open="true"] .bg-filter { display: none; }</code></pre>
+
+    <h3 id="comp-focus">5.6 Focus, states and motion</h3>
+    <p>
+      The state model is the same on all three sites, and it is stated most clearly by the store's token names.
+      There are four states, and each one has a definition that does not depend on a designer choosing a new
+      colour:
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>The state model, with the values each state resolves to.</caption>
+        <thead><tr><th>State</th><th>How it is expressed</th><th>Example (a translucent control)</th></tr></thead>
+        <tbody>
+          <tr><td>Rest</td><td>base token</td><td><code>--color-background-fill-subtle-default: #ffffff26</code> — 15%</td></tr>
+          <tr><td>Hover</td><td>stronger fill, or a lighter text colour</td><td><code>#ffffff59</code> (35%) on a fill; <code>--color-text-secondary</code> (65% white) on a glyph</td></tr>
+          <tr><td>Pressed / active</td><td>back to the rest fill, so the press reads as a "down" rather than a "further up"</td><td><code>#ffffff26</code> (15%)</td></tr>
+          <tr><td>Focus</td><td>a white 2px ring, offset 2px, with a tightened radius</td><td><code>outline: 2px solid #fff; outline-offset: 2px; border-radius: 2px</code></td></tr>
+          <tr><td>Disabled</td><td>opacity, plus a widened fill token</td><td><code>opacity: .5</code>, <code>--color-background-fill-disabled-primary</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+<pre><code>/* One focus treatment, used across all three properties. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+  border-radius: 2px;                 /* the ring is a rectangle, whatever the control's shape */
+}
+/* Link rows inside a nav tighten the offset so neighbouring rings cannot overlap. */
+.nav-link:focus-visible { outline-offset: -.5rem; }   /* --link-outline-offset */
+
+/* A utility every one of these codebases needs and only one of them names. */
+.visually-hidden {
+  clip: rect(0 0 0 0);
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  position: absolute; overflow: hidden;
+  border: 0;
+}</code></pre>
+    <p>
+      Two more conventions fall out of the study and are worth copying even though they are not components:
+    </p>
+    <ul>
+      <li><strong>A skip link with its own z-index.</strong> The shared header reserves <code>--skipnav-z-index: 9001</code> — one above the header's 9000 — so the skip target stays reachable over a sticky bar.</li>
+      <li><strong>Motion off under <code>prefers-reduced-motion</code>.</strong> The shared stylesheet carries a reduced-motion block, and every transition in it is optional polish rather than information.</li>
+    </ul>
+
+    <h3 id="comp-glow">5.7 The ambient image glow</h3>
+    <p>
+      This is the effect that makes the art on an inner page look like it is <em>lighting</em> the canvas around it:
+      a soft, saturated haze of the image's own colours bleeding roughly 160px past its edges. It appears on
+      Unreal Engine's inner pages — <code>/features</code> is the clearest example — and it is the most
+      sophisticated thing in this study.
+    </p>
+    <p>
+      It is <strong>not</strong> a CSS <code>filter: blur()</code> on a copy of the image. The blurred copy is
+      painted into a <strong>canvas one eighth of the size</strong> and then stretched back up by CSS, so the
+      browser's own bilinear magnification does the blurring at a sixty-fourth of the pixel cost.
+    </p>
+
+    <h4>What is actually in the DOM, measured</h4>
+<pre><code>div.image-holder                      643×362   position: relative
+├── div.blurred-image                 963×682   position: absolute; inset: -160px;
+│   │                                            z-index: 0; pointer-events: none; overflow: visible
+│   ├── img                           (opacity 0)  aria-hidden="true"  crossOrigin="anonymous"
+│   │                                   the SAME art, from a 256px-wide CMS variant
+│   └── canvas.blurred-image__canvas  intrinsic 120×85, laid out 963×682
+│                                       aria-hidden="true"; position: absolute; inset: 0; width/height 100%
+└── img.cosmos-asset                  643×362   z-index: 2; border-radius: 24px   ← the card itself</code></pre>
+    <p>
+      Read those two numbers together: <b>963 ÷ 120 = 8.02</b> and <b>682 ÷ 85 = 8.02</b>. The canvas holds 10,200
+      pixels where the box it fills has 656,000 — and the 8× magnification is the blur. The wrapper is sized
+      <code>inset: calc(var(--image-blur-pixels) * -2)</code>, so the aura's reach is always exactly twice the blur
+      radius; here that resolved to −160px, meaning the component was given an 80px radius on this page (its own
+      default is 50px, and its CSS fallback is 125px).
+    </p>
+
+    <h4>The pipeline, in the order it runs</h4>
+    <ol>
+      <li><strong>A hidden duplicate of the art.</strong> Not the hero file: <code>image.optUrl || resize({ src: image.url, width: 256 })</code> — a 256px-wide transform of the same CMS asset, loaded <code>crossOrigin="anonymous"</code> so it can be uploaded as a WebGL texture without tainting the canvas, and marked <code>aria-hidden</code> as decoration.</li>
+      <li><strong>A shared offscreen WebGL canvas</strong>, 300×150 (the browser default — its size is never set), reused across instances. The image is uploaded as a texture.</li>
+      <li><strong>A two-pass separable Gaussian blur</strong> in GLSL: a horizontal pass into framebuffer A with <code>u_blurRadius</code>, then a vertical pass into framebuffer B. Measured radius: <code>u_blurRadius = 10</code> — the 80px radius divided by the 8× downsample, because the blur is computed at the small resolution.</li>
+      <li><strong>A composite pass</strong> with <code>u_saturation</code> (measured 1 — the aura keeps the art's true colour) and <code>u_distortion</code> (measured 1 — a slow wobble, forced to 0 under <code>prefers-reduced-motion</code>).</li>
+      <li><strong>One <code>drawImage</code> that copies a band</strong>, not the whole buffer — <code>drawImage(gl, 0, gl.height - n, w, n, 0, 0, w, n)</code>. Measured live as <code>drawImage(canvas, 0, 65, 120, 85, 0, 0, 120, 85)</code>: the WebGL result lands in the bottom 85 rows of the 150-tall GL canvas (WebGL's origin is bottom-left), so the copy takes that band. This step is what explains the odd-looking numbers.</li>
+      <li><strong>CSS stretches the 120×85 canvas to 963×682</strong> — <code>position: absolute; inset: 0; width: 100%; height: 100%</code> — and the smoothing filter turns 10,200 pixels into a 160px-wide glow.</li>
+      <li><strong>It redraws at 30fps</strong> (<code>1000 / 30</code>): 414 draws measured over 13.7 seconds. The loop exists for the animation, not the blur — the wobble needs a new frame, and each frame is cheap precisely because the buffer is tiny.</li>
+    </ol>
+
+    <h4>Recreating it without WebGL</h4>
+    <p>
+      The structure is the whole trick; the shader is an optimisation. This is the same effect in portable CSS —
+      a copy of the art, inset by twice the blur radius, behind the content and inert to the pointer.
+    </p>
+<pre><code>/* 1 · the card and its aura share a positioned parent */
+.glow { position: relative; }
+
+/* 2 · the aura layer: bleeds twice the blur radius past the content on every side */
+.glow__aura {
+  position: absolute;
+  inset: calc(var(--glow-blur, 50px) * -2);   /* 80px radius → 160px of reach */
+  z-index: 0;
+  pointer-events: none;                       /* never intercept a click or a hover */
+}
+
+/* 3 · the blurred copy — either let CSS blur it… */
+.glow__aura img {
+  display: block; width: 100%; height: 100%;
+  object-fit: cover;                          /* fill the aura box, crop the overflow */
+  filter: blur(var(--glow-blur, 50px)) saturate(1);
+  opacity: var(--glow-opacity, 1);
+}
+
+/* …or do what Epic does and upscale a tiny canvas instead (far cheaper, and it can animate) */
+.glow__aura canvas { display: block; width: 100%; height: 100%; }
+
+/* 4 · the content rides above the aura */
+.glow__card { position: relative; z-index: 2; border-radius: 24px; overflow: hidden; }</code></pre>
+<pre><code>/* The cheap version: paint the art into a canvas 1/8 of the box and let CSS magnify it.
+   Same technique, no shader, ~20 lines — and it works with an ordinary &lt;img&gt;. */
+const DOWNSAMPLE = 8;
+
+function paintGlow(canvas, img) {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = Math.max(1, Math.round(rect.width / DOWNSAMPLE));
+  canvas.height = Math.max(1, Math.round(rect.height / DOWNSAMPLE));
+  const ctx = canvas.getContext("2d");
+
+  /* cover-fit the source, the way object-fit: cover would */
+  const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+  const w = img.naturalWidth * scale;
+  const h = img.naturalHeight * scale;
+  ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+  /* no ctx.filter, no blur — the browser's own upscaling is the blur */
+}
+
+const canvas = document.querySelector(".glow__aura canvas");
+const img = document.querySelector(".glow__aura img");
+img.decode().then(() => paintGlow(canvas, img));
+new ResizeObserver(() => paintGlow(canvas, img)).observe(canvas);</code></pre>
+    <p class="code-note">
+      Two conveniences in the original are worth copying ahead of the shader: the hidden source is a
+      <b>256px-wide</b> transform of the artwork — a blur destroys detail, so never download the full-size file for
+      it — and the aura is <code>pointer-events: none</code>, so the card underneath stays fully interactive.
+    </p>
+
+    <h4>Usage spec</h4>
+    <ul>
+      <li><strong>Only when the art has colour to give.</strong> The effect reads as the image emitting light, so it needs a saturated or high-contrast picture — a grey screenshot produces a grey smudge.</li>
+      <li><strong>Reach is always twice the blur radius</strong> (<code>inset: calc(var(--blur) * -2)</code>). More and the haze stops belonging to the image; less and it looks like a rendering artefact.</li>
+      <li><strong>One glow per view, on the hero.</strong> It is the loudest owner of the background in the whole study, and it is used on inner-page heroes — not on cards in a grid.</li>
+      <li><strong>The aura never carries meaning.</strong> It is <code>aria-hidden</code>, ignores the pointer, sits at <code>z-index: 0</code> under a card at <code>z-index: 2</code>, and no text sits on it, so contrast is untouched.</li>
+      <li><strong>Keep the blur cheap:</strong> downsample the canvas (8× here), blur a small asset, reuse one GL context across instances, and cap the redraw rate if it animates at all.</li>
+      <li><strong>Turn the motion off, not the glow,</strong> under <code>prefers-reduced-motion</code> — the distortion goes to zero and the aura holds still.</li>
+      <li><strong>Watch the box.</strong> An element extending 160px past its parent can add scrollbars near a viewport edge; clamp the aura's parent with <code>overflow: hidden</code>, or drop the effect on small screens, where the reach would outrun the margin anyway.</li>
+    </ul>
+    <div class="note">
+      <strong>Why it looks like it belongs to the image</strong>
+      <p>
+        Because it <em>is</em> the image — the same pixels, low-passed until only the colour field survives. That is
+        why a small CMS transform is enough, why the aura follows the artwork's real palette (red neon on the left,
+        green on the right in the example), and why it never reads as a decorative gradient bolted on: there is no
+        hue in the glow that is not in the picture.
+      </p>
+    </div>
+
+    <h2 id="assets">6 · Remote assets</h2>
+    <p>
+      Every URL below was requested after the scrape, and the status column says how it answered. Three levels
+      matter, and they are not the same thing:
+    </p>
+    <ul>
+      <li><span class="pill ok">hotlink-safe</span> — answered 200 with <code>Access-Control-Allow-Origin: *</code>, so it can be embedded from any origin, including a file on disk.</li>
+      <li><span class="pill warn">on-origin only</span> — answered 200 for the page itself but 403 to a scripted request; Cloudflare allows it for the site's own origin. Link it, do not embed it.</li>
+      <li><span class="pill bad">missing</span> — declared by the page but returns 404 or 204.</li>
+    </ul>
+
+    <h4>Brand marks and icons</h4>
+    <div class="assets">
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R" alt="Unreal Engine wordmark"></div>
+        <p class="asset-meta"><b>Unreal Engine wordmark</b><br><span class="pill ok">hotlink-safe</span><br>
+          <code>cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R</code><br>
+          SVG, 2.2KB, rendered 600×32 in the footer, natural 300×41. The only brand mark on any of the three pages that is a plain file rather than inline markup.</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><span class="muted small">link only</span></div>
+        <p class="asset-meta"><b>Unreal Engine favicons</b><br><span class="pill warn">on-origin only</span><br>
+          <code>www.unrealengine.com/cosmos/static/favicons/favicon.svg</code> (SVG)<br>
+          <code>…/favicon-96x96.png</code> (2KB)<br>
+          <code>…/apple-touch-icon.png</code> (3KB)<br>
+          <code>www.unrealengine.com/favicon.ico</code><br>
+          All four answered 200 when requested from inside the page; the same URLs return 403 to anything else.</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><span class="muted small">link only</span></div>
+        <p class="asset-meta"><b>Unreal Engine web manifest</b><br><span class="pill warn">on-origin only</span><br>
+          <code>www.unrealengine.com/cosmos/static/favicons/site.webmanifest</code><br>
+          <code>application/manifest+json</code>. Loaded during the page visit, so its icon set is the authoritative one for that property.</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><span class="muted small">link only</span></div>
+        <p class="asset-meta"><b>Fortnite icon</b><br><span class="pill warn">on-origin only</span><br>
+          <code>www.fortnite.com/favicon.ico</code> — 200, <code>image/vnd.microsoft.icon</code>.<br>
+          The page also declares <code>www.fortnite.com/remix/apple-touch-icon.png</code>, which returns <b>404</b>: <span class="pill bad">missing</span> — a real broken link on the live page.</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><span class="muted small">none exists</span></div>
+        <p class="asset-meta"><b>Epic Games Store icon</b><br><span class="pill bad">missing</span><br>
+          <code>store.epicgames.com/favicon.ico</code> answers <b>204 No Content</b>, and the document declares no <code>&lt;link rel="icon"&gt;</code> at all. The store's mark exists only as an inline component in its header, so there is nothing to link.</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><span class="muted small">inline markup</span></div>
+        <p class="asset-meta"><b>Unreal Engine account glyph</b><br>
+          A 24×24 inline SVG, identical on all three sites, painted with <code>fill-opacity=".95"</code> and <code>fill: currentcolor</code>. There is no file to link: the shared header draws every icon inline so it can inherit the current colour.<br>
+          <code>&lt;svg viewBox="0 0 24 24"&gt;&lt;path fill-opacity=".95" d="M12 2.25c5.385 0 9.75 4.365 9.75 9.75s…"&gt;</code></p>
+      </div>
+    </div>
+
+    <h4>Typefaces</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>Font files found in use, with the status each one answered.</caption>
+        <thead><tr><th>Family / weight</th><th>URL</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Inter 400</td><td><code>components.unrealengine.com/fonts/inter/Inter-Regular.woff2</code></td><td><span class="pill ok">hotlink-safe</span> 200, 99KB, CORS <code>*</code></td></tr>
+          <tr><td>Inter 500</td><td><code>components.unrealengine.com/fonts/inter/Inter-Medium.woff2</code></td><td><span class="pill ok">hotlink-safe</span></td></tr>
+          <tr><td>Inter Tight 700</td><td><code>components.unrealengine.com/fonts/inter/InterTight-Bold.woff2</code></td><td><span class="pill ok">hotlink-safe</span></td></tr>
+          <tr><td>Inter 300 · 400 · 500 · 700</td><td><code>store.epicgames.com/egs-v2/assets/Inter-{Light,Regular,Medium,Bold}-*.woff2</code></td><td><span class="pill warn">on-origin only</span> 200 in the browser network log; 403 to a scripted request, and no CORS header, so not embeddable cross-origin</td></tr>
+          <tr><td>Inter Tight 700</td><td><code>store.epicgames.com/egs-v2/assets/InterTight-Bold-CPdZBAQJ.woff2</code></td><td><span class="pill warn">on-origin only</span> 200, 142KB</td></tr>
+          <tr><td>HeadingNow Variable</td><td><code>www.fortnite.com/remix/assets/HeadingNowVariable-RXM5wN22.woff2</code></td><td><span class="pill warn">on-origin only</span> 200 in the browser network log</td></tr>
+          <tr><td>HeadingNow Variable Italic</td><td><code>www.fortnite.com/remix/assets/HeadingNowVariableItalic-k94H1wko.woff2</code></td><td><span class="pill warn">on-origin only</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted">
+      The document you are reading is set in the three hotlink-safe files above, loaded live from Epic's component
+      host — which is why the type in §4 should look exactly like the type on unrealengine.com.
+    </p>
+
+    <h4>Shared component stylesheets</h4>
+    <div class="table-wrap">
+      <table>
+        <caption>The component library behind the header, on both sites that use it.</caption>
+        <thead><tr><th>What</th><th>URL</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Global navigation, loader</td><td><code>components.unrealengine.com/styles/navigation.css</code></td><td><span class="pill ok">hotlink-safe</span> 200, 415 bytes, CORS <code>*</code></td></tr>
+          <tr><td>Inter <code>@font-face</code> set</td><td><code>components.unrealengine.com/fonts/inter/index.css</code></td><td><span class="pill ok">hotlink-safe</span> 200, CORS <code>*</code></td></tr>
+          <tr><td>The component's own rules</td><td><code>support/library-data/unreal-engine-navigation.css</code> (local)</td><td>39KB — the shadow stylesheet captured verbatim, including the 22 theming hooks in §2.2</td></tr>
+          <tr><td>Page stylesheets</td><td><code>assets.unrealengine.com/unrealengine-website-…/\_next/static/chunks/\*.css</code></td><td>200 — the Next.js chunks behind unrealengine.com, for reference</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h4>Social cards and sample page art</h4>
+    <div class="assets">
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cdn2.unrealengine.com/egs-seo-asset-1200x1200-5678f8a3aee1.png" alt="Epic Games Store social card"></div>
+        <p class="asset-meta"><b>Store <code>og:image</code></b><br><span class="pill ok">hotlink-safe</span><br>1200×1200 PNG</p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cdn2.unrealengine.com/egs-honkai-star-rail-carousel-desktop-c4f77919.jpg?resize=1&amp;w=1280&amp;h=720&amp;quality=medium" alt="Store carousel art"></div>
+        <p class="asset-meta"><b>Store carousel art</b><br><span class="pill ok">hotlink-safe</span><br><code>cdn2.unrealengine.com/egs-honkai-star-rail-carousel-desktop-c4f77919.jpg</code></p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cdn2.unrealengine.com/egs-football-manager-27-carousel-desktop-653f51f0.jpg?resize=1&amp;w=1280&amp;h=720&amp;quality=medium" alt="Store carousel art"></div>
+        <p class="asset-meta"><b>Store carousel art</b><br><span class="pill ok">hotlink-safe</span><br><code>…/egs-football-manager-27-carousel-desktop-653f51f0.jpg</code></p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/cmkfcyema05vj07n20pw5f0ii" alt="Fortnite developer social card"></div>
+        <p class="asset-meta"><b>Fortnite <code>og:image</code></b><br><span class="pill ok">hotlink-safe</span><br><code>cms-assets.unrealengine.com/cm6l5gfpm05kr07my04cqgy2x/cmkfcyema05vj07n20pw5f0ii</code></p>
+      </div>
+      <div class="asset">
+        <div class="asset-stage"><img src="https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1200/HfuPC0S3Tk6bQ4nDY3pR" alt="Unreal Engine social card"></div>
+        <p class="asset-meta"><b>Unreal Engine <code>og:image</code></b><br><span class="pill ok">hotlink-safe</span><br>CMS transform: <code>resize=width:1200</code> — the same asset is served at any width by changing the URL</p>
+      </div>
+    </div>
+    <p class="small muted">
+      Both content back ends are worth noting as patterns. The store's art lives on <code>cdn2.unrealengine.com</code>
+      with a transform query string (<code>?resize=1&amp;w=1280&amp;h=720&amp;quality=medium</code>), and Unreal
+      Engine's lives on <code>cms-assets.unrealengine.com</code> with a path-based transform
+      (<code>/resize=width:384/quality=value:90/auto_image/&lt;id&gt;</code>) and long-lived immutable caching. Neither
+      site ships multiple hand-exported sizes.
+
+    </p>
+
+    <h2 id="forge">7 · Where this meets Forge</h2>
+    <p>
+      The Forge shell was already built against architecture spec v2, which was itself derived from this look. This
+      table is the honest reconciliation — where the shell already agrees, where it deliberately differs, and where
+      it is still carrying the older poster palette.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <caption>Forge's current shell against the Epic findings.</caption>
+        <thead><tr><th>Decision</th><th>Forge today</th><th>Epic</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td>Canvas</td><td><code>#101014</code></td><td><code>#101014</code> (store token <code>--color-background-default</code>)</td><td><span class="pill ok">identical</span></td></tr>
+          <tr><td>Elevated surfaces</td><td><code>#18181C</code>, <code>#202024</code></td><td><code>#18181c</code> / <code>#202024</code></td><td><span class="pill ok">identical</span></td></tr>
+          <tr><td>Header height</td><td><code>--sh-header-base: 72px</code></td><td><code>--header-height: 4.5rem</code> (72px)</td><td><span class="pill ok">identical, same figure</span></td></tr>
+          <tr><td>Header mechanics</td><td>fixed, measured and published as <code>--sh-header-h</code></td><td>sticky, measured and published as <code>--header-height</code> from the host</td><td><span class="pill ok">same pattern</span></td></tr>
+          <tr><td>Primary action</td><td><code>#26BBFF</code> fill with a <code>#101014</code> label</td><td><code>#26bbff</code> with <code>#101014</code> (Unreal Engine)</td><td><span class="pill ok">identical</span></td></tr>
+          <tr><td>Accent scoping</td><td>cyan is shell-only, asserted absent from the workspace CSS</td><td>one accent per property, themed in from outside</td><td><span class="pill ok">same idea</span></td></tr>
+          <tr><td>Heading family</td><td>Inter, sentence case, weights 700/600</td><td>Inter or Inter Tight 700, sentence case</td><td><span class="pill ok">matches</span></td></tr>
+          <tr><td>Button geometry</td><td>radius 8px, 14px/500 label</td><td>8px, 14px/500 + 0.02em (Unreal Engine and store)</td><td><span class="pill ok">matches</span></td></tr>
+          <tr><td>Input treatment</td><td><code>#1E1E22</code> fill with a <code>#404043</code> border</td><td>Unreal Engine uses the same pair; the store uses a filled pill with no border at all</td><td><span class="pill">matches UE, diverges from the store</span></td></tr>
+          <tr><td>Hover rule</td><td>border colour and a 3px lift; never a fill change</td><td>fill strengthens (15% → 35% white); borders lighten; <em>no element moves</em></td><td><span class="pill warn">different — worth revisiting</span></td></tr>
+          <tr><td>Mobile breakpoint</td><td>760px</td><td>719.9px / 720px in the shared component</td><td><span class="pill warn">40px apart, no practical cost</span></td></tr>
+          <tr><td>Breadcrumbs and Back</td><td>sticky sub-header with breadcrumbs; every wizard screen has Back</td><td>neither exists anywhere on the three pages</td><td><span class="pill">deliberate divergence — a wizard needs both</span></td></tr>
+          <tr><td>Progress bar</td><td>gradient <code>#26BBFF</code> → <code>#F7FF19</code></td><td>gradients are always <code>225deg</code>, 600 → 400 of one hue; a two-property gradient has no precedent</td><td><span class="pill warn">invented for Forge</span></td></tr>
+          <tr><td>Panel and outline colours</td><td><code>#23253A</code> panel, <code>#3A3D4D</code> outline, <code>#B2B5C2</code> grey</td><td>no equivalents — Epic's neutrals are <code>#101014… #404044</code> plus white at four alphas</td><td><span class="pill warn">poster-palette residue</span></td></tr>
+          <tr><td>Body text colour</td><td><code>#FFFFFF</code> with <code>#B2B5C2</code> secondary</td><td><code>#fffffff2</code> primary, <code>#ffffffa6</code> secondary</td><td><span class="pill warn">alphas would read softer</span></td></tr>
+          <tr><td>Search</td><td>present in the header, honest about being unbuilt</td><td><code>--search-box-width</code> slot, nav hides when search opens</td><td><span class="pill">same slot; the state pattern is worth copying</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note">
+      <strong>Three changes this study would justify</strong>
+      <p>
+        <b>1.</b> Replace the panel, outline and grey tokens with Epic's alpha-white family
+        (<code>#ffffff0d</code> / <code>#ffffff26</code> / <code>#ffffff59</code> and text at
+        <code>#fffffff2</code> / <code>#ffffffa6</code>). The poster palette is the last thing in the shell that
+        does not belong to the look the rest of the page is chasing.<br>
+        <b>2.</b> Retire the 3px lift on hover in favour of strengthening the fill, which is what every one of these
+        three sites does and what the store's own tokens encode.<br>
+        <b>3.</b> Adopt the focus convention wholesale: a 2px white ring at a 2px offset with a tightened radius.
+        It is the one detail that is identical on all three properties.
+      </p>
+    </div>
+
+    <h2 id="appendix">8 · Method, files, reproduction</h2>
+    <h4>What was run</h4>
+    <ul>
+      <li><code>node tools/design-library-scrape.mjs</code> — launches headless Chrome, loads each site, waits for hydration, reads the composed tree (shadow roots included), then re-measures at 390px and probes same-origin assets.</li>
+      <li>Four scrapes were taken. The first three were discarded for cause, and the reasons are recorded because they are the kind of error this kind of study invites: the consent overlay's palette and type leaking into the census, and the shared header being invisible to <code>querySelectorAll</code> because it lives in a shadow root.</li>
+      <li>61 candidate asset URLs were then re-requested: 42 confirmed loaded by the browser, 18 that the page never requested (favicons and unused weights), 1 that failed.</li>
+    </ul>
+    <h4>Files</h4>
+    <ul>
+      <li><code>support/library-data/&lt;site&gt;.json</code> — the raw dump per site: 2,668 + 2,258 + 1 custom properties, the colour and type censuses, component groups, asset inventory, the browser network log, the same-origin probe and both viewport measurements.</li>
+      <li><code>support/library-data/&lt;site&gt;-navigation.css</code> — the shared navigation component's own stylesheet, captured verbatim from its shadow root, ~39KB each.</li>
+      <li><code>tools/design-library-scrape.mjs</code> — the scraper, documented at the top of the file.</li>
+      <li><code>support/library.html</code> — this document.</li>
+    </ul>
+    <h4>To reproduce</h4>
+<pre><code>node tools/design-library-scrape.mjs            # all three sites, ~2.5 minutes
+node tools/design-library-scrape.mjs fortnite-developer   # one site</code></pre>
+    <h4>What this pass did not capture</h4>
+    <ul>
+      <li><strong>Footer internals.</strong> Both footers are shared web components (<code>&lt;unrealengine-footer&gt;</code>, <code>&lt;egs-footer&gt;</code>, <code>&lt;fortnite-footer&gt;</code>); only their mounting was recorded.</li>
+      <li><strong>The nested search box.</strong> <code>&lt;epic-wf-search-box&gt;</code> is not in the DOM until the search is opened, so its internals are undocumented here.</li>
+      <li><strong>Rendered hover, press and focus states.</strong> The state values come from the tokens and declared rules, not from driving the page. Everything quoted is evidence; nothing about a hover <em>animation</em> is claimed.</li>
+      <li><strong>The store's grid, carousel and product-page components.</strong> This pass covers the landing pages of three properties, which is where the shared system is visible; a product page would add its own vocabulary.</li>
+      <li><strong>Anything behind a login.</strong> The account dropdown and wallet elements were seen only as declared markup and closed state.</li>
+    </ul>
+    <footer class="doc-foot">
+      <p>
+        Derived study of publicly served CSS and markup on unrealengine.com, store.epicgames.com and
+        fortnite.com/developer, collected 16 November 2026. Unreal Engine, Epic Games, the Epic Games Store,
+        Fortnite, Inter Tight and HeadingNow are trademarks or licensed assets of Epic Games, Inc. and their
+        respective owners; the values and declarations here are quoted for reference, and the hotlinked assets in
+        §6 remain subject to Epic's terms.
+      </p>
+    </footer>
+  </main>
+</div>
+<script>
+/* Copy buttons for the CSS blocks. Deliberately the smallest thing that works: no framework, no fetch,
+ * and it degrades to a selectable block if the clipboard API is unavailable (file:// in some browsers). */
+(() => {
+  const blocks = document.querySelectorAll('pre > code');
+  for (const code of blocks) {
+    const pre = code.parentElement;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy';
+    button.textContent = 'Copy';
+    button.addEventListener('click', async () => {
+      const text = code.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = 'Copied';
+        button.dataset.copied = 'true';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        button.textContent = 'Selected';
+      }
+      setTimeout(() => { button.textContent = 'Copy'; delete button.dataset.copied; }, 1600);
+    });
+    pre.appendChild(button);
+  }
+})();
+</script>
+</body>
+</html>

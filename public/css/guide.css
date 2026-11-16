@@ -1,23 +1,29 @@
-/* UEFN Game Guide — the app's only stylesheet.
+/* UEFN Game Guide — the workspace's stylesheet.
  *
- * Every colour, size and radius here comes from css/tokens.css, which is transcribed from
- * support/FORTNITE_STYLE_LIBRARY.md. There is not a single hex value in this file: retheming the app
- * means editing the tokens, and nothing else.
+ * Every colour, size and radius here comes from css/tokens.css, which carries the one palette
+ * (support/library.html, read off unrealengine.com, store.epicgames.com and fortnite.com/developer).
+ * There is not a single hex value in this file: retheming the app means editing the tokens, and nothing
+ * else. 1.2.0 moved the palette itself there — the shell used to hold a second, separate one.
  *
- * The poster's rules this follows literally:
- *   - one bright fill, and it is for actions (--fn-action). Nothing else is ever that loud;
+ * The library's rules this follows literally:
+ *   - one accent fill, and it is for actions (--fn-action). Nothing else is ever that loud;
  *   - status is carried by text and weight, never by hue. There is no second colour to code with, and
  *     that constraint is what makes the app readable without colour vision;
- *   - 8px radius on buttons, 10px on cards, and generous negative space between blocks.
+ *   - a surface is one fill and one edge: 1.2.1 gave every panel and every interactive surface the same
+ *     base (--fn-surface-panel), the same hover step and the same subtle edge, so the box is a single
+ *     component rather than a set of near-misses;
+ *   - 8px radius on buttons, 16px on boxes (1.2.2: the published container step), and generous negative
+ *     space between blocks. A chosen box wears a 1px accent edge, not a heavier one, since 1.2.2.
  *
- * [derived] Anything not on the poster is marked as such, and is a decision made so the app works at
- * all — hover states, focus rings, phone widths, and the interactive-card border.
+ * [derived] Anything the library does not state is marked as such, and is a decision made so the app
+ * works at all — hover states, focus rings, phone widths, and the interactive-card border, which rests at
+ * 1.2.1's subtle step and strengthens to the accessible one under the pointer.
  */
 
 /* ============================== base ============================== */
 
 /* styles.css sets the body background and a 880px column for the older pages. This page is a
- * different application, so it takes the Fortnite canvas and a wider column, by class rather than by
+ * different application, so it takes the shared canvas and a wider column, by class rather than by
  * element, so the other pages are untouched. */
 body.g-app {
   margin: 0;
@@ -33,7 +39,7 @@ body.g-app {
  * the older pages' navy/amber. Same markup contract, new palette. */
 .g-main .status {
   border-color: var(--fn-border-strong);
-  background: var(--fn-surface-quiet);
+  background: var(--fn-surface-panel);
   color: var(--fn-text);
 }
 
@@ -41,10 +47,13 @@ body.g-app {
 /* styles.css styles `main` with a max-width; the app's column is set on .sh-app-body instead. */
 .g-app main.g-main { max-width: none; margin: 0; padding: 0; }
 
-/* Links inside the workspace follow the Fortnite palette. The shell's own links (header, hero, footer)
- * are restyled in css/shell.css, which loads after this file. */
-.g-app a { color: var(--fn-text-muted); text-underline-offset: 3px; }
-.g-app a:hover { color: var(--fn-text); }
+/* Links inside the workspace. Scoped to the app's own region rather than to `body.g-app`: the body
+ * carries that class, so `.g-app a` also matched the shell's header and footer links - and outranked
+ * every one of them by a class of specificity, which quietly repainted the Admin action's label and the
+ * footer's links with the workspace's muted colour whatever shell.css said. Loading order cannot fix a
+ * specificity gap, so the selector is the fix: shell.css styles the shell, this styles the workspace. */
+.g-main a { color: var(--fn-text-muted); text-underline-offset: 3px; }
+.g-main a:hover { color: var(--fn-text); }
 
 /* Long copy inside a form control does not wrap on its own — the UA stylesheet sets the control's own
  * white-space — which showed up as card descriptions running out of their cards and over the card
@@ -78,15 +87,24 @@ body.g-app {
   outline-offset: 2px;
   border-radius: 4px;
 }
-/* Programmatic focus on a screen title (every screen change) should not draw a ring. Screen titles are
- * <h2> now that the page's own <h1> belongs to the hero. */
+/* Programmatic focus on a screen title (every screen change moves focus there) does not draw a ring. The
+ * ring belongs to the keyboard, and nobody tabbed to this: the title is `tabindex="-1"`, so it is not
+ * reachable by Tab and this rule can never hide a position marker.
+ *
+ * 1.2.2 fixed the box that used to appear around the title on load. The rule was here all along, but it
+ * named <h2> - which is what screen titles were when the page still had a hero. 1.2.0 removed the hero,
+ * the screen title became the page's only <h1>, and the exemption stopped matching. It now covers both.
+ * The h1 keeps its tabindex and the app keeps moving focus to it, because that move is what tells a
+ * screen reader the screen changed. */
+.g-app h1:focus,
 .g-app h2:focus { outline: none; }
 
 /* ============================== header ============================== */
 
-/* The site header, its navigation, the search field, the Dev mode button and the Admin action are all
- * page-shell furniture and live in css/shell.css (support/Forge--architecture_specification.md). What
- * used to be here was restyled header, a checkbox for dev mode, and the header's own progress bar; all
+/* The site header, its navigation and the Admin action are all page-shell furniture and live in
+ * css/shell.css (support/Forge--architecture_specification_v2.md). The search field and the Dev mode
+ * button used to be listed here too; 1.2.0 removed the first and moved the second to the footer. What
+ * used to be here was a restyled header, a checkbox for dev mode, and the header's own progress bar; all
  * three moved when the app container got its own sticky header. */
 
 /* ============================== page rhythm ============================== */
@@ -103,10 +121,12 @@ body.g-app {
   color: var(--fn-text-muted);
 }
 
-/* Titles, section headings and UI labels are Inter in sentence case, per the architecture spec (v2):
+/* Titles, section headings and UI labels are Inter in sentence case, per the architecture spec:
  * "Headings (H1, H2): Inter (Standard sentence case; no forced full capitalization)" and "Body & UI:
- * Inter". The Fortnite poster's heavy italic display face is no longer used by the app; the token and
- * the @font-face stay in tokens.css because support/FORTNITE_STYLE_LIBRARY.md still documents it. */
+ * Inter". One heading still asks for the poster's display face - .g-notes-title, below - which is the
+ * reason --fn-font-display and its @font-face are still in tokens.css. It is a leftover rather than a
+ * decision: the spec names Inter for headings, and 1.2.0 was a colour release, so it was left alone and
+ * flagged here instead of being changed quietly. */
 .g-title {
   margin: 0 0 var(--fn-space-3);
   font-family: var(--fn-font-ui);
@@ -190,12 +210,15 @@ body.g-app {
 
 /* ============================== buttons ============================== */
 
+/* A body CTA is 40px tall, which is what the library's own primary buttons measure - and 1.2.1 settled
+ * that split: navigation CTAs are 32px (the shell's, in shell.css) and body CTAs are 40px. The table-sized
+ * action in the recap row drops to 32px where a 40px row would break the table. */
 .g-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--fn-space-2);
-  min-height: 44px;
+  min-height: 40px;
   padding: 0 var(--fn-space-5);
   border-radius: var(--fn-radius-button);
   border: 1px solid transparent;
@@ -204,33 +227,32 @@ body.g-app {
   line-height: var(--fn-action-line);
   text-decoration: none;
   cursor: pointer;
-  transition: color var(--fn-motion) ease, border-color var(--fn-motion) ease,
-    transform var(--fn-motion) ease, box-shadow var(--fn-motion) ease;
+  transition: color var(--fn-motion) ease, background-color var(--fn-motion) ease,
+    border-color var(--fn-motion) ease;
 }
 
-/* [derived] Hover on a control: the border strengthens and the control lifts. The fill never changes,
- * so no hover can move a label onto a background it was not measured against. */
+/* Hover on a control is the library's: the fill strengthens and the label keeps the colour it was
+ * measured at. 1.2.0 removed the hover border from the primary action and the lift from every control -
+ * a control that jumps off the page on hover is not in the library, and the accent's hover step is
+ * lighter than its rest fill, so contrast on the dark label rises from 8.7:1 to 11.5:1 rather than
+ * falling. Nothing here changes a text colour on hover, which is what keeps every label's contrast
+ * intact: no hover can move a label onto a background it was not measured against. */
 .g-btn-primary { background: var(--fn-action); color: var(--fn-on-action); }
-.g-btn-primary:hover {
-  border-color: var(--fn-on-action);
-  transform: translateY(calc(var(--fn-lift) * -1));
-  box-shadow: var(--fn-shadow-hover-tight);
-}
-.g-btn-primary:active { background: var(--fn-action-pressed); transform: none; box-shadow: none; }
+.g-btn-primary:hover { background: var(--fn-action-hover); border-color: transparent; }
+.g-btn-primary:active { background: var(--fn-action-pressed); }
 
-.g-btn-secondary { background: var(--fn-surface-control); color: var(--fn-text); border-color: var(--fn-border-strong); }
-.g-btn-secondary:hover {
-  border-color: var(--fn-text);
-  transform: translateY(calc(var(--fn-lift) * -1));
-  box-shadow: var(--fn-shadow-hover-tight);
-}
+/* The secondary action is a translucent fill with no border, at the library's brightness: white at 15%
+ * at rest and 35% on hover. */
+.g-btn-secondary { background: var(--fn-surface-subtle); color: var(--fn-text); }
+.g-btn-secondary:hover { background: var(--fn-surface-subtle-hover); color: var(--fn-text); }
 
+/* A quiet action is the library's ghost: no fill, a 35% border, and a faint fill on hover. */
 .g-btn-quiet { background: transparent; color: var(--fn-text-secondary); border-color: var(--fn-border-strong); }
+/* A quiet action's hover is the panel's own hover step: one documented step, never a one-off. */
 .g-btn-quiet:hover {
-  border-color: var(--fn-text);
+  background: var(--fn-surface-panel-hover);
+  border-color: var(--fn-border-strong-hover);
   color: var(--fn-text);
-  transform: translateY(calc(var(--fn-lift) * -1));
-  box-shadow: var(--fn-shadow-hover-tight);
 }
 
 /* [derived] The palette has no danger hue, so a destructive action is marked by a heavier border and
@@ -242,18 +264,14 @@ body.g-app {
   border-color: var(--fn-text-muted);
   font-weight: 700;
 }
-.g-btn-danger:hover {
-  border-color: var(--fn-text);
-  transform: translateY(calc(var(--fn-lift) * -1));
-  box-shadow: var(--fn-shadow-hover-tight);
-}
+.g-btn-danger:hover { border-color: var(--fn-text); }
 
 .g-btn.is-disabled,
-.g-btn[disabled] { color: var(--fn-text-disabled); background: var(--fn-surface-quiet); border-color: var(--fn-border); cursor: not-allowed; }
+.g-btn[disabled] { color: var(--fn-text-disabled); background: var(--fn-surface-panel); border-color: var(--fn-border); cursor: not-allowed; }
 /* A control that cannot be used must not lift, or it invites a click it will not honour. */
 .g-btn.is-disabled:hover,
 .g-btn[disabled]:hover {
-  background: var(--fn-surface-quiet);
+  background: var(--fn-surface-panel);
   border-color: var(--fn-border);
   color: var(--fn-text-disabled);
   transform: none;
@@ -293,8 +311,10 @@ body.g-app {
   .g-choices-2, .g-choices-3 { grid-template-columns: minmax(0, 1fr); }
 }
 
-/* An interactive card's outline carries meaning — it is what says "this is clickable" — so it uses
- * the accessible strong border rather than the 1.7:1 decorative one. */
+/* A card rests on 1.2.1's box: the panel fill and the subtle edge, which is 1.5:1 against the canvas and
+ * therefore decoration. The boundary that carries meaning arrives on hover, where it strengthens to the
+ * accessible step - so the outline, the fill and the lift all say "clickable" at the moment the pointer is
+ * actually on the control. */
 .g-choice {
   display: flex;
   flex-direction: column;
@@ -303,22 +323,29 @@ body.g-app {
   height: 100%;
   text-align: left;
   padding: var(--fn-space-5);
-  background: var(--fn-surface-card);
-  border: 1px solid var(--fn-border-strong);
+  background: var(--fn-surface-panel);
+  border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   color: var(--fn-text);
   cursor: pointer;
-  transition: border-color var(--fn-motion) ease, transform var(--fn-motion) ease,
-    box-shadow var(--fn-motion) ease;
+  transition: background-color var(--fn-motion) ease, border-color var(--fn-motion) ease,
+    transform var(--fn-motion) ease, box-shadow var(--fn-motion) ease;
 }
-/* Hover on a card is a border and a lift. The card's fill is fixed: repainting it is how a card became
- * light cyan with white text on it. */
+/* Hover on an interactive surface is a full-surface colour change - the library's box under the pointer -
+ * and the surface lifts with it. Both values are tokens, and every label drawn on the card was measured
+ * against the hovered fill as well as the resting one. Repainting a surface with a colour nobody measured
+ * is how a card once became light cyan with white text on it. */
 .g-choice:hover {
+  background: var(--fn-surface-panel-hover);
   border-color: var(--fn-border-strong);
   transform: translateY(calc(var(--fn-lift) * -1));
   box-shadow: var(--fn-shadow-hover);
 }
-.g-choice.is-selected { border-color: var(--fn-action); border-width: 2px; background: var(--fn-selected); }
+/* 1.2.2 halved the selected border, 2px down to 1px, so a chosen box wears the same edge as every other
+ * box and says what it is with its colour instead. It also removes a pixel of movement: selecting a card
+ * used to grow its border and shift everything inside by one pixel. The accent, the fill and the marker
+ * are what carry the state. */
+.g-choice.is-selected { border-color: var(--fn-action); border-width: 1px; background: var(--fn-selected); }
 .g-choice.is-disabled { cursor: not-allowed; color: var(--fn-text-disabled); }
 
 .g-choice-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--fn-space-3); }
@@ -359,8 +386,13 @@ body.g-app {
 
 /* ============================== panels ============================== */
 
+/* A panel is a container: 1.2.1's base fill and its subtle edge, and nothing else - it does not repaint
+ * under the pointer. The full-surface hover colour belongs to the surfaces you can act on (.g-choice,
+ * .g-option, .g-brandtile and .g-tracker-link, further down): a container that repaints whenever the
+ * pointer crosses a control inside it turns a three-control panel into a flashing block, and it would
+ * claim the whole panel is clickable when it is not. */
 .g-panel {
-  background: var(--fn-surface-quiet);
+  background: var(--fn-surface-panel);
   border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   padding: var(--fn-space-6);
@@ -391,22 +423,26 @@ body.g-app {
   width: 100%;
   text-align: left;
   padding: var(--fn-space-4) var(--fn-space-5);
-  background: var(--fn-surface-card);
-  border: 1px solid var(--fn-border-strong);
+  background: var(--fn-surface-panel);
+  border: 1px solid var(--fn-border);
   border-left-width: 4px;
   border-radius: var(--fn-radius-card);
   color: var(--fn-text);
   font-size: var(--fn-lead-size);
   line-height: var(--fn-lead-line);
   cursor: pointer;
-  transition: border-color var(--fn-motion) ease, transform var(--fn-motion) ease,
-    box-shadow var(--fn-motion) ease;
+  transition: background-color var(--fn-motion) ease, border-color var(--fn-motion) ease,
+    transform var(--fn-motion) ease, box-shadow var(--fn-motion) ease;
 }
 .g-option:hover {
+  background: var(--fn-surface-panel-hover);
   border-color: var(--fn-border-strong);
   transform: translateY(calc(var(--fn-lift) * -1));
   box-shadow: var(--fn-shadow-hover-tight);
 }
+/* 1.2.1 leaves the chosen answer on the same fill the hover uses, which is why the accent gutter and the
+ * marker matter: a hovered option and a chosen one are told apart by the 4px accent edge and by the word
+ * the marker states, not by a fill that only looks slightly different. */
 .g-option.is-selected { border-left-color: var(--fn-action); background: var(--fn-selected); }
 .g-option-label { font-weight: 600; }
 /* Label and marker share a row: the marker used to wrap onto its own line and read as a stray tick. */
@@ -436,7 +472,7 @@ body.g-app {
   border: 1px solid var(--fn-border-strong);
   border-left-width: 4px;
   border-radius: var(--fn-radius-card);
-  background: var(--fn-surface-quiet);
+  background: var(--fn-surface-panel);
   margin-bottom: var(--fn-space-5);
 }
 .g-notice-text { margin: 0; color: var(--fn-text); }
@@ -519,21 +555,23 @@ body.g-app {
   gap: var(--fn-space-2);
   width: 100%;
   padding: var(--fn-space-4) var(--fn-space-3);
-  background: var(--fn-surface-card);
-  border: 1px solid var(--fn-border-strong);
+  background: var(--fn-surface-panel);
+  border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   color: var(--fn-text);
   cursor: pointer;
-  transition: border-color var(--fn-motion) ease, transform var(--fn-motion) ease,
-    box-shadow var(--fn-motion) ease;
+  transition: background-color var(--fn-motion) ease, border-color var(--fn-motion) ease,
+    transform var(--fn-motion) ease, box-shadow var(--fn-motion) ease;
 }
 .g-brandtile:hover {
+  background: var(--fn-surface-panel-hover);
   border-color: var(--fn-border-strong);
   transform: translateY(calc(var(--fn-lift) * -1));
   box-shadow: var(--fn-shadow-hover-tight);
 }
 .g-brandtile.is-previewing { border-color: var(--fn-text); }
-.g-brandtile.is-chosen { border-color: var(--fn-action); border-width: 2px; }
+/* 1.2.2: 1px, like every other chosen box (see .g-choice.is-selected). */
+.g-brandtile.is-chosen { border-color: var(--fn-action); border-width: 1px; }
 .g-brandlogo { width: 64px; height: 64px; border-radius: 8px; }
 .g-brandtile-label { font-weight: 600; }
 .g-brandtile-marker {
@@ -616,7 +654,7 @@ body.g-app {
   max-width: 420px;
   min-height: 44px;
   padding: 0 var(--fn-space-4);
-  background: var(--fn-surface-card);
+  background: var(--fn-surface-panel);
   border: 1px solid var(--fn-border-strong);
   border-radius: var(--fn-radius-button);
   color: var(--fn-text);
@@ -626,7 +664,7 @@ body.g-app {
 
 .g-tip {
   border-left: 4px solid var(--fn-action);
-  background: var(--fn-surface-card);
+  background: var(--fn-surface-panel);
   padding: var(--fn-space-3) var(--fn-space-4);
   border-radius: 0 var(--fn-radius-card) var(--fn-radius-card) 0;
   color: var(--fn-text-secondary);
@@ -665,7 +703,7 @@ body.g-app {
 .g-device-list { display: grid; gap: var(--fn-space-4); }
 
 .g-device {
-  background: var(--fn-surface-card);
+  background: var(--fn-surface-panel);
   border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   padding: var(--fn-space-4) var(--fn-space-5);
@@ -767,10 +805,11 @@ body.g-app {
   border-radius: var(--fn-radius-card);
   text-decoration: none;
   color: var(--fn-text-secondary);
-  background: var(--fn-surface-quiet);
+  background: var(--fn-surface-panel);
   transition: background-color var(--fn-motion) ease, border-color var(--fn-motion) ease;
 }
 .g-tracker-link:hover {
+  background: var(--fn-surface-panel-hover);
   border-color: var(--fn-border-strong);
   color: var(--fn-text);
   transform: translateY(calc(var(--fn-lift) * -1));
@@ -793,7 +832,8 @@ body.g-app {
 }
 /* Done / now / next: a heavier border and a stated word each, no hue coding. */
 .g-tracker-item.is-done .g-tracker-link { border-color: var(--fn-border-strong); }
-.g-tracker-item.is-current .g-tracker-link { border-color: var(--fn-action); border-width: 2px; background: var(--fn-surface-card); }
+/* 1.2.2: 1px, like every other chosen box (see .g-choice.is-selected). */
+.g-tracker-item.is-current .g-tracker-link { border-color: var(--fn-action); border-width: 1px; background: var(--fn-selected); }
 .g-tracker-item.is-current .g-tracker-num { color: var(--fn-action); }
 .g-tracker-item.is-current .g-tracker-marker { color: var(--fn-on-action); background: var(--fn-action); border-radius: 999px; padding: 1px 7px; justify-self: start; }
 
@@ -839,5 +879,5 @@ body.g-app {
   .g-btnrow, .g-skip, .g-video { display: none !important; }
   body.g-app { background: var(--fn-print-paper); color: var(--fn-print-ink); }
   .g-panel, .g-device, .g-choice, .g-option { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }
-  .g-app a { color: var(--fn-print-ink); }
+  .g-main a { color: var(--fn-print-ink); }
 }

@@ -8,9 +8,10 @@
   <meta name="theme-color" content="#101014" />
   <link rel="icon" href="assets/logo.svg" />
   <!-- Load order matters. styles.css is the shared chrome for the older admin and chat pages and lives in
-       a cascade layer, so it can never outrank the app's own rules. tokens.css + guide.css are the
-       workspace (support/FORTNITE_STYLE_LIBRARY.md); shell.css is the page frame around it
-       (support/Forge--architecture_specification_v2.md) and comes last so the frame wins on the frame. -->
+       a cascade layer, so it can never outrank the app's own rules. tokens.css carries the one palette and
+       the workspace's tokens; guide.css is the workspace (support/library.html for the palette,
+       support/Forge--architecture_specification_v2.md for the frame); shell.css is the page frame around it
+       and comes last so the frame wins on the frame. -->
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/tokens.css" />
   <link rel="stylesheet" href="css/guide.css" />
@@ -30,13 +31,25 @@
   <!-- ============================== header ==============================
        Fixed at 72px with no bottom border, so it is the top edge of the page rather than a bar sitting
        on it. The body is offset by the same 72px (published as --sh-header-h, measured at runtime so
-       the value stays true if the row ever wraps on a very narrow screen). -->
+       the value stays true if the row ever wraps on a very narrow screen).
+
+       1.2.0 cut the header back to what a guide needs: the mark, the single navigation item the spec
+       asks for, and one way out. The search field is gone (it was never built, and the library's own
+       header has no search either), Dev mode moved to the footer, and Admin - the only action left - is
+       now the library's secondary control rather than a primary one. -->
   <header class="sh-header" id="siteHeader">
     <div class="sh-header-inner">
 
-      <!-- Far left, and a reset to the start of the guide. -->
-      <a class="logo-link sh-logo" href="#/home" title="Forge - back to the start">
-        <img src="assets/EGS-Logotype-2023-Vertical-White.svg" alt="Epic Games Store" />
+      <!-- Far left, and a reset to the start of the guide. 1.2.1 swapped the store logotype for the Epic
+           mark itself - a square 32px-viewBox SVG - and gave it a translucent wash on hover in place of a
+           dimmed image: the library's marks gain a shade under the pointer rather than fading.
+
+           The legacy `logo-link` class is gone with it. styles.css still styles that class as a pill with a
+           #3b4756 border, and its hover paints the border accent and the fill a navy blue; the app's mark
+           is its own component (sh-logo), so it carries only that. admin.html and chat.html keep the legacy
+           class, and the legacy look, untouched. -->
+      <a class="sh-logo" href="#/home" title="Forge - back to the start">
+        <img src="assets/logo_epic.svg" alt="Epic Games" width="44" height="44" />
       </a>
 
       <!-- One item, as the spec asks. The app's own screens carry every other destination, so there is
@@ -45,44 +58,10 @@
         <a class="sh-nav-link" href="#/home">Home</a>
       </nav>
 
-      <!-- Search is present and focusable, and says plainly that it is not built yet. The label is
-           visually hidden; the shortcut hint is real and wired. -->
-      <div class="sh-search">
-        <label class="sh-visually-hidden" for="searchInput">Search the guide</label>
-        <svg class="sh-search-icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-          <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.8" />
-          <path d="M12.8 12.8 L17 17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-        </svg>
-        <input
-          class="sh-search-input"
-          id="searchInput"
-          type="search"
-          placeholder="Search"
-          autocomplete="off"
-          spellcheck="false"
-          aria-describedby="searchPanel"
-        />
-        <kbd class="sh-kbd" id="searchHint">Ctrl K</kbd>
-      </div>
-
-      <button class="sh-btn sh-btn-secondary" id="devModeButton" type="button" aria-pressed="false">
-        <span>Dev mode</span>
-        <span class="sh-btn-state" id="devModeState">off</span>
-      </button>
-
-      <a class="sh-btn sh-btn-primary sh-btn-admin" href="admin.html">
-        <img src="assets/admin-logo.svg" alt="" width="16" height="16" />
-        <span>Admin</span>
-      </a>
-
-      <!-- A zero-height line break, used only by the narrowest layout: below 760px it puts the
-           navigation and Dev mode on a second row instead of leaving "Home" dangling after the primary
-           action. Inert and invisible at every other width. -->
-      <span class="sh-break" aria-hidden="true"></span>
+      <!-- Secondary grey, no icon. Its label colour is the library's default text colour, and the fill
+           is the library's translucent secondary step. -->
+      <a class="sh-btn sh-btn-secondary sh-btn-admin" href="admin.html">Admin</a>
     </div>
-
-    <!-- The honest answer when someone uses the search field. -->
-    <div class="sh-search-panel" id="searchPanel" role="status" hidden></div>
   </header>
 
   <main class="g-main sh-main" id="main">
@@ -165,15 +144,26 @@
     </div>
   </main>
 
-  <!-- A utility bar: the system status, and the admin entry point inside it. The guide's own footer
-       content (the sources, the Epic disclaimer) lives at the end of the home screen, which is where a
-       reader is when it matters. -->
+  <!-- A utility bar, and nothing else: the system status, and the two ways out of the guide. The guide's
+       own footer content (the sources, the Epic disclaimer) lives at the end of the home screen, which is
+       where a reader is when it matters.
+
+       1.2.0 stripped the legacy content back to exactly that, and moved Dev mode down here from the
+       header as a link. It is a <button> wearing the link's clothes because it toggles a state rather
+       than navigating: it keeps aria-pressed and spells the state out ("off"/"on"), so the state is
+       never colour alone. -->
   <footer class="sh-footer">
     <div class="sh-footer-inner">
       <div class="sh-status" id="systemStatus">
         <span class="sh-status-dot" id="statusDot" aria-hidden="true"></span>
         <p class="sh-status-text" id="footerStatus">Loading the guide data&hellip;</p>
-        <a class="sh-status-admin" href="admin.html">Go to admin page</a>
+      </div>
+      <div class="sh-footer-links">
+        <button class="sh-footer-link" id="devModeButton" type="button" aria-pressed="false">
+          <span>Dev mode</span>
+          <span class="sh-btn-state" id="devModeState">off</span>
+        </button>
+        <a class="sh-footer-link sh-footer-admin" href="admin.html">Go to admin page</a>
       </div>
     </div>
   </footer>

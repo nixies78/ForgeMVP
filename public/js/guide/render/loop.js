@@ -19,9 +19,11 @@
  *     widths would need a layout pass. The estimate is deliberately conservative, and every label
  *     carries its full text in a <title> so a shortened label is never the only copy.
  *
- * Colours come from the app's tokens through CSS custom properties, so the drawing inherits the
- * Fortnite style library instead of carrying its own copy of the palette. They are applied as inline
- * styles rather than presentation attributes, because var() is only reliably supported there.
+ * Colours come from the app's tokens through CSS custom properties, so the drawing inherits the style
+ * library instead of carrying its own copy of the palette. They are applied as inline styles rather
+ * than presentation attributes, because var() is only reliably supported there. Each var() carries a
+ * fallback with the 1.2.0 palette's own value, so a diagram that somehow renders before tokens.css
+ * arrives still draws in the app's colours rather than in the retired Fortnite ones.
  *
  * Accessibility: the SVG is a single image with a title and a description that spells the loop out in
  * prose, so a screen reader gets the meaning rather than a list of shapes. Meaning is never carried
@@ -65,7 +67,7 @@ function label(x, y, content, { size = FONT_STEP, fill, weight = 400, anchor = '
       fontFamily: family || 'var(--loop-font, Inter, "Segoe UI", system-ui, sans-serif)',
       fontSize: `${size}px`,
       fontWeight: String(weight),
-      fill: fill || 'var(--loop-text, #FFFFFF)'
+      fill: fill || 'var(--loop-text, #FFFFFFF2)'
     }
   );
   el.textContent = content;
@@ -162,7 +164,7 @@ export function renderCoreLoop(coreLoop) {
     root.append(
       label(VW / 2, 58, 'No core loop recorded for this game type yet.', {
         size: FONT_BOX,
-        fill: 'var(--loop-muted, #C3C3C4)'
+        fill: 'var(--loop-muted, #FFFFFFBF)'
       })
     );
     return root;
@@ -182,7 +184,7 @@ export function renderCoreLoop(coreLoop) {
       { x: entryX, y: entryY, width: entryW, height: entryH, rx: 8 },
       {
         fill: 'var(--loop-fill, #18181C)',
-        stroke: 'var(--loop-accent, #F7FF19)',
+        stroke: 'var(--loop-accent, #26BBFF)',
         strokeWidth: '2'
       }
     )
@@ -227,7 +229,7 @@ export function renderCoreLoop(coreLoop) {
   /* Faint track, so the ring reads as a loop even where no arrow is drawn. */
   root.append(
     make('circle', { cx: VW / 2, cy, r: RING_R, fill: 'none' }, {
-      stroke: 'var(--loop-stroke, #3A3A3E)',
+      stroke: 'var(--loop-stroke, #FFFFFF0D)',
       strokeWidth: '1.5',
       strokeDasharray: '3 7'
     })
@@ -255,10 +257,10 @@ export function renderCoreLoop(coreLoop) {
         'rect',
         { x: cx - pill.w / 2, y: py - pill.h / 2, width: pill.w, height: pill.h, rx: 10 },
         isFirst
-          ? { fill: 'var(--loop-accent, #F7FF19)', stroke: 'var(--loop-accent, #F7FF19)', strokeWidth: '1.5' }
+          ? { fill: 'var(--loop-accent, #26BBFF)', stroke: 'var(--loop-accent, #26BBFF)', strokeWidth: '1.5' }
           : {
               fill: 'var(--loop-fill, #18181C)',
-              stroke: 'var(--loop-stroke, #3A3A3E)',
+              stroke: 'var(--loop-stroke, #FFFFFF0D)',
               strokeWidth: '1.5'
             }
       )
@@ -270,7 +272,7 @@ export function renderCoreLoop(coreLoop) {
         label(cx, y, line, {
           size: FONT_STEP,
           weight: isFirst ? 600 : 500,
-          fill: isFirst ? 'var(--loop-accent-ink, #000000)' : 'var(--loop-text, #FFFFFF)'
+          fill: isFirst ? 'var(--loop-accent-ink, #101014)' : 'var(--loop-text, #FFFFFFF2)'
         })
       );
     });
@@ -309,7 +311,7 @@ export function renderCoreLoop(coreLoop) {
       group.append(
         make('rect', { x, y: outcomeTop, width: boxW, height: outcomeH, rx: 10 }, {
           fill: 'var(--loop-fill, #18181C)',
-          stroke: 'var(--loop-stroke, #3A3A3E)',
+          stroke: 'var(--loop-stroke, #FFFFFF0D)',
           strokeWidth: '1.5'
         })
       );
@@ -319,14 +321,14 @@ export function renderCoreLoop(coreLoop) {
         label(x + boxW / 2, outcomeTop + (lines.length ? 20 : outcomeH / 2), labelText, {
           size: 13,
           weight: 700,
-          fill: 'var(--loop-text, #FFFFFF)'
+          fill: 'var(--loop-text, #FFFFFFF2)'
         })
       );
       lines.forEach((line, li) => {
         group.append(
           label(x + boxW / 2, outcomeTop + 38 + li * LINE_H, line, {
             size: 12,
-            fill: 'var(--loop-muted, #C3C3C4)'
+            fill: 'var(--loop-muted, #FFFFFFBF)'
           })
         );
       });
@@ -361,12 +363,12 @@ function tangentArc(from, to, cy) {
     make(
       'path',
       { d: `M ${round(p1.x)} ${round(p1.y)} A ${RING_R} ${RING_R} 0 ${large} ${sweep} ${round(p2.x)} ${round(p2.y)}`, fill: 'none' },
-      { stroke: 'var(--loop-muted, #C3C3C4)', strokeWidth: '2' }
+      { stroke: 'var(--loop-muted, #FFFFFFBF)', strokeWidth: '2' }
     )
   );
   /* Arrowhead: a small triangle rotated to the arc's tangent at its end point. */
   const tangent = a2 + Math.PI / 2; // tangent direction when travelling clockwise
-  g.append(triangle(p2.x, p2.y, tangent, 'var(--loop-accent, #F7FF19)'));
+  g.append(triangle(p2.x, p2.y, tangent, 'var(--loop-accent, #26BBFF)'));
   return g;
 }
 
@@ -375,12 +377,12 @@ function arrow(x1, y1, x2, y2, name) {
   const g = make('g', {});
   g.append(
     make('path', { d: `M ${round(x1)} ${round(y1)} L ${round(x2)} ${round(y2)}`, fill: 'none' }, {
-      stroke: 'var(--loop-accent, #F7FF19)',
+      stroke: 'var(--loop-accent, #26BBFF)',
       strokeWidth: '2'
     })
   );
   const angle = Math.atan2(y2 - y1, x2 - x1);
-  g.append(triangle(x2, y2, angle, 'var(--loop-accent, #F7FF19)'));
+  g.append(triangle(x2, y2, angle, 'var(--loop-accent, #26BBFF)'));
   const t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
   t.textContent = name;
   g.append(t);

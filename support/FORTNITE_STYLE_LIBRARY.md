@@ -1,5 +1,12 @@
 # Fortnite — Style Library
 
+> **Superseded for the app, as of 1.2.0 (2026-11-16).** The workspace no longer takes its palette from
+> this document: the app carries one palette, the authentic Unreal/Epic one, declared in
+> `public/css/tokens.css` and written up in `support/library.html`. This document is kept because it is the
+> record of the palette the app used up to 1.1.0, and because its measurements are still where the type
+> scale, the spacing step and the accessibility posture come from. Anything below that names a colour is
+> history. See `support/unreal_forge_changelog.md` for the release that changed it.
+
 A markdown transcription of `support/Library--Styles--Fortnite.png`, plus the derived token names,
 measured contrast ratios and component notes this repo's UI is built from.
 

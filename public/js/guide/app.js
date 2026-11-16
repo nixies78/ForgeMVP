@@ -15,7 +15,7 @@ import { loadData } from './data.js';
 import { browserStorage, createStore } from './store.js';
 import { applySavedGame, createState, nextUnanswered, predecessor, progressFor, recordAnswer, savedGameNotice, trailFor, walkthroughSteps } from './state.js';
 import { applyRoute, parseHash, startRouter, toHash } from './router.js';
-import { measureHeader, wireSearch } from './chrome.js';
+import { measureHeader } from './chrome.js';
 import { parseShare, shareUrl } from './share.js';
 import { UI, WALKTHROUGH_STEPS } from './content.js';
 import { fill } from './dom.js';
@@ -64,6 +64,8 @@ const els = {
   screen: document.getElementById('screen'),
   progressBar: document.getElementById('progressBar'),
   progressLabel: document.getElementById('progressLabel'),
+  /* Dev mode lives in the footer as of 1.2.0. Same element ids, so its wiring below did not change:
+   * only the markup, which moved from the header into the utility bar and is styled as a link there. */
   devButton: document.getElementById('devModeButton'),
   devState: document.getElementById('devModeState'),
   devWrap: document.getElementById('devModeWrap'),
@@ -72,9 +74,6 @@ const els = {
   footerStatus: document.getElementById('footerStatus'),
   statusDot: document.getElementById('statusDot'),
   siteHeader: document.getElementById('siteHeader'),
-  searchInput: document.getElementById('searchInput'),
-  searchPanel: document.getElementById('searchPanel'),
-  searchHint: document.getElementById('searchHint'),
   bootError: document.getElementById('bootError'),
   bootErrorText: document.getElementById('bootErrorText')
 };
@@ -203,14 +202,14 @@ function showBootError(error) {
 /* ------------------------------------ the shell ------------------------------------ */
 
 function wireShell(ctx) {
-  /* Dev mode is a button with a stated on/off state and `aria-pressed`, not a checkbox: the spec asks
-   * for a control with clear active feedback, and a checkbox in a header reads as a form field. */
+  /* Dev mode is a button with a stated on/off state and `aria-pressed`, not a checkbox, and 1.2.0 kept
+   * that when it moved the control into the footer: the state has to be legible without colour, and a
+   * plain link has nowhere to say "off". */
   if (els.devButton) {
     els.devButton.addEventListener('click', () => ctx.actions.setDevMode(!ctx.state.devMode));
   }
 
   measureHeader(els.siteHeader);
-  wireSearch({ input: els.searchInput, panel: els.searchPanel, hint: els.searchHint });
 }
 
 /* ------------------------------------ actions ------------------------------------ */

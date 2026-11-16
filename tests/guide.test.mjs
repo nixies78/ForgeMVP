@@ -847,8 +847,16 @@ test('the guide stays reachable without dev mode, and dev mode stays discoverabl
   const html = await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
   assert.match(html, /id="devModeButton"[^>]*aria-pressed="false"/, 'the control is in the markup, not hidden behind a query param');
   assert.match(html, /id="devModeState"/, 'and it states its own on/off value, so colour is not the only signal');
+  /* 1.2.0 moved it out of the header and into the utility footer, where it is styled as a link. It is
+   * still the same control with the same state, which is why it is still a button: a plain link has
+   * nowhere to say "off". */
+  assert.ok(
+    html.indexOf('id="devModeButton"') > html.indexOf('<footer class="sh-footer">'),
+    'the control lives in the footer as of 1.2.0'
+  );
   const app = await readFile(path.join(GUIDE_DIR, 'app.js'), 'utf8');
   assert.match(app, /devFromQuery/, 'and ?dev=1 still works for a shared link');
+  assert.match(app, /devButton\.addEventListener\('click'/, 'and the footer link still toggles it');
 });
 
 test('the screen list in the router matches the screens that exist', async () => {
@@ -940,62 +948,181 @@ test('the breadcrumb trail has one definition, and every screen has a trail', as
   }
 });
 
-test('the shell palette and the workspace palette never mix', async () => {
+test('the palette is declared once, and both layers consume it', async () => {
   const shell = await readFile(path.join(PUBLIC_DIR, 'css', 'shell.css'), 'utf8');
   const guide = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
   const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
 
-  /* The spec's palette, declared once, in the shell stylesheet. v2's values: the body gradient, the
-   * header tint, the footer, Panel Charcoal, Outline Slate, the cyan primary, the progress ramp's yellow
-   * end, UI Gray, the secondary fill and the two search-field values. */
-  for (const colour of ['#101014', '#202024', '#18181C', '#23253A', '#3A3D4D', '#26BBFF', '#F7FF19', '#B2B5C2', '#5B5B65', '#1e1e22', '#404043']) {
-    assert.ok(shell.toLowerCase().includes(colour.toLowerCase()), `shell.css declares ${colour} from the architecture spec`);
+  /* 1.2.0 reconciled the palettes: the shell used to declare its own spec colours and the workspace
+   * carried a second, Fortnite-derived set. There is one palette now, under the --ue-* names, and it
+   * lives in tokens.css. These are its values - the library's neutrals, its white alphas, its accent,
+   * 1.2.1's panel trio, and the two hue families the progress ramp runs between. */
+  for (const colour of [
+    '#101014', /* the canvas */
+    '#18181C', /* an elevated, quiet surface: the footer band */
+    '#202024', /* an elevated, raised surface: controls and wells */
+    '#28282C', /* the box under the pointer, and what the store paints a current nav item with */
+    '#1C1C20', /* 1.2.1: a panel, a card, a list row - at rest */
+    '#343437', /* 1.2.1: and the subtle edge they all rest on */
+    '#101014D9', /* the sticky material: the canvas at 85% */
+    '#00000059', /* the inset scrim */
+    '#FFFFFF', /* the headline white */
+    '#FFFFFFF2', /* text, at 95% */
+    '#FFFFFFBF', /* supporting text, at 75% */
+    '#FFFFFFA6', /* the strong border's hover step */
+    '#FFFFFF59', /* the accessible border step, and disabled text */
+    '#FFFFFF26', /* a secondary control at rest */
+    '#26BBFF', /* the accent */
+    '#69D0FF', /* and its hover step */
+    '#33BFFF', /* and its press step: the palette's blue-400 */
+    '#868AFD', /* 1.2.1: the ramp's far end, the palette's indigo-400 */
+    '#101014', /* the label the library puts on the accent */
+    '#F7D82B' /* the warning hue */
+  ]) {
+    assert.ok(tokens.toUpperCase().includes(colour.toUpperCase()), `tokens.css declares ${colour} from the library`);
   }
-  /* And the hues v2 retired are gone rather than left behind: the navy header of v1, and its cyan. */
-  assert.ok(!shell.toUpperCase().includes('#0E1128'), 'the v1 navy header is gone');
-  assert.ok(!shell.toUpperCase().includes('#1CB0F6'), 'and so is the v1 cyan');
 
-  /* And nowhere else. The two palettes overlap in three values — #101014, #18181C and #F7FF19 are in
-   * both, which is unsurprising given where both come from — but every hue unique to the shell must stay
-   * out of the workspace, and cyan above all: nothing inside the container is allowed to use it. */
-  for (const [name, source] of [['guide.css', guide], ['tokens.css', tokens]]) {
-    for (const shellOnly of ['#1CB0F6', '#26BBFF', '#0E1128', '#23253A', '#3A3D4D', '#B2B5C2', '#5B5B65', '#1e1e22', '#404043']) {
+  /* The Fortnite blueprint palette is retired, not merely unused: none of it may survive anywhere.
+   * 1.2.1 retired the ramp's yellow as well - the progress bar runs between two published palette steps
+   * now - so shell.css finally declares no colour of its own, and that is pinned rather than described. */
+  const retired = ['#E2E2E3', '#C3C3C4', '#AEAEB0', '#3A3A3E', '#26262A', '#D2DA00', '#0A0A0D', '#F7FF19'];
+  const shellHex = (shell.match(/#[0-9a-fA-F]{3,8}\b/g) || []).map((h) => h.toUpperCase());
+  assert.deepEqual([...new Set(shellHex)], [], `shell.css declares no colour of its own: ${shellHex.join(', ')}`);
+  for (const [name, source] of [['tokens.css', tokens], ['guide.css', guide], ['shell.css', shell]]) {
+    for (const gone of retired) {
       assert.ok(
-        !source.toLowerCase().includes(shellOnly.toLowerCase()),
-        `${name} uses ${shellOnly}, which belongs to the shell`
+        !source.toUpperCase().includes(gone.toUpperCase()),
+        `${name} still uses ${gone}, which 1.2.0 retired`
       );
     }
   }
+  /* And so is the shell's own v2 palette, Panel Charcoal included. Its v1 navy and cyan are still gone. */
+  for (const gone of ['#23253A', '#3A3D4D', '#B2B5C2', '#5B5B65', '#1e1e22', '#404043', '#0E1128', '#1CB0F6']) {
+    for (const [name, source] of [['shell.css', shell], ['tokens.css', tokens], ['guide.css', guide]]) {
+      assert.ok(!source.toUpperCase().includes(gone.toUpperCase()), `${name} still uses ${gone}`);
+    }
+  }
+
+  /* The shell consumes the palette instead of declaring it, and keeps only its own geometry. */
+  assert.match(shell, /--sh-primary:\s*var\(--ue-accent\)/, 'the shell takes the accent from the palette');
+  assert.match(shell, /--sh-ink-on-primary:\s*var\(--ue-on-accent\)/, 'and the accent label with it');
+  assert.match(shell, /--sh-footer:\s*var\(--ue-elevated-low\)/, 'the footer is the palette\'s quiet surface');
+  assert.match(shell, /--sh-header-bg:\s*var\(--ue-canvas-header\)/, 'the header tint is the palette\'s canvas at 95%');
+  assert.match(shell, /--sh-header-base:\s*72px/, 'and its geometry - the 72px bar - is decided here');
+
+  /* The workspace's roles alias the same palette, which is what "reconciled" means in practice. */
+  assert.match(tokens, /--fn-action:\s*var\(--ue-accent\)/, 'the workspace action is the palette accent');
+  assert.match(tokens, /--fn-on-action:\s*var\(--ue-on-accent\)/, 'with the palette\'s label on it');
+  assert.match(tokens, /--fn-text:\s*var\(--ue-text\)/, 'and its text steps are the library\'s');
 
   /* guide.css carries no raw colours at all: everything is a token. */
   const hex = guide.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
   assert.deepEqual(hex, [], `guide.css uses raw colours: ${hex.join(', ')}`);
 });
 
-test('hover changes an edge and a lift, never a fill', async () => {
+/** The body of one CSS rule, for the pins below. */
+function ruleBody(css, selector) {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = css.match(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`));
+  assert.ok(match, `${selector} is declared`);
+  return match[1];
+}
+
+test('the workspace stylesheet cannot reach into the shell', async () => {
+  const guide = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  const shell = await readFile(path.join(PUBLIC_DIR, 'css', 'shell.css'), 'utf8');
+
+  /* The bug this pins, found while landing 1.2.0: `body` carries the `g-app` class, so the workspace's
+   * link rule `.g-app a` also matched the shell's header and footer links. It is one class more specific
+   * than any of the shell's own link classes, so it won - and the Admin action's label, which the spec
+   * and this suite both describe as the library's text colour, was painted in the workspace's muted one
+   * instead. Loading order cannot beat a specificity gap; the selector has to be scoped. */
+  /* The rule, not the mention: this test's own comment names the selector it forbids. */
+  assert.ok(!/\.g-app\s+a\s*[,{]/.test(guide), 'the workspace styles its links by region, not by the body class');
+  assert.match(guide, /\.g-main a\s*\{/, 'and the region is the app container');
+  /* The shell answers with its own rules, and they are the ones that apply: nothing in the shell is
+   * styled from the workspace's file, and the shell's controls state their own colours. */
+  assert.match(shell, /\.sh-btn-secondary\s*\{[^}]*color:\s*var\(--sh-text\)/, 'the Admin control states its own label colour');
+  assert.match(shell, /\.sh-footer-link\s*\{[^}]*color:\s*var\(--sh-gray\)/, 'and so do the footer links');
+});
+
+test('hover repaints an interactive surface by one library step, and controls do not lift', async () => {
   const guide = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
   const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
 
-  /* The bug this pins: `button:hover` from the older stylesheet outranked the card rules and repainted
-   * every choice card a light cyan, with white label text on it. The fix is the rule below, so the rule
-   * is asserted rather than trusted. */
+  /* The bug this test exists for: `button:hover` from the older stylesheet outranked the card rules and
+   * repainted every choice card light cyan, with white label text on it.
+   *
+   * 1.2.0 changed the hover language from "an edge and a lift, never a fill" to the library's: an
+   * interactive surface repaints its whole fill. So the fills are pinned instead - a hover may only paint
+   * a documented hover token, never a colour of its own - which is what keeps a repaint from ever being a
+   * colour nobody measured. */
+  const allowedFills = [
+    'var(--fn-surface-panel-hover)', /* an interactive surface, a tracker row, a quiet action: the box under the pointer */
+    'var(--fn-surface-subtle-hover)', /* a secondary control: 15% -> 35% */
+    'var(--fn-action-hover)' /* the accent: default -> hover */
+  ];
   const blocks = guide.match(/[^{}]*:hover[^{}]*\{[^}]*\}/g) || [];
   assert.ok(blocks.length >= 6, `hover rules were found to check (got ${blocks.length})`);
   for (const block of blocks) {
     /* A disabled control is the one documented exception: it removes a lift, it does not paint one. */
     if (/:disabled|is-disabled/.test(block)) continue;
-    const paints = block.match(/(^|[;{]\s*)background(-color)?\s*:/g) || [];
-    assert.deepEqual(paints, [], `a hover rule repaints a fill:\n${block.trim()}`);
+    for (const paint of block.match(/(?:^|[;{]\s*)background(?:-color)?\s*:\s*([^;}]+)/g) || []) {
+      const value = paint.replace(/^[;{\s]*background(?:-color)?\s*:\s*/, '').trim();
+      assert.ok(
+        allowedFills.includes(value),
+        `a hover rule paints ${value}, which is not a documented hover fill:\n${block.trim()}`
+      );
+    }
     assert.ok(
-      /border-color|box-shadow|transform|color|opacity|text-decoration/.test(block),
+      /border-color|box-shadow|transform|color|opacity|text-decoration|background/.test(block),
       `a hover rule changes nothing visible:\n${block.trim()}`
     );
   }
 
+  /* The surfaces you can act on repaint, lift, and strengthen their edge; a control repaints and stays put. */
+  for (const selector of ['.g-choice:hover', '.g-option:hover', '.g-brandtile:hover']) {
+    const body = ruleBody(guide, selector);
+    assert.match(body, /background:\s*var\(--fn-surface-panel-hover\)/, `${selector} repaints its fill`);
+    assert.match(body, /border-color:\s*var\(--fn-border-strong\)/, `${selector} strengthens its edge under the pointer`);
+    assert.match(body, /translateY\(calc\(var\(--fn-lift\) \* -1\)\)/, `${selector} still lifts`);
+  }
+  const tracker = ruleBody(guide, '.g-tracker-link:hover');
+  assert.match(tracker, /background:\s*var\(--fn-surface-panel-hover\)/, 'a tracker row steps up from the surface it sits on');
+  assert.match(tracker, /translateY\(calc\(var\(--fn-lift\) \* -1\)\)/, 'and lifts with it');
+  /* 1.2.1's card edge: the subtle step at rest, the accessible one on hover. That is the whole reason the
+   * rest border is allowed to be a 1.5:1 value - it is never the only thing carrying the boundary, because
+   * the pointer is what brings the strong one. */
+  for (const selector of ['.g-choice', '.g-option', '.g-brandtile', '.g-tracker-link']) {
+    assert.match(ruleBody(guide, selector), /border: 1px solid var\(--fn-border\)/, `${selector} rests on the subtle edge`);
+  }
+
+  for (const selector of ['.g-btn-primary:hover', '.g-btn-secondary:hover', '.g-btn-quiet:hover', '.g-btn-danger:hover']) {
+    const body = ruleBody(guide, selector);
+    assert.ok(
+      !/transform|box-shadow/.test(body),
+      `${selector} must not lift: a control brightens, it does not jump (1.2.0)`
+    );
+  }
+  /* The primary action drops the hover border; the secondary keeps the library's brightness ramp. */
+  const primaryHover = ruleBody(guide, '.g-btn-primary:hover');
+  assert.match(primaryHover, /background:\s*var\(--fn-action-hover\)/, 'the primary action brightens on hover');
+  assert.ok(!/border-color:\s*var\(--fn-(?!action\b)/.test(primaryHover), 'and no longer repaints a border to do it');
+  assert.match(ruleBody(guide, '.g-btn-secondary'), /background:\s*var\(--fn-surface-subtle\)/, 'the secondary action rests at 15% white');
+  assert.match(ruleBody(guide, '.g-btn-secondary:hover'), /background:\s*var\(--fn-surface-subtle-hover\)/, 'and brightens to 35%, the library\'s secondary step');
+
+  /* A container is not an interactive surface: hovering a control inside a panel must not repaint the
+   * panel, or the whole block flashes and claims to be clickable. */
+  assert.ok(!/\.g-panel[^{]*:hover/.test(guide), 'a panel container does not repaint on hover');
+
   /* The lift itself, so "slightly more noticeable than a colour change" is a number. */
   assert.match(tokens, /--fn-lift:\s*3px/, 'the hover lift is defined');
   assert.match(tokens, /--fn-shadow-hover/, 'and comes with a shadow to read as raised');
-  assert.ok(!/--fn-action-hover|--fn-surface-card-hover/.test(tokens), 'the old hover fills are gone, not left to rot');
+  /* And the hover fills are the library's published steps, aliased rather than invented. */
+  assert.match(tokens, /--fn-surface-panel-hover:\s*var\(--ue-surface-panel-hover\)/, 'the box hover is 1.2.1\'s panel step');
+  assert.match(tokens, /--ue-surface-panel:\s*#1C1C20/, 'and the box rests on 1.2.1\'s panel fill');
+  assert.match(tokens, /--fn-surface-subtle-hover:\s*var\(--ue-fill-subtle-hover\)/, 'and the control hover is the published subtle step');
+  assert.match(tokens, /--fn-action-hover:\s*var\(--ue-accent-hover\)/, 'and the accent hover is the library\'s own');
 });
 
 test('the page follows the architecture spec it was rebuilt from', async () => {
@@ -1017,33 +1144,110 @@ test('the page follows the architecture spec it was rebuilt from', async () => {
   assert.deepEqual([...order].sort((a, b) => a - b), order, 'and in the documented order');
 
   /* The header the spec describes: fixed, 72px in the stylesheet, and carrying exactly one navigation
-   * item, the search field, the Dev mode toggle and the Admin action. */
+   * item, the mark and one action. 1.2.0 removed the search field and the Dev mode toggle from it; 1.2.1
+   * swapped the mark for the Epic logo and took the legacy pill class off it. */
   assert.match(html, /class="sh-header" id="siteHeader"/, 'a site header');
-  assert.match(html, /EGS-Logotype-2023-Vertical-White\.svg/, 'with the logotype the spec names');
+  assert.match(html, /class="sh-logo" href="#\/home"/, 'with the mark, which resets to the start');
+  assert.match(html, /src="assets\/logo_epic\.svg"/, 'and it is the asset 1.2.1 names');
+  assert.ok(
+    !/class="logo-link/.test(html),
+    'the app no longer carries the legacy class whose pill border and navy hover 1.2.1 removed'
+  );
   assert.ok(!/navMore|navList/.test(html), 'and no overflow menu, because there is one nav item');
   const navItems = html.match(/class="sh-nav-link"/g) || [];
   assert.equal(navItems.length, 1, 'the navigation is a single item');
   assert.match(html, /class="sh-nav-link" href="#\/home">Home</, 'and the item is Home');
   assert.match(html, /id="appHead"/, 'the app container has its own header');
   assert.match(html, /src="js\/guide\/app\.js"/, 'and the app itself is one module');
+  /* The search field is gone, markup and all - not hidden, and not left wired to a shortcut that would
+   * focus nothing. */
+  assert.ok(!/sh-search|searchInput|searchHint|searchPanel|sh-kbd|sh-break/.test(html), 'the search field left with its markup');
+  /* chrome.js is allowed to say in a comment that the field once existed; what may not survive is the
+   * wiring: the module, the field lookup, and the Ctrl/Cmd-K shortcut that focused it. */
+  assert.ok(!/wireSearch|searchInput|searchPanel/.test(chrome), 'and its wiring left with it');
+  assert.ok(!/ctrlKey \|\| event\.metaKey/.test(chrome), 'and so did the shortcut that focused it');
+  assert.ok(!/wireSearch/.test(app), 'and the app no longer wires it');
 
-  /* The one primary action in the shell is the cyan Admin button with a dark label. */
-  assert.match(html, /class="sh-btn sh-btn-primary sh-btn-admin" href="admin\.html"/, 'Admin is the primary action');
+  /* The header's one action is Admin, and as of 1.2.0 it is the library's secondary control: a
+   * translucent fill, the library's default text colour, and no icon. */
+  assert.match(html, /class="sh-btn sh-btn-secondary sh-btn-admin" href="admin\.html"/, 'Admin is the secondary action');
+  assert.ok(!/admin-logo\.svg/.test(html), 'and it carries no icon');
   const shell = await readFile(path.join(PUBLIC_DIR, 'css', 'shell.css'), 'utf8');
-  assert.match(shell, /--sh-primary:\s*#26BBFF/, 'the primary fill is the spec\'s cyan');
-  assert.match(shell, /--sh-ink-on-primary:\s*#101014/, 'and its label is the spec\'s dark ink');
-  assert.match(shell, /--sh-header-bg:\s*rgba\(16, 16, 20, 0\.95\)/, 'the header is the body colour at 95%');
+  const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
+  assert.match(shell, /--sh-primary:\s*var\(--ue-accent\)/, 'the accent is the palette\'s');
+  assert.match(shell, /--sh-ink-on-primary:\s*var\(--ue-on-accent\)/, 'and its label is the palette\'s dark ink');
+  assert.match(shell, /--sh-header-bg:\s*var\(--ue-canvas-header\)/, 'the header is the canvas at 90%');
+  /* And the palette holds that exact value, because the spec names it and a serialisation is not a
+   * colour: the check below fails if it drifts by a single alpha step. 1.2.2 eased the tint from 95% to
+   * 90%, so the header's new backdrop blur has something to blur. */
+  assert.match(tokens, /--ue-canvas-header:\s*rgba\(16, 16, 20, 0\.90\)/, 'the 90% canvas tint is declared once, in the palette');
+  /* 1.2.2: one blur, shared by the fixed header and the sticky app bar. Two copies of an effect are two
+   * effects waiting to drift apart. */
+  assert.match(shell, /--sh-blur:\s*blur\(12px\)/, 'the frame has one frosted depth');
+  assert.match(shell, /backdrop-filter:\s*var\(--sh-blur\)/, 'the header frosts like the app bar');
   assert.match(shell, /position:\s*fixed/, 'the header is fixed');
   /* The header's own height is a minimum, and the page offset is a separate variable that chrome.js
    * publishes the measured height into. They are deliberately not the same property: a header sized
    * from the variable that holds its own measurement pins that measurement. */
   assert.match(shell, /--sh-header-base:\s*72px/, 'and 72px tall');
-  /* The progress ramp runs from the primary cyan to the spec's yellow. */
-  assert.match(shell, /--sh-progress-end:\s*#F7FF19/, 'the progress ramp ends at the spec\'s yellow');
+  /* The progress ramp runs between the palette's blue and indigo steps as of 1.2.1, replacing Forge's own
+   * cyan-to-yellow: two published families, aliased, so the shell still declares no colour of its own. */
+  assert.match(shell, /--sh-progress-from:\s*var\(--ue-palette-blue-400\)/, 'the ramp starts on the palette\'s blue');
+  assert.match(shell, /--sh-progress-to:\s*var\(--ue-palette-indigo-400\)/, 'and ends on its indigo');
+  assert.match(tokens, /--ue-palette-blue-400:\s*#33BFFF/, 'both of which the palette declares');
+  assert.match(tokens, /--ue-palette-indigo-400:\s*#868AFD/, 'at the weight the library publishes them at');
+  /* The mark's hover. 1.2.1 gave it a translucent wash; 1.2.2 took the box away and made the mark change
+   * its own shade, because a wash on a 44px square reads as a grey button appearing under the pointer.
+   * So the hover must paint nothing of its own at all, and it must not draw an edge in any state. */
+  const logo = ruleBody(shell, '.sh-logo');
+  assert.match(logo, /border:\s*0/, 'the mark has no border to begin with');
+  const logoHover = ruleBody(shell, '.sh-logo:hover img');
+  assert.match(logoHover, /opacity:\s*0\.8/, 'the mark answers the pointer by changing its own shade');
+  assert.ok(!/background/.test(logoHover), 'and not by painting a box behind itself');
+  assert.ok(
+    !/--sh-logo-hover/.test(shell),
+    'the wash token went with it, so nothing can quietly reinstate the box'
+  );
+  assert.ok(!/\.sh-logo:hover[^{]*\{[^}]*border/.test(shell), 'never by drawing an outline');
+  /* 1.2.1 split the control heights: the header's controls are 32px, the body's 40px. */
+  assert.match(ruleBody(shell, '.sh-btn'), /height:\s*32px/, 'a navigation CTA is 32px');
+  const guideCss = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  assert.match(ruleBody(guideCss, '.g-btn'), /min-height:\s*40px/, 'and a body CTA is 40px');
+  /* 1.2.2: the published container radius for boxes, the library's control radius for controls. Applied
+   * to the tokens, because that is the only place a radius is decided - and to the selected states, which
+   * must wear a 1px edge like every other box rather than growing a heavier one. */
+  assert.match(tokens, /--fn-radius-card:\s*16px/, 'a box takes the published 16px container radius');
+  assert.match(tokens, /--fn-radius-button:\s*8px/, 'a control keeps the library\'s 8px');
+  assert.match(
+    ruleBody(guideCss, '.g-choice.is-selected'),
+    /border-width:\s*1px/,
+    'a chosen card wears a 1px edge, not a 2px one'
+  );
+  assert.match(ruleBody(guideCss, '.g-brandtile.is-chosen'), /border-width:\s*1px/, 'and so does a chosen brand');
+  assert.match(
+    ruleBody(guideCss, '.g-tracker-item.is-current .g-tracker-link'),
+    /border-width:\s*1px/,
+    'and so does the current tracker row'
+  );
+  assert.ok(
+    !/border-width:\s*2px/.test(guideCss.replace(/\/\*[\s\S]*?\*\//g, '')),
+    'no selected box grew back to 2px'
+  );
+  /* The sticky app header is borderless and translucent as of 1.2.0: no rules above or below. */
+  const appHead = ruleBody(shell, '.sh-app-head');
+  assert.match(appHead, /border:\s*0/, 'the app container\'s sticky header carries no border');
+  assert.ok(!/\d+px solid/.test(appHead), 'and no rule above or below it in its place');
+  assert.match(appHead, /background:\s*var\(--sh-material\)/, 'and is painted with the canvas material, so content reads through it');
 
-  /* The search field says it is not built yet instead of doing nothing quietly. */
-  assert.match(chrome, /not built yet/i, 'the search field is honest about being unbuilt');
-  assert.match(chrome, /ctrlKey \|\| event\.metaKey/, 'and Ctrl/Cmd+K focuses it');
+  /* The footer is the utility bar, and only that: the status, and the two ways out. Dev mode moved
+   * here from the header in 1.2.0. */
+  const footerAt = html.indexOf('<footer class="sh-footer">');
+  assert.ok(footerAt > -1, 'there is a utility footer');
+  assert.ok(html.indexOf('id="devModeButton"') > footerAt, 'and Dev mode lives inside it now');
+  assert.match(html, /class="sh-footer-link sh-footer-admin" href="admin\.html">Go to admin page</, 'with the admin link beside it');
+  /* Nothing of the old footer content is left: no second navigation, and no guide credits. */
+  assert.ok(!/class="sh-nav"/.test(html.slice(footerAt)), 'the footer carries no navigation of its own');
+
   /* The header height is measured, not assumed: the page offsets itself by it and the app's sticky bar
    * positions itself from it. */
   assert.match(chrome, /ResizeObserver/, 'the header height is measured');

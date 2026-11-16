@@ -77,9 +77,11 @@ test('every page links the admin page from its header', async (t) => {
 
   const home = await (await fetch(`${base}/`)).text();
   /* The header logo is the reset to the start of the guide (the architecture spec is explicit about
-   * this); the Admin entry point is the page's own primary call to action beside it. */
-  assert.match(home, /<a class="logo-link[^"]*" href="#\/home"/, 'the home page logo resets to the start of the guide');
-  assert.match(home, /<a class="sh-btn sh-btn-primary[^"]*" href="admin\.html"/, 'the Admin action reaches the admin page');
+   * this); Admin, the header's one action, is the library's secondary control as of 1.2.0, and the mark is
+   * the app's own component as of 1.2.1, when the legacy pill class stopped being drawn around it. */
+  assert.match(home, /<a class="sh-logo" href="#\/home"/, 'the home page logo resets to the start of the guide');
+  assert.match(home, /<img src="assets\/logo_epic\.svg"/, 'the header mark is the Epic logo 1.2.1 names');
+  assert.match(home, /<a class="sh-btn sh-btn-secondary[^"]*" href="admin\.html"/, 'the Admin action reaches the admin page');
   /* The footer's system status carries the plain admin link, in the wording the spec gives it. */
   assert.match(home, /href="admin\.html"[^>]*>Go to admin page</, 'home page has a plain admin link');
 
@@ -131,7 +133,7 @@ test('the Admin link in the markup matches the admin page filename', async (t) =
   const home = await (await fetch(`${base}/`)).text();
 
   /* The header's Admin action is the admin entry point, and its target has to be a real file. */
-  const target = home.match(/class="sh-btn sh-btn-primary[^"]*" href="([^"]+)"/)?.[1];
+  const target = home.match(/class="sh-btn sh-btn-secondary[^"]*" href="([^"]+)"/)?.[1];
   assert.ok(target, 'the home page header carries an Admin action');
 
   const res = await fetch(`${base}/${target}`);
@@ -139,8 +141,13 @@ test('the Admin link in the markup matches the admin page filename', async (t) =
   assert.equal(res.status, 200, 'the Admin action target exists');
 
   /* The logo no longer names a file: it resets to the start of the guide, so there is nothing to 404. */
-  const logo = home.match(/<a class="logo-link[^"]*" href="([^"]+)"/)?.[1];
+  const logo = home.match(/<a class="sh-logo" href="([^"]+)"/)?.[1];
   assert.equal(logo, '#/home', 'the logo is a reset to the home route');
+  /* The mark it draws, on the other hand, is a real file, and it is the one 1.2.1 names. */
+  const mark = home.match(/<img src="(assets\/logo_epic\.svg)"/)?.[1];
+  assert.ok(mark, 'the header draws the Epic mark');
+  const markRes = await fetch(`${base}/${mark}`);
+  assert.equal(markRes.status, 200, 'the Epic mark is served');
 });
 
 test('every element id the page scripts look up exists in its markup', async () => {

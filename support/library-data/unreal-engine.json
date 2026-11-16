@@ -1,0 +1,4567 @@
+{
+ "meta": {
+  "url": "https://www.unrealengine.com/",
+  "title": "The most powerful real-time 3D creation tool - Unreal Engine",
+  "description": "Whatever your vision, bring it to life with Unreal Engine: the world's most advanced real-time 3D creation tool. Join our community of developers and get started today.",
+  "themeColor": "#ffffff",
+  "ogImage": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1200/HfuPC0S3Tk6bQ4nDY3pR",
+  "lang": "en-US",
+  "generators": [],
+  "stylesheetCount": 14,
+  "nodeCount": 1131,
+  "bodyBg": "rgb(16, 16, 20)",
+  "bodyColor": "rgb(255, 255, 255)",
+  "htmlBg": "rgb(16, 16, 20)"
+ },
+ "cssVariables": [
+  {
+   "name": "--eg-global-nav-height",
+   "selector": ".epic-wf",
+   "value": "4.5rem",
+   "href": "inline"
+  }
+ ],
+ "fonts": [
+  {
+   "family": "Inter, sans-serif",
+   "count": 545,
+   "samples": [
+    {
+     "el": "a.cta-button.cta-button-primary",
+     "text": "Skip to main content"
+    },
+    {
+     "el": "header#global-header.global-header",
+     "text": "Menu Overview Uses Learning Connect Language Sign in Back"
+    },
+    {
+     "el": "nav.global-header__nav",
+     "text": "Menu Overview Uses Learning Connect Language Sign in Back"
+    },
+    {
+     "el": "div#mobile-drawer.global-header__drawer",
+     "text": "Menu Overview Uses Learning Connect Language Sign in Back"
+    }
+   ],
+   "sizes": [
+    "16px",
+    "14px",
+    "10px",
+    "12px",
+    "20px"
+   ],
+   "weights": [
+    "400",
+    "500",
+    "700"
+   ]
+  },
+  {
+   "family": "Inter, \"Inter Fallback\"",
+   "count": 505,
+   "samples": [
+    {
+     "el": "div#cosmos-app",
+     "text": "We make the engine. ⁠You make it Unreal.Unreal Engine is bui"
+    },
+    {
+     "el": "div.app-children.min-h_60vh.ov-x_clip",
+     "text": "We make the engine. ⁠You make it Unreal.Unreal Engine is bui"
+    },
+    {
+     "el": "main.d_block.w_100%.hero-alpha",
+     "text": "We make the engine. ⁠You make it Unreal.Unreal Engine is bui"
+    },
+    {
+     "el": "div.responsive-container.pos_relative.w_100%",
+     "text": "We make the engine. ⁠You make it Unreal.Unreal Engine is bui"
+    }
+   ],
+   "sizes": [
+    "16px",
+    "0px"
+   ],
+   "weights": [
+    "400"
+   ]
+  },
+  {
+   "family": "\"Inter Tight\", sans-serif",
+   "count": 81,
+   "samples": [
+    {
+     "el": "h1.cosmos-text.cosmos-rich-text.heading",
+     "text": "We make the engine. ⁠You make it Unreal."
+    },
+    {
+     "el": "p",
+     "text": "We make the engine."
+    },
+    {
+     "el": "p",
+     "text": "⁠You make it Unreal."
+    },
+    {
+     "el": "h2.cosmos-text.cosmos-rich-text.heading",
+     "text": "Unreal Engine news"
+    }
+   ],
+   "sizes": [
+    "40px",
+    "24px",
+    "16px",
+    "20px"
+   ],
+   "weights": [
+    "700"
+   ]
+  }
+ ],
+ "typeStyles": [
+  {
+   "role": "h1",
+   "el": "h1.cosmos-text.cosmos-rich-text.heading",
+   "sample": "We make the engine. ⁠You make it Unreal.",
+   "fontFamily": "\"Inter Tight\", sans-serif",
+   "fontSize": "40px",
+   "fontWeight": "700",
+   "lineHeight": "48px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 8
+  },
+  {
+   "role": "h2",
+   "el": "h2.cosmos-text.cosmos-rich-text.heading",
+   "sample": "Unreal Engine news",
+   "fontFamily": "\"Inter Tight\", sans-serif",
+   "fontSize": "24px",
+   "fontWeight": "700",
+   "lineHeight": "28.8px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 7
+  },
+  {
+   "role": "interactive",
+   "el": "a.clickable-box__link.ta_inherit.[&::before]:content_''",
+   "sample": "Unreal Engine 5.8 is now available",
+   "fontFamily": "Inter, \"Inter Fallback\"",
+   "fontSize": "16px",
+   "fontWeight": "400",
+   "lineHeight": "24px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 51
+  },
+  {
+   "role": "h3",
+   "el": "h3.cosmos-text.heading.textStyle_headingSM",
+   "sample": "Tutorials",
+   "fontFamily": "\"Inter Tight\", sans-serif",
+   "fontSize": "16px",
+   "fontWeight": "700",
+   "lineHeight": "19.2px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 15
+  },
+  {
+   "role": "body",
+   "el": "p",
+   "sample": "Unreal Engine is built by developers, for developers, with f",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "16px",
+   "fontWeight": "400",
+   "lineHeight": "26.4px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 7
+  },
+  {
+   "role": "h3",
+   "el": "h3.cosmos-text.cosmos-rich-text.paragraph",
+   "sample": "Unreal Engine 5.8 is now available",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "16px",
+   "fontWeight": "700",
+   "lineHeight": "26.4px",
+   "letterSpacing": "normal",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 4
+  },
+  {
+   "role": "interactive",
+   "el": "a.cosmos-button.primary.white-space_nowrap",
+   "sample": "Get Unreal Engine",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "14px",
+   "fontWeight": "500",
+   "lineHeight": "14px",
+   "letterSpacing": "0.28px",
+   "textTransform": "none",
+   "color": "rgb(16, 16, 20)",
+   "count": 16
+  },
+  {
+   "role": "body",
+   "el": "p",
+   "sample": "Whether you’re an artist, a designer, or a programmer, our c",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "14px",
+   "fontWeight": "400",
+   "lineHeight": "23.1px",
+   "letterSpacing": "0.28px",
+   "textTransform": "none",
+   "color": "rgb(255, 255, 255)",
+   "count": 11
+  },
+  {
+   "role": "body",
+   "el": "p",
+   "sample": "Before you can install and run Unreal Editor, you’ll need to",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "14px",
+   "fontWeight": "400",
+   "lineHeight": "21px",
+   "letterSpacing": "0.28px",
+   "textTransform": "none",
+   "color": "rgba(255, 255, 255, 0.65)",
+   "count": 7
+  },
+  {
+   "role": "interactive",
+   "el": "a.ps_eds.dimension.2.td_underline.ov_hidden",
+   "sample": "84element84",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "12px",
+   "fontWeight": "400",
+   "lineHeight": "18px",
+   "letterSpacing": "0.24px",
+   "textTransform": "none",
+   "color": "rgb(38, 187, 255)",
+   "count": 10
+  },
+  {
+   "role": "interactive",
+   "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+   "sample": "News",
+   "fontFamily": "Inter, sans-serif",
+   "fontSize": "12px",
+   "fontWeight": "400",
+   "lineHeight": "15.6px",
+   "letterSpacing": "0.36px",
+   "textTransform": "none",
+   "color": "rgba(255, 255, 255, 0.95)",
+   "count": 4
+  }
+ ],
+ "colors": {
+  "text": [
+   {
+    "value": "rgb(255, 255, 255)",
+    "count": 679,
+    "area": 108231875,
+    "samples": [
+     {
+      "el": "unrealengine-navigation",
+      "text": "",
+      "area": 101808
+     },
+     {
+      "el": "epic-wf-cta-button#skip-nav.skip-nav",
+      "text": "",
+      "area": 1
+     },
+     {
+      "el": "a.cta-button.cta-button-primary",
+      "text": "Skip to main content",
+      "area": 768
+     },
+     {
+      "el": "header#global-header.global-header",
+      "text": "Menu Overview Uses Learning Connect Lang",
+      "area": 101808
+     },
+     {
+      "el": "div.bg-filter",
+      "text": "",
+      "area": 101808
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.65)",
+    "count": 303,
+    "area": 7734815,
+    "samples": [
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 23, 2026",
+      "area": 856
+     },
+     {
+      "el": "span.cosmos-text.cosmos-rich-text.paragraph",
+      "text": "Build bigger, better, more differentiate",
+      "area": 14462
+     },
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 22, 2026",
+      "area": 855
+     },
+     {
+      "el": "span.cosmos-text.cosmos-rich-text.paragraph",
+      "text": "We have started the road to UE6, where U",
+      "area": 14462
+     },
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 17, 2026",
+      "area": 825
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.95)",
+    "count": 40,
+    "area": 18644,
+    "samples": [
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "News",
+      "area": 522
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "News",
+      "area": 522
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "Events",
+      "area": 1448
+     }
+    ]
+   },
+   {
+    "value": "rgb(38, 187, 255)",
+    "count": 40,
+    "area": 83156,
+    "samples": [
+     {
+      "el": "a",
+      "text": "open the launcher",
+      "area": 2117
+     },
+     {
+      "el": "a",
+      "text": "Get support",
+      "area": 1399
+     },
+     {
+      "el": "a.c_eds.text.link.primary.default.trs_color_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).hover:c_eds.text.link.primary.press",
+      "text": "Unreal Engine for New Users",
+      "area": 5121
+     },
+     {
+      "el": "div.cosmos-text.paragraph.textStyle_paragraphSM",
+      "text": "Unreal Engine for New Users",
+      "area": 5121
+     },
+     {
+      "el": "span",
+      "text": "Users",
+      "area": 1473
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 238)",
+    "count": 26,
+    "area": 31535,
+    "samples": [
+     {
+      "el": "a.logo.logo--has-icon",
+      "text": "",
+      "area": 7456
+     },
+     {
+      "el": "img.logo__img",
+      "text": "",
+      "area": 7456
+     },
+     {
+      "el": "a",
+      "text": "",
+      "area": 784
+     },
+     {
+      "el": "epic-wf-eds-icon",
+      "text": "",
+      "area": 784
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 784
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.75)",
+    "count": 8,
+    "area": 17790,
+    "samples": [
+     {
+      "el": "a.footer-link.md",
+      "text": "Terms of service",
+      "area": 2318
+     },
+     {
+      "el": "span.label",
+      "text": "Terms of service",
+      "area": 2271
+     },
+     {
+      "el": "a.footer-link.md",
+      "text": "Privacy policy",
+      "area": 1938
+     },
+     {
+      "el": "span.label",
+      "text": "Privacy policy",
+      "area": 1899
+     },
+     {
+      "el": "a.footer-link.md",
+      "text": "Safety & security",
+      "area": 2370
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 0)",
+    "count": 4,
+    "area": 3926,
+    "samples": [
+     {
+      "el": "span.label",
+      "text": "Download",
+      "area": 1659
+     },
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 1",
+      "area": 733
+     },
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 2",
+      "area": 764
+     },
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 3",
+      "area": 770
+     }
+    ]
+   },
+   {
+    "value": "rgb(16, 16, 20)",
+    "count": 4,
+    "area": 24027,
+    "samples": [
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Get Unreal Engine",
+      "area": 6283
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "See all features",
+      "area": 5588
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Download Launcher",
+      "area": 6794
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Download now",
+      "area": 5362
+     }
+    ]
+   },
+   {
+    "value": "rgb(128, 128, 128)",
+    "count": 2,
+    "area": 2572,
+    "samples": [
+     {
+      "el": "hr",
+      "text": "",
+      "area": 1286
+     },
+     {
+      "el": "hr",
+      "text": "",
+      "area": 1286
+     }
+    ]
+   }
+  ],
+  "background": [
+   {
+    "value": "rgba(255, 255, 255, 0.05)",
+    "count": 35,
+    "area": 4122784,
+    "samples": [
+     {
+      "el": "div.search",
+      "text": "Search",
+      "area": 14608
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 23, 2026Unreal Engine 5.8 is now av",
+      "area": 116317
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 22, 2026The road to Unreal Engine 6",
+      "area": 116317
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 17, 2026State of Unreal 2026: Top n",
+      "area": 132956
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "November 10, 2026Beyond the product page",
+      "area": 132956
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.15)",
+    "count": 24,
+    "area": 56426,
+    "samples": [
+     {
+      "el": "a.dropdown__button.secondary-cta",
+      "text": "Sign in",
+      "area": 2273
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "Events",
+      "area": 1448
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "Spotlight",
+      "area": 1784
+     }
+    ]
+   },
+   {
+    "value": "rgb(38, 187, 255)",
+    "count": 6,
+    "area": 27775,
+    "samples": [
+     {
+      "el": "a.cta-button.cta-button-primary",
+      "text": "Skip to main content",
+      "area": 768
+     },
+     {
+      "el": "a.cta-button.cta-button-primary",
+      "text": "Download",
+      "area": 2980
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Get Unreal Engine",
+      "area": 6283
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "See all features",
+      "area": 5588
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Download Launcher",
+      "area": 6794
+     }
+    ]
+   },
+   {
+    "value": "rgba(16, 16, 20, 0.7)",
+    "count": 1,
+    "area": 101808,
+    "samples": [
+     {
+      "el": "div.bg-filter",
+      "text": "",
+      "area": 101808
+     }
+    ]
+   },
+   {
+    "value": "rgb(16, 16, 20)",
+    "count": 1,
+    "area": 955864,
+    "samples": [
+     {
+      "el": "div.theme-container",
+      "text": "How to install Unreal EngineDownload ins",
+      "area": 955864
+     }
+    ]
+   },
+   {
+    "value": "rgb(32, 32, 36)",
+    "count": 1,
+    "area": 304219,
+    "samples": [
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "Whether you’re an artist, a designer, or",
+      "area": 304219
+     }
+    ]
+   },
+   {
+    "value": "rgb(24, 24, 28)",
+    "count": 1,
+    "area": 1549744,
+    "samples": [
+     {
+      "el": "footer#global-footer.global-footer",
+      "text": "",
+      "area": 1549744
+     }
+    ]
+   }
+  ],
+  "border": [
+   {
+    "value": "rgb(255, 255, 255) / 0px solid",
+    "count": 532,
+    "area": 103155650,
+    "samples": [
+     {
+      "el": "unrealengine-navigation",
+      "text": "",
+      "area": 101808
+     },
+     {
+      "el": "div#cosmos-app",
+      "text": "We make the engine. ⁠You make it Unreal.",
+      "area": 12020988
+     },
+     {
+      "el": "div.app-children.min-h_60vh.ov-x_clip",
+      "text": "We make the engine. ⁠You make it Unreal.",
+      "area": 12020988
+     },
+     {
+      "el": "main.d_block.w_100%.hero-alpha",
+      "text": "We make the engine. ⁠You make it Unreal.",
+      "area": 1003940
+     },
+     {
+      "el": "div.responsive-container.pos_relative.w_100%",
+      "text": "We make the engine. ⁠You make it Unreal.",
+      "area": 1003940
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.65) / 0px none",
+    "count": 207,
+    "area": 6578378,
+    "samples": [
+     {
+      "el": "footer#global-footer.global-footer",
+      "text": "",
+      "area": 1549744
+     },
+     {
+      "el": "section.top.flex.space-between",
+      "text": "",
+      "area": 41152
+     },
+     {
+      "el": "epic-wf-footer-property-logo",
+      "text": "",
+      "area": 6976
+     },
+     {
+      "el": "span.logo.logo--has-icon",
+      "text": "",
+      "area": 6976
+     },
+     {
+      "el": "img.logo__img",
+      "text": "",
+      "area": 6976
+     }
+    ]
+   },
+   {
+    "value": "rgb(255, 255, 255) / 0px none",
+    "count": 114,
+    "area": 1353933,
+    "samples": [
+     {
+      "el": "epic-wf-cta-button#skip-nav.skip-nav",
+      "text": "",
+      "area": 1
+     },
+     {
+      "el": "a.cta-button.cta-button-primary",
+      "text": "Skip to main content",
+      "area": 768
+     },
+     {
+      "el": "header#global-header.global-header",
+      "text": "Menu Overview Uses Learning Connect Lang",
+      "area": 101808
+     },
+     {
+      "el": "div.bg-filter",
+      "text": "",
+      "area": 101808
+     },
+     {
+      "el": "div.global-header__flyout-wrapper.hide-in-drawer",
+      "text": "",
+      "area": 1600
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.65) / 0px solid",
+    "count": 96,
+    "area": 1156437,
+    "samples": [
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 23, 2026",
+      "area": 856
+     },
+     {
+      "el": "span.cosmos-text.cosmos-rich-text.paragraph",
+      "text": "Build bigger, better, more differentiate",
+      "area": 14462
+     },
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 22, 2026",
+      "area": 855
+     },
+     {
+      "el": "span.cosmos-text.cosmos-rich-text.paragraph",
+      "text": "We have started the road to UE6, where U",
+      "area": 14462
+     },
+     {
+      "el": "div.cosmos-text.eyebrow.textStyle_eyebrowSM",
+      "text": "June 17, 2026",
+      "area": 825
+     }
+    ]
+   },
+   {
+    "value": "rgb(38, 187, 255) / 0px solid",
+    "count": 40,
+    "area": 83156,
+    "samples": [
+     {
+      "el": "a",
+      "text": "open the launcher",
+      "area": 2117
+     },
+     {
+      "el": "a",
+      "text": "Get support",
+      "area": 1399
+     },
+     {
+      "el": "a.c_eds.text.link.primary.default.trs_color_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).hover:c_eds.text.link.primary.press",
+      "text": "Unreal Engine for New Users",
+      "area": 5121
+     },
+     {
+      "el": "div.cosmos-text.paragraph.textStyle_paragraphSM",
+      "text": "Unreal Engine for New Users",
+      "area": 5121
+     },
+     {
+      "el": "span",
+      "text": "Users",
+      "area": 1473
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 238) / 0px none",
+    "count": 26,
+    "area": 31535,
+    "samples": [
+     {
+      "el": "a.logo.logo--has-icon",
+      "text": "",
+      "area": 7456
+     },
+     {
+      "el": "img.logo__img",
+      "text": "",
+      "area": 7456
+     },
+     {
+      "el": "a",
+      "text": "",
+      "area": 784
+     },
+     {
+      "el": "epic-wf-eds-icon",
+      "text": "",
+      "area": 784
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 784
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.95) / 0px solid",
+    "count": 26,
+    "area": 7084,
+    "samples": [
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "News",
+      "area": 522
+     },
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "News",
+      "area": 522
+     },
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "Events",
+      "area": 629
+     },
+     {
+      "el": "span.eds_370_19um2dp20",
+      "text": "Spotlight",
+      "area": 847
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.05) / 1px solid",
+    "count": 25,
+    "area": 3668565,
+    "samples": [
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 23, 2026Unreal Engine 5.8 is now av",
+      "area": 116317
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 22, 2026The road to Unreal Engine 6",
+      "area": 116317
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "June 17, 2026State of Unreal 2026: Top n",
+      "area": 132956
+     },
+     {
+      "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+      "text": "November 10, 2026Beyond the product page",
+      "area": 132956
+     },
+     {
+      "el": "div.download-step.d_flex.ai_flex-start",
+      "text": "STEP 1Download the launcherBefore you ca",
+      "area": 118712
+     }
+    ]
+   },
+   {
+    "value": "rgba(0, 0, 0, 0) / 0px none",
+    "count": 24,
+    "area": 2138121,
+    "samples": [
+     {
+      "el": "img",
+      "text": "",
+      "area": 19200
+     },
+     {
+      "el": "img.image.trs_transform_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).h_100%",
+      "text": "",
+      "area": 41710
+     },
+     {
+      "el": "img.image.trs_transform_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).h_100%",
+      "text": "",
+      "area": 41710
+     },
+     {
+      "el": "img.image.trs_transform_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).h_100%",
+      "text": "",
+      "area": 48655
+     },
+     {
+      "el": "img.image.trs_transform_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).h_100%",
+      "text": "",
+      "area": 48655
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.95) / 0px none",
+    "count": 14,
+    "area": 11560,
+    "samples": [
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "News",
+      "area": 1284
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "Events",
+      "area": 1448
+     },
+     {
+      "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+      "text": "Spotlight",
+      "area": 1784
+     },
+     {
+      "el": "span.eds_370_1ug9nud.eds_370_1ug9nui.eds_370_1ommefj6",
+      "text": "",
+      "area": 576
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.75) / 0px none",
+    "count": 8,
+    "area": 17790,
+    "samples": [
+     {
+      "el": "a.footer-link.md",
+      "text": "Terms of service",
+      "area": 2318
+     },
+     {
+      "el": "span.label",
+      "text": "Terms of service",
+      "area": 2271
+     },
+     {
+      "el": "a.footer-link.md",
+      "text": "Privacy policy",
+      "area": 1938
+     },
+     {
+      "el": "span.label",
+      "text": "Privacy policy",
+      "area": 1899
+     },
+     {
+      "el": "a.footer-link.md",
+      "text": "Safety & security",
+      "area": 2370
+     }
+    ]
+   },
+   {
+    "value": "rgb(16, 16, 20) / 0px solid",
+    "count": 4,
+    "area": 24027,
+    "samples": [
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Get Unreal Engine",
+      "area": 6283
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "See all features",
+      "area": 5588
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Download Launcher",
+      "area": 6794
+     },
+     {
+      "el": "a.cosmos-button.primary.white-space_nowrap",
+      "text": "Download now",
+      "area": 5362
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.35) / 1px solid",
+    "count": 4,
+    "area": 21939,
+    "samples": [
+     {
+      "el": "a.cosmos-button.outline.white-space_nowrap",
+      "text": "Learn about licensing",
+      "area": 7333
+     },
+     {
+      "el": "a.cosmos-button.outline.white-space_nowrap",
+      "text": "View all",
+      "area": 3518
+     },
+     {
+      "el": "a.cosmos-button.outline.white-space_nowrap",
+      "text": "Download instructions",
+      "area": 7586
+     },
+     {
+      "el": "a.cosmos-button.outline.white-space_nowrap",
+      "text": "Visit forums",
+      "area": 3502
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.15) / 1px solid",
+    "count": 3,
+    "area": 17180,
+    "samples": [
+     {
+      "el": "div.search",
+      "text": "Search",
+      "area": 14608
+     },
+     {
+      "el": "hr.w_100%.bd-t-w_1px.border-top-style_solid",
+      "text": "",
+      "area": 1286
+     },
+     {
+      "el": "hr.w_100%.bd-t-w_1px.border-top-style_solid",
+      "text": "",
+      "area": 1286
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 0) / 0px solid",
+    "count": 3,
+    "area": 2267,
+    "samples": [
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 1",
+      "area": 733
+     },
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 2",
+      "area": 764
+     },
+     {
+      "el": "p.label.[&&]:c_var(--tag-color,_token(colors.eds.text.contrast)).textStyle_buttonSM",
+      "text": "STEP 3",
+      "area": 770
+     }
+    ]
+   },
+   {
+    "value": "rgb(128, 128, 128) / 0px none",
+    "count": 2,
+    "area": 2572,
+    "samples": [
+     {
+      "el": "hr",
+      "text": "",
+      "area": 1286
+     },
+     {
+      "el": "hr",
+      "text": "",
+      "area": 1286
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.35) / 0px none",
+    "count": 1,
+    "area": 14608,
+    "samples": [
+     {
+      "el": "form.search-form.active.prestine",
+      "text": "Search",
+      "area": 14608
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 0) / 0px none",
+    "count": 1,
+    "area": 1659,
+    "samples": [
+     {
+      "el": "span.label",
+      "text": "Download",
+      "area": 1659
+     }
+    ]
+   },
+   {
+    "value": "rgba(0, 0, 0, 0) / 0px solid",
+    "count": 1,
+    "area": 51113,
+    "samples": [
+     {
+      "el": "a",
+      "text": "Join the Epic Developer Community.",
+      "area": 51113
+     }
+    ]
+   }
+  ],
+  "fill": [
+   {
+    "value": "rgba(255, 255, 255, 0.65)",
+    "count": 54,
+    "area": 20520,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 400
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 265
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 400
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 264
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 400
+     }
+    ]
+   },
+   {
+    "value": "rgb(255, 255, 255)",
+    "count": 43,
+    "area": 18467,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1024
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 754
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 144
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 34
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 144
+     }
+    ]
+   },
+   {
+    "value": "rgba(255, 255, 255, 0.95)",
+    "count": 22,
+    "area": 4564,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 134
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 134
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     }
+    ]
+   },
+   {
+    "value": "rgb(38, 187, 255)",
+    "count": 13,
+    "area": 2725,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 61
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 61
+     },
+     {
+      "el": "svg",
+      "text": "",
+      "area": 256
+     }
+    ]
+   },
+   {
+    "value": "rgb(225, 102, 182)",
+    "count": 2,
+    "area": 83037,
+    "samples": [
+     {
+      "el": "path",
+      "text": "",
+      "area": 48092
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 34945
+     }
+    ]
+   },
+   {
+    "value": "rgb(255, 198, 163)",
+    "count": 2,
+    "area": 59659,
+    "samples": [
+     {
+      "el": "path",
+      "text": "",
+      "area": 30779
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 28880
+     }
+    ]
+   },
+   {
+    "value": "url(\"#eds-icon-gradient-blue\")",
+    "count": 2,
+    "area": 2857,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1600
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 1257
+     }
+    ]
+   },
+   {
+    "value": "url(\"#eds-icon-gradient-indigo\")",
+    "count": 2,
+    "area": 2440,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1600
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 840
+     }
+    ]
+   },
+   {
+    "value": "url(\"#eds-icon-gradient-purple\")",
+    "count": 2,
+    "area": 2702,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1600
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 1102
+     }
+    ]
+   },
+   {
+    "value": "url(\"#eds-icon-gradient-pink\")",
+    "count": 2,
+    "area": 2548,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1600
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 948
+     }
+    ]
+   },
+   {
+    "value": "url(\"#eds-icon-gradient-red\")",
+    "count": 2,
+    "area": 2440,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 1600
+     },
+     {
+      "el": "path",
+      "text": "",
+      "area": 840
+     }
+    ]
+   },
+   {
+    "value": "rgb(0, 0, 0)",
+    "count": 1,
+    "area": 955864,
+    "samples": [
+     {
+      "el": "svg",
+      "text": "",
+      "area": 955864
+     }
+    ]
+   },
+   {
+    "value": "rgb(187, 107, 240)",
+    "count": 1,
+    "area": 16245,
+    "samples": [
+     {
+      "el": "path",
+      "text": "",
+      "area": 16245
+     }
+    ]
+   }
+  ],
+  "stroke": []
+ },
+ "radii": [
+  {
+   "value": "8px",
+   "count": 68,
+   "samples": [
+    "a.main-link.parent",
+    "a.main-link.parent",
+    "a.main-link.parent",
+    "a.main-link.parent"
+   ]
+  },
+  {
+   "value": "16px",
+   "count": 34,
+   "samples": [
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "div.cosmos-card__thumbnail.asp_16/9.ov_hidden",
+    "div.cosmos-card__thumbnail-overlay.inset_0.pos_absolute",
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2"
+   ]
+  },
+  {
+   "value": "24px",
+   "count": 28,
+   "samples": [
+    "form.search-form.active.prestine",
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2"
+   ]
+  },
+  {
+   "value": "9999px",
+   "count": 18,
+   "samples": [
+    "div.search",
+    "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+    "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+    "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1"
+   ]
+  },
+  {
+   "value": "6px",
+   "count": 8,
+   "samples": [
+    "a.cta-button.cta-button-primary",
+    "a.dropdown__button.secondary-cta",
+    "a.cta-button.cta-button-primary",
+    "a.cosmos-button.secondary.white-space_nowrap"
+   ]
+  },
+  {
+   "value": "12px",
+   "count": 4,
+   "samples": [
+    "div.cosmos-card__thumbnail.asp_1/1.ov_hidden",
+    "div.cosmos-card__thumbnail.asp_1/1.ov_hidden",
+    "div.cosmos-card__thumbnail.asp_1/1.ov_hidden",
+    "div.cosmos-card__thumbnail.asp_1/1.ov_hidden"
+   ]
+  },
+  {
+   "value": "32px",
+   "count": 1,
+   "samples": [
+    "video.cosmos-video.obj-f_cover.asp_16_/_9"
+   ]
+  },
+  {
+   "value": "16px 16px 0px 0px",
+   "count": 1,
+   "samples": [
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2"
+   ]
+  },
+  {
+   "value": "0px 0px 16px 16px",
+   "count": 1,
+   "samples": [
+    "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2"
+   ]
+  }
+ ],
+ "shadows": [],
+ "components": {
+  "buttons": [
+   {
+    "kind": "button",
+    "el": "a.cosmos-button.primary.white-space_nowrap",
+    "sample": "Get Unreal Engine",
+    "href": "/download",
+    "count": 4,
+    "width": 157,
+    "height": 40,
+    "background": "rgb(38, 187, 255)",
+    "color": "rgb(16, 16, 20)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(16, 16, 20)",
+    "borderRadius": "8px",
+    "padding": "8px 16px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "button",
+    "el": "a.eds_370_19um2dp0.eds_370_j232ue2.eds_370_j232ue1",
+    "sample": "News",
+    "href": "/feed?tags=news",
+    "count": 4,
+    "width": 54,
+    "height": 24,
+    "background": "rgba(255, 255, 255, 0.15)",
+    "color": "rgba(255, 255, 255, 0.95)",
+    "backgroundImage": "",
+    "border": "0px none rgba(255, 255, 255, 0.95)",
+    "borderRadius": "9999px",
+    "padding": "0px 10px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "15.6px",
+    "letterSpacing": "0.36px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "button",
+    "el": "a.cosmos-button.secondary.white-space_nowrap",
+    "sample": "Browse more tutorials",
+    "href": "https://dev.epicgames.com/community/unreal-engine/learning?source=epic_games&types=tutorial,learning_path,course",
+    "count": 4,
+    "width": 176,
+    "height": 32,
+    "background": "rgba(255, 255, 255, 0.15)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(255, 255, 255)",
+    "borderRadius": "6px",
+    "padding": "4px 12px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "button",
+    "el": "a.cosmos-button.outline.white-space_nowrap",
+    "sample": "Learn about licensing",
+    "href": "/license",
+    "count": 3,
+    "width": 183,
+    "height": 40,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.35)",
+    "borderRadius": "8px",
+    "padding": "8px 16px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "button",
+    "el": "button.tag.[&&]:bg-c_var(--tag-background-color,_token(colors.eds.fill.secondary.default)).[&&]:d_inline-flex",
+    "sample": "STEP 1",
+    "href": "",
+    "count": 3,
+    "width": 65,
+    "height": 26,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "linear-gradient(225deg, rgb(223, 186, 248) 0%, rgb(51, 191, 255) 100%)",
+    "border": "0px solid rgb(255, 255, 255)",
+    "borderRadius": "9999px",
+    "padding": "4px 12px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "button",
+    "el": "a.cosmos-button.secondary.white-space_nowrap",
+    "sample": "Watch how to install",
+    "href": "https://www.youtube.com/watch?v=rldy9yY0yDU",
+    "count": 2,
+    "width": 204,
+    "height": 40,
+    "background": "rgba(255, 255, 255, 0.15)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(255, 255, 255)",
+    "borderRadius": "8px",
+    "padding": "8px 16px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "button",
+    "el": "a.cosmos-button.outline.white-space_nowrap",
+    "sample": "Visit forums",
+    "href": "https://forums.unrealengine.com/categories?tag=unreal-engine",
+    "count": 1,
+    "width": 109,
+    "height": 32,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.35)",
+    "borderRadius": "6px",
+    "padding": "4px 12px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   }
+  ],
+  "links": [
+   {
+    "kind": "link",
+    "el": "a.clickable-box__link.ta_inherit.[&::before]:content_''",
+    "sample": "Unreal Engine 5.8 is now available",
+    "href": "https://www.unrealengine.com/news/unreal-engine-5-8-is-now-available",
+    "count": 42,
+    "width": 264,
+    "height": 26,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(255, 255, 255)",
+    "borderRadius": "0px",
+    "padding": "0px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.ov_hidden.white-space_nowrap.tov_ellipsis",
+    "sample": "Github gone?",
+    "href": "https://forums.unrealengine.com/t/github-gone/2855842",
+    "count": 10,
+    "width": 92,
+    "height": 23,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(255, 255, 255)",
+    "borderRadius": "0px",
+    "padding": "0px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "23.1px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.ps_eds.dimension.2.td_underline.ov_hidden",
+    "sample": "84element84",
+    "href": "https://dev.epicgames.com/community/profile/BEJe6/84element84",
+    "count": 10,
+    "width": 80,
+    "height": 18,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 187, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(38, 187, 255)",
+    "borderRadius": "0px",
+    "padding": "0px 0px 0px 2px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "12px",
+    "fontWeight": "400",
+    "lineHeight": "18px",
+    "letterSpacing": "0.24px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.c_eds.text.link.primary.default.trs_color_token(animations.eds.duration.200)_token(animations.eds.easing.easeInOutQuad).hover:c_eds.text.link.primary.press",
+    "sample": "Unreal Engine for New Users",
+    "href": "https://dev.epicgames.com/documentation/unreal-engine/unreal-engine-for-new-users",
+    "count": 6,
+    "width": 222,
+    "height": 23,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 187, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(38, 187, 255)",
+    "borderRadius": "0px",
+    "padding": "0px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "color 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.cosmos-button.outline.white-space_nowrap",
+    "sample": "Learn about licensing",
+    "href": "/license",
+    "count": 3,
+    "width": 183,
+    "height": 40,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.35)",
+    "borderRadius": "8px",
+    "padding": "8px 16px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a",
+    "sample": "open the launcher",
+    "href": "com.epicgames.launcher://ue",
+    "count": 2,
+    "width": 125,
+    "height": 17,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 187, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(38, 187, 255)",
+    "borderRadius": "0px",
+    "padding": "0px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "400",
+    "lineHeight": "21px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "color 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.cosmos-button.ghost.white-space_nowrap",
+    "sample": "View FAQ",
+    "href": "/faq",
+    "count": 2,
+    "width": 98,
+    "height": 40,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(38, 187, 255)",
+    "backgroundImage": "",
+    "border": "0px solid rgb(38, 187, 255)",
+    "borderRadius": "8px",
+    "padding": "8px 16px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a",
+    "sample": "Join the Epic Developer Community.",
+    "href": "",
+    "count": 1,
+    "width": 527,
+    "height": 97,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgba(0, 0, 0, 0)",
+    "backgroundImage": "linear-gradient(225deg, rgb(241, 184, 221) 0%, rgb(134, 138, 253) 100%)",
+    "border": "0px solid rgba(0, 0, 0, 0)",
+    "borderRadius": "0px",
+    "padding": "0px",
+    "fontFamily": "\"Inter Tight\", sans-serif",
+    "fontSize": "40px",
+    "fontWeight": "700",
+    "lineHeight": "48px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "none"
+   },
+   {
+    "kind": "link",
+    "el": "a.cosmos-button.outline.white-space_nowrap",
+    "sample": "Visit forums",
+    "href": "https://forums.unrealengine.com/categories?tag=unreal-engine",
+    "count": 1,
+    "width": 109,
+    "height": 32,
+    "background": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.35)",
+    "borderRadius": "6px",
+    "padding": "4px 12px",
+    "fontFamily": "Inter, sans-serif",
+    "fontSize": "14px",
+    "fontWeight": "500",
+    "lineHeight": "14px",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background-color 0.1s cubic-bezier(0, 0, 1, 1), border-color 0.1s cubic-bezier(0, 0, 1, 1), color 0.1s cubic-bezier(0, 0",
+    "backdropFilter": "none"
+   }
+  ],
+  "inputs": [],
+  "cards": [
+   {
+    "kind": "card",
+    "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "sample": "Get Started with Unreal EngineThis five-part video series ta",
+    "href": "",
+    "count": 7,
+    "width": 418,
+    "height": 525,
+    "background": "rgba(255, 255, 255, 0.05)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.05)",
+    "borderRadius": "24px",
+    "padding": "16px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "card",
+    "el": "div.download-step.d_flex.ai_flex-start",
+    "sample": "STEP 1Download the launcherBefore you can install and run Un",
+    "href": "",
+    "count": 5,
+    "width": 418,
+    "height": 284,
+    "background": "rgba(255, 255, 255, 0.05)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.05)",
+    "borderRadius": "24px",
+    "padding": "32px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "all",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "card",
+    "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "sample": "TutorialsThe latest tutorials & courses from our experts.",
+    "href": "",
+    "count": 5,
+    "width": 418,
+    "height": 171,
+    "background": "rgba(255, 255, 255, 0.05)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.05)",
+    "borderRadius": "24px",
+    "padding": "20px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "blur(50px)"
+   },
+   {
+    "kind": "card",
+    "el": "div.pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:pos_relative.[&_button,_&_a[href]:not(.clickable-box__link)]:z_2",
+    "sample": "June 23, 2026Unreal Engine 5.8 is now availableBuild bigger,",
+    "href": "",
+    "count": 4,
+    "width": 630,
+    "height": 185,
+    "background": "rgba(255, 255, 255, 0.05)",
+    "color": "rgb(255, 255, 255)",
+    "backgroundImage": "",
+    "border": "1px solid rgba(255, 255, 255, 0.05)",
+    "borderRadius": "24px",
+    "padding": "12px",
+    "fontFamily": "Inter, \"Inter Fallback\"",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "lineHeight": "24px",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "boxShadow": "none",
+    "transition": "background 0.2s cubic-bezier(0.45, 0, 0.55, 1)",
+    "backdropFilter": "none"
+   }
+  ]
+ },
+ "assets": {
+  "images": [
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R",
+    "alt": "",
+    "width": 300,
+    "height": 41,
+    "rendered": "600x32",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmqgp745a38sh07og8o13mphx?width=384",
+    "alt": "Unreal Engine 5.8 is now available",
+    "width": 263,
+    "height": 147,
+    "rendered": "263x159",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmq9rgre02go607lp7of937we?width=384",
+    "alt": "The road to Unreal Engine 6",
+    "width": 263,
+    "height": 147,
+    "rendered": "263x159",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmqi2n8o673uc07n72ce9l2xy?width=384",
+    "alt": "State of Unreal 2026: Top news from the show",
+    "width": 263,
+    "height": 147,
+    "rendered": "263x185",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmw2kj0py2d2n07oe9308v4vf?width=384",
+    "alt": "Beyond the product page: Logitech G’s 360° Racing Studio",
+    "width": 263,
+    "height": 147,
+    "rendered": "263x185",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:900/quality=value:90/auto_image/WtzzP9AbRGFod5zfQqVM",
+    "alt": "Cyberpunk Street environment by Yehor Perepelytsia",
+    "width": 900,
+    "height": 506,
+    "rendered": "643x362",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/hrNK7mIVQIKFCMzAApAC?width=1920",
+    "alt": "Hellblade 2 screenshot ",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/yiR8DHWSWWmMJWzo5aiw?width=1920",
+    "alt": "Stray screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/EbZrZA7PSAiuLE94k9SJ?width=1920",
+    "alt": "Tower of Fantasy screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/12evTKP8RnsegoHHdQpw?width=1920",
+    "alt": "Switching to Unreal Engine thumbnail",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/bsGPpeaHRqea266Ahe9z?width=1920",
+    "alt": "Fortnite screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/HFryruVT4uY7vvD0Q7oA?width=1920",
+    "alt": "The Matrix: Resurrection screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/cmixf2sox0lo307oliuk70dv7?width=1920",
+    "alt": "",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/tmxKiYMPRdybg5i9Kazh?width=1920",
+    "alt": "",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/2zynOZMhTAuHAnBKViiE?width=1920",
+    "alt": "Architecture",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/YmIY1rJWQguWLcELaoWB?width=1920",
+    "alt": "Automotive cover image",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1920/quality=value:90/auto_image/QLF8b9dYTUCNoyMVLRFx?width=1920",
+    "alt": "Simulation cover image",
+    "width": 0,
+    "height": 0,
+    "rendered": "418x235",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmnyt7m2gj5nh07oesjrt080s",
+    "alt": "",
+    "width": 0,
+    "height": 0,
+    "rendered": "384x384",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmo8mki9q10m307one5885nm0",
+    "alt": "Your First Hour in Unreal Engine",
+    "width": 0,
+    "height": 0,
+    "rendered": "384x384",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmoa6zgpp7mu308ok43hkmt81",
+    "alt": "",
+    "width": 0,
+    "height": 0,
+    "rendered": "384x384",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmnyn0h66gbww08n4d3ws3qzl",
+    "alt": "Stack O Bot screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "276x165",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmnyoj1d0golv08n4f2fm4ncr",
+    "alt": "Content Examples cover image",
+    "width": 0,
+    "height": 0,
+    "rendered": "276x165",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/cmnynwebngmy807oedibpyynb",
+    "alt": "Lyra screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "276x165",
+    "inHeader": false,
+    "inFooter": false
+   },
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:400/quality=value:90/auto_image/60jWCSuxSPaoEOEuzrvD",
+    "alt": "Cropout screenshot",
+    "width": 0,
+    "height": 0,
+    "rendered": "276x165",
+    "inHeader": false,
+    "inFooter": false
+   }
+  ],
+  "logos": [
+   {
+    "src": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R",
+    "alt": "",
+    "width": 300,
+    "height": 41,
+    "rendered": "600x32",
+    "inHeader": false,
+    "inFooter": false
+   }
+  ],
+  "icons": [
+   {
+    "rel": "icon",
+    "href": "https://www.unrealengine.com/cosmos/static/favicons/favicon.svg",
+    "sizes": "",
+    "type": "image/svg+xml"
+   },
+   {
+    "rel": "icon",
+    "href": "https://www.unrealengine.com/cosmos/static/favicons/favicon-96x96.png",
+    "sizes": "96x96",
+    "type": "image/png"
+   },
+   {
+    "rel": "apple-touch-icon",
+    "href": "https://www.unrealengine.com/cosmos/static/favicons/apple-touch-icon.png",
+    "sizes": "180x180",
+    "type": ""
+   },
+   {
+    "rel": "manifest",
+    "href": "https://www.unrealengine.com/cosmos/static/favicons/site.webmanifest",
+    "sizes": "",
+    "type": ""
+   }
+  ],
+  "metaImages": [
+   {
+    "key": "og:image",
+    "value": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1200/HfuPC0S3Tk6bQ4nDY3pR"
+   },
+   {
+    "key": "twitter:image",
+    "value": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:1200/HfuPC0S3Tk6bQ4nDY3pR"
+   }
+  ],
+  "inlineSvg": [
+   {
+    "where": "body",
+    "w": 1414,
+    "h": 676,
+    "viewBox": "0 0 1920 1080",
+    "label": "",
+    "paths": 17,
+    "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" viewBox=\"0 0 1920 1080\" width=\"1920\" height=\"1080\" preserveAspectRatio=\"none\" style=\"width: 100%; height: 100%; transform: translate3d(0px, 0px, 0px); content-visibility: visible;\"><defs><clipPath id=\"__lottie_element_2\"><rect width=\"1920\" height=\"1080\" x=\"0\" y=\"0\"></rect></clipPath></defs><g clip-path=\"url(#__lottie_element_2)\"><g tra"
+   },
+   {
+    "where": "body",
+    "w": 40,
+    "h": 40,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiz); fill: url(&quot;#eds-icon-gradient-blue&quot;);\"><path fill-opacity=\".95\" d=\"M9.727 3.387a4.75 4.75 0 0 1 4.548 0l8.28 4.515a1.25 1.25 0 0 1 0 2.196l-1.804.983V16c0 1.705-1.36 2.896-2.937 3.62-1.62.742-3.733 1.13-5.813 1.13-1.462 0-2.939-.194-4.25-.566v.017"
+   },
+   {
+    "where": "body",
+    "w": 40,
+    "h": 40,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiz); fill: url(&quot;#eds-icon-gradient-indigo&quot;);\"><path fill-opacity=\".95\" d=\"M13.379 2.25a2.25 2.25 0 0 1 1.59.66l4.122 4.12c.422.422.659.994.659 1.591V19.5a2.25 2.25 0 0 1-2.25 2.25h-11a2.25 2.25 0 0 1-2.25-2.25v-15A2.25 2.25 0 0 1 6.5 2.25zM6.5 3.75a.75"
+   },
+   {
+    "where": "body",
+    "w": 40,
+    "h": 40,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiz); fill: url(&quot;#eds-icon-gradient-purple&quot;);\"><path fill-opacity=\".95\" d=\"M17.076 3.25a4.75 4.75 0 0 1 4.694 4.017l1.526 9.771a3.216 3.216 0 0 1-5.597 2.613l-2.54-2.901H8.841l-2.54 2.901a3.216 3.216 0 0 1-5.597-2.613l1.527-9.771A4.75 4.75 0 0 1 6.924 3"
+   },
+   {
+    "where": "body",
+    "w": 40,
+    "h": 40,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiz); fill: url(&quot;#eds-icon-gradient-pink&quot;);\"><path fill-opacity=\".95\" d=\"M8.379 3.25a2.25 2.25 0 0 1 1.59.66l2.342 2.34H19.5a2.25 2.25 0 0 1 2.25 2.25v10a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25v-13A2.25 2.25 0 0 1 4.5 3.25zM4.5 4.75a.75."
+   },
+   {
+    "where": "body",
+    "w": 40,
+    "h": 40,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiz); fill: url(&quot;#eds-icon-gradient-red&quot;);\"><path fill-opacity=\".95\" d=\"M12 2.25A7.75 7.75 0 0 1 19.75 10c0 3.277-1.9 6.203-3.686 8.244a24.7 24.7 0 0 1-3.303 3.122 14 14 0 0 1-.3.226l-.018.013-.005.003-.002.001v.001L12 21l.435.61a.75.75 0 0 1-.87 0L12 2"
+   },
+   {
+    "where": "body",
+    "w": 28,
+    "h": 28,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafix);\"><path fill-opacity=\".95\" d=\"M18.723 2.5c1.102 0 1.505.401 1.506 1.487v13.244c0 .17-.032.477-.087.608a.9.9 0 0 1-.21.334c-.107.099-.29.202-.378.242l-7.127 3a1.1 1.1 0 0 1-.853 0l-7.127-3a1.7 1.7 0 0 1-.378-.241.9.9 0 0 1-.21-.335c-.055-.131-.086-.438-.086-."
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Games",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Indie games",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Mobile games",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Switching to Unreal Engine",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Unreal Editor for Fortnite",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Film & TV",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Broadcast & live events",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22a.75"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Animation",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_-24px\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Architecture",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_-24px\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Automotive",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_-24px\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Simulation",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 d_inline trf_translateY(16%) va_baseline ms_-24px\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m1.03 5.72a.75.75 0 1 0-1.06 1.06l2.22 2.22H8a.75.75 0 0 0 0 1.5h6.19l-2.22 2.22"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "Watch how to install",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M5.25 4.246a1.5 1.5 0 0 1 2.202-1.327L22.1 10.674c1.064.564 1.064 2.088 0 2.652L7.452 21.08a1.5 1.5 0 0 1-2.202-1.326zm1.5 15.507L21.398 12 6.75 4.246z\"></path></svg>"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m5.03 6.22a.75.75 0 0 0-1.06 0l-5.47 5.47-2.47-2.47a.75.75 0 1 0-1.06 1.06l3.53 3.53 6.53-6.53a.75.75 0 0 0 0-1.06\"></path></svg>"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m5.03 6.22a.75.75 0 0 0-1.06 0l-5.47 5.47-2.47-2.47a.75.75 0 1 0-1.06 1.06l3.53 3.53 6.53-6.53a.75.75 0 0 0 0-1.06\"></path></svg>"
+   },
+   {
+    "where": "body",
+    "w": 24,
+    "h": 24,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiw);\"><path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m5.03 6.22a.75.75 0 0 0-1.06 0l-5.47 5.47-2.47-2.47a.75.75 0 1 0-1.06 1.06l3.53 3.53 6.53-6.53a.75.75 0 0 0 0-1.06\"></path></svg>"
+   },
+   {
+    "where": "body",
+    "w": 20,
+    "h": 20,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 eds_370_luhsut3\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiv);\"><path fill-opacity=\".95\" d=\"M12 3.25c5.3 0 9.75 3.837 9.75 8.75S17.3 20.75 12 20.75c-1.23 0-2.407-.207-3.493-.581l-4.121 2.475a.75.75 0 0 1-1.126-.767l.8-4.797C2.926 15.655 2.25 13.902 2.25 12c0-4.913 4.45-8.75 9.75-8.75m0 1.5c-4.642 0-8.25"
+   },
+   {
+    "where": "body",
+    "w": 20,
+    "h": 20,
+    "viewBox": "0 0 24 24",
+    "label": "",
+    "paths": 1,
+    "markup": "<svg aria-hidden=\"true\" class=\"eds_370_luhsut1 eds_370_luhsut3\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" data-eds-icon=\"true\" style=\"--eds_370_luhsut0: var(--eds_370_adnoafiv);\"><path fill-opacity=\".95\" d=\"M7.47 5.47a.75.75 0 1 1 1.06 1.06l-3.72 3.72H17a4.75 4.75 0 0 1 0 9.5.75.75 0 0 1 0-1.5 3.25 3.25 0 0 0 0-6.5H4.81l3.72 3.72a.75.75 0 0 1-1.06 1.06L1.94 11z\"></path></svg>"
+   }
+  ],
+  "backgrounds": [],
+  "svgUse": [],
+  "cssSvg": [
+   "https://cdn.cookielaw.org/logos/static/ot_external_link.svg"
+  ],
+  "inlineSvgCount": 71,
+  "stylesheets": [
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0uvzftzmevf-w.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0c6dq6wsi3vfj.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2zb85hv_t3n39.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3djmbajxiswhj.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1-nbj-6k8j8iu.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3v4snrvfcjben.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1eyb3l8v1in-p.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/27cym5wkw62ph.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2jgg_jvrc9mu4.css",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1a5ejinekx3w0.css",
+   "https://components.unrealengine.com/styles/navigation.css"
+  ],
+  "scripts": [
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0hg43r9my4-2a.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1hwpn1nigf9uh.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2jzgdaqctw7u3.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2c769jh9strcu.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/turbopack-16zdpt2kl2c8m.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3yn70964zjsvs.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0ltn_waw2gzyb.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/35_o_kvas5k19.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3gt0pza3z3yoa.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/34mgn8-08yinj.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2-ww6g34-r_4c.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1qwwnkatjn043.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1otnj80rckrm8.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0n61srz8ifmtf.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3-i5p7w6k2d0-.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3ut_33fwidy4y.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0pdz3ujig8f5_.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/138nm5t976nm4.js",
+   "https://tracking.unrealengine.com/tracking.js?l=en-US&version=9bc504dda37e8efd09a96ec00ae262c7a6a17c1b",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0cz1d0mv5g_q7.js",
+   "https://js.hcaptcha.com/1/api.js?render=explicit&uj=true",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1rcunpppe4kwq.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/27my0ojy2x-82.js",
+   "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0o5tb56s-6fz8.js",
+   "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js"
+  ]
+ },
+ "layout": {
+  "footer": {
+   "el": "div.download-card-footer.flex-g_1.[&_.cosmos-text.cosmos-title]:lh_25px",
+   "height": 120,
+   "background": "rgba(255, 255, 255, 0.05)",
+   "color": "rgb(255, 255, 255)",
+   "padding": "32px",
+   "borderTop": "1px solid rgba(255, 255, 255, 0.05)",
+   "links": [
+    {
+     "text": "Download UEFN",
+     "href": "https://store.epicgames.com/en-US/p/fortnite--uefn"
+    }
+   ]
+  },
+  "page": {
+   "maxWidth": "none",
+   "mainMaxWidth": "none / padding 0px",
+   "scrollWidth": 1414,
+   "viewport": 1414
+  }
+ },
+ "nav": [],
+ "fontFaces": [
+  {
+   "family": "Inter",
+   "weight": "400",
+   "style": "",
+   "src": "local(\"Inter Regular\"), local(\"Inter-Regular\"), url(\"https://components.unrealengine.com/fonts/inter/Inter-Regular.woff2\") format(\"woff2\")"
+  },
+  {
+   "family": "Inter",
+   "weight": "500",
+   "style": "",
+   "src": "local(\"Inter Medium\"), local(\"Inter-Medium\"), url(\"https://components.unrealengine.com/fonts/inter/Inter-Medium.woff2\") format(\"woff2\")"
+  },
+  {
+   "family": "\"Inter Tight\"",
+   "weight": "700",
+   "style": "",
+   "src": "local(\"Inter Tight Bold\"), local(\"InterTight-Bold\"), url(\"https://components.unrealengine.com/fonts/inter/InterTight-Bold.woff2\") format(\"woff2\")"
+  },
+  {
+   "family": "\"Inter Tight\"",
+   "weight": "900",
+   "style": "",
+   "src": "local(\"Inter Tight Black\"), local(\"InterTight-Black\"), url(\"https://components.unrealengine.com/fonts/inter/InterTight-Black.woff2\") format(\"woff2\")"
+  },
+  {
+   "family": "Inter",
+   "weight": "400",
+   "style": "",
+   "src": "local(\"Inter Regular\"), local(\"Inter-Regular\"), url(\"https://components.unrealengine.com/fonts/inter/Inter-Regular.woff2\") format(\"woff2\")"
+  },
+  {
+   "family": "Inter",
+   "weight": "500",
+   "style": "",
+   "src": "local(\"Inter Medium\"), local(\"Inter-Medium\"), url(\"https://components.unrealengine.com/fonts/inter/Inter-Medium.woff2\") format(\"woff2\")"
+  }
+ ],
+ "shadow": {
+  "host": "unrealengine-navigation",
+  "hostStyle": {
+   "height": 72,
+   "position": "sticky",
+   "top": "0px",
+   "zIndex": "9000",
+   "background": "rgba(0, 0, 0, 0)",
+   "backdropFilter": "none",
+   "borderBottom": "0px solid rgb(255, 255, 255)"
+  },
+  "elements": [
+   {
+    "el": "epic-wf-cta-button#skip-nav.skip-nav",
+    "box": "1x1",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": "https://www.unrealengine.com/#cosmos-app"
+   },
+   {
+    "el": "header#global-header.global-header",
+    "box": "1414x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "20px 24px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.bg-filter",
+    "box": "1414x72",
+    "bg": "rgba(16, 16, 20, 0.7)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.global-header__flyout-wrapper.hide-in-drawer",
+    "box": "50x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-nav-flyout-menu",
+    "box": "50x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "nav.global-header__nav",
+    "box": "1288x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-property-logo",
+    "box": "233x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div#mobile-drawer.global-header__drawer",
+    "box": "1031x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.main-nav.items-visible-4.active-search",
+    "box": "431x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-nav-main-menu",
+    "box": "431x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "ul.main-nav__list",
+    "box": "431x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Menu Overview Uses Learning Connect",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "li#epic-wf-nav-main-link-0.main-nav__list-item",
+    "box": "113x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Overview",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-main-link",
+    "box": "113x41",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "li#epic-wf-nav-main-link-1.main-nav__list-item",
+    "box": "82x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Uses",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-main-link",
+    "box": "82x41",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "li#epic-wf-nav-main-link-2.main-nav__list-item",
+    "box": "71x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-main-link",
+    "box": "71x41",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "li#epic-wf-nav-main-link-3.main-nav__list-item",
+    "box": "83x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-main-link",
+    "box": "83x41",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "li.main-nav__list-item.main-nav__list-item--condensed",
+    "box": "83x72",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-main-link",
+    "box": "83x41",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.toolbar",
+    "box": "483x42",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Language Sign in Back",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.tools",
+    "box": "483x42",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Language Sign in",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-search-box",
+    "box": "348x42",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.dropdown.dropdown--locale",
+    "box": "32x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Language",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "button.dropdown__button",
+    "box": "32x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "4px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "span.icon-wrapper",
+    "box": "24x24",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "svg",
+    "box": "24x24",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"> <path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m-2.487 10.5c.065 2.116.4 3.991.894 5.36.277.766.59 1.334.899 1.696.311.364.548.444.694.444s.383-.08.694-.444c.31",
+    "href": ""
+   },
+   {
+    "el": "path",
+    "box": "20x20",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.dropdown.dropdown--account",
+    "box": "71x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Sign in",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "a.dropdown__button.secondary-cta",
+    "box": "71x32",
+    "bg": "rgba(255, 255, 255, 0.15)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "6px",
+    "padding": "4px 12px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Sign in",
+    "img": "",
+    "svg": "",
+    "href": "https://www.unrealengine.com/login?state=%2F"
+   },
+   {
+    "el": "span.label",
+    "box": "47x24",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "14px",
+    "weight": "500",
+    "letterSpacing": "0.28px",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Sign in",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "div.main-cta",
+    "box": "93x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   },
+   {
+    "el": "epic-wf-cta-button.main-cta__primary",
+    "box": "93x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": "https://www.unrealengine.com/download"
+   }
+  ],
+  "images": [],
+  "svgs": [
+   {
+    "el": "svg",
+    "box": "24x24",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "0px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\"> <path fill-opacity=\".95\" d=\"M12 2.25c5.385 0 9.75 4.365 9.75 9.75s-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12 6.615 2.25 12 2.25m-2.487 10.5c.065 2.116.4 3.991.894 5.36.277.766.59 1.334.899 1.696.311.364.548.444.694.444s.383-.08.694-.444c.31",
+    "href": ""
+   }
+  ],
+  "links": [
+   {
+    "el": "a.dropdown__button.secondary-cta",
+    "box": "71x32",
+    "bg": "rgba(255, 255, 255, 0.15)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "6px",
+    "padding": "4px 12px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "Sign in",
+    "img": "",
+    "svg": "",
+    "href": "https://www.unrealengine.com/login?state=%2F"
+   }
+  ],
+  "inputs": [
+   {
+    "el": "button.dropdown__button",
+    "box": "32x32",
+    "bg": "rgba(0, 0, 0, 0)",
+    "color": "rgb(255, 255, 255)",
+    "font": "Inter",
+    "size": "16px",
+    "weight": "400",
+    "letterSpacing": "normal",
+    "textTransform": "none",
+    "radius": "0px",
+    "padding": "4px",
+    "border": "0px none rgb(255, 255, 255)",
+    "text": "",
+    "img": "",
+    "svg": "",
+    "href": ""
+   }
+  ],
+  "customProperties": [
+   {
+    "name": "--link-inline-padding",
+    "value": ".5rem"
+   },
+   {
+    "name": "--link-block-padding-fallback",
+    "value": ".625rem"
+   },
+   {
+    "name": "--link-inline-padding-fallback",
+    "value": "1rem"
+   },
+   {
+    "name": "--link-block-padding",
+    "value": ".25rem"
+   },
+   {
+    "name": "--header-height",
+    "value": "4.5rem"
+   },
+   {
+    "name": "--drawer-main-cta-height",
+    "value": "5.875rem"
+   },
+   {
+    "name": "--drawer-toolbar-height",
+    "value": "3.25rem"
+   },
+   {
+    "name": "--header-padding-block",
+    "value": "1.25rem"
+   },
+   {
+    "name": "--header-padding-inline",
+    "value": "1.25rem"
+   },
+   {
+    "name": "--drawer-padding-inline",
+    "value": "4rem"
+   },
+   {
+    "name": "--drawer-padding-block-end",
+    "value": "4rem"
+   },
+   {
+    "name": "--drawer-padding-block-start",
+    "value": "4rem"
+   },
+   {
+    "name": "--transform-direction",
+    "value": "1"
+   },
+   {
+    "name": "--flyout-toggle-width",
+    "value": "-58px"
+   },
+   {
+    "name": "--cta-vbucks-badge-size",
+    "value": "1.25rem"
+   },
+   {
+    "name": "--cta-icon-size",
+    "value": "1.125rem"
+   },
+   {
+    "name": "--cta-small-block-padding",
+    "value": ".25rem"
+   },
+   {
+    "name": "--cta-small-inline-padding",
+    "value": ".25rem"
+   },
+   {
+    "name": "--main-nav-mobile-offset",
+    "value": "-2.5rem"
+   },
+   {
+    "name": "--search-box-width",
+    "value": "100%"
+   }
+  ]
+ },
+ "shadowCss": [
+  {
+   "host": "unrealengine-navigation",
+   "source": "shadow-stylesheet-1",
+   "text": ".visually-hidden { clip: rect(0px, 0px, 0px, 0px); border: 0px; width: 1px; height: 1px; margin-block: -1px; margin-inline: -1px; padding: 0px; position: absolute; overflow: hidden; }\nsvg { fill: currentcolor; }\nsvg[viewbox=\"0 0 24 24\"] { block-size: 1.5rem; inline-size: 1.5rem; }\nsvg[viewbox=\"0 0 20 20\"] { block-size: 1.25rem; inline-size: 1.25rem; }\nsvg { color: var(--color-icon-primary,#fff); }\n.dropdown { display: flex; }\n@media (min-width: 720px) {\n  .dropdown { position: relative; }\n}\n.dropdown--locale .dropdown__button { padding-block: 0.25rem; padding-inline: 0.25rem; }\n.dropdown--locale epic-wf-menu-item { --link-inline-padding: .5rem; }\n.dropdown__button { appearance: none; color: inherit; font-family: inherit; font-size: inherit; user-select: none; z-index: 1; text-wrap: nowrap; background-color: rgba(0, 0, 0, 0); border: 0px; padding: 0px; text-decoration: none; display: flex; position: relative; }\n.dropdown__button > * { pointer-events: none; }\n.dropdown__button:not([disabled]) { cursor: pointer; }\n.dropdown__button:focus-visible { border-radius: 0.125rem; outline: rgb(255, 255, 255) solid 0.125rem; }\n.dropdown__button svg { transition-duration: var(--easing-duration,.12s); transition-property: color; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); }\n.dropdown__button:not([aria-expanded=\"true\"]) ~ epic-wf-simple-menu, .dropdown__button:not([aria-expanded=\"true\"]) ~ epic-wf-nav-vertical-menu { opacity: 0; pointer-events: none; visibility: hidden; }\n.dropdown__button epic-wf-avatar { overflow-wrap: normal; }\n@media (min-width: 720px) {\n  .dropdown__button epic-wf-avatar { max-width: max(12.5rem, 10vw); transition-duration: var(--easing-duration,.12s); transition-property: opacity; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); overflow: hidden; }\n  .dropdown__button:hover svg { color: var(--color-text-secondary,#ffffffa6); }\n  .dropdown__button:hover epic-wf-avatar { opacity: 0.75; }\n  .dropdown epic-wf-simple-menu, .dropdown epic-wf-nav-vertical-menu { transform: translateX(calc(-100% * var(--transform-direction))); }\n  .dropdown.dropdown--account button { outline-offset: 0.25rem; }\n  .dropdown.dropdown--locale epic-wf-simple-menu, .dropdown.dropdown--account epic-wf-simple-menu, .dropdown.dropdown--account epic-wf-nav-vertical-menu { min-width: 13.75rem; max-width: 33rem; }\n}\n.dropdown.dropdown--account a.secondary-cta { appearance: none; color: var(--color-text-primary,#fff); font-family: inherit; font-size: inherit; user-select: none; -webkit-font-smoothing: antialiased; text-rendering: optimizelegibility; --link-block-padding-fallback: .625rem; --link-inline-padding-fallback: 1rem; box-sizing: border-box; min-height: 1.25rem; padding: 0px; padding-block: var(--link-block-padding,var(--link-block-padding-fallback)); padding-inline: var(--link-inline-padding,var(--link-inline-padding-fallback)); z-index: 3; outline-offset: var(--link-outline-offset,-.5rem); transition-duration: var(--easing-duration,.12s); transition-property: color, background-color; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); --link-block-padding: .25rem; --link-inline-padding: .75rem; margin-block: 0px; margin-inline: 0px; text-align: center; background-color: var(--color-fill-secondary-default,#ffffff26); border: 0px; border-radius: 0.375rem; justify-content: space-between; align-items: center; column-gap: 0.25rem; margin: 0px; font-weight: 400; line-height: 1.25rem; text-decoration: none; display: flex; position: relative; }\n.dropdown.dropdown--account a.secondary-cta > * { pointer-events: none; }\n.dropdown.dropdown--account a.secondary-cta:not([disabled]) { cursor: pointer; }\n.dropdown.dropdown--account a.secondary-cta:focus-visible { border-radius: 0.125rem; outline: rgb(255, 255, 255) solid 0.125rem; }\n@media (max-width: 719.9px) {\n  .dropdown.dropdown--account a.secondary-cta { --link-block-padding-fallback: .75rem; }\n}\n@media (max-width: 1279.9px) {\n  .dropdown.dropdown--account a.secondary-cta { --link-inline-padding-fallback: .75rem; }\n}\n.dropdown.dropdown--account a.secondary-cta .label { font-family: Inter, sans-serif; font-style: normal; font-weight: var(--font-weight-regular,400); letter-spacing: 0.02em; flex-grow: 1; font-size: 0.875rem; line-height: 150%; }\n@media (max-width: 719.9px) {\n  .dropdown.dropdown--account a.secondary-cta .label { font-family: Inter, sans-serif; font-style: normal; font-weight: var(--font-weight-regular,400); font-size: 1rem; line-height: 150%; }\n}\n.dropdown.dropdown--account a.secondary-cta:hover, .dropdown.dropdown--account a.secondary-cta.active { background-color: var(--color-background-transparent-elevated-high-hover,#ffffff26); color: var(--color-text-primary,#fff); }\n.dropdown.dropdown--account a.secondary-cta:focus-visible { border-radius: 0.875rem; }\n@media (min-width: 720px) {\n  .dropdown.dropdown--account a.secondary-cta.parent:hover, .dropdown.dropdown--account a.secondary-cta.parent.active { color: var(--color-text-secondary,#ffffffa6); }\n}\n.dropdown.dropdown--account a.secondary-cta:focus-visible { outline-offset: 0.125rem; outline-color: rgb(255, 255, 255); }\n.dropdown.dropdown--account a.secondary-cta .label { letter-spacing: 0.02em; text-overflow: ellipsis; white-space: nowrap; color: var(--color-text-on-accent,#000); justify-content: center; font-family: Inter, sans-serif; font-size: 0.875rem; font-style: normal; font-weight: 500; line-height: 1.5rem; overflow: hidden; }\n@media (max-width: 719.9px) {\n  .dropdown.dropdown--account a.secondary-cta { --link-block-padding: .5rem; --link-inline-padding: .75rem; flex: 1 1 0%; }\n  .dropdown.dropdown--account a.secondary-cta .label { line-height: 1rem; }\n}\n.dropdown.dropdown--account a.secondary-cta:hover { background-color: var(--color-fill-secondary-hover,#ffffff59); }\n.dropdown.dropdown--account a.secondary-cta .label { color: var(--color-text-primary,#fff); overflow: visible; }\n@media (max-width: 719.9px) {\n  .dropdown epic-wf-simple-menu, .dropdown epic-wf-nav-vertical-menu { transition-property: transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); transform: translate(0px); }\n}\n@media (min-width: 720px) {\n  .dropdown epic-wf-simple-menu, .dropdown epic-wf-nav-vertical-menu { position: absolute; inset-block-start: 2.25rem; inset-inline-start: 2.5rem; }\n}\n.tools { box-sizing: border-box; z-index: 4; justify-content: flex-end; align-items: center; gap: 1rem; display: flex; }\n@media (max-width: 719.9px) {\n  .tools { height: 2.75rem; }\n}\n@media (max-width: 1279.9px) {\n  .tools { gap: 0.5rem; }\n}\n@media (min-width: 720px) {\n  .tools { flex-grow: 1; position: relative; }\n}\n.tools .balances { gap: 1rem; display: flex; }\n@media (max-width: 1279.9px) {\n  .tools .balances { gap: 0.5rem; }\n}\n@media (max-width: 719.9px) {\n  .tools .balances { gap: 0.25rem; }\n}\n.tools .icons { gap: 1rem; display: flex; }\n@media (max-width: 1279.9px) {\n  .tools .icons { gap: 0.5rem; }\n}\n@media (max-width: 719.9px) {\n  .tools .icons { gap: 0.25rem; }\n}\n.tools .icons epic-wf-eds-icon { width: 24px; transition-duration: var(--easing-duration,.12s); transition-property: fill; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); }\n.tools .icons .icon { appearance: none; color: inherit; font-family: inherit; font-size: inherit; user-select: none; box-sizing: border-box; background-color: rgba(0, 0, 0, 0); border: 0px; width: 32px; height: 32px; padding: 4px; text-decoration: none; position: relative; }\n.tools .icons .icon > * { pointer-events: none; }\n.tools .icons .icon:not([disabled]) { cursor: pointer; }\n.tools .icons .icon:focus-visible { border-radius: 0.125rem; outline: rgb(255, 255, 255) solid 0.125rem; }\n.tools .icons .icon:hover epic-wf-eds-icon { fill: var(--color-text-secondary,#ffffffa6); }\n.tools .icons .icon:hover .badge { background: rgb(38, 187, 255); }\n.tools .icons .badge { box-sizing: border-box; letter-spacing: 0.025em; min-width: 16px; height: 16px; transition-duration: var(--easing-duration,.12s); transition-property: background; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); color: rgb(0, 0, 0); background: rgb(97, 205, 255); border-radius: 9999px; justify-content: center; align-items: center; padding: 1px 4px; font-family: Inter, sans-serif; font-size: 0.625rem; font-weight: 700; line-height: 130%; display: flex; position: absolute; top: -4px; right: -4px; }\n@media (prefers-reduced-motion: reduce) {\n  *, ::before, ::after { transition-duration: 0s !important; transition-delay: 1ms !important; animation-duration: 0s !important; animation-delay: -1ms !important; }\n}\n:host { --header-height: 4.5rem; width: 100%; height: var(--header-height); font-family: Inter, sans-serif; display: flex; }\n:host([sticky=\"true\"]), :host([sticky=\"\"]) { z-index: var(--header-z-index,9000); position: sticky; top: 0px; }\n.global-header { --drawer-main-cta-height: 5.875rem; --drawer-toolbar-height: 3.25rem; --header-padding-block: 1.25rem; --header-padding-inline: 1.25rem; --drawer-padding-inline: 4rem; --drawer-padding-block-end: 4rem; --drawer-padding-block-start: 4rem; --transform-direction: 1; box-sizing: border-box; height: var(--header-height); padding-block: var(--header-padding-block); padding-inline: var(--header-padding-inline); -webkit-tap-highlight-color: transparent; width: 100%; z-index: var(--header-z-index,9000); align-items: center; column-gap: 0.75rem; display: flex; position: relative; }\n@media (max-width: 719.9px) {\n  .global-header { --header-padding-block: 0px; --header-padding-inline: 1rem; --drawer-padding-inline: 1rem; --drawer-padding-block-end: 1rem; --drawer-padding-block-start: 1rem; }\n}\n@media (min-width: 720px) {\n  .global-header { --header-padding-inline: 1.5rem; }\n  .global-header .main-nav.active-search { max-width: max-content; }\n  .global-header .main-nav.active-search + .toolbar { flex-grow: 1; }\n}\n.global-header[data-mobile-drawer-open=\"true\"] { background: var(--color-background-default,#101014); }\n.global-header[data-mobile-drawer-open=\"true\"] .main-nav, .global-header[data-mobile-drawer-open=\"true\"] .toolbar { background-color: var(--color-background-default,#101014); }\n@media (max-width: 719.9px) {\n  .global-header { --flyout-toggle-width: -58px; }\n}\n@media (min-width: 1280px) {\n  .global-header { column-gap: 1.75rem; }\n}\n.global-header.rtl { --transform-direction: -1; }\n.global-header[data-mobile-cta-hidden=\"true\"][data-mobile-secondary-cta-hidden=\"true\"], .global-header[data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"], .global-header[data-mobile-cta-hidden=\"true\"][data-mobile-top-secondary-cta=\"true\"], .global-header[data-mobile-top-cta=\"true\"][data-mobile-secondary-cta-hidden=\"true\"] { --drawer-main-cta-height: 0px; }\n.global-header:not([data-mobile-top-cta=\"true\"]):not([data-mobile-cta-hidden=\"true\"]):not([data-mobile-secondary-cta-hidden=\"true\"]):not([data-mobile-top-secondary-cta=\"true\"]) { --drawer-main-cta-height: 9.375rem; }\n@media (max-width: 719.9px) {\n  .global-header[data-property-logo-valid=\"false\"] .global-header__nav { justify-content: flex-end; }\n}\n@media (max-width: 350px) {\n  .global-header[data-property-logo-icon-valid=\"false\"] .mobile-top-cta { display: none; }\n}\n@media (min-width: 350.1px) and (max-width: 959.9px) {\n  .global-header[data-property-logo-icon-valid=\"false\"][data-mobile-top-cta=\"true\"] .main-cta { display: none; }\n}\n@media (max-width: 719.9px) {\n  .global-header[data-property-logo-icon-valid=\"true\"][data-mobile-top-cta=\"true\"] .main-cta { display: none; }\n}\n@media (max-width: 560px) {\n  .global-header[data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"false\"] { --drawer-main-cta-height: 5.5rem; }\n  .global-header[data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"false\"] .main-cta { display: flex; }\n}\n@media (max-width: 480px) {\n  .global-header[data-mobile-top-secondary-cta=\"true\"]:not([data-mobile-top-cta=\"true\"])[data-secondary-cta-has-icon=\"false\"] { --drawer-main-cta-height: 9.375rem; }\n  .global-header[data-mobile-top-secondary-cta=\"true\"]:not([data-mobile-top-cta=\"true\"])[data-secondary-cta-has-icon=\"false\"] .main-cta { display: flex; }\n}\n.global-header__flyout-wrapper { flex-shrink: 0; align-items: center; gap: 0.75rem; display: flex; }\n.global-header__flyout-wrapper epic-wf-nav-flyout-menu:not([active=\"true\"]) .friendly-box { opacity: 0; pointer-events: none; visibility: hidden; }\n@media (min-width: 720px) {\n  .global-header__flyout-wrapper { gap: 1rem; }\n}\n@media (max-width: 719.9px) {\n  .global-header__flyout-wrapper { width: calc-size(auto, size); transition-property: opacity, width; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }\n  [data-mobile-drawer-open=\"true\"] .global-header__flyout-wrapper, [data-mobile-drawer-has-closed=\"false\"] .global-header__flyout-wrapper { overflow: hidden; }\n  .global-header epic-wf-property-logo { transition-property: transform, width; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }\n}\n.global-header__drawer { box-sizing: border-box; flex-grow: 1; align-items: center; column-gap: 0.75rem; min-width: 0px; display: flex; }\n@media (max-width: 719.9px) {\n  .global-header__drawer { height: calc(100vh - var(--header-height) - var(--top-offset,0px)); z-index: 10; flex-direction: column-reverse; justify-content: start; align-items: stretch; width: 100%; transition-property: background-color; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); position: absolute; inset-block-start: var(--header-height); inset-inline-start: 0px; overflow: hidden; transform: translate(0px); }\n  @supports (height:100dvh) {\n  .global-header__drawer { height: calc(100dvh - var(--header-height) - var(--top-offset,0px)); }\n}\n}\n.global-header__nav { flex-grow: 1; justify-content: space-between; align-items: center; gap: 2rem 1.5rem; min-width: 0px; display: flex; }\n@media (max-width: 1279.9px) {\n  .global-header__nav { column-gap: 0.5rem; transition-property: transform, opacity, width; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }\n}\n.global-header .bg-filter { background: var(--color-background-transparent-default,#101014b3); backdrop-filter: var(--effect-material-blur,blur(50px)); z-index: -1; content: \"\"; display: block; position: absolute; inset: 0px; overflow: hidden; }\n.global-header[data-mobile-drawer-open=\"true\"] .bg-filter { display: none; }\n.skip-nav { z-index: var(--skipnav-z-index,9001); margin: 0px; position: absolute; inset-block-start: 0.75rem; inset-inline-start: 0.75rem; }\n@media (min-width: 720px) {\n  .skip-nav { inset-block-start: 1.25rem; inset-inline-start: 1.25rem; }\n}\n.skip-nav:not(:focus):not(:focus-within) { clip: rect(0px, 0px, 0px, 0px); border: 0px; width: 1px; height: 1px; margin-block: -1px; margin-inline: -1px; padding: 0px; position: absolute; overflow: hidden; }\n.mobile-toolbar { align-items: center; gap: 0.5rem; display: flex; }\n@media (min-width: 720px) {\n  .mobile-toolbar, .mobile-toolbar .mobile-top-cta, .mobile-toolbar .mobile-top-secondary-cta { display: none; }\n}\n@media (max-width: 420px) {\n  .mobile-toolbar { flex-basis: 12.5rem; justify-content: flex-end; min-width: 0px; overflow: hidden; }\n  [data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"true\"][data-property-logo-icon-valid=\"true\"] .mobile-toolbar { flex-basis: 18.75rem; }\n  [data-property-logo-icon-valid=\"false\"] .mobile-toolbar { flex-basis: initial; min-width: initial; }\n}\n@media (max-width: 420px) and (min-width: 350px) and (max-width: 959.9px) {\n  [data-property-logo-icon-valid=\"false\"] .mobile-toolbar { flex-shrink: 0; }\n}\n@media (max-width: 560px) {\n  [data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"true\"] .mobile-top-secondary-cta epic-wf-cta-button::part(label) { display: none; }\n  [data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"true\"] .mobile-top-secondary-cta epic-wf-cta-button { --cta-vbucks-badge-size: 1.25rem; --cta-icon-size: 1.125rem; --cta-small-block-padding: .25rem; --cta-small-inline-padding: .25rem; }\n  [data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"false\"] .mobile-top-secondary-cta { display: none; }\n}\n@media (max-width: 480px) {\n  [data-mobile-top-secondary-cta=\"true\"]:not([data-mobile-top-cta=\"true\"])[data-secondary-cta-has-icon=\"true\"] .mobile-top-secondary-cta epic-wf-cta-button::part(label) { display: none; }\n  [data-mobile-top-secondary-cta=\"true\"]:not([data-mobile-top-cta=\"true\"])[data-secondary-cta-has-icon=\"false\"] .mobile-top-secondary-cta { display: none; }\n}\n@media (max-width: 420px) {\n  [data-mobile-top-cta=\"true\"][data-cta-has-icon=\"true\"] .mobile-top-cta { min-width: 2rem; overflow: hidden; }\n  [data-mobile-top-cta=\"true\"][data-cta-has-icon=\"true\"] .mobile-top-cta epic-wf-cta-button::part(root) { justify-content: end; }\n  [data-mobile-top-cta=\"true\"][data-cta-has-icon=\"true\"][data-property-logo-icon-valid=\"false\"] .mobile-top-cta { min-width: 1.75rem; }\n  [data-mobile-top-cta=\"true\"][data-cta-has-icon=\"true\"][data-property-logo-icon-valid=\"false\"] .mobile-top-cta epic-wf-cta-button { --cta-icon-size: 1.125rem; --cta-small-block-padding: .3125rem; --cta-small-inline-padding: .3125rem; }\n  [data-mobile-top-cta=\"true\"][data-cta-has-icon=\"true\"][data-property-logo-icon-valid=\"false\"] .mobile-top-cta epic-wf-cta-button::part(label) { display: none; }\n}\n.toolbar { z-index: 1; flex-direction: column-reverse; flex: 1 1 0%; align-items: stretch; column-gap: 1.5rem; display: flex; position: relative; }\n@media (max-width: 719.9px) {\n  .toolbar { padding-block: 0.25rem; padding-inline: var(--header-padding-inline); }\n}\n@media (min-width: 720px) {\n  .toolbar { flex-direction: row; flex-grow: 0; align-items: center; }\n}\n.toolbar__back-wrapper { background-color: var(--color-background-default,#101014); max-width: 100%; padding-block: inherit; padding-inline: inherit; width: calc(100vw - var(--header-padding-inline) * 2); z-index: 4; flex-direction: column; justify-content: center; align-items: flex-start; transition-property: opacity, transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); display: flex; position: absolute; inset: 0px; transform: translate(0px); }\n@media (min-width: 720px) {\n  .toolbar__back-wrapper { display: none; }\n}\n.toolbar .back-button { appearance: none; color: var(--color-text-primary,#fff); font-family: inherit; font-size: inherit; user-select: none; -webkit-font-smoothing: antialiased; text-rendering: optimizelegibility; --link-block-padding-fallback: .625rem; --link-inline-padding-fallback: 1rem; box-sizing: border-box; min-height: 1.25rem; padding: 0px; padding-block: var(--link-block-padding,var(--link-block-padding-fallback)); padding-inline: var(--link-inline-padding,var(--link-inline-padding-fallback)); z-index: 3; outline-offset: var(--link-outline-offset,-.5rem); transition-duration: var(--easing-duration,.12s); transition-property: color, background-color; transition-timing-function: var(--easing,cubic-bezier(.65, 0, .35, 1)); margin-block: 0px; margin-inline: 0px; background-color: rgba(0, 0, 0, 0); border: 0px; border-radius: 0.5rem; justify-content: space-between; align-items: center; column-gap: 0.25rem; width: auto; margin: 0px; line-height: 1.25rem; text-decoration: none; display: flex; position: relative; }\n.toolbar .back-button > * { pointer-events: none; }\n.toolbar .back-button:not([disabled]) { cursor: pointer; }\n.toolbar .back-button:focus-visible { border-radius: 0.125rem; outline: rgb(255, 255, 255) solid 0.125rem; }\n@media (max-width: 719.9px) {\n  .toolbar .back-button { --link-block-padding-fallback: .75rem; }\n}\n@media (max-width: 1279.9px) {\n  .toolbar .back-button { --link-inline-padding-fallback: .75rem; }\n}\n.toolbar .back-button .label { font-family: Inter, sans-serif; font-style: normal; font-weight: var(--font-weight-regular,400); letter-spacing: 0.02em; flex-grow: 1; font-size: 0.875rem; line-height: 150%; }\n@media (max-width: 719.9px) {\n  .toolbar .back-button .label { font-family: Inter, sans-serif; font-style: normal; font-weight: var(--font-weight-regular,400); font-size: 1rem; line-height: 150%; }\n}\n.toolbar .back-button:hover, .toolbar .back-button.active { background-color: var(--color-background-transparent-elevated-high-hover,#ffffff26); color: var(--color-text-primary,#fff); }\n.toolbar .back-button:focus-visible { border-radius: 0.875rem; }\n@media (min-width: 720px) {\n  .toolbar .back-button.parent:hover, .toolbar .back-button.parent.active { color: var(--color-text-secondary,#ffffffa6); }\n}\n.toolbar .back-button:hover { background-color: inherit; }\n.toolbar .back-button .icon-wrapper { margin-inline-end: 0.375rem; }\n.avatar-wrapper { margin-block-end: 1.25rem; }\n.avatar-wrapper.margin-block-end-0 { margin-block-end: 0px; }\n@media (min-width: 720px) {\n  .avatar-wrapper { display: none; }\n}\n.main-cta { align-items: center; column-gap: 0.75rem; display: flex; }\n@media (max-width: 719.9px) {\n  .main-cta { background: var(--color-background-transparent-default,#101014b3); backdrop-filter: var(--effect-material-blur,blur(50px)); box-shadow: var(--shadow-top-md,0 -2px 1px #0000001a, 0 -4px 2px #0000001a, 0 -8px 4px #0000001a, 0 -16px 8px #0000001a, 0 -32px 16px #0000001a); z-index: 3; flex-direction: column; justify-content: center; gap: 1rem 0px; padding-block: 1.5rem; padding-inline: 4rem; transition-property: opacity; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); position: absolute; inset-block-end: 0px; inset-inline: 0px; overflow: hidden; }\n  .main-cta epic-wf-cta-button::part(root) { position: relative; }\n  .main-cta epic-wf-cta-button::part(start-icon) { margin-block: auto; position: absolute; inset-block: 0px; }\n  .main-cta epic-wf-cta-button::part(end-icon) { margin-block: auto; position: absolute; inset-block: 0px; }\n  .main-cta epic-wf-cta-button::part(start-icon) { inset-inline-start: var(--link-inline-padding,.75rem); }\n  .main-cta epic-wf-cta-button::part(end-icon) { inset-inline-end: var(--link-inline-padding,.75rem); }\n  .main-cta epic-wf-cta-button::part(label) { text-align: center; flex: 1 1 auto; }\n  [data-mobile-cta-hidden=\"true\"][data-mobile-secondary-cta-hidden=\"true\"] .main-cta, [data-mobile-top-cta=\"true\"] .main-cta .main-cta__primary, [data-mobile-top-secondary-cta=\"true\"] .main-cta .main-cta__secondary { display: none; }\n}\n@media (max-width: 719.9px) and (max-width: 560px) {\n  [data-mobile-top-cta=\"true\"][data-mobile-top-secondary-cta=\"true\"][data-secondary-cta-has-icon=\"false\"] .main-cta .main-cta__secondary { display: flex; }\n}\n@media (max-width: 719.9px) and (max-width: 480px) {\n  [data-mobile-top-secondary-cta=\"true\"]:not([data-mobile-top-cta=\"true\"])[data-secondary-cta-has-icon=\"false\"] .main-cta .main-cta__secondary { display: flex; }\n}\n@media (max-width: 719.9px) {\n  [data-dropdown-open=\"true\"] .main-cta, [data-mobile-subdrawer-open=\"true\"] .main-cta { opacity: 0; pointer-events: none; }\n  .main-cta { padding: 1rem; }\n  .main-cta epic-wf-cta-button { justify-content: center; width: 100%; max-width: 21.375rem; height: 2.5rem; transition-property: transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); display: flex; }\n  [data-dropdown-open=\"false\"][data-mobile-subdrawer-open=\"false\"] .toolbar__back-wrapper { opacity: 0; pointer-events: none; visibility: hidden; transform: translateX(calc(1rem * var(--transform-direction))); }\n}\n.main-nav { z-index: 1; flex-grow: 1; min-width: 0px; overflow: hidden; }\n@media (max-width: 719.9px) {\n  .main-nav { height: 100%; padding-block-start: var(--drawer-padding-block-start); padding-block-end: max(var(--drawer-padding-block-end), var(--drawer-main-cta-height)); padding-inline: var(--drawer-padding-inline); transition-property: padding, transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); overflow-y: auto; }\n}\n@media (min-width: 720px) and (max-width: 959.9px) {\n  .main-nav[data-search-open=\"true\"] { display: none; }\n  .main-nav[data-search-open=\"true\"] ~ .toolbar, .main-nav[data-search-open=\"true\"] ~ .toolbar epic-wf-search-box { flex-grow: 1; }\n}\n@media (min-width: 720px) {\n  .main-nav { align-items: center; transition-property: opacity; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); display: flex; }\n  .main-nav[data-search-open=\"true\"] .main-nav ~ .toolbar { flex-grow: 1; }\n}\n.main-nav__list-item { --main-nav-mobile-offset: -2.5rem; align-items: center; width: 100%; display: flex; }\n@media (max-width: 719.9px) {\n  .main-nav__list-item { align-items: flex-start; transition-property: transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); }\n}\n.main-nav__list-item epic-wf-condensed-menu { margin-inline-start: -3.75rem; }\n@media (min-width: 720px) {\n  .main-nav__list-item epic-wf-simple-menu, .main-nav__list-item epic-wf-nav-vertical-menu { margin-inline-start: -0.5rem; }\n  .main-nav__list-item epic-wf-nav-mega-menu { z-index: 1; max-width: 20rem; }\n}\n@media (min-width: 960px) {\n  .main-nav__list-item epic-wf-nav-mega-menu { max-width: 50rem; inset-inline: 1.125rem 1.25rem; }\n}\n@media (min-width: 1280px) {\n  .main-nav__list-item epic-wf-nav-mega-menu { max-width: initial; inset-inline: 1.125rem 1.25rem; }\n}\n@media (min-width: 1440px) {\n  .main-nav__list-item epic-wf-nav-mega-menu { inset-inline-start: 6.125rem; }\n}\n@media (min-width: 720px) {\n  .main-nav__list-item epic-wf-simple-menu, .main-nav__list-item epic-wf-nav-mega-menu, .main-nav__list-item epic-wf-nav-vertical-menu, .main-nav__list-item epic-wf-condensed-menu { position: absolute; inset-block-start: 3.8125rem; }\n}\n.main-nav__list-item epic-wf-main-link:not([active=\"true\"]) ~ epic-wf-simple-menu, .main-nav__list-item epic-wf-main-link:not([active=\"true\"]) ~ epic-wf-nav-mega-menu, .main-nav__list-item epic-wf-main-link:not([active=\"true\"]) ~ epic-wf-nav-vertical-menu, .main-nav__list-item epic-wf-main-link:not([active=\"true\"]) ~ epic-wf-condensed-menu, .main-nav__list-item epic-wf-main-link:not([active=\"true\"]) .friendly-box { opacity: 0; pointer-events: none; visibility: hidden; }\n@media (min-width: 720px) {\n  .main-nav__list-item epic-wf-main-link[tabindex=\"-1\"] { pointer-events: none; }\n}\n@media (max-width: 719.9px) {\n  epic-wf-simple-menu, epic-wf-nav-mega-menu, epic-wf-nav-vertical-menu { background-color: var(--color-background-default,#101014); box-shadow: none; box-sizing: border-box; height: calc(100vh - (var(--header-height) + var(--drawer-toolbar-height) + var(--top-offset,0px))); max-width: 100%; padding-block-start: var(--drawer-padding-block-start); padding-block-end: var(--drawer-padding-block-end); padding-inline: var(--drawer-padding-inline); transform: translateX(calc(1rem * var(--transform-direction))); z-index: 4; width: 100vw; flex-direction: column; transition-property: opacity, transform; transition-duration: 0.3s; transition-timing-function: cubic-bezier(0.65, 0, 0.35, 1); display: flex; position: absolute; inset-block-start: var(--drawer-toolbar-height); inset-inline: 0px; overflow-y: auto; }\n  @supports (height:100dvh) {\n  epic-wf-simple-menu, epic-wf-nav-mega-menu, epic-wf-nav-vertical-menu { height: calc(100dvh - (var(--header-height) + var(--drawer-toolbar-height) + var(--top-offset,0px))); }\n}\n  epic-wf-simple-menu epic-wf-menu-item { width: 100%; }\n  epic-wf-nav-mega-menu, epic-wf-nav-vertical-menu { row-gap: 2rem; }\n}\n.icon-wrapper { display: flex; }\n.friendly-box { height: 2.5rem; transform: translateX(calc(-50% * var(--transform-direction))); z-index: 4; width: 100%; min-width: 5.625rem; margin-block-start: -0.375rem; position: absolute; inset-block-start: 100%; inset-inline-start: 50%; }\n@media (max-width: 719.9px) {\n  .friendly-box { display: none; }\n}\n.main-nav__list-item:hover .friendly-box::before, .main-nav__list-item:hover .friendly-box::after { content: \"\"; transform-origin: center top; z-index: -1; width: 4rem; height: 2rem; position: absolute; }\n@media (max-width: 719.9px) {\n  .main-nav__list-item:hover .friendly-box::before, .main-nav__list-item:hover .friendly-box::after { display: none; }\n}\n.main-nav__list-item:hover .friendly-box::before { transform: rotate(calc(-35deg * var(--transform-direction))); inset-inline-start: -3.5rem; }\n.main-nav__list-item:hover .friendly-box::after { transform: rotate(calc(35deg * var(--transform-direction))); inset-inline-end: -3.5rem; }\n.menu-toggle { appearance: none; color: inherit; font-family: inherit; font-size: inherit; user-select: none; background-color: rgba(0, 0, 0, 0); border: 0px; margin: -0.75rem; padding: 0.75rem; text-decoration: none; }\n.menu-toggle > * { pointer-events: none; }\n.menu-toggle:not([disabled]) { cursor: pointer; }\n.menu-toggle:focus-visible { border-radius: 0.125rem; outline: rgb(255, 255, 255) solid 0.125rem; }\n@media (min-width: 720px) {\n  .menu-toggle { display: none; }\n}\n.menu-toggle svg { width: 1.5rem; height: 1.5rem; fill: var(--color-text-primary,#fff); display: block; }\n@media (max-width: 719.9px) {\n  [data-mobile-drawer-open=\"false\"][data-mobile-drawer-has-opened=\"true\"] .main-nav { overflow-y: hidden; }\n  [data-mobile-drawer-open=\"true\"] .main-nav .main-nav__list[data-mobile-child-menu-open=\"true\"] { scroll-behavior: auto; overflow-y: hidden; }\n  [data-mobile-drawer-open=\"true\"] .main-nav .main-nav__list[data-mobile-child-menu-open=\"true\"] > .menu-heading, [data-mobile-drawer-open=\"true\"] .main-nav .main-nav__list[data-mobile-child-menu-open=\"true\"] .main-nav__list-item[data-is-active=\"false\"] { visibility: hidden; }\n  [data-mobile-drawer-open=\"true\"] .global-header__flyout-wrapper.hide-in-drawer { opacity: 0; pointer-events: none; width: 0px; }\n  [data-mobile-drawer-open=\"true\"] epic-wf-property-logo { transform: translateX(calc(-.25rem * var(--transform-direction))); }\n  [data-mobile-drawer-open=\"true\"][data-flyout-disabled=\"true\"] epic-wf-property-logo { transform: translate(0px); }\n  [data-mobile-drawer-open=\"true\"][data-mobile-drawer-has-opened=\"false\"] .global-header__drawer { pointer-events: none; }\n  [data-mobile-drawer-open=\"true\"][data-mobile-drawer-has-opened=\"false\"] .main-nav { overflow-y: hidden; }\n  [data-mobile-drawer-open=\"true\"] .toolbar, [data-mobile-drawer-open=\"true\"] .main-cta epic-wf-cta-button { transform: translateY(0px); }\n  [data-mobile-drawer-open=\"true\"][data-search-open=\"true\"] { --search-box-width: 100%; }\n  [data-mobile-drawer-open=\"true\"][data-search-open=\"true\"] .dropdown, [data-mobile-drawer-open=\"true\"][data-search-open=\"true\"] .icons, [data-mobile-drawer-open=\"true\"][data-search-open=\"true\"] .balances { display: none; }\n  [data-dropdown-open=\"true\"] epic-wf-simple-menu, [data-dropdown-open=\"true\"] epic-wf-nav-mega-menu, [data-dropdown-open=\"true\"] epic-wf-nav-vertical-menu, [data-mobile-subdrawer-open=\"true\"] epic-wf-simple-menu, [data-mobile-subdrawer-open=\"true\"] epic-wf-nav-mega-menu, [data-mobile-subdrawer-open=\"true\"] epic-wf-nav-vertical-menu, [data-mobile-drawer-open=\"false\"] epic-wf-property-logo { transform: translate(0px); }\n  [data-mobile-drawer-open=\"false\"] .global-header__drawer { opacity: 0; pointer-events: none; visibility: hidden; background-color: rgba(0, 0, 0, 0); }\n  [data-mobile-drawer-open=\"false\"] .main-nav { transform: translateY(calc(var(--drawer-main-cta-height) * -1)); padding-block-start: 2.5rem; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:first-child { transform: translateY(calc(var(--main-nav-mobile-offset) * 1)); z-index: 1; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(2) { transform: translateY(calc(var(--main-nav-mobile-offset) * 2)); z-index: 2; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(3) { transform: translateY(calc(var(--main-nav-mobile-offset) * 3)); z-index: 3; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(4) { transform: translateY(calc(var(--main-nav-mobile-offset) * 4)); z-index: 4; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(5) { transform: translateY(calc(var(--main-nav-mobile-offset) * 5)); z-index: 5; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(6) { transform: translateY(calc(var(--main-nav-mobile-offset) * 6)); z-index: 6; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(7) { transform: translateY(calc(var(--main-nav-mobile-offset) * 7)); z-index: 7; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(8) { transform: translateY(calc(var(--main-nav-mobile-offset) * 8)); z-index: 8; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(9) { transform: translateY(calc(var(--main-nav-mobile-offset) * 9)); z-index: 9; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(10) { transform: translateY(calc(var(--main-nav-mobile-offset) * 10)); z-index: 10; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(11) { transform: translateY(calc(var(--main-nav-mobile-offset) * 11)); z-index: 11; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(12) { transform: translateY(calc(var(--main-nav-mobile-offset) * 12)); z-index: 12; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(13) { transform: translateY(calc(var(--main-nav-mobile-offset) * 13)); z-index: 13; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(14) { transform: translateY(calc(var(--main-nav-mobile-offset) * 14)); z-index: 14; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(15) { transform: translateY(calc(var(--main-nav-mobile-offset) * 15)); z-index: 15; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(16) { transform: translateY(calc(var(--main-nav-mobile-offset) * 16)); z-index: 16; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(17) { transform: translateY(calc(var(--main-nav-mobile-offset) * 17)); z-index: 17; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(18) { transform: translateY(calc(var(--main-nav-mobile-offset) * 18)); z-index: 18; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(19) { transform: translateY(calc(var(--main-nav-mobile-offset) * 19)); z-index: 19; }\n  [data-mobile-drawer-open=\"false\"] .main-nav__list-item:nth-child(20) { transform: translateY(calc(var(--main-nav-mobile-offset) * 20)); z-index: 20; }\n  [data-mobile-drawer-open=\"false\"] .toolbar { transform: translateY(calc(-100% - 0.375rem)); }\n  [data-mobile-drawer-open=\"false\"] .main-cta epic-wf-cta-button { transform: translateY(100%); }\n}\n.menu-heading { display: none; }\n.menu-heading h2 { font-weight: inherit; font-size: inherit; margin: 0px; }\n@media (max-width: 719.9px) {\n  .menu-heading { display: unset; letter-spacing: -0.07rem; color: var(--color-text-primary,#fff); align-self: start; margin-block-end: 2rem; padding-inline: 0.5rem; font-family: Inter, sans-serif; font-size: 2rem; font-style: normal; font-weight: 900; line-height: 100%; }\n  .menu-heading.no-margin { margin-block-end: 0px; }\n  .main-nav__list-item--condensed { opacity: 0; pointer-events: none; visibility: hidden; display: none; }\n}\n.menu-wrap { flex-direction: column; width: 100%; display: flex; }\n@media (min-width: 720px) {\n  .main-nav.items-visible-0 .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-1 #epic-wf-nav-main-link-0 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-2 #epic-wf-nav-main-link-1 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-3 #epic-wf-nav-main-link-2 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-4 #epic-wf-nav-main-link-3 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-5 #epic-wf-nav-main-link-4 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-6 #epic-wf-nav-main-link-5 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-7 #epic-wf-nav-main-link-6 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-8 #epic-wf-nav-main-link-7 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-9 #epic-wf-nav-main-link-8 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-10 #epic-wf-nav-main-link-9 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-11 #epic-wf-nav-main-link-10 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-12 #epic-wf-nav-main-link-11 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-13 #epic-wf-nav-main-link-12 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-14 #epic-wf-nav-main-link-13 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-15 #epic-wf-nav-main-link-14 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-16 #epic-wf-nav-main-link-15 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-17 #epic-wf-nav-main-link-16 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-18 #epic-wf-nav-main-link-17 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-19 #epic-wf-nav-main-link-18 ~ .main-nav__list-item:not(.main-nav__list-item--condensed), .main-nav.items-visible-20 #epic-wf-nav-main-link-19 ~ .main-nav__list-item:not(.main-nav__list-item--condensed) { display: none; }\n  .main-nav__list-item { flex-shrink: 0; width: auto; height: 4.5rem; }\n  .main-nav__list-item--condensed { opacity: 1; visibility: unset; }\n  .main-nav__list-item--condensed.hidden { opacity: 0; pointer-events: none; visibility: hidden; display: none; }\n  .main-nav__list-filler { opacity: 0; pointer-events: none; visibility: hidden; flex: 1 1 0%; display: flex; }\n  .menu-heading { opacity: 0; pointer-events: none; visibility: hidden; display: none; }\n  .menu-wrap { overscroll-behavior: contain; color-scheme: var(--eg-global-nav-color-scheme,dark); overflow-wrap: anywhere; margin-block: -0.5rem; margin-inline: -0.5rem; padding-block: 0.5rem; padding-inline: 0.5rem; overflow: hidden auto; }\n  .menu-wrap::-webkit-scrollbar { width: 16px; }\n  .menu-wrap::-webkit-scrollbar-track { margin-block: 8px; }\n  .menu-wrap::-webkit-scrollbar-thumb { box-shadow: 0 0 0 6px var(--color-background-transparent-elevated-high-hover,#ffffff26) inset; background: 0px 0px; border: 4px solid rgba(0, 0, 0, 0); border-radius: 100px; }\n}"
+  }
+ ],
+ "brand": {
+  "customElements": [
+   "unrealengine-navigation",
+   "unrealengine-footer",
+   "next-route-announcer"
+  ],
+  "shadowHosts": [
+   "unrealengine-navigation",
+   "unrealengine-footer",
+   "next-route-announcer"
+  ],
+  "topBand": [
+   {
+    "el": "div#cosmos-app",
+    "box": "1414x8501 @0,72",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "We make the engine. ⁠You make it Unreal.",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "div.app-children.min-h_60vh.ov-x_clip",
+    "box": "1414x8501 @0,72",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "We make the engine. ⁠You make it Unreal.",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "div.blurred-image.d_flex.ai_center",
+    "box": "1606x870 @-96,-8",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "canvas.blurred-image__canvas.d_block.pos_absolute",
+    "box": "1606x870 @-96,-8",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "main.d_block.w_100%.hero-alpha",
+    "box": "1414x710 @0,72",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "We make the engine. ⁠You make it Unreal.",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "div.responsive-container.pos_relative.w_100%",
+    "box": "1414x710 @0,72",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "We make the engine. ⁠You make it Unreal.",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "section.content-visibility_unset.h_full.section-container",
+    "box": "1414x710 @0,72",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "We make the engine. ⁠You make it Unreal.",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "unrealengine-navigation",
+    "box": "1414x72 @0,0",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "header#global-header.global-header",
+    "box": "1414x72 @0,0",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "div.bg-filter",
+    "box": "1414x72 @0,0",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "",
+    "bg": "rgba(16, 16, 20, 0.7)"
+   },
+   {
+    "el": "nav.global-header__nav",
+    "box": "1288x72 @102,0",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "bg": "rgba(0, 0, 0, 0)"
+   },
+   {
+    "el": "div#mobile-drawer.global-header__drawer",
+    "box": "1031x72 @359,0",
+    "imgSrc": "",
+    "svgMarkup": "",
+    "link": "",
+    "linkLabel": "",
+    "text": "Menu Overview Uses Learning Connect Lang",
+    "bg": "rgba(0, 0, 0, 0)"
+   }
+  ]
+ },
+ "responsive": [
+  {
+   "width": 1440,
+   "height": 1000,
+   "types": [
+    {
+     "sel": "h1",
+     "sample": "We make the engine. ⁠You make it Unreal.",
+     "fontSize": "40px",
+     "lineHeight": "48px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "h2",
+     "sample": "Unreal Engine news",
+     "fontSize": "24px",
+     "lineHeight": "28.8px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "h3",
+     "sample": "Unreal Engine 5.8 is now available",
+     "fontSize": "16px",
+     "lineHeight": "26.4px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    },
+    {
+     "sel": "p",
+     "sample": "We make the engine.",
+     "fontSize": "40px",
+     "lineHeight": "48px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "a",
+     "sample": "Get Unreal Engine",
+     "fontSize": "14px",
+     "lineHeight": "14px",
+     "fontWeight": "500",
+     "letterSpacing": "0.28px",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    },
+    {
+     "sel": "button",
+     "sample": "STEP 1",
+     "fontSize": "16px",
+     "lineHeight": "24px",
+     "fontWeight": "400",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    }
+   ]
+  },
+  {
+   "width": 390,
+   "height": 1000,
+   "types": [
+    {
+     "sel": "h1",
+     "sample": "We make the engine. ⁠You make it Unreal.",
+     "fontSize": "32px",
+     "lineHeight": "38.4px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "h2",
+     "sample": "Unreal Engine news",
+     "fontSize": "24px",
+     "lineHeight": "28.8px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "h3",
+     "sample": "Unreal Engine 5.8 is now available",
+     "fontSize": "16px",
+     "lineHeight": "26.4px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    },
+    {
+     "sel": "p",
+     "sample": "We make the engine.",
+     "fontSize": "32px",
+     "lineHeight": "38.4px",
+     "fontWeight": "700",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "\"Inter Tight\""
+    },
+    {
+     "sel": "a",
+     "sample": "Get Unreal Engine",
+     "fontSize": "14px",
+     "lineHeight": "14px",
+     "fontWeight": "500",
+     "letterSpacing": "0.28px",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    },
+    {
+     "sel": "button",
+     "sample": "STEP 1",
+     "fontSize": "16px",
+     "lineHeight": "24px",
+     "fontWeight": "400",
+     "letterSpacing": "normal",
+     "textTransform": "none",
+     "fontFamily": "Inter"
+    }
+   ]
+  }
+ ],
+ "sameOrigin": [
+  {
+   "path": "/favicon.ico",
+   "status": 200,
+   "mime": "image/x-icon",
+   "bytes": 0
+  },
+  {
+   "path": "/cosmos/static/favicons/favicon.svg",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "bytes": 0
+  },
+  {
+   "path": "/cosmos/static/favicons/favicon-96x96.png",
+   "status": 200,
+   "mime": "image/png",
+   "bytes": 1832
+  },
+  {
+   "path": "/cosmos/static/favicons/apple-touch-icon.png",
+   "status": 200,
+   "mime": "image/png",
+   "bytes": 3127
+  },
+  {
+   "path": "/cosmos/static/favicons/site.webmanifest",
+   "status": 200,
+   "mime": "application/manifest+json",
+   "bytes": 0
+  }
+ ],
+ "site": {
+  "slug": "unreal-engine",
+  "url": "https://www.unrealengine.com/",
+  "label": "Unreal Engine"
+ },
+ "scrapedAt": "2026-11-16T07:28:54.963Z",
+ "network": [
+  {
+   "url": "https://www.unrealengine.com/",
+   "status": 200,
+   "mime": "text/html",
+   "type": "Document",
+   "cached": false
+  },
+  {
+   "url": "https://cdn.cookielaw.org/consent/0195fc17-47ba-72f0-9c37-87970c8f15b2/0195d8e2-f8d3-79a9-9bc4-c88bb848b291/en.json",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/logos/static/ot_guard_logo.svg",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Fetch",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/scripttemplates/202503.2.0/assets/otCommonStyles.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Fetch",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/scripttemplates/202503.2.0/assets/otFloatingRounded.json",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/scripttemplates/202503.2.0/assets/v2/otPcTab.json",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": true
+  },
+  {
+   "url": "https://cef3322242ea.w.hcaptcha.com/logo.png",
+   "status": 200,
+   "mime": "image/png",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://tracking.unrealengine.com/init",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/api/cosmos/auth",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/api/cosmos/launch-darkly-flags",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/cosmos/static/favicons/apple-touch-icon.png",
+   "status": 200,
+   "mime": "image/png",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/cosmos/static/favicons/favicon-96x96.png",
+   "status": 200,
+   "mime": "image/png",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/cosmos/static/favicons/favicon.ico",
+   "status": 200,
+   "mime": "image/x-icon",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/cosmos/static/favicons/favicon.svg",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/download?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/download?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/feed?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/feed?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/feed?tags=news&_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/feed?tags=news&_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/license?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/license?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/news/state-of-unreal-2026-top-news-from-the-show?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/news/the-road-to-ue-6?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/news/the-road-to-ue-6?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/news/unreal-engine-5-8-is-now-available?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/news/unreal-engine-5-8-is-now-available?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/routing-rules",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/spotlights/beyond-the-product-page-logitech-g-s-360-racing-studio?_rsc=5CB68i4pnAekjehf",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/spotlights/beyond-the-product-page-logitech-g-s-360-racing-studio?_rsc=tXyZJ52UQVBCVsD3",
+   "status": 200,
+   "mime": "text/x-component",
+   "type": "Fetch",
+   "cached": false
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/media/Inter-Bold.0q6si_uqyck6j.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/media/Inter-Medium.1j5i7qtw1myl-.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/media/Inter-Regular.1plip2iltmmq0.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/media/InterTight-Bold.1_l5twpyvv0gu.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": true
+  },
+  {
+   "url": "https://components.unrealengine.com/fonts/inter/Inter-Medium.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/fonts/inter/Inter-Regular.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/fonts/inter/InterTight-Bold.woff2",
+   "status": 200,
+   "mime": "font/woff2",
+   "type": "Font",
+   "cached": false
+  },
+  {
+   "url": "https://cdn.cookielaw.org/logos/4da294eb-1392-4a74-9f51-31f9fe6d153f/adfa92f3-9eba-48f9-bfb0-060f9dbf93db/epicLogo.png",
+   "status": 200,
+   "mime": "image/png",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/logos/static/powered_by_logo.svg",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/1apgNGiXQCy67NbFZw2R",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmq9rgre02go607lp7of937we?width=384",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmqgp745a38sh07og8o13mphx?width=384",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmqi2n8o673uc07n72ce9l2xy?width=384",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:384/quality=value:90/auto_image/cmw2kj0py2d2n07oe9308v4vf?width=384",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:900/quality=value:90/auto_image/WtzzP9AbRGFod5zfQqVM",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:96/quality=value:90/auto_image/cmq9rgre02go607lp7of937we?width=96",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:96/quality=value:90/auto_image/cmqgp745a38sh07og8o13mphx?width=96",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:96/quality=value:90/auto_image/cmqi2n8o673uc07n72ce9l2xy?width=96",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/resize=width:96/quality=value:90/auto_image/cmw2kj0py2d2n07oe9308v4vf?width=96",
+   "status": 200,
+   "mime": "image/webp",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xho03tqx07mzwb57nha7",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xho33tqz07mz0sqvsu4j",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhoq3tra07mzkzedd1td",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhp63wlm07o59mtdawan",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhpu3wls07o5g6joe4ag",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhrq3wmn07o5xiqxc9fk",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhrr3wmp07o53dbxkm7q",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhrx3tsh07mzz3amnbyl",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhu83wn807o5swbsaol6",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhug3tsy07mzvdqx61yp",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmb81xhxk3ttl07mzk4qbhiy1",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AVzjeqAbLRKi3W5jq0CAvz/cmw3pr31z131h07oi9zhw2rp5",
+   "status": 200,
+   "mime": "image/svg+xml",
+   "type": "Image",
+   "cached": true
+  },
+  {
+   "url": "https://tracking.unrealengine.com/track.png?referringUrl=none&location=https%3A%2F%2Fwww.unrealengine.com%2F&now=1794814128742&eventType=pageView&l=en-US",
+   "status": 204,
+   "mime": "text/plain",
+   "type": "Image",
+   "cached": false
+  },
+  {
+   "url": "https://www.unrealengine.com/cosmos/static/favicons/site.webmanifest",
+   "status": 200,
+   "mime": "application/manifest+json",
+   "type": "Manifest",
+   "cached": false
+  },
+  {
+   "url": "https://cms-assets.unrealengine.com/AiKUh5PQCTaOFnmJDZJBfz/cmsp5hwz774lv07n16duj74fg",
+   "status": 206,
+   "mime": "video/mp4",
+   "type": "Media",
+   "cached": true
+  },
+  {
+   "url": "https://www.unrealengine.com/api/cosmos/metrics",
+   "status": 200,
+   "mime": "application/json",
+   "type": "Ping",
+   "cached": false
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0hg43r9my4-2a.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0ltn_waw2gzyb.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0n61srz8ifmtf.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0o5tb56s-6fz8.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0pdz3ujig8f5_.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/138nm5t976nm4.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1gbhqf33efcf0.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1hwpn1nigf9uh.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1otnj80rckrm8.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1qwwnkatjn043.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1rcunpppe4kwq.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2-ww6g34-r_4c.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/27my0ojy2x-82.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2c769jh9strcu.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2jzgdaqctw7u3.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3-i5p7w6k2d0-.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/34mgn8-08yinj.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/35_o_kvas5k19.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3gt0pza3z3yoa.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3ut_33fwidy4y.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3yn70964zjsvs.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/turbopack-16zdpt2kl2c8m.js",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/scripttemplates/202503.2.0/otBannerSdk.js",
+   "status": 200,
+   "mime": "application/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/scripttemplates/otSDKStub.js",
+   "status": 200,
+   "mime": "application/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/arrow-up-circle.tatW7Zvr-BnGXXw9o.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/check.C7BVou1x-BvA4eMep.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/facebook.CdUO8yhD-xG_H6nBM.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/footer-tHjwzfuG.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/instagram.Daru9fTs-DgJ-KSEy.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/lit-shared-78MzwiFe.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/rss.Cn2rrIV3-Bk8JW7yh.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/tokens-shared-C4BdElUr.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/twitch.DckzycLm-YiraCxiU.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/twitter-x.CATYT-fE-BONyetXW.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/unrealengine-footer-BYeZfJp6.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/unrealengine-footer.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/footer/youtube.DJjyxJSH-DnBrEjlJ.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/navigation/lit-shared-D1W4Xv7o.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/navigation/navigation-DjD4QVN8.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/navigation/tokens-shared-CURCdY8n.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/navigation/unrealengine-navigation-D4ab-59M.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://components.unrealengine.com/navigation/unrealengine-navigation.mjs",
+   "status": 200,
+   "mime": "text/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://js.hcaptcha.com/1/api.js?render=explicit&uj=true",
+   "status": 200,
+   "mime": "application/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://tracking.unrealengine.com/v/9bc504dda37e8efd09a96ec00ae262c7a6a17c1b/tracking.js",
+   "status": 200,
+   "mime": "application/javascript",
+   "type": "Script",
+   "cached": true
+  },
+  {
+   "url": "https://www.unrealengine.com/cdn-cgi/challenge-platform/h/b/scripts/jsd/f8df4d4a0cd6/main.js?ray=a5b4c7e9ab5abf09",
+   "status": 200,
+   "mime": "application/javascript",
+   "type": "Script",
+   "cached": false
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0c6dq6wsi3vfj.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/0uvzftzmevf-w.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1-nbj-6k8j8iu.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1a5ejinekx3w0.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/1eyb3l8v1in-p.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/27cym5wkw62ph.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2jgg_jvrc9mu4.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/2zb85hv_t3n39.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3djmbajxiswhj.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://assets.unrealengine.com/unrealengine-website-41409ef/_next/static/chunks/3v4snrvfcjben.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://components.unrealengine.com/styles/navigation.css",
+   "status": 200,
+   "mime": "text/css",
+   "type": "Stylesheet",
+   "cached": true
+  },
+  {
+   "url": "https://cdn.cookielaw.org/consent/0195fc17-47ba-72f0-9c37-87970c8f15b2/0195fc17-47ba-72f0-9c37-87970c8f15b2.json",
+   "status": 200,
+   "mime": "application/json",
+   "type": "XHR",
+   "cached": true
+  },
+  {
+   "url": "https://www.unrealengine.com/cdn-cgi/challenge-platform/h/b/jsd/oneshot/f8df4d4a0cd6/0.9098173611457597:1794809420:IT3Q6BuJ9HlWZKawjNXwO7mPBN4_V62eHoJM6Sz-zaQ/a5b4c7e9ab5abf09",
+   "status": 200,
+   "mime": "text/plain",
+   "type": "XHR",
+   "cached": false
+  }
+ ]
+}

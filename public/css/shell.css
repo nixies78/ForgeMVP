@@ -1,51 +1,59 @@
 /* ============================================================================
  * Forge - the page shell.
  *
- * This file is the page frame from support/Forge--architecture_specification_v2.md:
- * the fixed header, the inset web-app container, and the utility footer. The
- * workspace inside the container is governed by support/FORTNITE_STYLE_LIBRARY.md.
+ * This file is the page frame from support/Forge--architecture_specification_v2.md: the
+ * fixed header, the inset web-app container, and the utility footer. The workspace
+ * inside the container is governed by the one palette in css/tokens.css, written up in
+ * support/library.html.
  *
- * Every hex value from the specification is declared once, here, as a --sh-* token.
- *
- * v2 changed four things this file had from v1 and they are all visible below:
- * the header is fixed rather than sticky and is painted with the body colour
- * (#101014 at 95%) instead of Unreal Navy; the hero is gone; the primary action is
- * Blueprint cyan with a dark label instead of electric yellow; and the type is
- * Inter in sentence case everywhere - the spec is explicit that headings are Inter
- * and that there is no forced full capitalisation.
+ * 1.2.0 reconciled the shell with the workspace. Until that release the shell declared its own colour
+ * values and the workspace carried a second, Fortnite-derived palette, so the two were merely similar.
+ * There is now ONE palette, declared once in css/tokens.css as --ue-*, and every token below is either
+ * an alias onto it or frame geometry. 1.2.0:
+ *   - took the search field and the Dev mode control out of the header (Dev mode is now a footer link),
+ *   - made the Admin action the library's secondary control, with no icon, and
+ *   - turned the sticky app header borderless and translucent.
+ * 1.2.1 then swapped the header mark for the Epic logo itself, gave the mark a hover wash, split the
+ * control heights (navigation 32px here, body 40px in guide.css), moved the progress ramp onto the
+ * published blue and indigo steps, and dropped the footer's top border. That last change means this file
+ * no longer declares a single colour value of its own.
+ * 1.2.2 frosts the header with the same blur as the sticky app bar (one --sh-blur for both, and the tint
+ * eased to 90% so the effect is visible), and takes the box back off the mark's hover: the mark changes
+ * its own shade now, because a wash on a 44px square reads as a grey button appearing under the pointer.
  * ========================================================================== */
 
 :root {
-  /* The specification's palette, verbatim. */
-  --sh-body-1: #101014;          /* body gradient, stop 1 */
-  --sh-body-2: #202024;          /* body gradient, stop 2 */
-  --sh-body-3: #101014;          /* body gradient, stop 3 */
-  --sh-header-bg: rgba(16, 16, 20, 0.95);  /* the header: #101014 at 95% opacity */
-  --sh-footer: #18181C;          /* the footer */
-  --sh-panel: #23253A;           /* Panel Charcoal - dropdowns and inputs */
-  --sh-outline: #3A3D4D;         /* Outline Slate - 1px structural borders */
-  --sh-primary: #26BBFF;         /* the primary action's fill, and the start of the progress ramp */
-  --sh-white: #FFFFFF;           /* Engine White - primary text */
-  --sh-gray: #B2B5C2;            /* UI Gray - secondary text and links */
-  --sh-ink-on-primary: #101014;  /* the dark label the spec asks for on the primary fill (10.4:1) */
-  --sh-secondary-btn: #5B5B65;   /* the Dev mode button's fill */
-  --sh-input-bg: #1e1e22;        /* the search field */
-  --sh-input-border: #404043;    /* the search field's edge */
-  --sh-progress-end: #F7FF19;    /* the far end of the progress gradient */
+  /* ---------- the frame's role tokens: aliases onto the one palette ---------- */
+  --sh-body-1: var(--ue-canvas);          /* body gradient, stop 1 */
+  --sh-body-2: var(--ue-elevated-medium); /* body gradient, stop 2 */
+  --sh-body-3: var(--ue-canvas);          /* body gradient, stop 3 */
+  --sh-header-bg: var(--ue-canvas-header); /* the canvas at 90%, the spec's header tint (1.2.2) */
+  --sh-footer: var(--ue-elevated-low);    /* the footer is a band, so it keeps the low step */
+  --sh-material: var(--ue-material);      /* the sticky bar's translucent material: the canvas at 85% */
+  --sh-primary: var(--ue-accent);         /* the primary action */
+  --sh-white: var(--ue-white);            /* headings and strong labels */
+  --sh-text: var(--ue-text);              /* the library's default text colour: white at 95% */
+  --sh-gray: var(--ue-text-secondary);    /* secondary text and links: white at 75% */
+  --sh-ink-on-primary: var(--ue-on-accent);  /* the dark label the library puts on the accent (8.7:1) */
+  --sh-secondary: var(--ue-fill-subtle);      /* a secondary control's fill: white at 15% */
+  --sh-secondary-hover: var(--ue-fill-subtle-hover); /* and at 35% on hover */
+  --sh-warn: var(--ue-warning);           /* the status indicator's warning hue */
+  --sh-progress-from: var(--ue-palette-blue-400);   /* 1.2.1: the ramp's published families */
+  --sh-progress-to: var(--ue-palette-indigo-400);
 
-  /* [derived] Not in the specification: values its own rules need but it does not name. */
+  /* [derived] Frame geometry, which is the only thing this file still decides for itself. */
   --sh-header-base: 72px;        /* the header's own minimum height, at every width above 760px */
   --sh-header-h: var(--sh-header-base);  /* what the page offsets itself by; chrome.js re-measures it */
   --sh-track: color-mix(in srgb, var(--sh-white) 8%, transparent);
-  --sh-glow: 0 0 0 3px color-mix(in srgb, var(--sh-primary) 32%, transparent);
-  --sh-shadow-panel: 0 18px 40px color-mix(in srgb, #000000 55%, transparent);
   --sh-inset: clamp(16px, 5vw, 64px);   /* the spec asks for >= 64px; 64px of gutter each side on a
                                          * 360px phone would leave nothing to read, so it eases down */
   --sh-content-max: 1240px;
   --sh-ease: 160ms ease;
+  /* One frosted depth for the whole frame. 1.2.2 gave the fixed header the sticky bar's blur, and two
+   * copies of the same effect is how they drift apart, so both read this. */
+  --sh-blur: blur(12px);
   /* The spec names Inter for headings and for body/UI alike, so the shell has one face. */
-  --sh-font: var(--fn-font-ui, "Inter", "Segoe UI", system-ui, sans-serif),
-    "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --sh-font: var(--fn-font-ui, "Inter", "Segoe UI", system-ui, sans-serif);
 }
 
 /* ============================== header ============================== */
@@ -57,6 +65,11 @@
   width: 100%;
   z-index: 50;
   background: var(--sh-header-bg);
+  /* 1.2.2: the header now frosts like the app's sub-header, so content reads through it as it scrolls
+   * under. The tint eased from 95% to 90% at the same time - a blur behind an almost-opaque fill is an
+   * effect nobody can see. */
+  backdrop-filter: var(--sh-blur);
+  -webkit-backdrop-filter: var(--sh-blur);
   border: 0; /* the spec is explicit: a clean edge, no border */
 }
 
@@ -76,17 +89,35 @@
   font-family: var(--sh-font);
 }
 
-/* The vertical Epic Games Store logotype, as named by the spec: 44px of the 72px bar. */
+/* The Epic mark, as 1.2.1 swapped it in: a square 32px-viewBox SVG rather than the store's vertical
+ * logotype, still sized to the spec's 44px of the 72px bar.
+ *
+ * No border, at any state, and no border to colour on hover: the class that used to draw one was the
+ * legacy `.logo-link` pill in styles.css, and the app's markup no longer carries it.
+ *
+ * 1.2.2 settled the hover. 1.2.1 gave the mark a translucent wash, which reads as a grey box appearing
+ * under the pointer on a 44px square - a box around a logo says "button", and the site this mark comes
+ * from does not draw one. The hover is now the mark itself changing shade, which is the whole effect:
+ * nothing is added to the layout, nothing can appear or disappear, and the link still answers the
+ * pointer. */
 .sh-logo {
   display: inline-flex;
   align-items: center;
   flex: none;
+  border: 0;
   padding: 4px;
   border-radius: 8px;
   text-decoration: none;
 }
-.sh-logo img { display: block; height: 44px; width: auto; }
-.sh-logo:hover img { opacity: 0.85; }
+
+.sh-logo img {
+  display: block;
+  height: 44px;
+  width: auto;
+  transition: opacity var(--sh-ease);
+}
+
+.sh-logo:hover img { opacity: 0.8; }
 
 /* ---------- navigation: one item ---------- */
 
@@ -101,79 +132,31 @@
   text-decoration: none;
   white-space: nowrap;
 }
-.sh-nav-link:hover { color: var(--sh-white); }
+.sh-nav-link:hover { color: var(--sh-text); }
 
-/* ---------- search ---------- */
+/* ---------- the one action ---------- */
 
-.sh-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-  width: 240px;
-  height: 38px;
-  padding: 0 10px;
-  background: var(--sh-input-bg);
-  border: 1px solid var(--sh-input-border);
-  border-radius: 8px;
-}
-.sh-search-icon { width: 16px; height: 16px; flex: none; color: var(--sh-gray); }
-.sh-search-input {
-  flex: 1 1 auto;
-  min-width: 0;
-  background: none;
-  border: 0;
-  padding: 0;
-  color: var(--sh-white);
-  font: inherit;
-  font-size: 14px;
-}
-.sh-search-input::placeholder { color: var(--sh-gray); }
-.sh-search-input:focus { outline: none; }
-.sh-search:focus-within { border-color: var(--sh-primary); }
-.sh-search-input::-webkit-search-cancel-button { filter: invert(1) opacity(0.5); }
-.sh-kbd {
-  flex: none;
-  padding: 2px 6px;
-  border: 1px solid var(--sh-outline);
-  border-radius: 5px;
-  color: var(--sh-gray);
-  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
-  font-size: 11px;
-  line-height: 16px;
-}
-.sh-search-panel {
-  max-width: var(--sh-content-max);
-  margin: 0 auto;
-  padding: 10px var(--sh-inset) 14px;
-  color: var(--sh-gray);
-  font-family: var(--sh-font);
-  font-size: 14px;
-  line-height: 20px;
-}
-.sh-search-panel strong { color: var(--sh-white); }
-
-/* ---------- the two actions ---------- */
-
+/* A navigation CTA is 32px tall: 1.2.1 settled the split between the header's controls and the body's,
+ * which measure 40px (guide.css). Both numbers come off the library's own buttons. */
 .sh-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
   flex: none;
-  height: 38px;
+  height: 32px;
   padding: 0 14px;
   border: 0;
   border-radius: 8px;
   font-family: var(--sh-font);
   font-size: 14px;
   line-height: 20px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--sh-ease), color var(--sh-ease), box-shadow var(--sh-ease);
+  transition: background-color var(--sh-ease), color var(--sh-ease);
 }
 .sh-btn-state {
   padding: 1px 6px;
@@ -184,22 +167,18 @@
   font-weight: 700;
 }
 
-/* Dev mode: secondary, borderless, and its active state is carried by the chip rather than by the
- * fill, so it never reads as a second primary action beside Admin. */
-.sh-btn-secondary { background: var(--sh-secondary-btn); color: var(--sh-white); }
-.sh-btn-secondary:hover { background: color-mix(in srgb, var(--sh-secondary-btn) 78%, var(--sh-white)); }
-.sh-btn-secondary[aria-pressed='true'] .sh-btn-state {
-  background: var(--sh-primary);
-  color: var(--sh-ink-on-primary);
+/* Admin is the library's secondary control: a translucent fill, no border, no icon, and the library's
+ * default text colour. 1.2.0 demoted it from the primary action, because the header no longer has one -
+ * a page whose only header action is a way into the admin tool should not shout. */
+.sh-btn-secondary {
+  background: var(--sh-secondary);
+  color: var(--sh-text);
 }
+.sh-btn-secondary:hover { background: var(--sh-secondary-hover); color: var(--sh-white); }
 
-/* Admin: the page's one primary action, in the spec's cyan with the spec's dark label. */
-.sh-btn-primary { background: var(--sh-primary); color: var(--sh-ink-on-primary); font-weight: 700; }
-.sh-btn-primary:hover { box-shadow: var(--sh-glow); background: color-mix(in srgb, var(--sh-primary) 88%, var(--sh-white)); }
-.sh-btn-primary img { display: block; }
-
-/* Focus in the shell is the primary cyan, because the shell is where that hue lives. Focus inside the
- * workspace stays the Fortnite accent, so a keyboard user can see which system they are in. */
+/* Focus in the shell is the accent, and guide.css declares the workspace's own ring where the workspace
+ * uses it. Both resolve to the one accent now that the palettes are reconciled, but each layer keeps
+ * stating its own focus treatment rather than inheriting one by accident. */
 .sh-header :focus-visible,
 .sh-footer :focus-visible {
   outline: 2px solid var(--sh-primary);
@@ -213,7 +192,7 @@
  * not, so this beats the older page chrome no matter what it says. */
 body.g-app {
   background: linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
-  color: var(--sh-white);
+  color: var(--sh-text);
   padding-top: var(--sh-header-h);
 }
 
@@ -231,16 +210,20 @@ body.g-app {
 }
 
 /* Sticky below the fixed header, so the trail and the progress stay visible down a long device plan.
- * `--sh-header-h` is measured by chrome.js: the spec fixes 72px, and a phone may wrap taller. */
+ * `--sh-header-h` is measured by chrome.js: the spec fixes 72px, and a phone may wrap taller.
+ *
+ * 1.2.0 made this bar borderless and translucent, which is how the library's own secondary bars behave
+ * (the store's department bar, the shared header): no rules above or below, and a material tint of the
+ * canvas at 85% with a blur, so the content scrolling under it stays recognisable without competing
+ * with the trail. Previously it had a hairline top and bottom and a 92% tint. */
 .sh-app-head {
   position: sticky;
   top: var(--sh-header-h);
   z-index: 20;
-  background: color-mix(in srgb, var(--sh-body-2) 92%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-top: 1px solid var(--sh-outline);
-  border-bottom: 1px solid var(--sh-outline);
+  background: var(--sh-material);
+  backdrop-filter: var(--sh-blur);
+  -webkit-backdrop-filter: var(--sh-blur);
+  border: 0;
 }
 .sh-app-head-inner {
   display: flex;
@@ -285,7 +268,8 @@ body.g-app {
 .sh-crumbbar .g-crumb.is-current { color: var(--sh-white); font-weight: 600; }
 .sh-crumbbar .g-crumb-sep { color: color-mix(in srgb, var(--sh-gray) 60%, transparent); }
 
-/* Progress: cyan at the start ramping to the spec's #F7FF19 at completion. */
+/* Progress: the published blue and indigo steps, blue at the start ramping to indigo at completion, which
+ * is what 1.2.1 asked for in place of Forge's own cyan-to-yellow. */
 .sh-progress { display: flex; align-items: center; gap: 10px; flex: none; }
 .sh-progress-track {
   position: relative;
@@ -299,7 +283,7 @@ body.g-app {
   height: 100%;
   width: 0;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--sh-primary) 0%, var(--sh-progress-end) 100%);
+  background: linear-gradient(90deg, var(--sh-progress-from) 0%, var(--sh-progress-to) 100%);
   transition: width var(--sh-ease);
 }
 .sh-progress-label {
@@ -320,17 +304,27 @@ body.g-app {
 
 /* ============================== footer ============================== */
 
-/* A utility bar: the system status, with the admin entry point inside it. */
-.sh-footer { background: var(--sh-footer); border-top: 1px solid var(--sh-outline); }
+/* A utility bar, and nothing else: the system status, and the two ways out of the guide. 1.2.0 stripped
+ * the legacy content back to exactly this and moved Dev mode here out of the header. */
+/* The footer is a band under the page and nothing else: 1.2.1 removed its top border, so the status line
+ * and the two links sit on the colour change alone.
+ *
+ * `border: 0` rather than simply dropping `border-top`, because the older chrome still carries a bare
+ * `footer { border-top: 1px solid ... }` inside its cascade layer - and a layered element selector that
+ * nothing contradicts is exactly how a border survives a rule that was deleted on purpose. */
+.sh-footer { background: var(--sh-footer); border: 0; }
 .sh-footer-inner {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--fn-space-4, 16px);
   max-width: var(--sh-content-max);
   margin: 0 auto;
   padding: var(--fn-space-4, 18px) var(--sh-inset);
   font-family: var(--sh-font);
 }
-.sh-status { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; row-gap: 6px; }
+.sh-status { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; row-gap: 6px; min-width: 0; }
 .sh-status-dot {
   width: 8px;
   height: 8px;
@@ -339,28 +333,56 @@ body.g-app {
   background: var(--sh-gray);
 }
 .sh-status-dot.is-ok { background: var(--sh-primary); }
-.sh-status-dot.is-warn { background: var(--sh-progress-end); }
+/* The library's warning hue rather than the ramp's yellow: same family, and the ramp keeps its own. */
+.sh-status-dot.is-warn { background: var(--sh-warn); }
 .sh-status-text { margin: 0; color: var(--sh-gray); font-size: 13px; line-height: 20px; }
 .sh-status-text a { color: var(--sh-white); }
-.sh-status-admin {
-  color: var(--sh-gray);
+
+/* The utility links, Dev mode included. Dev mode is a control, not a destination, so it is a <button>
+ * wearing the links' clothes: it keeps aria-pressed and spells its state out in words, which is why the
+ * "off"/"on" chip travels with it and colour is never the only signal. */
+.sh-footer-links { display: flex; align-items: center; flex-wrap: wrap; gap: var(--fn-space-4, 16px); }
+.sh-footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  font-family: var(--sh-font);
   font-size: 13px;
+  line-height: 20px;
   font-weight: 600;
+  color: var(--sh-gray);
   text-decoration: none;
+  cursor: pointer;
+  transition: color var(--sh-ease);
+}
+.sh-footer-link:hover { color: var(--sh-white); }
+.sh-footer-link .sh-btn-state {
+  background: color-mix(in srgb, var(--sh-white) 12%, transparent);
+  color: var(--sh-gray);
+}
+.sh-footer-link[aria-pressed='true'] { color: var(--sh-white); }
+.sh-footer-link[aria-pressed='true'] .sh-btn-state {
+  background: var(--sh-primary);
+  color: var(--sh-ink-on-primary);
+}
+/* The admin link keeps the underline that says "this is a destination" - the toggle beside it must not
+ * read as one. */
+.sh-footer-admin {
   border-bottom: 1px solid color-mix(in srgb, var(--sh-gray) 45%, transparent);
 }
-.sh-status-admin:hover { color: var(--sh-white); border-bottom-color: var(--sh-white); }
+.sh-footer-admin:hover { border-bottom-color: var(--sh-white); }
 
 /* ============================== states ============================== */
 
 .sh-btn:focus-visible,
-.sh-search-input:focus-visible,
+.sh-footer-link:focus-visible,
 .sh-nav-link:focus-visible { outline: 2px solid var(--sh-primary); outline-offset: 2px; }
 
 [hidden] { display: none !important; }
-
-/* The header's line break: inert everywhere except the narrowest layout, which turns it on. */
-.sh-break { display: none; }
 
 .sh-visually-hidden {
   position: absolute;
@@ -376,21 +398,14 @@ body.g-app {
 
 /* ============================== responsive ============================== */
 
-/* The header is one 72px row while it fits, which is what the spec describes. Below that the row
- * genuinely cannot hold the logo, the navigation, the search field and both actions, so it wraps into
- * two rows rather than squeezing the navigation to nothing - and the height is measured in chrome.js
- * and published as --sh-header-h, so the container's sticky header follows it instead of guessing. */
-
-@media (max-width: 1080px) {
-  .sh-search { width: 200px; }
-}
+/* The header is one 72px row while it fits, which is what the spec describes. 1.2.0 removed the search
+ * field, so the row that has to fit is now the logo, one navigation item and one action - which holds
+ * down to a 360px phone. It may still wrap, because a wrapped row is better than a crushed one, and the
+ * height is measured in chrome.js and published as --sh-header-h so the container's sticky header
+ * follows it instead of guessing. */
 
 @media (max-width: 900px) {
   .sh-header-inner { gap: var(--fn-space-3, 12px); }
-  .sh-search { width: 44px; padding: 0 12px; }
-  .sh-search-input, .sh-kbd { display: none; }
-  .sh-search:focus-within { width: 200px; }
-  .sh-search:focus-within .sh-search-input { display: block; }
   .sh-footer-inner { padding-top: var(--fn-space-3, 12px); padding-bottom: var(--fn-space-3, 12px); }
 }
 
@@ -403,17 +418,10 @@ body.g-app {
     row-gap: 6px;
   }
   .sh-logo img { height: 34px; }
-  /* Row 1 keeps the logo, the search field and the primary action; row 2 takes the navigation and Dev
-   * mode together. The break is a zero-height flex item spanning the full line, which is the only
-   * reliable way to force the wrap: sizing rules alone cannot, because flex line-breaking uses each
-   * item's base size, so a growing search field still leaves room for one more short item on row 1. */
-  .sh-break { display: block; order: 4; flex: 0 0 100%; height: 0; }
-  .sh-search { order: 2; flex: 1 1 44px; }
-  .sh-btn-primary { order: 3; }
   /* The nav sizes to its content (`min-width: min-content`) instead of shrinking below the width of its
    * own link - the failure mode the v1 four-item bar had, caught by the same check. */
-  .sh-nav { order: 5; flex: 0 1 auto; min-width: min-content; }
-  .sh-btn-secondary { order: 6; margin-left: auto; }
+  .sh-nav { flex: 0 1 auto; min-width: min-content; }
+  .sh-btn { margin-left: auto; }
   .sh-app-head-inner { flex-wrap: wrap; row-gap: 6px; }
   .sh-crumbbar { order: 3; flex-basis: 100%; }
   /* Truncation is worse than omission on a phone: "Ho... > Com... > Elimin... > Summary" is four
@@ -425,8 +433,13 @@ body.g-app {
   .sh-crumbbar .g-crumb { max-width: 16ch; }
 }
 
+@media (max-width: 560px) {
+  /* Two utility links beside a status line is one thing too many for a phone: the footer stacks. */
+  .sh-footer-inner { flex-direction: column; align-items: flex-start; }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sh-progress-bar, .sh-btn { transition: none; }
+  .sh-progress-bar, .sh-btn, .sh-footer-link { transition: none; }
 }
 
 /* ============================== print ============================== */
