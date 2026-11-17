@@ -385,3 +385,25 @@ test('every page loads the rescue script and names a probe target', async () => 
     assert.match(html, /install-startup\.bat/, `${page} must tell the user about the one-time installer`);
   }
 });
+
+test('the mockups that cannot work from disk hand over to the server too', async () => {
+  /* These are the mockups with a real dependency on an origin: the randomiser loads its logic as
+   * an ES module and fetches its JSON, the questions page fetches its data. A browser blocks both
+   * on file://, so double-clicking either one left a styled, dead page - the worst kind, because
+   * everything looks fine until nothing responds. */
+  for (const page of ['concepts/randomiser-1-slots/index.html', 'concepts/questions-1-default/index.html']) {
+    const html = await readFile(path.join(PUBLIC_DIR, page), 'utf8');
+    assert.match(
+      html,
+      /<script src="\.\.\/\.\.\/js\/local-server-check\.js"><\/script>/,
+      `${page} loads the rescue script`
+    );
+  }
+
+  /* And the rescue has to name the page, not just its file name. A mockup sits two folders down,
+   * so the old last-segment redirect answered file:///.../questions-1-default/index.html with
+   * http://localhost:8080/index.html - the home page, not the mockup. */
+  const rescue = await readFile(path.join(PUBLIC_DIR, 'js', 'local-server-check.js'), 'utf8');
+  assert.match(rescue, /function pagePath\(\)/, 'the rescue works out where the page lives');
+  assert.match(rescue, /origin \+ '\/' \+ pagePath\(\)/, 'the redirect is built from that full path');
+});

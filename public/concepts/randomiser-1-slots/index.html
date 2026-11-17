@@ -39,7 +39,20 @@
     font: 400 1rem/1.5 var(--body);
     min-height: 100vh;
   }
-  .wrap { max-width: 64rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+  /* The Epic mark in a 72px bar - the app's own header measurement (css/shell.css .sh-header-inner is
+     min-height: 72px, .sh-logo img is 44px) - drawn in this page's tokens and rule colour. */
+  .top {
+    height: 72px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    border-bottom: 1px solid var(--line-2);
+  }
+  .top img { display: block; height: 44px; width: auto; }
   h1 {
     font: 800 clamp(2rem, 5vw, 3rem)/1.05 var(--title);
     letter-spacing: -0.02em;
@@ -326,6 +339,7 @@
 </style>
 </head>
 <body>
+<header class="top"><img src="../../assets/logo_epic.svg" alt="Epic Games"></header>
 <main class="wrap">
   <h1>Roll for a starting point</h1>
   <p class="lede">Three reels: a flavour (or a brand), a game type and a hook. Lock anything you like and spin the rest.</p>
@@ -650,5 +664,9 @@ async function init() {
 
 init();
 </script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its
+     JSON, and a browser blocks both on a file:// page. This still runs there, and hands the
+     browser over to the server address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
 </body>
 </html>
