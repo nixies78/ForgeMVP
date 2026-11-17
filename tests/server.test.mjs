@@ -139,20 +139,41 @@ test('with live reload on, pages get the reload script and changes are announced
   assert.ok(html.includes(LIVE_RELOAD_SNIPPET + '</body>'), 'the script goes just before </body>');
   assert.equal(Number(res.headers.get('content-length')), Buffer.byteLength(html));
 
-  const stream = await fetch(`${base}${LIVE_RELOAD_PATH}`);
-  assert.match(stream.headers.get('content-type'), /text\/event-stream/);
-  const reader = stream.body.getReader();
-  const decoder = new TextDecoder();
-  let seen = decoder.decode((await reader.read()).value);
-  assert.match(seen, /data: \w+/, 'the stream opens with the boot id');
+  const poll = async () => {
+    const r = await fetch(`${base}${LIVE_RELOAD_PATH}`);
+    assert.equal(r.headers.get('cache-control'), 'no-store');
+    return r.text();
+  };
+  const before = await poll();
+  assert.match(before, /^\w+\.\d+$/, 'the version is the boot id and a change count');
+  assert.equal(await poll(), before, 'nothing changed, so the version is stable');
 
   await writeFile(path.join(dir, 'index.html'), '<!doctype html><body><p>changed</p></body>');
   const deadline = Date.now() + 5000;
-  while (!seen.includes('data: reload') && Date.now() < deadline) {
-    seen += decoder.decode((await reader.read()).value);
+  let after = before;
+  while (after === before && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    after = await poll();
   }
-  assert.ok(seen.includes('data: reload'), 'a file change is announced to open pages');
-  await reader.cancel();
+  assert.notEqual(after, before, 'a file change bumps the version, so open pages reload');
+});
+
+test('live reload never holds a connection open', async (t) => {
+  // Browsers allow six connections per host: a held-open stream per tab starved
+  // every other request once six tabs were open.
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'forge-live-'));
+  const server = createServer(dir, { live: true });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  t.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(dir, { recursive: true, force: true });
+  });
+  const res = await fetch(`http://127.0.0.1:${server.address().port}${LIVE_RELOAD_PATH}`);
+  assert.doesNotMatch(res.headers.get('content-type'), /event-stream/);
+  assert.ok(res.headers.get('content-length'), 'a complete, sized response, so the socket is freed');
+  await res.text();
+  assert.doesNotMatch(LIVE_RELOAD_SNIPPET, /EventSource/);
+  assert.match(LIVE_RELOAD_SNIPPET, /document\.hidden/, 'hidden tabs do not poll');
 });
 
 test('injectLiveReload works with and without a closing body tag', () => {

@@ -100,19 +100,29 @@ export function healthPayload() {
 /**
  * Live reload (local development only, off unless --live is passed).
  *
- * Every HTML page gets a tiny script that holds an EventSource open on
- * /__livereload. When anything under public/ changes, the server sends "reload"
- * and the page refreshes itself. When the server process restarts (the dev
- * supervisor restarts it after a server.js edit), the page reconnects, sees a new
- * boot id, and refreshes too. Cloud Run never passes --live, so production pages
- * are served byte-for-byte as they are on disk.
+ * Every HTML page gets a tiny script that asks /__livereload for the current
+ * version (boot id + change count) about once a second, and refreshes the page
+ * when it changes: a file under public/ changed, or the server restarted after a
+ * server.js edit. Cloud Run never passes --live, so production pages are served
+ * byte-for-byte as they are on disk.
+ *
+ * Why polling and not a held-open EventSource: browsers allow only six HTTP/1.1
+ * connections per host, and an EventSource holds one for as long as the tab is
+ * open. With six or more tabs on the site every slot was taken, so new pages and
+ * images queued for minutes. A poll is a short request that frees its slot at once,
+ * and hidden tabs do not poll at all.
  */
 export const LIVE_RELOAD_PATH = '/__livereload';
+export const LIVE_RELOAD_INTERVAL_MS = 1000;
 export const LIVE_RELOAD_SNIPPET =
-  '<script>(function(){var boot=null;function connect(){var es=new EventSource("' +
+  '<script>(function(){var seen=null;function check(){if(document.hidden)return;' +
+  'fetch("' +
   LIVE_RELOAD_PATH +
-  '");es.onmessage=function(e){if(e.data==="reload"||(boot&&boot!==e.data)){location.reload();return;}boot=e.data;};' +
-  'es.onerror=function(){es.close();setTimeout(connect,1000);};}connect();})();</script>';
+  '",{cache:"no-store"}).then(function(r){return r.ok?r.text():null;}).then(function(v){' +
+  'if(!v)return;if(seen&&v!==seen){location.reload();return;}seen=v;}).catch(function(){});}' +
+  'check();setInterval(check,' +
+  LIVE_RELOAD_INTERVAL_MS +
+  ');document.addEventListener("visibilitychange",check);})();</script>';
 
 /** Put the live-reload script just before </body>, or at the end if there is none. */
 export function injectLiveReload(html) {
@@ -122,12 +132,12 @@ export function injectLiveReload(html) {
 
 function createLiveReload(publicDir) {
   const bootId = Date.now().toString(36);
-  const clients = new Set();
+  let changes = 0;
   let timer = null;
   let watcher = null;
 
-  const broadcast = () => {
-    for (const res of clients) res.write('data: reload\n\n');
+  const bump = () => {
+    changes += 1;
   };
 
   try {
@@ -136,34 +146,25 @@ function createLiveReload(publicDir) {
     watcher = fs.watch(fs.realpathSync.native(publicDir), { recursive: true }, () => {
       // Editors and git write several files in a burst: wait for it to settle.
       clearTimeout(timer);
-      timer = setTimeout(broadcast, 150);
+      timer = setTimeout(bump, 150);
     });
   } catch (err) {
     console.error(`  Live reload could not watch ${publicDir}: ${err.message}`);
   }
 
-  // Comment lines keep idle connections from being dropped by the browser.
-  const heartbeat = setInterval(() => {
-    for (const res of clients) res.write(': ping\n\n');
-  }, 25000);
-  heartbeat.unref?.();
-
   return {
     handle(req, res) {
+      const body = `${bootId}.${changes}`;
       res.writeHead(200, {
-        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Content-Length': Buffer.byteLength(body),
         'Cache-Control': 'no-store',
-        Connection: 'keep-alive',
       });
-      res.write(`retry: 1000\ndata: ${bootId}\n\n`);
-      clients.add(res);
-      req.on('close', () => clients.delete(res));
+      res.end(req.method === 'HEAD' ? undefined : body);
     },
     close() {
+      clearTimeout(timer);
       watcher?.close();
-      clearInterval(heartbeat);
-      for (const res of clients) res.end();
-      clients.clear();
     },
   };
 }
@@ -258,15 +259,7 @@ export function createServer(publicDir = PUBLIC_DIR, { live = false } = {}) {
       fs.createReadStream(target).pipe(res);
     });
   });
-  if (liveReload) {
-    // Event streams never go idle, so end them first or server.close() would wait
-    // for its timeout on every shutdown.
-    const closeServer = server.close.bind(server);
-    server.close = (callback) => {
-      liveReload.close();
-      return closeServer(callback);
-    };
-  }
+  if (liveReload) server.on('close', () => liveReload.close());
   return server;
 }
 
