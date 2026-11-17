@@ -16,10 +16,12 @@
   }
   :root {
     --ink: #101014;
-    --muted: #5c5c63;
-    --line: #e6e6ea;
+    --muted: #55555c;
+    --line: #e4e4e9;
+    --soft: #f5f6f8;
     --blue: #33BFFF;
     --blue-ink: #185977;
+    --blue-wash: #eaf8ff;
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
@@ -30,118 +32,120 @@
     background: #fff;
     color: var(--ink);
     font-family: var(--body);
-    font-size: 18px;
+    font-size: 17px;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
 
   /* thin progress bar, like a form you are moving through */
-  .progress {
-    position: fixed; top: 0; left: 0; right: 0; height: 3px;
-    background: var(--line); z-index: 10;
-  }
-  .progress span {
-    display: block; height: 100%; width: 0;
-    background: var(--blue);
-    transition: width .2s linear;
-  }
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--line); z-index: 10; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--blue); transition: width .2s linear; }
 
-  .screen {
-    min-height: 100vh;
-    min-height: 100svh;
-    display: flex;
-    align-items: center;
-    padding: 96px clamp(24px, 8vw, 128px);
-  }
-  .inner { width: 100%; max-width: 860px; margin: 0 auto; }
+  .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 56px); }
+  section { padding-block: clamp(64px, 9vw, 120px); }
+  .hero { padding-top: clamp(64px, 7vw, 96px); padding-bottom: clamp(48px, 7vw, 96px); }
 
   .label {
-    font-family: var(--body);
-    font-weight: 700;
-    font-size: 15px;
-    color: var(--blue-ink);
-    display: flex; align-items: center; gap: 10px;
-    margin: 0 0 28px;
+    font-weight: 700; font-size: 15px; color: var(--blue-ink);
+    margin: 0 0 22px;
   }
-  .label .num {
-    display: inline-grid; place-items: center;
-    width: 28px; height: 28px; border-radius: 6px;
-    background: var(--blue); color: var(--ink);
-    font-size: 14px;
-  }
-
-  h1, h2 {
-    font-family: var(--title);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.05;
-    margin: 0;
-  }
-  h1 { font-size: clamp(44px, 7.4vw, 92px); }
-  h2 { font-size: clamp(34px, 5vw, 60px); }
-
+  h1, h2, h3 { font-family: var(--title); font-weight: 700; letter-spacing: -0.025em; margin: 0; }
+  h1 { font-size: clamp(42px, 6vw, 76px); line-height: 1.02; max-width: 14em; }
+  h2 { font-size: clamp(32px, 4.4vw, 54px); line-height: 1.06; }
   .lede {
-    color: var(--muted);
-    font-size: clamp(18px, 1.6vw, 21px);
-    max-width: 34em;
-    margin: 28px 0 44px;
+    color: var(--muted); font-size: clamp(18px, 1.6vw, 21px);
+    max-width: 38em; margin: 24px 0 0;
+  }
+  .prompt {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin: clamp(36px, 4vw, 52px) 0 18px;
+    font-weight: 700; font-size: 15px;
+  }
+  .prompt .hint { font-weight: 400; color: var(--muted); font-size: 14px; }
+  kbd {
+    font-family: var(--body); font-weight: 700; font-size: 12px;
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 1px 6px;
+    background: #fff; color: var(--ink);
   }
 
-  .cta {
-    display: inline-flex; align-items: center; gap: 12px;
-    background: var(--blue); color: var(--ink);
-    font-family: var(--body); font-weight: 700; font-size: 19px;
-    text-decoration: none;
-    padding: 16px 28px; border-radius: 8px;
-    transition: transform .15s ease, box-shadow .15s ease;
+  /* the three answers */
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card {
+    position: relative;
+    display: flex; flex-direction: column;
+    border: 1.5px solid var(--line); border-radius: 14px;
+    background: #fff; overflow: hidden;
+    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
   }
-  .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(51,191,255,.35); }
-  .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  .cta .arrow { transition: transform .15s ease; }
-  .cta:hover .arrow { transform: translateX(3px); }
-  .hint {
-    display: inline-block; margin-left: 18px;
-    font-size: 14px; color: var(--muted);
-  }
-  .hint kbd {
-    font-family: var(--body); font-weight: 700; font-size: 13px;
-    border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
-  }
+  .card:hover { border-color: var(--ink); transform: translateY(-3px); box-shadow: 0 14px 36px rgba(16,16,20,.08); }
+  .card.ready { border-color: var(--blue); }
+  .card.ready:hover { border-color: var(--blue); box-shadow: 0 14px 36px rgba(51,191,255,.25); }
 
-  /* numbered path */
-  .steps { list-style: none; margin: 0; padding: 0; }
-  .steps li {
-    display: grid; grid-template-columns: 56px 1fr; align-items: baseline;
-    padding: 28px 0;
+  .visual {
+    position: relative;
+    aspect-ratio: 2 / 1; max-width: 100%;
+    display: grid; place-items: center;
+    background: var(--soft);
     border-bottom: 1px solid var(--line);
   }
-  .steps li:first-child { border-top: 1px solid var(--line); }
-  .steps .n {
-    font-family: var(--title); font-weight: 700; font-size: 22px; color: var(--blue-ink);
+  .card.ready .visual { background: var(--blue-wash); border-bottom-color: #cdeefd; }
+  .visual svg { width: 34%; max-width: 120px; height: auto; }
+  .key {
+    position: absolute; top: 14px; left: 14px;
+    width: 30px; height: 30px; border-radius: 7px;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 14px;
+    border: 1.5px solid var(--ink); background: #fff;
   }
-  .steps .t {
-    font-family: var(--title); font-weight: 600;
-    font-size: clamp(24px, 3.2vw, 38px); letter-spacing: -0.02em; line-height: 1.15;
-  }
+  .card.ready .key { background: var(--blue); border-color: var(--blue); }
 
-  .facts {
-    display: flex; flex-wrap: wrap; gap: 20px 56px; margin-top: 48px;
+  .body { display: flex; flex-direction: column; flex: 1; padding: 22px 22px 24px; }
+  .badge {
+    align-self: flex-start;
+    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 999px; margin-bottom: 12px;
   }
-  .facts div { font-size: 16px; color: var(--muted); }
+  .badge.on { background: var(--blue-wash); color: var(--blue-ink); }
+  .badge.soon { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
+  h3 { font-size: 26px; line-height: 1.15; }
+  .body p { color: var(--muted); font-size: 16px; margin: 10px 0 24px; flex: 1; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--body); font-weight: 700; font-size: 17px;
+    text-decoration: none; color: var(--ink);
+    padding: 14px 22px; border-radius: 8px;
+    border: 1.5px solid var(--ink); background: #fff;
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+  .btn:hover { background: var(--soft); }
+  .btn.primary { background: var(--blue); border-color: var(--blue); }
+  .btn.primary:hover { box-shadow: 0 8px 24px rgba(51,191,255,.4); }
+  .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .btn .arrow { transition: transform .15s ease; }
+  .btn:hover .arrow { transform: translateX(3px); }
+  .card .btn { width: 100%; }
+  .btn.big { font-size: 19px; padding: 16px 30px; }
+
+  /* what you walk away with */
+  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; }
+  .strip-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px 72px; align-items: end; }
+  .facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 20px 56px; }
+  .facts div { font-size: 15px; color: var(--muted); }
   .facts b {
-    display: block;
-    font-family: var(--title); font-weight: 700; font-size: clamp(44px, 6vw, 72px);
-    line-height: 1; color: var(--ink); letter-spacing: -0.03em; margin-bottom: 6px;
+    display: block; font-family: var(--title); font-weight: 700;
+    font-size: clamp(44px, 6vw, 76px); line-height: 1; letter-spacing: -0.03em;
+    color: var(--ink); margin-bottom: 6px;
   }
 
   .final { text-align: center; }
-  .final .lede { margin-left: auto; margin-right: auto; }
+  .final .lede { margin: 18px auto 36px; }
 
   .tag {
-    position: fixed; left: 16px; bottom: 16px; z-index: 10;
+    position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
     font-size: 12px; font-weight: 700; color: var(--muted);
-    background: rgba(255,255,255,.9); border: 1px solid var(--line);
+    background: rgba(255,255,255,.92); border: 1px solid var(--line);
     padding: 5px 10px; border-radius: 999px;
   }
 
@@ -152,15 +156,19 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
+    .card:hover { transform: none; }
   }
 
+  @media (max-width: 920px) {
+    .options { grid-template-columns: 1fr; max-width: 560px; }
+    .strip-grid { grid-template-columns: 1fr; }
+  }
   @media (max-width: 560px) {
-    body { font-size: 17px; }
-    .screen { padding: 80px 24px; }
-    .hint { display: none; }
-    .cta { width: 100%; justify-content: center; }
-    .steps li { grid-template-columns: 40px 1fr; padding: 22px 0; }
-    .facts { gap: 28px 40px; }
+    .prompt .hint { display: none; }
+    .visual { aspect-ratio: 5 / 2; }
+    .visual svg { width: 22%; }
+    .facts { gap: 20px 32px; }
+    .final .btn { width: 100%; }
   }
 </style>
 </head>
@@ -168,44 +176,88 @@
 <div class="progress" aria-hidden="true"><span id="bar"></span></div>
 
 <main>
-  <section class="screen">
-    <div class="inner">
+  <section class="hero">
+    <div class="wrap">
       <p class="label">Forge &middot; for Fortnite creators</p>
       <h1>What game do you want to&nbsp;make?</h1>
-      <p class="lede">Answer a few questions and Forge turns your idea into a plan you can build in Unreal Editor for Fortnite.</p>
-      <a class="cta" href="#">Start designing <span class="arrow" aria-hidden="true">&rarr;</span></a>
-      <span class="hint">press <kbd>Enter &crarr;</kbd></span>
+      <p class="lede">Forge turns your idea into an exact game type, the devices it needs and five build steps. Then build it in Unreal Editor for Fortnite and tap into Fortnite's developer economy.</p>
+
+      <p class="prompt">Choose how to start <span class="hint">&mdash; press <kbd>A</kbd> <kbd>B</kbd> or <kbd>C</kbd></span></p>
+      <div class="options">
+        <article class="card ready">
+          <div class="visual">
+            <span class="key">A</span>
+            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="14" y="14" width="92" height="92" rx="14"/>
+              <path d="M32 42h10M32 62h10M32 82h10" stroke="#33BFFF" stroke-width="7"/>
+              <path d="M52 42h36M52 62h28M52 82h32"/>
+            </svg>
+          </div>
+          <div class="body">
+            <span class="badge on">Ready</span>
+            <h3>Answer Questions</h3>
+            <p>Work through a short set of questions about the game you want. We'll narrow it down to an exact game type and build you a step-by-step plan.</p>
+            <a class="btn primary" href="#" data-key="a">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="visual">
+            <span class="key">B</span>
+            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="60" cy="64" r="44"/>
+              <path d="M60 64V20M60 64l38 22M60 64l-38 22"/>
+              <circle cx="60" cy="64" r="8" fill="#33BFFF" stroke="#33BFFF"/>
+              <path d="M52 8h16l-8 12z" fill="#101014"/>
+            </svg>
+          </div>
+          <div class="body">
+            <span class="badge soon">Coming soon</span>
+            <h3>Randomise</h3>
+            <p>Not sure what to make? Spin the wheel and let it pick a game idea for you - a game type, a twist and a brand to build around.</p>
+            <a class="btn" href="#" data-key="b">Spin the wheel</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="visual">
+            <span class="key">C</span>
+            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 26a10 10 0 0 1 10-10h50a10 10 0 0 1 10 10v28a10 10 0 0 1-10 10H40L24 76V64a10 10 0 0 1-10-10z"/>
+              <path d="M98 50a8 8 0 0 1 8 8v26a8 8 0 0 1-8 8v12L84 92H58a8 8 0 0 1-8-8v-6"/>
+              <path d="M32 40h34" stroke="#33BFFF" stroke-width="7"/>
+            </svg>
+          </div>
+          <div class="body">
+            <span class="badge soon">Coming soon</span>
+            <h3>Chat with AI</h3>
+            <p>Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
+            <a class="btn" href="#" data-key="c">Start chatting</a>
+          </div>
+        </article>
+      </div>
     </div>
   </section>
 
-  <section class="screen">
-    <div class="inner reveal">
-      <p class="label">Here's how it goes</p>
-      <ol class="steps">
-        <li><span class="n">1&rarr;</span><span class="t">Answer a few questions.</span></li>
-        <li><span class="n">2&rarr;</span><span class="t">Get your exact game type and the devices it needs.</span></li>
-        <li><span class="n">3&rarr;</span><span class="t">Follow five build steps in UEFN.</span></li>
-      </ol>
-    </div>
-  </section>
-
-  <section class="screen">
-    <div class="inner reveal">
-      <p class="label">Already mapped out</p>
-      <h2>The research is done. You just choose.</h2>
+  <section class="strip">
+    <div class="wrap strip-grid reveal">
+      <div>
+        <p class="label">What you walk away with</p>
+        <h2>The research is done. You just&nbsp;build.</h2>
+      </div>
       <div class="facts">
-        <div><b>13</b>game types</div>
-        <div><b>59</b>devices</div>
+        <div><b>13</b>researched game types</div>
+        <div><b>59</b>UEFN devices</div>
         <div><b>5</b>build steps</div>
       </div>
     </div>
   </section>
 
-  <section class="screen final">
-    <div class="inner reveal">
+  <section class="final">
+    <div class="wrap reveal">
       <h2>Ready when you are.</h2>
       <p class="lede">From idea to island, one question at a time.</p>
-      <a class="cta" href="#">Start designing <span class="arrow" aria-hidden="true">&rarr;</span></a>
+      <a class="btn primary big" href="#">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
     </div>
   </section>
 </main>
@@ -230,10 +282,13 @@
   }
   addEventListener('scroll', progress, { passive: true });
   addEventListener('resize', progress);
-  addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && document.activeElement === document.body) document.querySelector(".cta").click();
-  });
   progress();
+  /* Typeform-style keys: A, B or C picks an answer */
+  addEventListener('keydown', function (e) {
+    if (e.ctrlKey || e.metaKey || e.altKey || /input|textarea/i.test(document.activeElement.tagName)) return;
+    var el = document.querySelector('[data-key="' + e.key.toLowerCase() + '"]');
+    if (el) { el.focus(); el.click(); }
+  });
 </script>
 </body>
 </html>

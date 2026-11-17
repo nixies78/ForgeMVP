@@ -17,8 +17,9 @@
 
   :root {
     --paper: #F5F5F2;
+    --card: #FFFFFF;
     --ink: #000000;
-    --grey: #5C5C5A;     /* AA on paper for small text */
+    --grey: #5C5C5A;     /* AA on paper and white for small text */
     --rule: #000000;
     --pink: #E166B6;
     --u: 8px;            /* base unit, everything is a multiple */
@@ -52,6 +53,13 @@
     column-gap: calc(var(--u) * 3);
   }
 
+  .label {
+    margin: 0;
+    font: 700 13px/1 "Inter", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
   /* ---------- Header: logo only ---------- */
   header { padding-block: calc(var(--u) * 3); }
   .brand {
@@ -66,47 +74,40 @@
     display: grid; place-items: center;
   }
   .brand .mark img { width: 22px; height: auto; display: block; }
-  .brand span {
-    font: 700 15px/1 "Inter", sans-serif;
-    letter-spacing: 0.02em;
-  }
+  .brand span { font: 700 15px/1 "Inter", sans-serif; letter-spacing: 0.02em; }
 
   /* ---------- Hero ---------- */
   .hero {
     border-top: 2px solid var(--rule);
-    padding-block: calc(var(--u) * 10) calc(var(--u) * 12);
-    row-gap: calc(var(--u) * 5);
+    padding-block: calc(var(--u) * 7) calc(var(--u) * 7);
+    row-gap: calc(var(--u) * 4);
     align-items: end;
   }
-  .eyebrow {
-    grid-column: 1 / -1;
-    margin: 0;
-    font: 700 13px/1 "Inter", sans-serif;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
+  .hero .label { grid-column: 1 / -1; }
   h1 {
-    grid-column: 1 / 10;
+    grid-column: 1 / 8;
     margin: 0;
     font-family: "Inter Tight", "Inter", sans-serif;
     font-weight: 700;
-    font-size: clamp(52px, 10.5vw, 148px);
+    font-size: clamp(52px, 9vw, 128px);
     line-height: 0.9;
     letter-spacing: -0.045em;
   }
   h1 .dot { color: var(--pink); }
   .hero-side {
-    grid-column: 10 / -1;
+    grid-column: 8 / -1;
     display: flex;
     flex-direction: column;
     gap: calc(var(--u) * 3);
     align-items: flex-start;
   }
-  .lede { margin: 0; font-size: 18px; line-height: 1.45; max-width: 30ch; }
+  .lede { margin: 0; font-size: 18px; line-height: 1.45; max-width: 40ch; }
 
+  /* ---------- Buttons ---------- */
   .btn {
     display: inline-flex;
     align-items: center;
+    justify-content: space-between;
     gap: calc(var(--u) * 2);
     height: 56px;
     padding-inline: calc(var(--u) * 3);
@@ -120,41 +121,105 @@
   .btn:hover, .btn:focus-visible { background: var(--ink); color: var(--paper); }
   .btn:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
   .btn .arrow { font-weight: 400; font-size: 20px; }
+  .btn.secondary { background: transparent; }
+  .btn.secondary:hover, .btn.secondary:focus-visible { background: var(--ink); color: var(--paper); }
 
-  /* ---------- Steps ---------- */
-  .steps {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+  /* ---------- Three ways in ---------- */
+  .ways-head {
     border-top: 2px solid var(--rule);
+    padding-block: calc(var(--u) * 2) calc(var(--u) * 3);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: calc(var(--u) * 2);
+    flex-wrap: wrap;
   }
-  .step {
+  .ways-head p:last-child { margin: 0; color: var(--grey); font-size: 15px; }
+
+  .ways { list-style: none; margin: 0; padding: 0; row-gap: calc(var(--u) * 3); }
+  .way {
     grid-column: span 4;
-    padding-block: calc(var(--u) * 3) calc(var(--u) * 8);
-    border-top: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--card);
+    border: 2px solid var(--ink);
+  }
+  .way-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: calc(var(--u) * 2.5) calc(var(--u) * 3) 0;
   }
   .num {
-    display: block;
     font-family: "Inter Tight", "Inter", sans-serif;
     font-weight: 700;
-    font-size: clamp(120px, 15vw, 208px);
+    font-size: clamp(88px, 9vw, 128px);
     line-height: 0.8;
     letter-spacing: -0.06em;
-    margin: 0 0 calc(var(--u) * 4) -0.06em;
+    margin-left: -0.05em;
   }
-  .step h2 {
+  .badge {
+    display: inline-block;
+    padding: 6px 8px;
+    font: 700 11px/1 "Inter", sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 2px solid var(--ink);
+  }
+  .badge.ready { background: var(--ink); color: var(--card); }
+
+  .icon {
+    display: block;
+    margin: calc(var(--u) * 3) calc(var(--u) * 3) 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-block: calc(var(--u) * 3);
+  }
+  .icon svg { display: block; width: 100%; height: 96px; }
+
+  .way-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: calc(var(--u) * 3);
+  }
+  .way h2 {
     margin: 0 0 var(--u);
-    font: 700 20px/1.2 "Inter", sans-serif;
-    letter-spacing: -0.01em;
+    font-family: "Inter Tight", "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 28px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
   }
-  .step p { margin: 0; color: var(--grey); max-width: 30ch; }
+  .way p { margin: 0 0 calc(var(--u) * 3); color: var(--grey); font-size: 16px; }
+  .way .btn { margin-top: auto; width: 100%; }
+
+  /* ---------- Walk-away strip ---------- */
+  .strip {
+    margin-top: calc(var(--u) * 10);
+    border-top: 2px solid var(--rule);
+    list-style: none;
+    padding: 0;
+  }
+  .strip li {
+    grid-column: span 4;
+    padding-block: calc(var(--u) * 2) 0;
+    display: flex;
+    align-items: baseline;
+    gap: calc(var(--u) * 2);
+  }
+  .strip b {
+    font-family: "Inter Tight", "Inter", sans-serif;
+    font-weight: 700;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .strip span { font-size: 16px; line-height: 1.3; }
 
   /* ---------- Image ---------- */
   figure { margin: 0; }
-  .art {
-    border-top: 2px solid var(--rule);
-    padding-top: calc(var(--u) * 3);
-  }
+  .art { margin-top: calc(var(--u) * 10); }
   .art .frame {
     border: 2px solid var(--ink);
     aspect-ratio: 21 / 9;
@@ -181,7 +246,7 @@
   /* ---------- Final CTA ---------- */
   .final {
     text-align: center;
-    padding-block: calc(var(--u) * 14) calc(var(--u) * 16);
+    padding-block: calc(var(--u) * 12) calc(var(--u) * 14);
   }
   .final h2 {
     margin: 0 0 calc(var(--u) * 4);
@@ -213,31 +278,32 @@
   }
 
   /* ---------- Responsive ---------- */
-  @media (max-width: 900px) {
-    h1 { grid-column: 1 / -1; }
-    .hero-side { grid-column: 1 / 9; }
+  @media (max-width: 980px) {
+    h1, .hero-side { grid-column: 1 / -1; }
+    .way { grid-column: 1 / -1; }
+    .way { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
+    .way-top { grid-column: 1; grid-row: 1; }
+    .icon { grid-column: 1; grid-row: 2; }
+    .way-body { grid-column: 2; grid-row: 1 / span 2; border-left: 1px solid var(--ink); }
+    .strip li { grid-column: span 4; flex-direction: column; gap: 4px; }
   }
-  @media (max-width: 720px) {
+  @media (max-width: 640px) {
     .grid { column-gap: calc(var(--u) * 2); }
-    .hero { padding-block: calc(var(--u) * 6) calc(var(--u) * 8); row-gap: calc(var(--u) * 4); }
-    .hero-side { grid-column: 1 / -1; }
-    .step {
-      grid-column: 1 / -1;
-      display: grid;
-      grid-template-columns: 96px 1fr;
-      column-gap: calc(var(--u) * 2);
-      align-items: start;
-      padding-block: calc(var(--u) * 3);
-      border-top: 1px solid var(--rule);
-    }
-    .step:first-child { border-top: 0; }
-    .num { font-size: 96px; margin: 0; grid-row: span 2; }
-    .step h2 { margin-top: 6px; }
+    .hero { padding-block: calc(var(--u) * 5); row-gap: calc(var(--u) * 3); }
+    .way { display: flex; }
+    .way-body { border-left: 0; }
+    .icon { margin-top: calc(var(--u) * 2); padding-block: calc(var(--u) * 2); }
+    .icon svg { height: 72px; }
+    .num { font-size: 80px; }
+    .strip li { grid-column: 1 / -1; flex-direction: row; gap: calc(var(--u) * 2);
+                border-top: 1px solid var(--rule); padding-block: calc(var(--u) * 1.5); }
+    .strip li:first-child { border-top: 0; }
+    .strip b { font-size: 44px; min-width: 2ch; }
     .art .frame { aspect-ratio: 2 / 1; }
     .art img { object-position: 50% 100%; }
     .art figcaption { flex-direction: column; gap: 4px; }
     .art figcaption span:last-child { text-align: left; }
-    .final { padding-block: calc(var(--u) * 10) calc(var(--u) * 12); }
+    .final { padding-block: calc(var(--u) * 9) calc(var(--u) * 10); }
   }
 </style>
 </head>
@@ -253,36 +319,84 @@
 <main>
   <section class="wrap">
     <div class="grid hero">
-      <p class="eyebrow">Forge for UEFN</p>
+      <p class="label">Forge for UEFN</p>
       <h1>Idea in.<br>Island out<span class="dot">.</span></h1>
       <div class="hero-side">
-        <p class="lede">Design your Fortnite island in Forge. Build it in Unreal Editor for Fortnite.</p>
-        <a class="btn" href="#">Start your design <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        <p class="lede">Bring Forge an idea and leave with the exact game type, the UEFN devices it needs and five build steps. Then build it in Unreal Editor for Fortnite and step into Fortnite&rsquo;s developer economy.</p>
+        <a class="btn" href="#questions">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
       </div>
     </div>
   </section>
 
-  <section class="wrap" aria-label="How it works">
-    <ol class="grid steps">
-      <li class="step">
-        <span class="num" aria-hidden="true">1</span>
-        <h2>Answer a few questions</h2>
-        <p>A short set of questions narrows your idea down.</p>
+  <section class="wrap" aria-labelledby="ways-title">
+    <div class="ways-head">
+      <p class="label" id="ways-title">Three ways in</p>
+      <p>Pick how you&rsquo;d like to design it.</p>
+    </div>
+    <ol class="grid ways">
+      <li class="way" id="questions">
+        <div class="way-top"><span class="num" aria-hidden="true">1</span><span class="badge ready">Ready</span></div>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
+            <rect x="0" y="8" width="24" height="24" fill="#E166B6"/>
+            <rect x="40" y="14" width="160" height="12" fill="#000"/>
+            <rect x="0" y="40" width="24" height="24" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="40" y="46" width="120" height="12" fill="#000"/>
+            <rect x="0" y="72" width="24" height="24" fill="none" stroke="#000" stroke-width="3"/>
+            <rect x="40" y="78" width="140" height="12" fill="#000"/>
+          </svg>
+        </span>
+        <div class="way-body">
+          <h2>Answer Questions</h2>
+          <p>Work through a short set of questions about the game you want. We&rsquo;ll narrow it down to an exact game type and build you a step-by-step plan.</p>
+          <a class="btn" href="#">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        </div>
       </li>
-      <li class="step">
-        <span class="num" aria-hidden="true">2</span>
-        <h2>Get your exact game type</h2>
-        <p>One of 13 researched types, plus the devices it needs.</p>
+      <li class="way">
+        <div class="way-top"><span class="num" aria-hidden="true">2</span><span class="badge">Coming soon</span></div>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
+            <circle cx="48" cy="48" r="45" fill="none" stroke="#000" stroke-width="3"/>
+            <path d="M48 48 L48 3 A45 45 0 0 1 86.97 25.5 Z" fill="#E166B6"/>
+            <line x1="48" y1="3" x2="48" y2="93" stroke="#000" stroke-width="3"/>
+            <line x1="9" y1="25.5" x2="87" y2="70.5" stroke="#000" stroke-width="3"/>
+            <line x1="9" y1="70.5" x2="87" y2="25.5" stroke="#000" stroke-width="3"/>
+            <circle cx="48" cy="48" r="7" fill="#000"/>
+            <path d="M120 40 L150 48 L120 56 Z" fill="#000"/>
+          </svg>
+        </span>
+        <div class="way-body">
+          <h2>Randomise</h2>
+          <p>Not sure what to make? Spin the wheel and let it pick a game idea for you &mdash; a game type, a twist and a brand to build around.</p>
+          <a class="btn secondary" href="#">Spin the wheel <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        </div>
       </li>
-      <li class="step">
-        <span class="num" aria-hidden="true">3</span>
-        <h2>Build it in five steps</h2>
-        <p>A clear plan to follow in UEFN, one step at a time.</p>
+      <li class="way">
+        <div class="way-top"><span class="num" aria-hidden="true">3</span><span class="badge">Coming soon</span></div>
+        <span class="icon" aria-hidden="true">
+          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
+            <rect x="1.5" y="1.5" width="120" height="44" fill="none" stroke="#000" stroke-width="3"/>
+            <path d="M16 45 L16 62 L34 45" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="miter"/>
+            <rect x="64" y="52" width="120" height="44" fill="#E166B6"/>
+            <path d="M170 96 L170 96" stroke="none"/>
+            <rect x="16" y="18" width="72" height="10" fill="#000"/>
+            <rect x="80" y="69" width="88" height="10" fill="#000"/>
+          </svg>
+        </span>
+        <div class="way-body">
+          <h2>Chat with AI</h2>
+          <p>Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
+          <a class="btn secondary" href="#">Start chatting <span class="arrow" aria-hidden="true">&rarr;</span></a>
+        </div>
       </li>
     </ol>
-  </section>
 
-  <section class="wrap">
+    <ul class="grid strip" aria-label="What you walk away with">
+      <li><b>13</b><span>researched game types to land on</span></li>
+      <li><b>59</b><span>UEFN devices mapped to them</span></li>
+      <li><b>5</b><span>build steps to follow in UEFN</span></li>
+    </ul>
+
     <figure class="art">
       <div class="frame">
         <img src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp"
@@ -295,7 +409,7 @@
 
   <section class="wrap final">
     <h2>Your island starts with one answer.</h2>
-    <a class="btn" href="#">Start your design <span class="arrow" aria-hidden="true">&rarr;</span></a>
+    <a class="btn" href="#questions">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
   </section>
 </main>
 
