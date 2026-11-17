@@ -103,14 +103,15 @@ a { color: inherit; }
 /* ---------- nav ---------- */
 .nav {
   position: fixed; inset: 0 0 auto 0; z-index: 50;
+  height: 72px; display: flex; align-items: center;
   padding-top: env(safe-area-inset-top, 0px);
   transition: background-color .4s, backdrop-filter .4s, border-color .4s;
   border-bottom: 1px solid transparent;
 }
 .nav.scrolled { background: rgba(16,16,20,.72); backdrop-filter: blur(16px) saturate(140%); border-bottom-color: rgba(255,255,255,.06); }
-.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 100%; }
 .brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
-.brand img { height: 34px; width: auto; }
+.brand img { height: 44px; width: auto; }
 .brand-word { font-family: var(--display); font-size: 20px; letter-spacing: .06em; }
 .brand-sep { width: 1px; height: 26px; background: rgba(255,255,255,.25); }
 .nav-links { display: flex; align-items: center; gap: 32px; }

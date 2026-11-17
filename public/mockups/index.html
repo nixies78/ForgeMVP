@@ -9,10 +9,12 @@
     @font-face { font-family: "Inter"; src: url("../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding: 56px 20px 72px; }
+    body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding: 0 20px 72px; }
     main { max-width: 980px; margin: 0 auto; }
-    header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    header img { width: 40px; height: 40px; }
+    /* The app's header measurement - a 72px bar (css/shell.css .sh-header-inner) carrying the 44px Epic
+       mark (.sh-logo img). The bar now starts the page, so body's 56px top pad went with the old 46px row. */
+    header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; height: 72px; box-sizing: border-box; }
+    header img { height: 44px; width: auto; }
     h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
     h2 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #ACACAD; margin: 40px 0 12px; }
     .lede { color: #ACACAD; margin: 0 0 8px; max-width: 62ch; }

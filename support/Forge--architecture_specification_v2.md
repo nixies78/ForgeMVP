@@ -169,3 +169,9 @@ that names it, and every link to a page names its `index.html`. A server resolve
 `public/assets/x` and `dir/` to `dir/index.html`; a filesystem resolves them to `C:/assets/x` and a
 directory listing. `tests/paths.test.mjs` enforces both rules against the filesystem, because no check that
 runs through the server can see either fault.
+
+The one rule they share with the app is the header's two dimensions: a 72px bar carrying the Epic mark at
+44px, the same numbers as the shell, so the mockups can be compared against each other and against it.
+Everything else about a mockup's header - colour, rule, type, the nav it holds - is the mockup's own.
+`npm run verify` measures all thirteen pages against those two numbers, and `support/home-concepts-brief.md`
+states the rule for whoever writes the next one.

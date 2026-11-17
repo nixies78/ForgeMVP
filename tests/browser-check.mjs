@@ -18,7 +18,7 @@
  */
 
 import { spawn } from 'node:child_process';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -693,6 +693,9 @@ async function main() {
    * answers, that saving, dev mode and deletion all work. */
   await driveTheWizard(send, results);
 
+  /* Phase three: the mockups' own contract. */
+  await checkMockupHeaders(send, results);
+
   close();
   chrome.kill();
 
@@ -702,6 +705,102 @@ async function main() {
     console.log('Failures: ' + failed.map((f) => f.name).join(', '));
     process.exitCode = 1;
   }
+}
+
+/* ============================ phase three: the mockups' header ============================ */
+
+/** The one header all the home-page mockups share, so that they can be compared against each other and
+ * against the app: a 72px bar carrying the Epic mark at 44px, which is what the app's own header is
+ * (public/css/shell.css: `.sh-header-inner { min-height: 72px }`, `.sh-logo img { height: 44px }`).
+ *
+ * The mockups are thirteen separate pages, each with its own markup and its own stylesheet, so the only
+ * thing that keeps them agreeing is a check that measures them. They are listed from the disk rather
+ * than from a list here: a fourteenth mockup is covered the day it appears, not the day someone
+ * remembers to add it.
+ *
+ * Each page keeps its own colours, dividing rule and typography - this is about the two dimensions, so
+ * the check measures two numbers and nothing else. */
+async function checkMockupHeaders(send, results) {
+  const problems = [];
+  const dir = path.join(process.cwd(), 'public', 'concepts');
+
+  const pages = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    /* _media is the asset folder, not a page, and concepts/index.html is a one-line pointer to the
+     * mockups index rather than a mockup. */
+    if (entry.isDirectory() && entry.name !== '_media') pages.push(`concepts/${entry.name}/index.html`);
+  }
+  pages.push('mockups/index.html');
+  pages.sort();
+
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+
+  for (const page of pages) {
+    const before = problems.length;
+    await send('Page.navigate', { url: new URL(page, BASE).href });
+    await sleep(900);
+    const measured = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const header = document.querySelector('header');
+        if (!header) return { header: null };
+        const mark = [...header.querySelectorAll('img')].find((i) => /logo_epic/.test(i.getAttribute('src') || ''))
+          || header.querySelector('img');
+        /* The bar is measured by its rendered box. The mark is measured by offsetHeight, its laid-out
+         * height: 2-funky sets the mark inside a frame rotated 4deg, and a rotated square's bounding box
+         * is 47px for a 44px image, which says something about the frame rather than about the logo. */
+        return {
+          header: header.getBoundingClientRect().height,
+          mark: mark ? mark.offsetHeight : null,
+          /* A mark that measures 44px but sits outside the bar it belongs to is not a 72px header: the
+           * two prototype pages used to carry a 156px lockup that overhung its bar by ten pixels, which
+           * the two numbers alone cannot see. */
+          markInside: mark
+            ? (() => {
+                const bar = header.getBoundingClientRect();
+                const box = mark.getBoundingClientRect();
+                return box.top >= bar.top - 1 && box.bottom <= bar.bottom + 1;
+              })()
+            : false,
+          markSrc: mark ? mark.getAttribute('src') : null,
+          markLoaded: mark ? (mark.loading === 'lazy' ? true : mark.complete && mark.naturalWidth > 0) : false,
+          /* Below-the-fold images are marked loading="lazy" and have not been fetched yet, which is not
+           * a fault - they are left out so that the check reports the ones that really failed. */
+          images: [...document.images]
+            .filter((i) => i.loading !== 'lazy' && !(i.complete && i.naturalWidth > 0))
+            .map((i) => i.getAttribute('src'))
+        };
+      })()`,
+      returnByValue: true
+    });
+    const state = measured.result.value || {};
+
+    if (state.header == null) {
+      problems.push(`${page} has no <header> at all, so it cannot carry the shared 72px bar`);
+      continue;
+    }
+    if (Math.round(state.header) !== 72) problems.push(`${page} has a ${Math.round(state.header)}px header, not 72px`);
+    if (state.mark == null) problems.push(`${page} has no mark image in its header`);
+    else if (Math.round(state.mark) !== 44) problems.push(`${page} shows its header mark at ${Math.round(state.mark)}px, not 44px`);
+    if (state.mark && !state.markLoaded) problems.push(`${page} shows a mark that did not load (${state.markSrc})`);
+    if (state.mark && !state.markInside) problems.push(`${page} draws its mark outside the header bar it belongs to`);
+    for (const src of state.images || []) problems.push(`${page} has an image that did not load: ${src}`);
+
+    const verdict = problems.length > before ? 'FAIL ' : 'ok   ';
+    console.log(
+      `${verdict}headers · ${page.replace('concepts/', '').replace('/index.html', '').padEnd(20)} ` +
+        `header ${Math.round(state.header)}px, mark ${state.mark == null ? 'none' : Math.round(state.mark) + 'px'}` +
+        `${state.mark && !state.markLoaded ? ' (did not load)' : ''}`
+    );
+  }
+
+  for (const problem of problems) console.log(`       ! ${problem}`);
+  results.push({
+    name: `mockup headers (${pages.length} pages)`,
+    state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none',
+      shell: { backButtons: 0, h1Count: 0, navItems: 0, crumbLinks: 0 } },
+    problems,
+    pageErrors: []
+  });
 }
 
 /* ============================ phase two: the click-through ============================ */

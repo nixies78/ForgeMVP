@@ -1,8 +1,25 @@
 # Home page concepts - shared brief (2026-11-17)
 
-Five standalone mock-ups of the Forge home page, each in a very different direction, so the
-owner can compare ideas. **Static HTML/CSS only** - no app code, no data loading, buttons can be
-dead links (`href="#"`). Light inline JS is fine for a flourish (scroll reveal, a ticker), never required.
+Standalone mock-ups of the Forge home page, each in a very different direction, so the owner can compare
+ideas. **Static HTML/CSS only** - no app code, no data loading, buttons can be dead links (`href="#"`).
+Light inline JS is fine for a flourish (scroll reveal, a ticker), never required.
+
+The nine landing mock-ups, the three page prototypes (questions, lessons, randomiser) and the index that
+lists them all are in `public/concepts/<slug>/` and `public/mockups/`.
+
+## What every concept must share
+
+The direction is yours; the frame around it is not, because the mock-ups are compared against each other
+and against the app. One header, in every concept:
+
+- **72px tall**, carrying the **Epic mark at 44px** (`../../assets/logo_epic.svg`, `height: 44px;
+  width: auto`). Those two numbers are the app's own header (`public/css/shell.css`: `.sh-header-inner {
+  min-height: 72px }`, `.sh-logo img { height: 44px }`), and `npm run verify` measures all thirteen pages
+  against them, so a mock-up that drifts is reported as a failed check rather than discovered later.
+- Your header keeps **your** colours, your dividing rule, your type and your nav - it is the two
+  dimensions that are fixed, not the treatment.
+- Small-screen rules are yours: the 72/44 contract is the desktop rendering, and a `@media` block may do
+  what your design needs below that.
 
 ## What the page is for
 
@@ -60,7 +77,8 @@ Orange `#331B0B #773E1B #BA622A #FEA66E #FFC6A3` · Amber `#322206 #744F0E #B77C
 Yellow `#312B09 #736514 #B59E20 #F9E264 #FBED9C` · Lime `#222E11 #4F6C28 #7DA93E #C1ED82 #D7F4B0` ·
 Green `#132D15 #2C6A30 #46A64C #8AEA90 #B4F2B8` · Teal `#0E2B26 #206359 #329C8C #76E0D0 #A8EBE1`.
 
-**Logo**: the Epic mark is at `/assets/logo_epic.svg` (white). Do not recolour, stretch or add effects to it.
+**Logo**: the Epic mark is at `../../assets/logo_epic.svg` (white). Do not recolour, stretch or add effects
+to it.
 
 ## Images
 
@@ -80,7 +98,11 @@ Use `loading="lazy"` below the fold. Not every image needs to appear.
 
 - One self-contained page: `public/concepts/<slug>/index.html`, with its CSS inline in a `<style>`
   block (or a sibling `style.css` in the same folder). Touch **no other file** in the repo.
-- Paths: `../_media/...` for images, `/assets/...` for fonts and the logo.
+- Paths, and this one matters: **relative, never from a web root**. `../_media/...` for images and
+  `../../assets/...` for fonts and the logo. `/assets/logo_epic.svg` looks right in a served page and
+  breaks in an opened one - these pages get opened straight from disk, where `/assets/` is the drive
+  root, and a directory link (`../concepts/other/`) shows a file listing instead of a page. Link to
+  `index.html` by name. `tests/paths.test.mjs` fails on both.
 - Works at desktop width and at phone width (~400px) with no horizontal scroll.
 - Readable contrast (WCAG AA for body text).
 - Put a small fixed "Concept N - <name>" tag in a corner so screenshots stay identifiable.
