@@ -56,3 +56,7 @@ __MACOSX/
 # checkout on a PC can run on its own port without changing what is committed.
 # See autostart-forgemvp.vbs for the keys.
 .local/
+
+# Concept-page media: web copies of Epic marketing art and Fortnite cosmetic renders.
+# Local only - this repo is public, and these are not ours to publish.
+/public/concepts/_media/

@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Choose Your Mode (Concept 3)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"Inter";src:url("/assets/fonts/inter-latin-variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Archivo Black";src:url("/assets/fonts/archivo-black-latin.woff2") format("woff2");font-weight:400;font-display:swap}
+
+:root{
+  --purple-0:#251530; --purple-1:#573270; --purple-2:#894EB0; --purple:#BB6BF0; --purple-3:#CD92F4; --purple-4:#DFBAF8;
+  --indigo-0:#1B1C33; --indigo-1:#3F4076; --indigo-2:#6265BA; --indigo:#868AFD; --indigo-3:#A6A9FE; --indigo-4:#C7C8FE;
+  --yellow:#F7D82B; --yellow-3:#F9E264; --green:#5FE367; --blue:#33BFFF; --orange:#FE8539; --pink:#E166B6; --teal:#44D5BF;
+  --n0:#101014; --n1:#18181C; --n7:#ACACAD;
+  --energy:linear-gradient(90deg,#BB6BF0,#FEB4B4);
+  --display:"Archivo Black","Inter Tight",Impact,system-ui,sans-serif;
+  --title:"Inter Tight","Inter",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --gutter:clamp(16px,4vw,48px);
+  --max:1240px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:var(--body);font-size:16px;line-height:1.55;color:#fff;
+  background:
+    radial-gradient(1200px 700px at 78% 8%, rgba(187,107,240,.28), transparent 60%),
+    radial-gradient(900px 600px at 5% 40%, rgba(134,138,253,.18), transparent 60%),
+    linear-gradient(180deg,var(--purple-0) 0%, #20183a 35%, var(--indigo-0) 70%, #131325 100%);
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gutter)}
+.eyebrow{font:800 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--purple-4)}
+.eyebrow .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:1px;box-shadow:0 0 10px var(--green)}
+.energy-text{background:var(--energy);-webkit-background-clip:text;background-clip:text;color:transparent}
+h1,h2,h3{margin:0}
+h2{font:700 clamp(32px,4.6vw,56px)/1 var(--title);letter-spacing:-.02em;text-transform:uppercase}
+.section{padding-block:clamp(56px,9vw,112px)}
+.sec-head{display:flex;align-items:end;justify-content:space-between;gap:16px 32px;flex-wrap:wrap;margin-bottom:32px}
+.sec-head p{margin:10px 0 0;color:#D9D3E6;max-width:52ch}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex;align-items:center;gap:14px;text-decoration:none;font:800 16px/1 var(--title);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:18px 26px;transition:transform .15s,box-shadow .15s,filter .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-play{
+  background:var(--yellow);color:#1a1300;font-size:clamp(18px,2vw,22px);padding:22px 30px 22px 34px;
+  box-shadow:0 6px 0 #B59E20, 0 18px 40px rgba(247,216,43,.25);
+  clip-path:polygon(0 0,100% 0,100% 100%,14px 100%,0 calc(100% - 14px));
+}
+.btn-play:hover{box-shadow:0 8px 0 #B59E20, 0 24px 50px rgba(247,216,43,.35);filter:brightness(1.05)}
+.btn-play:active{transform:translateY(4px);box-shadow:0 2px 0 #B59E20}
+.key{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 7px;border-radius:5px;font:800 11px/1 var(--body);letter-spacing:.04em;border:2px solid currentColor;opacity:.75}
+.btn-ghost{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.22);color:#fff;backdrop-filter:blur(6px)}
+.btn-ghost:hover{border-color:var(--purple-3);background:rgba(187,107,240,.14)}
+
+/* ---------- Top bar ---------- */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(22,14,34,.78);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topbar .wrap{display:flex;align-items:center;gap:20px;height:64px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
+.brand img{height:30px;width:auto}
+.brand b{font:400 20px/1 var(--display);letter-spacing:.04em}
+.tabs{display:flex;gap:4px;margin-left:12px;height:100%}
+.tabs a{display:flex;align-items:center;padding:0 14px;text-decoration:none;font:800 13px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;border-bottom:3px solid transparent}
+.tabs a:hover{color:#fff}
+.tabs a.on{color:#fff;border-bottom-color:var(--yellow)}
+.topbar .spacer{flex:1}
+.vbucks{display:flex;align-items:center;gap:8px;font:800 13px/1 var(--body);letter-spacing:.06em;color:#fff;background:rgba(255,255,255,.07);border-radius:999px;padding:8px 14px;white-space:nowrap}
+.vbucks i{width:16px;height:16px;border-radius:50%;background:var(--energy);display:inline-block}
+.topbar .btn{padding:11px 16px;font-size:13px}
+
+/* ---------- Hero ---------- */
+.hero{position:relative;overflow:hidden}
+.hero::before{ /* floor glow */
+  content:"";position:absolute;left:50%;bottom:-160px;width:1400px;height:420px;transform:translateX(-10%);
+  background:radial-gradient(closest-side, rgba(187,107,240,.45), rgba(254,180,180,.12) 60%, transparent);
+  pointer-events:none;
+}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:center;gap:24px;min-height:min(calc(100vh - 64px),820px);padding-block:40px 0}
+.hero-copy{position:relative;z-index:3;padding-bottom:40px}
+.mode-pill{display:inline-flex;align-items:center;gap:10px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:8px 12px;margin-bottom:22px}
+.mode-pill small{font:700 11px/1 var(--body);letter-spacing:.12em;color:var(--n7);text-transform:uppercase}
+.mode-pill strong{font:800 12px/1 var(--body);letter-spacing:.12em;text-transform:uppercase}
+.hero h1{font:400 clamp(44px,5.8vw,92px)/.92 var(--display);text-transform:uppercase;letter-spacing:-.01em}
+.hero h1 .l1,.hero h1 .l2,.hero h1 .l3{display:block;white-space:nowrap}
+.hero-sub{font-size:clamp(16px,1.5vw,19px);color:#E4DDF0;max-width:46ch;margin:22px 0 32px}
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.hud{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px}
+.hud div{background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.1);border-left:3px solid var(--purple);border-radius:4px;padding:10px 14px}
+.hud b{display:block;font:700 24px/1 var(--title)}
+.hud span{font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#C9C1D8}
+
+.lineup{position:relative;z-index:1;align-self:end;min-height:520px;display:flex;align-items:flex-end;justify-content:center}
+.lineup::before{ /* pedestal */
+  content:"";position:absolute;bottom:20px;left:6%;right:6%;height:70px;border-radius:50%;
+  background:radial-gradient(closest-side, rgba(254,180,180,.55), rgba(187,107,240,.35) 55%, transparent);
+  filter:blur(4px);
+}
+.char{position:relative;margin:0 -70px;display:flex;flex-direction:column;align-items:center;flex-shrink:0;padding-bottom:30px}
+.char img{max-width:none;height:min(72vh,640px);width:auto;filter:drop-shadow(0 20px 30px rgba(0,0,0,.45))}
+.char.side img{height:min(62vh,550px)}
+.char.mid{z-index:2}
+.plate{position:absolute;bottom:0;display:flex;align-items:center;gap:6px;background:rgba(16,16,20,.85);border:1px solid rgba(255,255,255,.14);border-radius:4px;padding:6px 10px;font:800 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.plate .ok{color:var(--green)}
+.plate.you{border-color:var(--yellow);color:var(--yellow)}
+.char .slot-label{position:absolute;top:-6px;font:800 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--purple-4);background:rgba(37,21,48,.8);padding:6px 10px;border-radius:999px;border:1px solid rgba(205,146,244,.4)}
+
+/* ---------- MOTD ---------- */
+.motd{border-block:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(187,107,240,.16),rgba(134,138,253,.08) 50%,rgba(254,180,180,.12))}
+.motd .wrap{display:grid;grid-template-columns:auto 1fr auto;gap:16px 32px;align-items:center;padding-block:26px}
+.motd .tag{font:800 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;background:var(--energy);color:#2a1238;padding:8px 10px;border-radius:3px;white-space:nowrap}
+.motd p{margin:0;font:600 clamp(16px,1.6vw,19px)/1.4 var(--title);color:#F3EEF9}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:700 12px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(255,255,255,.2);padding:8px 11px;border-radius:999px;white-space:nowrap;color:#EDE7F5}
+
+/* ---------- Mode select ---------- */
+.modes{display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:18px}
+.mode{position:relative;display:flex;flex-direction:column;justify-content:flex-end;min-height:250px;border-radius:10px;overflow:hidden;text-decoration:none;isolation:isolate;
+  border:2px solid rgba(255,255,255,.12);background:var(--indigo-0);transition:transform .2s,border-color .2s,box-shadow .2s}
+.mode.feat{grid-row:1 / span 2;min-height:520px}
+.mode img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;transition:transform .5s}
+.mode::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(16,10,30,0) 25%,rgba(20,12,36,.7) 58%,rgba(20,12,36,.96))}
+.mode:hover{transform:translateY(-4px);border-color:var(--yellow);box-shadow:0 0 0 4px rgba(247,216,43,.18),0 24px 50px rgba(0,0,0,.4)}
+.mode:hover img{transform:scale(1.05)}
+.mode.soon img{filter:saturate(.55) brightness(.75)}
+.mode.soon:hover{border-color:var(--purple-3);box-shadow:0 0 0 4px rgba(187,107,240,.2),0 24px 50px rgba(0,0,0,.4)}
+.mode-body{padding:22px 24px 24px}
+.badges{position:absolute;top:16px;left:16px;display:flex;gap:8px;flex-wrap:wrap}
+.badge{font:800 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px;border-radius:3px}
+.badge.ready{background:var(--green);color:#0b2a0e}
+.badge.soon{background:rgba(16,16,20,.82);color:var(--purple-4);border:1px solid rgba(205,146,244,.5)}
+.badge.meta{background:rgba(16,16,20,.7);color:#fff}
+.mode .num{font:800 12px/1 var(--body);letter-spacing:.16em;color:var(--purple-4);text-transform:uppercase}
+.mode h3{font:400 clamp(26px,3vw,40px)/1 var(--display);text-transform:uppercase;margin:8px 0 10px}
+.mode.feat h3{font-size:clamp(34px,4.4vw,60px)}
+.mode p{margin:0;color:#E2DBEE;max-width:44ch;font-size:15px}
+.mode .go{margin-top:18px;display:inline-flex;align-items:center;gap:10px;font:800 14px/1 var(--title);letter-spacing:.08em;text-transform:uppercase}
+.mode.feat .go{background:var(--yellow);color:#1a1300;padding:14px 18px;border-radius:5px;box-shadow:0 4px 0 #B59E20}
+.mode.soon .go{color:var(--purple-3)}
+
+/* ---------- Pass / tier track ---------- */
+.pass{position:relative}
+.pass-panel{border-radius:14px;padding:clamp(20px,3vw,36px);background:linear-gradient(160deg,rgba(87,50,112,.55),rgba(27,28,51,.85) 60%);border:1px solid rgba(255,255,255,.1)}
+.pass-top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;margin-bottom:22px}
+.level{display:flex;align-items:center;gap:14px}
+.level .lv{display:grid;place-items:center;width:54px;height:54px;border-radius:10px;background:var(--energy);color:#2a1238;font:400 22px/1 var(--display)}
+.level strong{display:block;font:700 20px/1.1 var(--title)}
+.level small{color:#CFC7DE;font-weight:600}
+.xp{flex:1;min-width:200px;max-width:460px}
+.xp-bar{height:12px;border-radius:999px;background:rgba(0,0,0,.4);overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+.xp-bar i{display:block;height:100%;width:33%;background:var(--energy);border-radius:inherit;box-shadow:0 0 16px rgba(254,180,180,.6)}
+.xp-lbl{display:flex;justify-content:space-between;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;margin-top:8px}
+.track-scroll{overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--purple-2) transparent;padding-bottom:10px;margin-inline:-6px}
+.track{display:grid;grid-template-columns:repeat(9,minmax(128px,1fr));gap:10px;padding:6px;min-width:1180px;list-style:none;margin:0}
+.tier{position:relative;display:flex;flex-direction:column;border-radius:8px;overflow:hidden;background:#18142a;border:2px solid var(--rc);min-height:220px}
+.tier .t-no{font:800 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.35);padding:8px 10px;display:flex;justify-content:space-between}
+.tier .t-art{flex:1;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,var(--rc2),transparent 70%),linear-gradient(180deg,var(--rc3),#18142a);min-height:100px}
+.tier .t-art span{font-size:40px;line-height:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.tier .t-txt{padding:10px 10px 12px}
+.tier b{display:block;font:700 15px/1.15 var(--title)}
+.tier small{display:block;font-size:12px;color:#CFC7DE;margin-top:4px;line-height:1.35}
+.tier .rar{font:800 10px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
+.tier.done .t-no::after{content:"✓";color:var(--green)}
+.tier.cur{box-shadow:0 0 0 3px rgba(247,216,43,.5),0 0 30px rgba(247,216,43,.25)}
+.tier.cur .t-no::after{content:"▶ Now";color:var(--yellow)}
+.r-unc{--rc:#5FE367;--rc2:rgba(95,227,103,.35);--rc3:#132D15}
+.r-rare{--rc:#33BFFF;--rc2:rgba(51,191,255,.35);--rc3:#0A2633}
+.r-epic{--rc:#BB6BF0;--rc2:rgba(187,107,240,.4);--rc3:#251530}
+.r-leg{--rc:#FE8539;--rc2:rgba(254,133,57,.45);--rc3:#331B0B}
+.track-hint{display:none;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;margin-top:8px}
+.loadout{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}
+.loadout div{background:rgba(0,0,0,.28);border-radius:8px;padding:16px 18px;border:1px solid rgba(255,255,255,.08)}
+.loadout b{font:700 17px/1.2 var(--title);display:block;margin-bottom:4px}
+.loadout span{color:#D4CCE2;font-size:14px}
+.loadout em{font:800 11px/1 var(--body);font-style:normal;letter-spacing:.14em;text-transform:uppercase;color:var(--yellow);display:block;margin-bottom:8px}
+
+/* ---------- Discover row ---------- */
+.row-ctrl{display:flex;gap:8px}
+.row-ctrl button{width:46px;height:46px;border-radius:8px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:#fff;font:800 18px/1 var(--body);cursor:pointer}
+.row-ctrl button:hover{border-color:var(--yellow);color:var(--yellow)}
+.discover{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(220px,24vw,290px);gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 6px 14px;margin-inline:-6px;scrollbar-width:thin;scrollbar-color:var(--purple-2) transparent;list-style:none;margin-block:0}
+.gt{scroll-snap-align:start;position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/5;background:linear-gradient(160deg,var(--c1),var(--c0));border:2px solid rgba(255,255,255,.1);display:flex;flex-direction:column;justify-content:flex-end;transition:transform .2s,border-color .2s;isolation:isolate}
+.gt:hover{transform:translateY(-4px);border-color:#fff}
+.gt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+.gt::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 40%,rgba(14,10,26,.92))}
+.gt .glyph{position:absolute;top:18%;left:0;right:0;text-align:center;font:400 96px/1 var(--display);color:rgba(255,255,255,.16);z-index:-1}
+.gt .cat{position:absolute;top:12px;left:12px;font:800 10px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;background:rgba(16,16,20,.78);padding:6px 8px;border-radius:3px}
+.gt .gt-body{padding:16px}
+.gt h3{font:700 22px/1.05 var(--title);text-transform:uppercase;letter-spacing:-.01em}
+.gt p{margin:6px 0 0;font-size:13px;color:#DCD5E8;line-height:1.4}
+.c-combat{--c1:#BA4545;--c0:#331313}
+.c-horror{--c1:#573270;--c0:#101014}
+.c-rpg{--c1:#7DA93E;--c0:#222E11}
+.c-sim{--c1:#B77C17;--c0:#322206}
+.c-plat{--c1:#258CBB;--c0:#0A2633}
+.c-puzzle{--c1:#329C8C;--c0:#0E2B26}
+.c-party{--c1:#A54B85;--c0:#2D1424}
+.c-race{--c1:#6265BA;--c0:#1B1C33}
+
+/* ---------- Ready up ---------- */
+.ready{position:relative;overflow:hidden}
+.ready-panel{position:relative;border-radius:16px;overflow:hidden;padding:clamp(28px,5vw,64px);display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;isolation:isolate;
+  background:linear-gradient(120deg,#573270 0%,#3F4076 55%,#251530 100%);border:1px solid rgba(255,255,255,.12)}
+.ready-panel::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(600px 300px at 85% 100%,rgba(254,180,180,.45),transparent 70%),radial-gradient(500px 300px at 10% 0%,rgba(187,107,240,.4),transparent 70%)}
+.ready h2{font:400 clamp(44px,7vw,96px)/.92 var(--display)}
+.ready p{color:#EDE6F7;max-width:44ch;margin:16px 0 28px;font-size:17px}
+.countdown{display:inline-flex;align-items:center;gap:10px;font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.3);padding:8px 12px;border-radius:4px;margin-bottom:18px}
+.countdown i{width:8px;height:8px;border-radius:50%;background:var(--yellow);box-shadow:0 0 10px var(--yellow);animation:pulse 1.2s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.ready-chars{display:flex;align-items:flex-end;margin-bottom:calc(-1 * clamp(28px,5vw,64px))}
+.ready-chars img{height:clamp(280px,32vw,420px);width:auto;margin-left:-60px;filter:drop-shadow(0 16px 24px rgba(0,0,0,.45))}
+.ready-chars img:first-child{margin-left:0}
+
+footer{padding-block:40px 70px;color:#BDB5CC;font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
+footer img{height:36px;width:auto}
+
+.concept-tag{position:fixed;left:12px;bottom:12px;z-index:50;font:800 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;background:rgba(16,16,20,.88);color:#fff;border:1px solid var(--yellow);padding:8px 10px;border-radius:4px}
+
+/* reveal */
+.js-rv .rv{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
+.js-rv .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.js-rv .rv{opacity:1;transform:none;transition:none}html{scroll-behavior:auto}.countdown i{animation:none}}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1020px){
+  .tabs{display:none}
+  .hero .wrap{grid-template-columns:1fr;min-height:0;max-height:none;padding-top:36px}
+  .hero-copy{padding-bottom:0}
+  .lineup{min-height:0;height:auto}
+  .char{margin:0 -50px}
+  .char img{height:min(60vw,480px)}
+  .char.side img{height:min(52vw,420px)}
+  .motd .wrap{grid-template-columns:1fr}
+  .modes{grid-template-columns:1fr;grid-template-rows:none}
+  .mode.feat{grid-row:auto;min-height:420px}
+  .loadout{grid-template-columns:1fr}
+  .ready-panel{grid-template-columns:1fr}
+  .ready-chars{justify-content:center}
+}
+@media (max-width:600px){
+  .topbar .wrap{gap:10px;height:58px}
+  .vbucks{display:none}
+  .brand b{font-size:17px}
+  .brand img{height:26px}
+  .hero h1{font-size:clamp(44px,13vw,64px)}
+  .btn-play{width:100%;justify-content:center}
+  .btn-ghost{width:100%;justify-content:center}
+  .hud{display:grid;grid-template-columns:1fr 1fr}
+  .char{margin:0 -38px}
+  .char img{height:78vw}
+  .char.side img{height:66vw}
+  .plate{font-size:9px;padding:5px 7px}
+  .char .slot-label{display:none}
+  .mode{min-height:230px}
+  .mode.feat{min-height:380px}
+  .track-hint{display:block}
+  .row-ctrl{display:none}
+  .discover{grid-auto-columns:72%}
+  .ready-chars img{height:62vw;margin-left:-40px}
+  .concept-tag{font-size:10px;padding:6px 8px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#"><img src="/assets/logo_epic.svg" alt="Epic Games"><b>FORGE</b></a>
+    <nav class="tabs" aria-label="Lobby">
+      <a class="on" href="#top">Play</a>
+      <a href="#modes">Modes</a>
+      <a href="#pass">Forge Pass</a>
+      <a href="#discover">Discover</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="vbucks"><i></i>13 game types</span>
+    <a class="btn btn-ghost" href="#">Sign in</a>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <div class="mode-pill"><small>Selected mode</small><strong class="energy-text">Island Designer</strong></div>
+      <h1><span class="l1">Press play</span><span class="l2">on your</span><span class="l3 energy-text">island.</span></h1>
+      <p class="hero-sub">Take your game from idea to executable. Design in Forge, let AI tools bring it to life in Unreal Engine, and tap into Fortnite's vibrant developer economy.</p>
+      <div class="cta-row">
+        <a class="btn btn-play" href="#">Drop in <span class="key">Enter</span></a>
+        <a class="btn btn-ghost" href="#modes">Select mode</a>
+      </div>
+      <div class="hud" aria-label="What is inside Forge">
+        <div><b>13</b><span>Game types</span></div>
+        <div><b>59</b><span>Devices</span></div>
+        <div><b>74</b><span>Drafts</span></div>
+        <div><b>10</b><span>Category basics</span></div>
+      </div>
+    </div>
+
+    <div class="lineup" aria-hidden="true">
+      <div class="char side">
+        <span class="slot-label">Idea</span>
+        <img src="../_media/char-fn-18-outfit-jett.webp" alt="" width="875" height="1400">
+        <span class="plate"><span class="ok">✓</span> Ready</span>
+      </div>
+      <div class="char mid">
+        <span class="slot-label">Plan</span>
+        <img src="../_media/char-fn-38-outfit-malibu-hat-off.webp" alt="" width="877" height="1400">
+        <span class="plate you">★ You</span>
+      </div>
+      <div class="char side">
+        <span class="slot-label">Build</span>
+        <img src="../_media/char-fn-38-outfit-mothmando-elite.webp" alt="" width="875" height="1400">
+        <span class="plate"><span class="ok">✓</span> Ready</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOTD / why Fortnite -->
+<section class="motd" aria-label="Why build for Fortnite">
+  <div class="wrap">
+    <span class="tag">Message of the day</span>
+    <p>Fortnite is a platform, not just a game. Build in UEFN, publish to a huge live audience and earn through the developer economy. Forge gets you from blank page to build plan.</p>
+    <div class="chips"><span class="chip">Build in UEFN</span><span class="chip">Publish to Fortnite</span><span class="chip">Earn as a creator</span></div>
+  </div>
+</section>
+
+<!-- MODE SELECT -->
+<section class="section" id="modes">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Select mode</div>
+        <h2>Three ways <span class="energy-text">to drop in</span></h2>
+        <p>Pick how you want to start. Every mode ends in the same place: a game type, the devices it needs, and a build plan.</p>
+      </div>
+    </div>
+
+    <div class="modes">
+      <a class="mode feat rv" href="#">
+        <img src="../_media/art-cltm-evergreen-boxfights-2k.webp" alt="" loading="lazy">
+        <div class="badges"><span class="badge ready">● Ready</span><span class="badge meta">Solo · Guided</span></div>
+        <div class="mode-body">
+          <span class="num">Mode 01 · Featured</span>
+          <h3>Answer questions</h3>
+          <p>A short run of questions narrows your idea to an exact game type and builds you a step-by-step plan.</p>
+          <span class="go">Play now <span aria-hidden="true">→</span></span>
+        </div>
+      </a>
+      <a class="mode soon rv" href="#">
+        <img src="../_media/art-cltm-evergreen-prophunt-2k.webp" alt="" loading="lazy">
+        <div class="badges"><span class="badge soon">Coming soon</span><span class="badge meta">Random</span></div>
+        <div class="mode-body">
+          <span class="num">Mode 02</span>
+          <h3>Spin the wheel</h3>
+          <p>No idea yet? Spin for a game type, a twist and a brand to build around.</p>
+          <span class="go">Notify me</span>
+        </div>
+      </a>
+      <a class="mode soon rv" href="#">
+        <img src="../_media/art-23br-evergreen-purple-motd-1920x1080.webp" alt="" loading="lazy" style="object-position:50% 20%">
+        <div class="badges"><span class="badge soon">Coming soon</span><span class="badge meta">AI</span></div>
+        <div class="mode-body">
+          <span class="num">Mode 03</span>
+          <h3>Chat with AI</h3>
+          <p>Describe it in your own words. The AI asks follow-ups and turns it into a buildable plan.</p>
+          <span class="go">Notify me</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FORGE PASS -->
+<section class="section pass" id="pass" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Forge Pass · Season 1</div>
+        <h2>Level up <span class="energy-text">idea to island</span></h2>
+        <p>Nine tiers from first spark to published island. Forge handles the planning tiers; you claim the build tiers in UEFN.</p>
+      </div>
+    </div>
+
+    <div class="pass-panel rv">
+      <div class="pass-top">
+        <div class="level"><span class="lv">3</span><div><strong>Plan unlocked</strong><small>Game type and devices claimed</small></div></div>
+        <div class="xp">
+          <div class="xp-bar"><i></i></div>
+          <div class="xp-lbl"><span>Tier 3 / 9</span><span>Next: Create your project</span></div>
+        </div>
+      </div>
+
+      <div class="track-scroll">
+        <ol class="track">
+          <li class="tier r-unc done"><span class="t-no">Tier 1</span><div class="t-art"><span>💡</span></div><div class="t-txt"><span class="rar">Uncommon</span><b>Your idea</b><small>A sentence, a vibe, or nothing at all.</small></div></li>
+          <li class="tier r-rare done"><span class="t-no">Tier 2</span><div class="t-art"><span>🎯</span></div><div class="t-txt"><span class="rar">Rare</span><b>Game type</b><small>Locked to 1 of 13 researched types.</small></div></li>
+          <li class="tier r-epic cur"><span class="t-no">Tier 3</span><div class="t-art"><span>🧰</span></div><div class="t-txt"><span class="rar">Epic</span><b>Device loadout</b><small>The UEFN devices your game needs.</small></div></li>
+          <li class="tier r-rare"><span class="t-no">Tier 4</span><div class="t-art"><span>📁</span></div><div class="t-txt"><span class="rar">Build 1</span><b>Create your project</b><small>Spin up the island in UEFN.</small></div></li>
+          <li class="tier r-unc"><span class="t-no">Tier 5</span><div class="t-art"><span>🧭</span></div><div class="t-txt"><span class="rar">Build 2</span><b>Basic navigation</b><small>New to UEFN? Learn the controls.</small></div></li>
+          <li class="tier r-rare"><span class="t-no">Tier 6</span><div class="t-art"><span>🧱</span></div><div class="t-txt"><span class="rar">Build 3</span><b>Block out your island</b><small>Lay down the space to play in.</small></div></li>
+          <li class="tier r-epic"><span class="t-no">Tier 7</span><div class="t-art"><span>⚙️</span></div><div class="t-txt"><span class="rar">Build 4</span><b>Core game loop</b><small>Place and wire the devices from your plan.</small></div></li>
+          <li class="tier r-epic"><span class="t-no">Tier 8</span><div class="t-art"><span>✨</span></div><div class="t-txt"><span class="rar">Build 5</span><b>Make it look good</b><small>Polish, atmosphere and brand.</small></div></li>
+          <li class="tier r-leg"><span class="t-no">Tier 9</span><div class="t-art"><span>🏆</span></div><div class="t-txt"><span class="rar">Legendary</span><b>Publish</b><small>Ship it to Fortnite players.</small></div></li>
+        </ol>
+      </div>
+      <div class="track-hint">Swipe the track →</div>
+
+      <div class="loadout">
+        <div><em>Reward</em><b>The exact game type</b><span>Not "a shooter" but which one, with what works for it.</span></div>
+        <div><em>Reward</em><b>Your device list</b><span>The UEFN devices to place, grouped and explained.</span></div>
+        <div><em>Reward</em><b>Five build steps</b><span>From empty project to a game that looks the part.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISCOVER -->
+<section class="section" id="discover" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>Discover</div>
+        <h2>13 game types. <span class="energy-text">All researched.</span></h2>
+        <p>Every type comes with its own devices, questions and build notes. Pick one or let Forge find it for you.</p>
+      </div>
+      <div class="row-ctrl"><button type="button" data-dir="-1" aria-label="Scroll left">←</button><button type="button" data-dir="1" aria-label="Scroll right">→</button></div>
+    </div>
+
+    <ul class="discover" id="row">
+      <li class="gt c-combat"><img src="../_media/art-cltm-evergreen-boxfights-2k.webp" alt="" loading="lazy" style="object-position:30% 50%"><span class="cat">Combat</span><div class="gt-body"><h3>Box Fights</h3><p>Fast build fights in a tight arena.</p></div></li>
+      <li class="gt c-party"><img src="../_media/art-cltm-evergreen-prophunt-2k.webp" alt="" loading="lazy" style="object-position:55% 50%"><span class="cat">Party</span><div class="gt-body"><h3>Prop Hunt</h3><p>Hide as props. Seekers hunt you down.</p></div></li>
+      <li class="gt c-sim"><img src="../_media/art-cltm-evergreen-tycoon-2k.webp" alt="" loading="lazy" style="object-position:50% 50%"><span class="cat">Sim</span><div class="gt-body"><h3>Tycoon</h3><p>Earn, spend, expand your base.</p></div></li>
+      <li class="gt c-horror"><img src="../_media/art-23br-evergreen-halloween-newsheader-1900x600.webp" alt="" loading="lazy" style="object-position:20% 50%"><span class="cat">Horror</span><div class="gt-body"><h3>Horror Chase</h3><p>Something hunts you. Escape or hold out.</p></div></li>
+      <li class="gt c-plat"><img src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" loading="lazy" style="object-position:62% 50%"><span class="cat">Platforming</span><div class="gt-body"><h3>Deathrun / Obby</h3><p>Traps everywhere. Survive to the end.</p></div></li>
+      <li class="gt c-combat"><span class="glyph">01</span><span class="cat">Combat</span><div class="gt-body"><h3>Elimination</h3><p>Last one or team standing wins.</p></div></li>
+      <li class="gt c-combat"><span class="glyph">02</span><span class="cat">Combat</span><div class="gt-body"><h3>Team Elimination</h3><p>Squad vs squad until one side falls.</p></div></li>
+      <li class="gt c-combat"><span class="glyph">03</span><span class="cat">Combat</span><div class="gt-body"><h3>Zone Wars</h3><p>Build and fight in a shrinking zone.</p></div></li>
+      <li class="gt c-rpg"><span class="glyph">04</span><span class="cat">Adventure</span><div class="gt-body"><h3>Action RPG</h3><p>Quests, NPCs and progression.</p></div></li>
+      <li class="gt c-plat"><span class="glyph">05</span><span class="cat">Platforming</span><div class="gt-body"><h3>Parkour</h3><p>Precision jumps. Fastest run wins.</p></div></li>
+      <li class="gt c-puzzle"><span class="glyph">06</span><span class="cat">Puzzle</span><div class="gt-body"><h3>Escape Room</h3><p>Chain clues and locks before time's up.</p></div></li>
+      <li class="gt c-race"><span class="glyph">07</span><span class="cat">Racing</span><div class="gt-body"><h3>Circuit Racing</h3><p>Laps, lines and finishing position.</p></div></li>
+      <li class="gt c-race"><span class="glyph">08</span><span class="cat">Racing</span><div class="gt-body"><h3>Time Trial</h3><p>Race the clock, top the board.</p></div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- READY UP -->
+<section class="section ready" style="padding-top:0">
+  <div class="wrap">
+    <div class="ready-panel rv">
+      <div>
+        <span class="countdown"><i></i>Matchmaking: waiting on you</span>
+        <h2>Ready<br><span class="energy-text">up.</span></h2>
+        <p>Your squad's in the lobby. Answer a few questions and walk out with a game type, a device list and five build steps for UEFN.</p>
+        <a class="btn btn-play" href="#">Start designing <span class="key">Enter</span></a>
+      </div>
+      <div class="ready-chars" aria-hidden="true">
+        <img src="../_media/char-fn-38-outfit-constable-sprinkle-glasses-off.webp" alt="" loading="lazy" width="877" height="1400">
+        <img src="../_media/char-fn-18-outfit-shadow-midas-mid-reactive.webp" alt="" loading="lazy" width="875" height="1400">
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="/assets/logo_epic.svg" alt="Epic Games">
+    <span>Forge helps you design Fortnite islands to build in Unreal Editor for Fortnite. Concept mock-up.</span>
+  </div>
+</footer>
+
+<div class="concept-tag">Concept 3 · Choose Your Mode</div>
+
+<script>
+  // Discover row arrows
+  document.querySelectorAll('.row-ctrl button').forEach(function(b){
+    b.addEventListener('click',function(){
+      var row=document.getElementById('row');
+      row.scrollBy({left:row.clientWidth*0.8*Number(b.dataset.dir),behavior:'smooth'});
+    });
+  });
+  // Scroll reveal (opt-in via JS; ?still disables it; everything shows after 1.5s regardless)
+  if('IntersectionObserver' in window && (location.search+location.hash).indexOf('still')<0){
+    document.documentElement.classList.add('js-rv');
+    setTimeout(function(){document.querySelectorAll('.rv').forEach(function(el){el.classList.add('in')})},1500);
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+    document.querySelectorAll('.rv').forEach(function(el){io.observe(el)});
+  } else {
+    document.querySelectorAll('.rv').forEach(function(el){el.classList.add('in')});
+  }
+</script>
+</body>
+</html>

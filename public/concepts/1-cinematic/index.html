@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Forge - Concept 1 - Cinematic Launch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="../_media/art-23br-evergreen-purple-motd-1920x1080.webp">
+<style>
+@font-face {
+  font-family: "Inter";
+  src: url("/assets/fonts/inter-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo Black";
+  src: url("/assets/fonts/archivo-black-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --ink-0: #101014;
+  --ink-1: #18181C;
+  --ink-2: #202024;
+  --ink-3: #28282C;
+  --line: #303034;
+  --mute: #ACACAD;
+  --dim: #787678;
+  --white: #FFFFFF;
+  --blue: #33BFFF;
+  --lilac: #DFBAF8;
+  --grad: linear-gradient(100deg, #33BFFF 0%, #DFBAF8 100%);
+  --display: "Archivo Black", "Inter Tight", "Inter", system-ui, sans-serif;
+  --title: "Inter Tight", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gutter: clamp(20px, 5vw, 72px);
+  --ease: cubic-bezier(.2, .7, .1, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; scroll-behavior: smooth; background: #000; }
+body {
+  margin: 0;
+  background: #000;
+  color: var(--white);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+/* ---------- utilities ---------- */
+.eyebrow {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.wrap { width: 100%; max-width: 1280px; margin: 0 auto; padding-inline: var(--gutter); }
+
+/* ---------- buttons ---------- */
+.btn {
+  --h: 56px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  height: var(--h); padding: 0 30px;
+  border-radius: 999px;
+  font-family: var(--body); font-weight: 700; font-size: 15px; letter-spacing: .02em;
+  text-decoration: none; white-space: nowrap;
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease), background-color .3s;
+}
+.btn-primary {
+  color: #0A0A0E;
+  background: var(--grad);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset, 0 10px 40px -8px rgba(51,191,255,.55), 0 0 80px -20px rgba(223,186,248,.6);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.2) inset, 0 16px 60px -8px rgba(51,191,255,.75), 0 0 120px -20px rgba(223,186,248,.8); }
+.btn-primary svg { transition: transform .4s var(--ease); }
+.btn-primary:hover svg { transform: translateX(4px); }
+.btn-ghost {
+  color: var(--white);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.22);
+  backdrop-filter: blur(8px);
+}
+.btn-ghost:hover { background: rgba(255,255,255,.12); }
+.btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  padding-top: env(safe-area-inset-top, 0px);
+  transition: background-color .4s, backdrop-filter .4s, border-color .4s;
+  border-bottom: 1px solid transparent;
+}
+.nav.scrolled { background: rgba(16,16,20,.72); backdrop-filter: blur(16px) saturate(140%); border-bottom-color: rgba(255,255,255,.06); }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+.brand { display: flex; align-items: center; gap: 14px; text-decoration: none; }
+.brand img { height: 34px; width: auto; }
+.brand-word { font-family: var(--display); font-size: 20px; letter-spacing: .06em; }
+.brand-sep { width: 1px; height: 26px; background: rgba(255,255,255,.25); }
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-links a.link { font-size: 14px; font-weight: 500; color: var(--mute); text-decoration: none; transition: color .2s; }
+.nav-links a.link:hover { color: var(--white); }
+.nav .btn { --h: 42px; padding: 0 20px; font-size: 14px; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: flex-end;
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero-art {
+  position: absolute; inset: 0; z-index: -2;
+  background: url("../_media/art-23br-evergreen-purple-motd-1920x1080.webp") center 30% / cover no-repeat;
+  transform: scale(1.12);
+  animation: kenburns 22s var(--ease) forwards;
+  filter: saturate(1.05) contrast(1.05);
+}
+@keyframes kenburns { from { transform: scale(1.12); } to { transform: scale(1.0); } }
+.hero::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.35) 40%, transparent 70%),
+    radial-gradient(120% 90% at 50% 35%, transparent 25%, rgba(0,0,0,.55) 60%, #000 100%),
+    linear-gradient(180deg, rgba(0,0,0,.55) 0%, transparent 22%, transparent 45%, rgba(0,0,0,.85) 78%, #000 100%);
+}
+.hero-content { padding-block: 0 clamp(72px, 12vh, 132px); position: relative; }
+.hero .eyebrow { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 26px; color: #E6E6E8; }
+.hero .eyebrow::before { content: ""; width: 34px; height: 2px; background: var(--grad); border-radius: 2px; }
+.hero h1 {
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(44px, min(8.6vw, 16vh), 168px);
+  line-height: .9;
+  letter-spacing: -.02em;
+  text-transform: uppercase;
+  margin: 0 0 30px;
+  text-shadow: 0 6px 60px rgba(0,0,0,.5);
+}
+.hero h1 .line { display: block; }
+.hero-sub {
+  max-width: 540px;
+  font-size: clamp(16px, 1.4vw, 19px);
+  color: #D6D6D8;
+  margin: 0 0 40px;
+}
+.hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; }
+.scroll-cue {
+  position: absolute; right: var(--gutter); bottom: clamp(72px, 12vh, 132px);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--mute);
+  writing-mode: vertical-rl;
+}
+.scroll-cue::after {
+  content: ""; width: 1px; height: 64px;
+  background: linear-gradient(180deg, var(--blue), transparent);
+  animation: cue 2.4s ease-in-out infinite;
+  transform-origin: top;
+}
+@keyframes cue { 0% { transform: scaleY(0); opacity: 1; } 60% { transform: scaleY(1); opacity: 1; } 100% { transform: scaleY(1); opacity: 0; } }
+
+/* ---------- statement scenes ---------- */
+.scene {
+  position: relative;
+  min-height: 90vh; min-height: 90svh;
+  display: flex; align-items: center;
+  padding-block: clamp(96px, 16vh, 180px);
+}
+.statement {
+  font-family: var(--display);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: clamp(38px, 7.6vw, 124px);
+  line-height: .95;
+  letter-spacing: -.015em;
+  margin: 0;
+}
+.statement .soft { color: #3A3A40; }
+.scene-note { margin-top: 36px; max-width: 520px; color: var(--mute); font-size: clamp(16px, 1.3vw, 19px); }
+
+.scene-glow::before {
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  width: min(900px, 120vw); aspect-ratio: 1; border-radius: 50%;
+  left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(51,191,255,.16), rgba(223,186,248,.06) 55%, transparent 75%);
+}
+.scene > .wrap { position: relative; z-index: 1; }
+
+.center { text-align: center; }
+.center .scene-note { margin-inline: auto; }
+
+/* ---------- full-bleed frame (why fortnite) ---------- */
+.frame {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: center;
+  overflow: hidden; isolation: isolate;
+  background: #000;
+}
+.frame-art {
+  position: absolute; inset: 0; z-index: -2;
+  background: url("../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp") 70% center / cover no-repeat;
+}
+.frame::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, #000 0%, rgba(0,0,0,.92) 30%, rgba(0,0,0,.35) 62%, rgba(0,0,0,.15) 100%),
+    linear-gradient(180deg, #000 0%, transparent 18%, transparent 80%, #000 100%);
+}
+.frame-copy { max-width: 600px; }
+.frame h2, .section-title {
+  font-family: var(--title); font-weight: 700;
+  font-size: clamp(34px, 5vw, 72px);
+  line-height: 1.0; letter-spacing: -.03em;
+  margin: 18px 0 40px;
+}
+.beats { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: beat; }
+.beats li {
+  counter-increment: beat;
+  display: grid; grid-template-columns: 56px 1fr; gap: 6px 16px;
+  padding: 22px 0;
+  border-top: 1px solid rgba(255,255,255,.12);
+}
+.beats li:last-child { border-bottom: 1px solid rgba(255,255,255,.12); }
+.beats li::before {
+  content: "0" counter(beat);
+  font-family: var(--title); font-weight: 700; font-size: 14px; letter-spacing: .1em;
+  color: var(--blue); padding-top: 5px;
+}
+.beats strong { font-family: var(--title); font-weight: 700; font-size: clamp(20px, 2vw, 26px); letter-spacing: -.01em; display: block; }
+.beats span { grid-column: 2; color: var(--mute); font-size: 16px; }
+
+/* ---------- three ways in ---------- */
+.ways { padding-block: clamp(96px, 16vh, 180px) clamp(80px, 12vh, 140px); background: var(--ink-0); }
+.ways-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: clamp(36px, 5vw, 64px); }
+.ways-head .section-title { margin: 18px 0 0; }
+.ways-head p { max-width: 380px; color: var(--mute); margin: 0; }
+.posters { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 24px); }
+.poster {
+  position: relative; overflow: hidden; isolation: isolate;
+  aspect-ratio: 3 / 4.4;
+  border-radius: 18px;
+  background: var(--ink-2);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: clamp(22px, 2.4vw, 34px);
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: transform .6s var(--ease), border-color .4s, box-shadow .6s var(--ease);
+}
+.poster img {
+  position: absolute; inset: 0; z-index: -2;
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 1.2s var(--ease), filter .6s;
+  filter: saturate(.85) brightness(.85);
+}
+.poster::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,.55) 55%, rgba(8,8,12,.97) 100%);
+}
+.poster:hover { transform: translateY(-6px); border-color: rgba(51,191,255,.5); box-shadow: 0 30px 80px -30px rgba(51,191,255,.45); }
+.poster:hover img { transform: scale(1.06); filter: saturate(1) brightness(.95); }
+.poster:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.poster-top {
+  position: absolute; top: clamp(18px, 2vw, 26px); left: clamp(22px, 2.4vw, 34px); right: clamp(22px, 2.4vw, 34px);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.poster-num { font-family: var(--display); font-size: 15px; letter-spacing: .08em; color: rgba(255,255,255,.85); }
+.pill {
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  padding: 7px 12px; border-radius: 999px;
+  background: rgba(0,0,0,.55); border: 1px solid rgba(255,255,255,.22); color: #E6E6E8;
+  backdrop-filter: blur(6px);
+}
+.pill.live { background: var(--grad); color: #0A0A0E; border-color: transparent; }
+.poster h3 {
+  font-family: var(--display); font-weight: 400; text-transform: uppercase;
+  font-size: clamp(28px, 2.9vw, 44px); line-height: .95; letter-spacing: -.01em;
+  margin: 0 0 14px;
+}
+.poster p { margin: 0 0 22px; color: #C9C9CC; font-size: 15.5px; max-width: 34ch; }
+.poster-cta { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; font-size: 14px; letter-spacing: .02em; }
+.poster-cta .arrow { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.35); transition: background .3s, border-color .3s; }
+.poster:hover .poster-cta .arrow { background: var(--grad); border-color: transparent; color: #0A0A0E; }
+.poster.featured { border-color: rgba(51,191,255,.35); }
+
+/* ---------- walk away with ---------- */
+.result { padding-block: clamp(110px, 18vh, 200px); background: linear-gradient(180deg, var(--ink-0), #000 70%); }
+.result .section-title { max-width: 14ch; }
+.deliver { list-style: none; margin: 0; padding: 0; }
+.deliver li {
+  display: grid; grid-template-columns: minmax(64px, 130px) 1fr minmax(0, 320px); align-items: baseline; gap: 24px;
+  padding: clamp(26px, 3.5vw, 44px) 0;
+  border-top: 1px solid var(--line);
+}
+.deliver li:last-child { border-bottom: 1px solid var(--line); }
+.deliver .k { font-family: var(--title); font-weight: 700; font-size: 13px; letter-spacing: .2em; color: var(--dim); text-transform: uppercase; }
+.deliver .v { font-family: var(--display); text-transform: uppercase; font-size: clamp(28px, 4.2vw, 64px); line-height: .95; letter-spacing: -.015em; }
+.deliver .d { color: var(--mute); font-size: 16px; }
+
+/* ---------- numbers ---------- */
+.numbers { padding-block: clamp(80px, 12vh, 140px); background: #000; border-top: 1px solid var(--ink-2); }
+.num-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.num { padding-top: 26px; border-top: 2px solid var(--ink-3); position: relative; }
+.num::before { content: ""; position: absolute; top: -2px; left: 0; width: 40px; height: 2px; background: var(--grad); }
+.num b { display: block; font-family: var(--title); font-weight: 800; font-size: clamp(56px, 7vw, 112px); line-height: .9; letter-spacing: -.05em; }
+.num span { display: block; margin-top: 14px; color: var(--mute); font-size: 15px; font-weight: 500; }
+.numbers-cap { margin-bottom: 56px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: baseline; }
+.numbers-cap h2 { font-family: var(--title); font-weight: 700; font-size: clamp(24px, 2.6vw, 36px); letter-spacing: -.02em; margin: 0; line-height: 1.1; }
+
+/* ---------- finale ---------- */
+.finale {
+  position: relative; overflow: hidden; isolation: isolate;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: center; text-align: center;
+  padding-block: 120px;
+}
+.finale-art {
+  position: absolute; inset: 0; z-index: -2;
+  background: url("../_media/art-30fne-blogheader-1900-600-dark-creatorportal.webp") center / cover no-repeat;
+  opacity: .55;
+}
+.finale::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    radial-gradient(60% 50% at 50% 55%, rgba(51,191,255,.18), transparent 70%),
+    linear-gradient(180deg, #000 0%, rgba(0,0,0,.55) 30%, rgba(0,0,0,.55) 70%, #000 100%);
+}
+.finale .statement { font-size: clamp(44px, 10vw, 168px); line-height: .88; margin: 22px 0 30px; }
+.finale p { max-width: 560px; margin: 0 auto 44px; color: #D0D0D3; font-size: clamp(16px, 1.4vw, 19px); }
+.finale .btn { --h: 64px; padding: 0 38px; font-size: 16px; }
+.finale-meta { margin-top: 26px; font-size: 13px; color: var(--dim); }
+
+/* ---------- footer ---------- */
+footer { background: #000; border-top: 1px solid var(--ink-2); padding-block: 36px calc(36px + env(safe-area-inset-bottom, 0px)); }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; color: var(--dim); font-size: 13px; }
+.foot .brand img { height: 26px; }
+.foot .brand-word { font-size: 15px; color: var(--white); }
+
+/* ---------- concept tag ---------- */
+.concept-tag {
+  position: fixed; z-index: 60;
+  left: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  padding: 8px 12px; border-radius: 8px;
+  background: rgba(16,16,20,.82); color: #E6E6E8;
+  border: 1px solid rgba(51,191,255,.4);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+/* ---------- reveal ---------- */
+.js .reveal { opacity: 0; transform: translateY(40px); filter: blur(6px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease), filter 1.1s var(--ease); }
+.js .reveal.in { opacity: 1; transform: none; filter: none; }
+.js .reveal.d1 { transition-delay: .12s; }
+.js .reveal.d2 { transition-delay: .24s; }
+.js .reveal.d3 { transition-delay: .36s; }
+.js .hero .reveal { transform: translateY(24px); }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-art { animation: none; transform: none; }
+  .scroll-cue::after { animation: none; }
+  .js .reveal { opacity: 1; transform: none; filter: none; transition: none; }
+}
+
+.short { display: none; }
+/* ---------- responsive ---------- */
+@media (max-width: 980px) {
+  .posters { grid-template-columns: 1fr; }
+  .poster { aspect-ratio: 16 / 11; }
+  .num-grid { grid-template-columns: repeat(2, 1fr); row-gap: 48px; }
+  .deliver li { grid-template-columns: 1fr; gap: 10px; }
+  .nav-links a.link { display: none; }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .brand img { height: 28px; }
+  .brand-word { font-size: 17px; }
+  .brand-sep { height: 22px; }
+  .nav-inner { height: 64px; }
+  .nav .btn { --h: 38px; padding: 0 14px; font-size: 13px; }
+  .hero { align-items: flex-end; }
+  .hero-art { background-position: 52% 20%; }
+  .hero::before {
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.6) 0%, transparent 18%, rgba(0,0,0,.35) 40%, rgba(0,0,0,.92) 66%, #000 100%);
+  }
+  .hero-content { padding-bottom: 88px; }
+  .hero h1 { margin-bottom: 22px; font-size: 14.5vw; }
+  .eyebrow { letter-spacing: .2em; }
+  .long { display: none; } .short { display: inline; }
+  .hero-sub { margin-bottom: 30px; }
+  .hero-ctas .btn { width: 100%; }
+  .scroll-cue { display: none; }
+  .scene { min-height: 0; }
+  .frame { align-items: flex-end; min-height: 0; padding-block: 58vw 72px; }
+  .frame-art { inset: 0 0 auto 0; height: 78vw; background-position: 62% center; background-size: cover; }
+  .frame::before { background: linear-gradient(180deg, rgba(0,0,0,.25) 0%, transparent 14vw, rgba(0,0,0,.6) 50vw, #000 76vw, #000 100%); }
+  .ways { padding-block: 88px 64px; }
+  .result { padding-block: 72px 80px; }
+  .numbers { padding-block: 64px 72px; }
+  .numbers-cap { margin-bottom: 36px; }
+  footer { padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)); }
+  .poster { aspect-ratio: 4 / 5; }
+  .beats li { grid-template-columns: 40px 1fr; }
+  .finale { min-height: 0; padding-block: 120px 110px; }
+  .finale .btn { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#" aria-label="Forge home">
+      <img src="/assets/logo_epic.svg" alt="Epic Games" width="30" height="34">
+      <span class="brand-sep" aria-hidden="true"></span>
+      <span class="brand-word">FORGE</span>
+    </a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="link" href="#ways">Ways in</a>
+      <a class="link" href="#result">What you get</a>
+      <a class="btn btn-primary" href="#">Start designing</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- SCENE 1: HERO -->
+  <section class="hero" aria-label="Introduction">
+    <div class="hero-art" role="img" aria-label="Fortnite outfits lined up against a purple backdrop"></div>
+    <div class="wrap hero-content">
+      <div class="eyebrow reveal">Forge &middot; for <span class="long">Unreal Editor for Fortnite</span><span class="short">UEFN</span></div>
+      <h1>
+        <span class="line reveal d1">Every island</span>
+        <span class="line reveal d2">starts <span class="grad-text">here.</span></span>
+      </h1>
+      <p class="hero-sub reveal d2">Take your game from idea to executable. Design it in Forge, bring it to life in Unreal Engine, and launch it into Fortnite's developer economy.</p>
+      <div class="hero-ctas reveal d3">
+        <a class="btn btn-primary" href="#">Start your design
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="#ways">See the three ways in</a>
+      </div>
+    </div>
+    <div class="scroll-cue" aria-hidden="true">Scroll</div>
+  </section>
+
+  <!-- SCENE 2: STATEMENT -->
+  <section class="scene scene-glow center" id="idea" aria-label="The idea">
+    <div class="wrap">
+      <p class="statement reveal"><span class="soft">You have</span><br>the idea.</p>
+      <p class="statement reveal d1" style="margin-top:.35em"><span class="soft">Now give it</span><br><span class="grad-text">a plan.</span></p>
+      <p class="scene-note reveal d2">Forge turns a spark into the exact game type, the devices it needs and the steps to build it. No blank page. No guesswork.</p>
+    </div>
+  </section>
+
+  <!-- SCENE 3: WHY FORTNITE -->
+  <section class="frame" id="why" aria-labelledby="why-title">
+    <div class="frame-art" role="img" aria-label="A Fall Guys bean holding a blueprint beside a wireframe arch in Fortnite"></div>
+    <div class="wrap">
+      <div class="frame-copy">
+        <div class="eyebrow reveal">Why Fortnite</div>
+        <h2 id="why-title" class="reveal d1">The biggest stage<br>is already built.</h2>
+        <ol class="beats">
+          <li class="reveal d1"><strong>Design in Forge.</strong><span>Lock the idea down before you touch the editor.</span></li>
+          <li class="reveal d2"><strong>Build in UEFN.</strong><span>Unreal Editor for Fortnite, with AI tools to speed you up.</span></li>
+          <li class="reveal d3"><strong>Launch to players.</strong><span>Publish your island and tap into Fortnite's developer economy.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 4: THREE WAYS IN -->
+  <section class="ways" id="ways" aria-labelledby="ways-title">
+    <div class="wrap">
+      <div class="ways-head">
+        <div>
+          <div class="eyebrow reveal">Choose your opening</div>
+          <h2 id="ways-title" class="section-title reveal d1">Three ways in.</h2>
+        </div>
+        <p class="reveal d2">Know exactly what you want, or nothing at all. Every route ends at the same place: a plan you can build.</p>
+      </div>
+
+      <div class="posters">
+        <a class="poster featured reveal" href="#">
+          <img src="../_media/art-cltm-evergreen-boxfights-2k.webp" alt="" loading="lazy" style="object-position: 22% center">
+          <div class="poster-top"><span class="poster-num">01</span><span class="pill live">Ready today</span></div>
+          <h3>Answer<br>questions.</h3>
+          <p>A few sharp questions narrow your idea to an exact game type and a step-by-step plan.</p>
+          <span class="poster-cta">Start answering <span class="arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+        </a>
+        <a class="poster reveal d1" href="#">
+          <img src="../_media/art-cltm-evergreen-prophunt-2k.webp" alt="" loading="lazy" style="object-position: 50% center">
+          <div class="poster-top"><span class="poster-num">02</span><span class="pill">Coming soon</span></div>
+          <h3>Spin the<br>wheel.</h3>
+          <p>No idea yet? Let Forge pick a game type, a twist and a brand to build around.</p>
+          <span class="poster-cta">Get notified <span class="arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+        </a>
+        <a class="poster reveal d2" href="#">
+          <img src="../_media/art-cltm-evergreen-tycoon-2k.webp" alt="" loading="lazy" style="object-position: 50% center">
+          <div class="poster-top"><span class="poster-num">03</span><span class="pill">Coming soon</span></div>
+          <h3>Chat<br>with AI.</h3>
+          <p>Describe it in your own words. The AI asks follow-ups and shapes a buildable plan.</p>
+          <span class="poster-cta">Get notified <span class="arrow" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 5: WHAT YOU WALK AWAY WITH -->
+  <section class="result" id="result" aria-labelledby="result-title">
+    <div class="wrap">
+      <div class="eyebrow reveal">What you walk away with</div>
+      <h2 id="result-title" class="section-title reveal d1">Not a mood board. <span class="grad-text">A blueprint.</span></h2>
+      <ul class="deliver">
+        <li class="reveal"><span class="k">The what</span><span class="v">Exact game type</span><span class="d">Your idea, pinned to a researched game type you can actually ship.</span></li>
+        <li class="reveal"><span class="k">The tools</span><span class="v">Every device</span><span class="d">The UEFN devices your island needs, named before you open the editor.</span></li>
+        <li class="reveal"><span class="k">The path</span><span class="v">Five build steps</span><span class="d">A clear order of work, from empty island to playable game.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- SCENE 6: NUMBERS -->
+  <section class="numbers" id="numbers" aria-labelledby="numbers-title">
+    <div class="wrap">
+      <div class="numbers-cap">
+        <h2 id="numbers-title" class="reveal">Built on real research.</h2>
+        <div class="eyebrow reveal d1">Inside Forge today</div>
+      </div>
+      <div class="num-grid">
+        <div class="num reveal"><b>13</b><span>Researched game types</span></div>
+        <div class="num reveal d1"><b>74</b><span>Game drafts</span></div>
+        <div class="num reveal d2"><b>10</b><span>Category basics</span></div>
+        <div class="num reveal d3"><b>59</b><span>UEFN devices mapped</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENE 7: FINALE -->
+  <section class="finale" id="start" aria-labelledby="finale-title">
+    <div class="finale-art" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="eyebrow reveal">Your move</div>
+      <h2 id="finale-title" class="statement reveal d1">Your island<br><span class="grad-text">starts now.</span></h2>
+      <p class="reveal d2">A few questions stand between you and a plan you can build in Unreal Editor for Fortnite. Take the first one now.</p>
+      <div class="reveal d3">
+        <a class="btn btn-primary" href="#">Start your design
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <div class="finale-meta">Answer questions &middot; ready today</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#" aria-label="Forge home">
+      <img src="/assets/logo_epic.svg" alt="Epic Games" width="23" height="26">
+      <span class="brand-sep" aria-hidden="true"></span>
+      <span class="brand-word">FORGE</span>
+    </a>
+    <span>Design in Forge. Build in Unreal Editor for Fortnite.</span>
+  </div>
+</footer>
+
+<div class="concept-tag">Concept 1 &middot; Cinematic Launch</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var nav = document.getElementById('nav');
+  function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 40); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  if (!('IntersectionObserver' in window)) return;
+  root.classList.add('js');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mockups - Forge home page</title>
+  <link rel="icon" href="/assets/logo.svg" />
+  <style>
+    @font-face { font-family: "Inter"; src: url("/assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding: 56px 20px 72px; }
+    main { max-width: 980px; margin: 0 auto; }
+    header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    header img { width: 40px; height: 40px; }
+    h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
+    h2 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #ACACAD; margin: 40px 0 12px; }
+    .lede { color: #ACACAD; margin: 0 0 8px; max-width: 62ch; }
+    .lede a, footer a { color: #33BFFF; }
+    ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+    a.card { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 18px; padding: 20px 22px; border-radius: 14px; background: #18181C; border: 1px solid #303034; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+    a.card:hover, a.card:focus-visible { border-color: var(--c); transform: translateY(-2px); outline: none; }
+    .num { width: 56px; height: 56px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; font-size: 22px; color: #101014; background: linear-gradient(135deg, var(--c), var(--c2)); }
+    .name { font-weight: 700; font-size: 18px; }
+    .desc { color: #ACACAD; font-size: 14px; }
+    .go { color: var(--c); font-weight: 700; font-size: 14px; white-space: nowrap; }
+    footer { margin-top: 40px; color: #787678; font-size: 13px; }
+    @media (max-width: 520px) { a.card { grid-template-columns: 44px 1fr; } .num { width: 44px; height: 44px; font-size: 18px; } .go { display: none; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <a href="/" title="Back to the Forge home page"><img src="/assets/logo_epic.svg" alt="Epic Games" /></a>
+      <h1>Mockups</h1>
+    </header>
+    <p class="lede">Static mock-ups of the Forge home page, for comparing directions. None of them is wired to the app yet - <a href="/">the current home page</a> is still the real one.</p>
+
+    <h2>Minimal landing pages</h2>
+    <ol>
+      <li><a class="card" href="../concepts/6-one-question/" style="--c:#33BFFF;--c2:#A0E1FF"><span class="num">6</span><span><span class="name">One Question</span><br><span class="desc">Monochrome, one calm step at a time, like a conversation. After Typeform.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/7-three-steps/" style="--c:#E166B6;--c2:#FFC6A3"><span class="num">7</span><span><span class="name">Three Steps</span><br><span class="desc">Swiss grid, three big numerals, nothing decorative. After Braun and Apple's simplest pages.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/8-quiet-dark/" style="--c:#AAE755;--c2:#A8EBE1"><span class="num">8</span><span><span class="name">Quiet Power</span><br><span class="desc">Dark and restrained: one headline, one art strip, a three-step timeline. After Raycast and Arc.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/9-spotlight/" style="--c:#868AFD;--c2:#F1B8DD"><span class="num">9</span><span><span class="name">Spotlight</span><br><span class="desc">One screen, one character, one statement on a gradient. After Nothing and Teenage Engineering.</span></span><span class="go">Open &rarr;</span></a></li>
+    </ol>
+
+    <h2>Full pages</h2>
+    <ol>
+      <li><a class="card" href="../concepts/1-cinematic/" style="--c:#33BFFF;--c2:#DFBAF8"><span class="num">1</span><span><span class="name">Cinematic Launch</span><br><span class="desc">Dark, full-bleed trailer pacing. After unrealengine.com and Apple launches.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/2-funky/" style="--c:#F7D82B;--c2:#E166B6"><span class="num">2</span><span><span class="name">Sticker Pop</span><br><span class="desc">The funky one: bright poster blocks, outlines and character stickers. After Gumroad and Figma Config.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/3-lobby/" style="--c:#BB6BF0;--c2:#FEB4B4"><span class="num">3</span><span><span class="name">Choose Your Mode</span><br><span class="desc">The page as a game lobby: mode tiles, badges and a journey track. After the Fortnite front end.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/4-editorial/" style="--c:#F9A91F;--c2:#D7F4B0"><span class="num">4</span><span><span class="name">The Pitch</span><br><span class="desc">Light, editorial and grown-up: a well-argued sales page. After Stripe and Linear.</span></span><span class="go">Open &rarr;</span></a></li>
+      <li><a class="card" href="../concepts/5-bento/" style="--c:#5FE367;--c2:#A0E1FF"><span class="num">5</span><span><span class="name">Creator Bento</span><br><span class="desc">A dark bento grid of tiles, characters and mini UIs. After Apple feature grids and Vercel.</span></span><span class="go">Open &rarr;</span></a></li>
+    </ol>
+
+    <footer><a href="/">&larr; Back to the home page</a> &middot; Design brief: <code>support/home-concepts-brief.md</code></footer>
+  </main>
+</body>
+</html>
