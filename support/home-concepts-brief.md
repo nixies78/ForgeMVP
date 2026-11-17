@@ -65,8 +65,8 @@ Green `#132D15 #2C6A30 #46A64C #8AEA90 #B4F2B8` · Teal `#0E2B26 #206359 #329C8C
 ## Images
 
 Web-sized copies live in `/concepts/_media/` (list with sizes in `/concepts/_media/index.json`).
-This folder is **git-ignored on purpose** (the repo is public and these are Epic/Fortnite assets) -
-reference the files, never copy them elsewhere in the repo.
+The repo owner approved publishing these copies (2026-11-17), so they are committed. Reference
+them from there; never copy them elsewhere in the repo.
 
 - `art-*.webp` - Epic/Fortnite marketing key art and banners (1900x600 headers, 1920x1080 key art,
   1200x630 share images, 576 squares). `art-cltm-evergreen-{boxfights,prophunt,tycoon}-2k.webp` are

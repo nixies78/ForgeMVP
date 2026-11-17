@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Concept 6 - One Question</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("/assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --ink: #101014;
+    --muted: #5c5c63;
+    --line: #e6e6ea;
+    --blue: #33BFFF;
+    --blue-ink: #185977;
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: #fff;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* thin progress bar, like a form you are moving through */
+  .progress {
+    position: fixed; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--line); z-index: 10;
+  }
+  .progress span {
+    display: block; height: 100%; width: 0;
+    background: var(--blue);
+    transition: width .2s linear;
+  }
+
+  .screen {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    padding: 96px clamp(24px, 8vw, 128px);
+  }
+  .inner { width: 100%; max-width: 860px; margin: 0 auto; }
+
+  .label {
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--blue-ink);
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 28px;
+  }
+  .label .num {
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; border-radius: 6px;
+    background: var(--blue); color: var(--ink);
+    font-size: 14px;
+  }
+
+  h1, h2 {
+    font-family: var(--title);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0;
+  }
+  h1 { font-size: clamp(44px, 7.4vw, 92px); }
+  h2 { font-size: clamp(34px, 5vw, 60px); }
+
+  .lede {
+    color: var(--muted);
+    font-size: clamp(18px, 1.6vw, 21px);
+    max-width: 34em;
+    margin: 28px 0 44px;
+  }
+
+  .cta {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--blue); color: var(--ink);
+    font-family: var(--body); font-weight: 700; font-size: 19px;
+    text-decoration: none;
+    padding: 16px 28px; border-radius: 8px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .cta:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(51,191,255,.35); }
+  .cta:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .cta .arrow { transition: transform .15s ease; }
+  .cta:hover .arrow { transform: translateX(3px); }
+  .hint {
+    display: inline-block; margin-left: 18px;
+    font-size: 14px; color: var(--muted);
+  }
+  .hint kbd {
+    font-family: var(--body); font-weight: 700; font-size: 13px;
+    border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px;
+  }
+
+  /* numbered path */
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: grid; grid-template-columns: 56px 1fr; align-items: baseline;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .steps li:first-child { border-top: 1px solid var(--line); }
+  .steps .n {
+    font-family: var(--title); font-weight: 700; font-size: 22px; color: var(--blue-ink);
+  }
+  .steps .t {
+    font-family: var(--title); font-weight: 600;
+    font-size: clamp(24px, 3.2vw, 38px); letter-spacing: -0.02em; line-height: 1.15;
+  }
+
+  .facts {
+    display: flex; flex-wrap: wrap; gap: 20px 56px; margin-top: 48px;
+  }
+  .facts div { font-size: 16px; color: var(--muted); }
+  .facts b {
+    display: block;
+    font-family: var(--title); font-weight: 700; font-size: clamp(44px, 6vw, 72px);
+    line-height: 1; color: var(--ink); letter-spacing: -0.03em; margin-bottom: 6px;
+  }
+
+  .final { text-align: center; }
+  .final .lede { margin-left: auto; margin-right: auto; }
+
+  .tag {
+    position: fixed; left: 16px; bottom: 16px; z-index: 10;
+    font-size: 12px; font-weight: 700; color: var(--muted);
+    background: rgba(255,255,255,.9); border: 1px solid var(--line);
+    padding: 5px 10px; border-radius: 999px;
+  }
+
+  /* gentle fade-in */
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  .no-js .reveal { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
+  }
+
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+    .screen { padding: 80px 24px; }
+    .hint { display: none; }
+    .cta { width: 100%; justify-content: center; }
+    .steps li { grid-template-columns: 40px 1fr; padding: 22px 0; }
+    .facts { gap: 28px 40px; }
+  }
+</style>
+</head>
+<body class="no-js">
+<div class="progress" aria-hidden="true"><span id="bar"></span></div>
+
+<main>
+  <section class="screen">
+    <div class="inner">
+      <p class="label">Forge &middot; for Fortnite creators</p>
+      <h1>What game do you want to&nbsp;make?</h1>
+      <p class="lede">Answer a few questions and Forge turns your idea into a plan you can build in Unreal Editor for Fortnite.</p>
+      <a class="cta" href="#">Start designing <span class="arrow" aria-hidden="true">&rarr;</span></a>
+      <span class="hint">press <kbd>Enter &crarr;</kbd></span>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="inner reveal">
+      <p class="label">Here's how it goes</p>
+      <ol class="steps">
+        <li><span class="n">1&rarr;</span><span class="t">Answer a few questions.</span></li>
+        <li><span class="n">2&rarr;</span><span class="t">Get your exact game type and the devices it needs.</span></li>
+        <li><span class="n">3&rarr;</span><span class="t">Follow five build steps in UEFN.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="screen">
+    <div class="inner reveal">
+      <p class="label">Already mapped out</p>
+      <h2>The research is done. You just choose.</h2>
+      <div class="facts">
+        <div><b>13</b>game types</div>
+        <div><b>59</b>devices</div>
+        <div><b>5</b>build steps</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen final">
+    <div class="inner reveal">
+      <h2>Ready when you are.</h2>
+      <p class="lede">From idea to island, one question at a time.</p>
+      <a class="cta" href="#">Start designing <span class="arrow" aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Concept 6 - One Question</div>
+
+<script>
+  document.body.classList.remove('no-js');
+  var items = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { threshold: 0.2 });
+    items.forEach(function (el) { io.observe(el); });
+  } else {
+    items.forEach(function (el) { el.classList.add('in'); });
+  }
+  var bar = document.getElementById('bar');
+  function progress() {
+    var max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+  }
+  addEventListener('scroll', progress, { passive: true });
+  addEventListener('resize', progress);
+  addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && document.activeElement === document.body) document.querySelector(".cta").click();
+  });
+  progress();
+</script>
+</body>
+</html>
