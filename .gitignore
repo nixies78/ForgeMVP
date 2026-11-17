@@ -51,3 +51,8 @@ __MACOSX/
 # the hero video alone is ~50 MB: versioning both copies would put ~100 MB of the
 # same binary into history. What ships is public/assets/.
 /assets/
+
+# Per-copy machine settings and logs (port, shortcut names, live reload). Each
+# checkout on a PC can run on its own port without changing what is committed.
+# See autostart-forgemvp.vbs for the keys.
+.local/

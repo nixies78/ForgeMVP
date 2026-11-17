@@ -10,14 +10,23 @@
 '
 '  Installed as a Startup shortcut by install-startup.bat - no admin rights needed.
 '  To undo: run uninstall-startup.bat.
+'
+'  Per-copy settings (optional, never committed): .local\settings.ini next to
+'  this script, one KEY=VALUE per line. Without it you get the defaults below.
+'    NAME=ForgeMVP     shortcut names (install-startup.bat uses it)
+'    PORT=8080         port the server listens on
+'    URLHOST=localhost host name used in the address you open
+'    PAGE=admin.html   page opened at logon / by the desktop shortcut
+'    OPEN=1            1 = open the page in the browser at logon, 0 = do not
+'    LIVE=0            1 = run tools\dev-supervisor.mjs: pages refresh when files
+'                      change, and the server restarts itself after a crash
 ' ============================================================================
 
 Option Explicit
 
-Const PORT = 8080
 Const WAIT_MS = 800
 
-Dim shell, fso, home, nodeExe
+Dim shell, fso, home, nodeExe, settings, PORT, openPage, livePage, command
 Set shell = CreateObject("WScript.Shell")
 Set fso = CreateObject("Scripting.FileSystemObject")
 
@@ -45,6 +54,18 @@ End If
 
 nodeExe = FindNode()
 
+Set settings = ReadSettings(home & "\.local\settings.ini")
+PORT = Setting("PORT", "8080")
+openPage = (Setting("OPEN", "1") = "1")
+livePage = (Setting("LIVE", "0") = "1")
+
+If livePage Then
+  command = """" & nodeExe & """ """ & home & "\tools\dev-supervisor.mjs"""
+Else
+  command = """" & nodeExe & """ """ & home & "\server.js"""
+End If
+If openPage Then command = command & " --open"
+
 If checkOnly Then
   WScript.Echo "repo folder : " & home
   WScript.Echo "server.js   : " & fso.FileExists(home & "\server.js")
@@ -53,8 +74,9 @@ If checkOnly Then
   Else
     WScript.Echo "node.exe    : " & nodeExe
   End If
-  WScript.Echo "would run   : """ & nodeExe & """ """ & home & "\server.js"" --open"
-  WScript.Echo "admin page  : http://localhost:" & PORT & "/admin.html"
+  WScript.Echo "would run   : " & command
+  WScript.Echo "with PORT   : " & PORT
+  WScript.Echo "page        : http://" & Setting("URLHOST", "localhost") & ":" & PORT & "/" & Setting("PAGE", "admin.html")
   If nodeExe = "" Then
     WScript.Quit 1
   Else
@@ -69,13 +91,44 @@ If nodeExe = "" Then
 End If
 
 shell.CurrentDirectory = home
+shell.Environment("PROCESS")("PORT") = PORT
 
 ' Window style 0 = hidden, and we do not wait: server.js opens the browser itself
 ' once it is actually listening. If the server is already running it detects the
 ' busy port, opens the browser and exits quietly, so logon never starts two copies.
-shell.Run """" & nodeExe & """ """ & home & "\server.js"" --open", 0, False
+' (Default command: node server.js --open)
+shell.Run command, 0, False
 
 WScript.Sleep WAIT_MS
+
+' ---------------------------------------------------------------------------
+' .local\settings.ini: KEY=VALUE lines; blank lines and ; or # comments ignored.
+' ---------------------------------------------------------------------------
+Function ReadSettings(file)
+  Dim d, ts, line, eq
+  Set d = CreateObject("Scripting.Dictionary")
+  d.CompareMode = 1
+  If fso.FileExists(file) Then
+    Set ts = fso.OpenTextFile(file, 1)
+    Do While Not ts.AtEndOfStream
+      line = Trim(ts.ReadLine)
+      eq = InStr(line, "=")
+      If eq > 1 And Left(line, 1) <> ";" And Left(line, 1) <> "#" Then
+        d(Trim(Left(line, eq - 1))) = Trim(Mid(line, eq + 1))
+      End If
+    Loop
+    ts.Close
+  End If
+  Set ReadSettings = d
+End Function
+
+Function Setting(key, fallback)
+  If settings.Exists(key) And settings(key) <> "" Then
+    Setting = settings(key)
+  Else
+    Setting = fallback
+  End If
+End Function
 
 ' ---------------------------------------------------------------------------
 ' Find node.exe: PATH first, then the usual install locations.

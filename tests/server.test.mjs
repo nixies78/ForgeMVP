@@ -6,9 +6,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { readFile } from 'node:fs/promises';
+import os from 'node:os';
+import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
 
-import { createServer, describeListenError, resolveRequestPath, PUBLIC_DIR } from '../server.js';
+import {
+  createServer,
+  describeListenError,
+  resolveRequestPath,
+  injectLiveReload,
+  LIVE_RELOAD_PATH,
+  LIVE_RELOAD_SNIPPET,
+  PUBLIC_DIR,
+} from '../server.js';
 
 const ROOT = path.dirname(PUBLIC_DIR);
 
@@ -101,6 +110,54 @@ test('unknown paths return a helpful 404', async (t) => {
   const res = await fetch(`${base}/nope.html`);
   assert.equal(res.status, 404);
   assert.match(await res.text(), /Back to the home page/);
+});
+
+test('live reload is off by default, so production pages are served untouched', async (t) => {
+  const server = createServer();
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  t.after(() => new Promise((resolve) => server.close(resolve)));
+
+  const html = await (await fetch(`${base}/`)).text();
+  assert.equal(html, await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8'));
+  assert.equal((await fetch(`${base}${LIVE_RELOAD_PATH}`)).status, 404);
+});
+
+test('with live reload on, pages get the reload script and changes are announced', async (t) => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), 'forge-live-'));
+  await writeFile(path.join(dir, 'index.html'), '<!doctype html><body><p>hi</p></body>');
+  const server = createServer(dir, { live: true });
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  t.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    await rm(dir, { recursive: true, force: true });
+  });
+
+  const res = await fetch(`${base}/`);
+  const html = await res.text();
+  assert.ok(html.includes(LIVE_RELOAD_SNIPPET + '</body>'), 'the script goes just before </body>');
+  assert.equal(Number(res.headers.get('content-length')), Buffer.byteLength(html));
+
+  const stream = await fetch(`${base}${LIVE_RELOAD_PATH}`);
+  assert.match(stream.headers.get('content-type'), /text\/event-stream/);
+  const reader = stream.body.getReader();
+  const decoder = new TextDecoder();
+  let seen = decoder.decode((await reader.read()).value);
+  assert.match(seen, /data: \w+/, 'the stream opens with the boot id');
+
+  await writeFile(path.join(dir, 'index.html'), '<!doctype html><body><p>changed</p></body>');
+  const deadline = Date.now() + 5000;
+  while (!seen.includes('data: reload') && Date.now() < deadline) {
+    seen += decoder.decode((await reader.read()).value);
+  }
+  assert.ok(seen.includes('data: reload'), 'a file change is announced to open pages');
+  await reader.cancel();
+});
+
+test('injectLiveReload works with and without a closing body tag', () => {
+  assert.equal(injectLiveReload('<p>a</p></body></html>'), '<p>a</p>' + LIVE_RELOAD_SNIPPET + '</body></html>');
+  assert.equal(injectLiveReload('<p>a</p>'), '<p>a</p>' + LIVE_RELOAD_SNIPPET);
 });
 
 test('a revalidated request gets 304, so unchanged files are not resent', async (t) => {
@@ -250,7 +307,10 @@ test('describeListenError turns a busy port into advice, not a crash', () => {
 test('the logon launcher starts a hidden server and opens the admin page', async () => {
   const vbs = await readFile(path.join(ROOT, 'autostart-forgemvp.vbs'), 'utf8');
 
-  assert.match(vbs, /server\.js"" --open/, 'launcher runs the server in open mode');
+  assert.match(vbs, /\\server\.js"""/, 'launcher runs server.js by default');
+  assert.match(vbs, /command & " --open"/, 'launcher opens the page unless OPEN=0');
+  assert.match(vbs, /Setting\("PORT", "8080"\)/, 'the port defaults to 8080 without local settings');
+  assert.match(vbs, /\\tools\\dev-supervisor\.mjs/, 'LIVE=1 runs the always-on dev supervisor');
   assert.match(vbs, /, 0, False/, 'the server window is hidden and not waited on');
   assert.match(vbs, /GetParentFolderName\(WScript\.ScriptFullName\)/, 'repo folder is derived from the script location');
   assert.match(vbs, /where node/, 'launcher looks up node.exe on PATH');
@@ -268,8 +328,13 @@ test('the installer registers the launcher in Startup and adds a desktop shortcu
   assert.match(bat, /CreateShortcut\('%LNK%'\)/, 'creates the Startup shortcut');
   assert.match(bat, /TargetPath = 'wscript\.exe'/, 'the shortcut runs the launcher via wscript');
   assert.match(bat, /autostart-forgemvp\.vbs/, 'the shortcut points at the launcher in the repo, so later edits still apply');
-  assert.match(bat, /ForgeMVP Admin\.url/, 'creates a desktop shortcut');
-  assert.match(bat, /URL=http:\/\/localhost:8080\/admin\.html/, 'the desktop shortcut opens the served admin page');
+  assert.match(bat, /set "LABEL=ForgeMVP Admin"/, 'the desktop shortcut is named ForgeMVP Admin by default');
+  assert.match(bat, /URLFILE=%DESKTOP%\\%LABEL%\.url/, 'creates a desktop shortcut');
+  assert.match(bat, /set "URLHOST=localhost"/, 'defaults to localhost');
+  assert.match(bat, /set "PORT=8080"/, 'defaults to port 8080');
+  assert.match(bat, /set "PAGE=admin\.html"/, 'defaults to the admin page');
+  assert.match(bat, /SERVERURL=http:\/\/%URLHOST%:%PORT%\/%PAGE%/, 'the desktop shortcut opens the served page');
+  assert.match(bat, /\.local\\settings\.ini/, 'reads per-copy settings');
   assert.match(bat, /TESTMODE/, 'supports a dry run so the installer can be checked safely');
   assert.doesNotMatch(bat, /file:\/\/\//, 'the installer must never use a file:// path');
 });

@@ -3,12 +3,22 @@ setlocal
 title ForgeMVP - remove auto-start
 cd /d "%~dp0"
 
+rem Same per-copy settings as install-startup.bat: .local\settings.ini
+set "NAME=ForgeMVP"
+set "LABEL=ForgeMVP Admin"
+if exist "%~dp0.local\settings.ini" (
+    for /f "usebackq eol=; tokens=1,* delims==" %%a in ("%~dp0.local\settings.ini") do (
+        if /i "%%a"=="NAME" set "NAME=%%b"
+        if /i "%%a"=="LABEL" set "LABEL=%%b"
+    )
+)
+
 set "STARTUP=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
-set "LNK=%STARTUP%\ForgeMVP.lnk"
-set "URLFILE=%USERPROFILE%\Desktop\ForgeMVP Admin.url"
+set "LNK=%STARTUP%\%NAME%.lnk"
+set "URLFILE=%USERPROFILE%\Desktop\%LABEL%.url"
 
 echo ========================================================
-echo   ForgeMVP - remove automatic start-up
+echo   %NAME% - remove automatic start-up
 echo ========================================================
 echo.
 
@@ -27,7 +37,7 @@ if exist "%URLFILE%" (
 )
 
 echo.
-echo ForgeMVP will no longer start when you log in.
+echo %NAME% will no longer start when you log in.
 echo You can still run it by hand with start.bat.
 echo.
 echo Note: this does not stop a server that is already running.

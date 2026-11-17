@@ -29,6 +29,27 @@ Double-click **`install-startup.bat`** once. It:
 No administrator rights are needed, and nothing is written outside your own user account.
 Undo it any time with **`uninstall-startup.bat`**.
 
+#### Several copies on one PC, and live reload
+
+Each checkout can have its own port, address and shortcut names, so several copies
+can run side by side. Put a **`.local\settings.ini`** in the repo folder (git-ignored,
+so it never changes anyone else's setup), then run `install-startup.bat`:
+
+```ini
+NAME=ForgeFlavio                 ; Startup shortcut name
+LABEL=ForgeFlavio                ; desktop shortcut name
+URLHOST=forgeflavio.localhost    ; any *.localhost name reaches this PC in Chrome/Edge/Firefox
+PORT=8650                        ; must be free: netstat -ano | findstr :8650
+PAGE=                            ; page to open (empty = home page)
+OPEN=0                           ; 1 = open the browser at logon
+LIVE=1                           ; 1 = live reload + auto-restart (tools/dev-supervisor.mjs)
+```
+
+With `LIVE=1`, open pages refresh when anything in `public/` changes (including a
+`git pull`), the server restarts itself when `server.js` changes or crashes, and its
+output goes to `.local\server.log`. Without the file you get the defaults: port 8080,
+`ForgeMVP Admin` shortcut, admin page opened at logon, no live reload.
+
 From then on the admin page is always at <http://localhost:8080/admin.html> - just use the
 desktop shortcut.
 

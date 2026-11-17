@@ -65,3 +65,6 @@ coverage
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# --- per-copy machine settings and logs (see autostart-forgemvp.vbs) ---
+.local

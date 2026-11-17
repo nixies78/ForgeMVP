@@ -97,8 +97,80 @@ export function healthPayload() {
   };
 }
 
-export function createServer(publicDir = PUBLIC_DIR) {
-  return http.createServer((req, res) => {
+/**
+ * Live reload (local development only, off unless --live is passed).
+ *
+ * Every HTML page gets a tiny script that holds an EventSource open on
+ * /__livereload. When anything under public/ changes, the server sends "reload"
+ * and the page refreshes itself. When the server process restarts (the dev
+ * supervisor restarts it after a server.js edit), the page reconnects, sees a new
+ * boot id, and refreshes too. Cloud Run never passes --live, so production pages
+ * are served byte-for-byte as they are on disk.
+ */
+export const LIVE_RELOAD_PATH = '/__livereload';
+export const LIVE_RELOAD_SNIPPET =
+  '<script>(function(){var boot=null;function connect(){var es=new EventSource("' +
+  LIVE_RELOAD_PATH +
+  '");es.onmessage=function(e){if(e.data==="reload"||(boot&&boot!==e.data)){location.reload();return;}boot=e.data;};' +
+  'es.onerror=function(){es.close();setTimeout(connect,1000);};}connect();})();</script>';
+
+/** Put the live-reload script just before </body>, or at the end if there is none. */
+export function injectLiveReload(html) {
+  const at = html.lastIndexOf('</body>');
+  return at === -1 ? html + LIVE_RELOAD_SNIPPET : html.slice(0, at) + LIVE_RELOAD_SNIPPET + html.slice(at);
+}
+
+function createLiveReload(publicDir) {
+  const bootId = Date.now().toString(36);
+  const clients = new Set();
+  let timer = null;
+  let watcher = null;
+
+  const broadcast = () => {
+    for (const res of clients) res.write('data: reload\n\n');
+  };
+
+  try {
+    // Watch the real path: on Windows a short 8.3 path (C:\Users\EDWARD~1\...)
+    // makes libuv's recursive watcher abort the whole process on the first event.
+    watcher = fs.watch(fs.realpathSync.native(publicDir), { recursive: true }, () => {
+      // Editors and git write several files in a burst: wait for it to settle.
+      clearTimeout(timer);
+      timer = setTimeout(broadcast, 150);
+    });
+  } catch (err) {
+    console.error(`  Live reload could not watch ${publicDir}: ${err.message}`);
+  }
+
+  // Comment lines keep idle connections from being dropped by the browser.
+  const heartbeat = setInterval(() => {
+    for (const res of clients) res.write(': ping\n\n');
+  }, 25000);
+  heartbeat.unref?.();
+
+  return {
+    handle(req, res) {
+      res.writeHead(200, {
+        'Content-Type': 'text/event-stream; charset=utf-8',
+        'Cache-Control': 'no-store',
+        Connection: 'keep-alive',
+      });
+      res.write(`retry: 1000\ndata: ${bootId}\n\n`);
+      clients.add(res);
+      req.on('close', () => clients.delete(res));
+    },
+    close() {
+      watcher?.close();
+      clearInterval(heartbeat);
+      for (const res of clients) res.end();
+      clients.clear();
+    },
+  };
+}
+
+export function createServer(publicDir = PUBLIC_DIR, { live = false } = {}) {
+  const liveReload = live ? createLiveReload(publicDir) : null;
+  const server = http.createServer((req, res) => {
     // Probes must not touch the filesystem or the static cache logic.
     let pathname = '';
     try {
@@ -114,6 +186,10 @@ export function createServer(publicDir = PUBLIC_DIR) {
         'Cache-Control': 'no-store',
       });
       res.end(req.method === 'HEAD' ? undefined : body);
+      return;
+    }
+    if (liveReload && pathname === LIVE_RELOAD_PATH) {
+      liveReload.handle(req, res);
       return;
     }
 
@@ -158,6 +234,21 @@ export function createServer(publicDir = PUBLIC_DIR) {
         return;
       }
 
+      if (liveReload && ext === '.html') {
+        fs.readFile(target, 'utf8', (readErr, html) => {
+          if (readErr) {
+            res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end('500 Could not read file');
+            return;
+          }
+          const body = injectLiveReload(html);
+          headers['Content-Length'] = Buffer.byteLength(body);
+          res.writeHead(200, headers);
+          res.end(req.method === 'HEAD' ? undefined : body);
+        });
+        return;
+      }
+
       headers['Content-Length'] = stat.size;
       res.writeHead(200, headers);
       if (req.method === 'HEAD') {
@@ -167,6 +258,16 @@ export function createServer(publicDir = PUBLIC_DIR) {
       fs.createReadStream(target).pipe(res);
     });
   });
+  if (liveReload) {
+    // Event streams never go idle, so end them first or server.close() would wait
+    // for its timeout on every shutdown.
+    const closeServer = server.close.bind(server);
+    server.close = (callback) => {
+      liveReload.close();
+      return closeServer(callback);
+    };
+  }
+  return server;
 }
 
 function escapeHtml(value) {
@@ -233,8 +334,8 @@ export function installGracefulShutdown(server, { exit = (code) => process.exit(
   };
 }
 
-export function startServer({ port = resolvePort(), host = process.env.HOST || DEFAULT_HOST, open = false } = {}) {
-  const server = createServer();
+export function startServer({ port = resolvePort(), host = process.env.HOST || DEFAULT_HOST, open = false, live = false } = {}) {
+  const server = createServer(PUBLIC_DIR, { live });
 
   server.on('error', (err) => {
     const info = describeListenError(err, port);
@@ -259,6 +360,7 @@ export function startServer({ port = resolvePort(), host = process.env.HOST || D
     console.log(`  Admin page: http://localhost:${actual}/admin.html`);
     console.log(`  Chat test : http://localhost:${actual}/chat.html`);
     console.log(`  Health    : http://localhost:${actual}/healthz`);
+    if (live) console.log('  Live reload is on: open pages refresh when a file in public/ changes.');
     for (const addr of lanAddresses()) {
       console.log(`  On your network (others can open this): http://${addr}:${actual}/`);
     }
@@ -303,5 +405,5 @@ function lanAddresses() {
 
 // Only auto-start when executed directly, not when imported by a test.
 if (process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))) {
-  startServer({ open: process.argv.includes('--open') });
+  startServer({ open: process.argv.includes('--open'), live: process.argv.includes('--live') });
 }
