@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mockups - Forge home page</title>
+  <title>Mockups - Forge</title>
   <link rel="icon" href="/assets/logo.svg" />
   <style>
     @font-face { font-family: "Inter"; src: url("/assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
@@ -24,6 +24,17 @@
     .name { font-weight: 700; font-size: 18px; }
     .desc { color: #ACACAD; font-size: 14px; }
     .go { color: var(--c); font-weight: 700; font-size: 14px; white-space: nowrap; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; padding: 6px; background: #18181C; border: 1px solid #303034; border-radius: 14px; }
+    .tab { flex: 1 1 160px; appearance: none; border: 0; border-radius: 10px; padding: 12px 16px; background: transparent; color: #ACACAD; font: 700 15px/1.2 "Inter", system-ui, sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s, color .15s; }
+    .tab:hover { color: #fff; background: #202024; }
+    .tab:focus-visible { outline: 2px solid #33BFFF; outline-offset: 2px; }
+    .tab[aria-selected="true"] { background: #fff; color: #101014; }
+    .count { font-size: 12px; font-weight: 700; min-width: 22px; padding: 2px 7px; border-radius: 999px; background: #303034; color: #fff; }
+    .tab[aria-selected="true"] .count { background: #101014; }
+    .panel h2:first-child { margin-top: 28px; }
+    .empty { margin-top: 28px; display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: center; padding: 28px 24px; border-radius: 14px; background: #18181C; border: 1px dashed #404044; }
+    .empty .name { margin: 0 0 4px; }
+    .empty .desc { margin: 0; }
     footer { margin-top: 40px; color: #787678; font-size: 13px; }
     @media (max-width: 520px) { a.card { grid-template-columns: 44px 1fr; } .num { width: 44px; height: 44px; font-size: 18px; } .go { display: none; } }
   </style>
@@ -34,9 +45,17 @@
       <a href="/" title="Back to the Forge home page"><img src="/assets/logo_epic.svg" alt="Epic Games" /></a>
       <h1>Mockups</h1>
     </header>
-    <p class="lede">Static mock-ups of the Forge home page, for comparing directions. None of them is wired to the app yet - <a href="/">the current home page</a> is still the real one.</p>
+    <p class="lede">Design options for each kind of Forge page. Pick a page type, then open the designs to compare directions. None of them is wired to the app yet - <a href="/">the current Forge</a> is still the real one.</p>
 
-    <h2>Landing pages</h2>
+    <div class="tabs" role="tablist" aria-label="Page type">
+      <button class="tab" role="tab" id="tab-landing" aria-controls="panel-landing" aria-selected="true" data-tab="landing">Landing pages <span class="count">9</span></button>
+      <button class="tab" role="tab" id="tab-randomiser" aria-controls="panel-randomiser" aria-selected="false" tabindex="-1" data-tab="randomiser">Randomiser page <span class="count">0</span></button>
+      <button class="tab" role="tab" id="tab-questions" aria-controls="panel-questions" aria-selected="false" tabindex="-1" data-tab="questions">Question page <span class="count">0</span></button>
+      <button class="tab" role="tab" id="tab-lessons" aria-controls="panel-lessons" aria-selected="false" tabindex="-1" data-tab="lessons">Lesson page <span class="count">0</span></button>
+    </div>
+
+    <section class="panel" role="tabpanel" id="panel-landing" aria-labelledby="tab-landing">
+    <h2>Focused landing pages</h2>
     <ol>
       <li><a class="card" href="../concepts/6-one-question/" style="--c:#33BFFF;--c2:#A0E1FF"><span class="num">6</span><span><span class="name">One Question</span><br><span class="desc">Monochrome: one big question, answered by the three ways in. After Typeform.</span></span><span class="go">Open &rarr;</span></a></li>
       <li><a class="card" href="../concepts/7-three-steps/" style="--c:#E166B6;--c2:#FFC6A3"><span class="num">7</span><span><span class="name">Three Steps</span><br><span class="desc">Swiss grid: the three ways in as numbered, hard-edged cards, in Pink. After Braun and Apple.</span></span><span class="go">Open &rarr;</span></a></li>
@@ -52,8 +71,71 @@
       <li><a class="card" href="../concepts/4-editorial/" style="--c:#F9A91F;--c2:#D7F4B0"><span class="num">4</span><span><span class="name">The Pitch</span><br><span class="desc">Light, editorial and grown-up: a well-argued sales page. After Stripe and Linear.</span></span><span class="go">Open &rarr;</span></a></li>
       <li><a class="card" href="../concepts/5-bento/" style="--c:#5FE367;--c2:#A0E1FF"><span class="num">5</span><span><span class="name">Creator Bento</span><br><span class="desc">A dark bento grid of tiles, characters and mini UIs. After Apple feature grids and Vercel.</span></span><span class="go">Open &rarr;</span></a></li>
     </ol>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-randomiser" aria-labelledby="tab-randomiser" hidden>
+      <div class="empty" style="--c:#FE8539;--c2:#FBED9C">
+        <span class="num">?</span>
+        <div>
+          <p class="name">Randomiser page designs are on the way</p>
+          <p class="desc">The "Spin the wheel" screen: spin for a game type, a twist and a brand to build around, then take the idea into a plan.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-questions" aria-labelledby="tab-questions" hidden>
+      <div class="empty" style="--c:#33BFFF;--c2:#DFBAF8">
+        <span class="num">?</span>
+        <div>
+          <p class="name">Question page designs are on the way</p>
+          <p class="desc">The "Answer questions" flow: one question at a time, narrowing an idea to an exact game type and the devices it needs.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-lessons" aria-labelledby="tab-lessons" hidden>
+      <div class="empty" style="--c:#5FE367;--c2:#A0E1FF">
+        <span class="num">?</span>
+        <div>
+          <p class="name">Lesson page designs are on the way</p>
+          <p class="desc">The build walkthrough: the five build steps in UEFN, each with its instructions and video.</p>
+        </div>
+      </div>
+    </section>
 
     <footer><a href="/">&larr; Back to the home page</a> &middot; Design brief: <code>support/home-concepts-brief.md</code></footer>
   </main>
+  <script>
+    // Tabs: the page type in the address (#landing, #randomiser, #questions, #lessons),
+    // so a link can open straight onto one set of designs.
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+      function show(name, focus) {
+        var found = tabs.some(function (t) { return t.dataset.tab === name; });
+        if (!found) name = 'landing';
+        tabs.forEach(function (t) {
+          var on = t.dataset.tab === name;
+          t.setAttribute('aria-selected', on);
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          if (on && focus) t.focus();
+        });
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { history.replaceState(null, '', '#' + t.dataset.tab); show(t.dataset.tab); });
+        t.addEventListener('keydown', function (e) {
+          var step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+          if (e.key === 'Home') step = -i; else if (e.key === 'End') step = tabs.length - 1 - i;
+          if (!step) return;
+          e.preventDefault();
+          var next = tabs[(i + step + tabs.length) % tabs.length];
+          history.replaceState(null, '', '#' + next.dataset.tab);
+          show(next.dataset.tab, true);
+        });
+      });
+      window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+      show(location.hash.slice(1));
+    })();
+  </script>
 </body>
 </html>
