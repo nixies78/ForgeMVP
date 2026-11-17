@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 1 - Fruit machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("/assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --bg: #101014;
+    --tile: #18181C;
+    --tile-2: #202024;
+    --line: #28282C;
+    --line-2: #303034;
+    --line-3: #404044;
+    --muted: #ACACAD;
+    --dim: #787678;
+    --accent: #F9A91F;        /* UEFN Amber: spin / locked */
+    --accent-dark: #322206;
+    --accent-2: #33BFFF;      /* UEFN Blue: links, focus */
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --item-h: 13.5rem;        /* height of one reel entry (image + name) */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: #fff;
+    font: 400 1rem/1.5 var(--body);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 64rem; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+  h1 {
+    font: 800 clamp(2rem, 5vw, 3rem)/1.05 var(--title);
+    letter-spacing: -0.02em;
+    margin: 0 0 .5rem;
+  }
+  .lede { color: var(--muted); margin: 0 0 2rem; max-width: 40rem; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--accent-2); outline-offset: 3px; }
+
+  /* ---------- Machine ---------- */
+  .machine {
+    background: var(--tile);
+    border: 1px solid var(--line-2);
+    border-radius: 1.25rem;
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.25rem;
+  }
+  .reels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .875rem;
+  }
+  .reel { display: flex; flex-direction: column; gap: .625rem; min-width: 0; }
+  .reel-label {
+    font: 700 .75rem/1 var(--body);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+  .window {
+    position: relative;
+    height: var(--item-h);
+    overflow: hidden;
+    border-radius: .875rem;
+    background: var(--bg);
+    border: 2px solid var(--line-2);
+    transition: border-color .2s;
+  }
+  /* Shading at top and bottom of the window so the strip reads as a drum. */
+  .window::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: linear-gradient(#101014cc, transparent 18%, transparent 82%, #101014cc);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .reel.spinning .window::after { opacity: 1; }
+  .reel.locked .window { border-color: var(--accent); }
+  .strip { will-change: transform; }
+  .strip.moving .item { filter: blur(.6px); }
+
+  .item {
+    height: var(--item-h);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .75rem;
+    text-align: center;
+  }
+  .pic {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    border-radius: .5rem;
+    overflow: hidden;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+  .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .name {
+    font: 700 1rem/1.2 var(--title);
+    min-height: 2.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-wrap: anywhere;
+  }
+  .kind-tag {
+    font: 700 .625rem/1 var(--body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Placeholder when the image is missing. --ph is set per reel kind. */
+  .ph {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .25rem;
+    background: linear-gradient(145deg, var(--ph-dark), var(--ph-mid));
+    color: var(--ph-light);
+  }
+  .ph .initials { font: 800 2.25rem/1 var(--title); letter-spacing: -0.02em; }
+  .ph .coming {
+    font: 600 .6875rem/1 var(--body);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .85;
+  }
+  .k-flavour { --ph-dark: #251530; --ph-mid: #573270; --ph-light: #DFBAF8; }
+  .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
+  .k-type    { --ph-dark: #0A2633; --ph-mid: #185977; --ph-light: #A0E1FF; }
+  .k-hook    { --ph-dark: #2D1424; --ph-mid: #693055; --ph-light: #F1B8DD; }
+
+  .item.empty .pic { border: 2px dashed var(--line-3); }
+  .item.empty .q { font: 800 3rem/1 var(--title); color: var(--line-3); }
+  .item.empty .name { color: var(--dim); font-weight: 600; }
+
+  /* Lock toggle */
+  .lock {
+    display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+    min-height: 2.75rem;
+    padding: .5rem .875rem;
+    border-radius: .625rem;
+    border: 1px solid var(--line-3);
+    background: var(--tile-2);
+    cursor: pointer;
+    font-weight: 600;
+    font-size: .9375rem;
+  }
+  .lock:hover:not(:disabled) { border-color: var(--muted); }
+  .lock svg { width: 1.125rem; height: 1.125rem; flex: none; }
+  .lock .shackle { transition: transform .15s; transform-origin: 17px 11px; }
+  .lock[aria-pressed="false"] .shackle { transform: translate(5px, -3px); }
+  .lock[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #101014;
+  }
+  .lock:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* Controls column: lever + spin */
+  .controls {
+    display: flex; flex-direction: column; align-items: stretch; justify-content: center; gap: .75rem;
+    width: 12rem;
+  }
+  .lever {
+    align-self: center;
+    width: 3rem; height: 9rem;
+    position: relative;
+    cursor: pointer;
+    border: 0; background: none; padding: 0;
+  }
+  .lever .rod {
+    position: absolute; left: 50%; bottom: 1rem;
+    width: .5rem; height: 6.5rem; margin-left: -.25rem;
+    background: linear-gradient(90deg, #787678, #ACACAD, #787678);
+    border-radius: .25rem;
+    transform-origin: 50% 100%;
+    transition: transform .25s cubic-bezier(.3,.6,.4,1.4);
+  }
+  .lever .knob {
+    position: absolute; left: 50%; top: -1.25rem;
+    width: 2.25rem; height: 2.25rem; margin-left: -1.125rem;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #FEB4B4, #FD5E5E 55%, #762C2C);
+  }
+  .lever .base {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    height: 1.5rem; border-radius: .5rem;
+    background: var(--line-2);
+  }
+  .lever.pulled .rod { transform: scaleY(-.55); }
+  .lever:disabled { cursor: not-allowed; opacity: .5; }
+
+  .spin {
+    min-height: 4rem;
+    border: 0;
+    border-radius: .875rem;
+    background: var(--accent);
+    color: #101014;
+    font: 800 1.5rem/1.1 var(--title);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    padding: .75rem 1rem;
+    box-shadow: 0 4px 0 #B77C17;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .spin:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 #B77C17; }
+  .spin:disabled {
+    background: var(--line-2);
+    color: var(--muted);
+    box-shadow: none;
+    cursor: not-allowed;
+    font-size: 1rem;
+  }
+  .ghost {
+    min-height: 2.75rem;
+    border-radius: .625rem;
+    border: 1px solid var(--line-3);
+    background: transparent;
+    font-weight: 600;
+    font-size: .9375rem;
+    padding: .5rem .875rem;
+    cursor: pointer;
+  }
+  .ghost:hover:not(:disabled) { border-color: var(--muted); }
+  .ghost:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- Result ---------- */
+  .result {
+    margin-top: 1.5rem;
+    background: var(--tile);
+    border: 1px solid var(--line-2);
+    border-left: 4px solid var(--accent);
+    border-radius: 1rem;
+    padding: 1.5rem;
+  }
+  .result h2 {
+    font: 700 .75rem/1 var(--body);
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 .75rem;
+  }
+  .strapline {
+    font: 800 clamp(1.5rem, 3.6vw, 2.25rem)/1.15 var(--title);
+    letter-spacing: -0.015em;
+    margin: 0 0 1.25rem;
+  }
+  .details { display: grid; gap: .875rem; margin: 0 0 1.5rem; color: var(--muted); }
+  .details p { margin: 0; }
+  .details strong { color: #fff; font-weight: 700; }
+  .details .under { display: block; margin-top: .25rem; font-size: .9375rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; }
+  .primary {
+    min-height: 2.75rem;
+    border: 0; border-radius: .625rem;
+    background: #fff; color: #101014;
+    font-weight: 700; padding: .625rem 1.125rem; cursor: pointer;
+  }
+  .result { transition: opacity .2s; }
+  .result.stale { opacity: .45; }
+  .note { color: var(--muted); font-size: .875rem; flex-basis: 100%; margin: 0; min-height: 1.3em; }
+
+  .status { color: var(--muted); font-size: .9375rem; margin: 1rem 0 0; min-height: 1.5em; }
+  .error { color: #FE8989; }
+
+  .tag {
+    position: fixed; right: .75rem; bottom: .75rem; z-index: 10;
+    background: #000c; border: 1px solid var(--line-3);
+    color: var(--muted);
+    font: 600 .75rem/1 var(--body);
+    padding: .5rem .625rem; border-radius: .5rem;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* ---------- Narrow ---------- */
+  @media (max-width: 52rem) {
+    .machine { grid-template-columns: 1fr; }
+    .controls { width: auto; flex-direction: row; flex-wrap: wrap; }
+    .lever { display: none; }
+    .spin { flex: 1 1 100%; }
+    .ghost { flex: 1 1 100%; }
+  }
+  @media (max-width: 40rem) {
+    :root { --item-h: 10rem; }
+    .wrap { padding-top: 2rem; }
+    .reels { gap: .5rem; }
+    .item { padding: .5rem; gap: .375rem; }
+    .name { font-size: .8125rem; }
+    .ph .initials { font-size: 1.5rem; }
+    .ph .coming { font-size: .5625rem; }
+    .lock { padding: .5rem; font-size: .8125rem; gap: .375rem; }
+    .reel-label { font-size: .6875rem; letter-spacing: .08em; }
+  }
+  @media (max-width: 22rem) {
+    .lock .lock-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lever .rod, .lock .shackle, .spin { transition: none; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Roll for a starting point</h1>
+  <p class="lede">Three reels: a flavour (or a brand), a game type and a hook. Lock anything you like and spin the rest.</p>
+
+  <section class="machine" aria-label="Fruit machine">
+    <div class="reels" id="reels"><!-- built by script --></div>
+    <div class="controls">
+      <button class="lever" id="lever" type="button" tabindex="-1" aria-hidden="true" title="Pull to spin">
+        <span class="base"></span><span class="rod"><span class="knob"></span></span>
+      </button>
+      <button class="spin" id="spin" type="button" disabled>Spin</button>
+      <button class="ghost" id="unlock-spin" type="button" disabled>Unlock all and spin</button>
+    </div>
+  </section>
+  <p class="status" id="status" aria-live="polite">Loading the reels…</p>
+
+  <section class="result" id="result" hidden aria-labelledby="result-h">
+    <h2 id="result-h">Your starting point</h2>
+    <p class="strapline" id="strapline" aria-live="polite"></p>
+    <div class="details">
+      <p id="type-detail"></p>
+      <p id="hook-detail"></p>
+    </div>
+    <div class="actions">
+      <button class="primary" type="button" data-todo="Suggest a pitch">Suggest a pitch</button>
+      <button class="ghost" type="button" data-todo="Start a document">Start a document from this</button>
+      <p class="note" id="todo-note" aria-live="polite"></p>
+    </div>
+  </section>
+</main>
+<div class="tag">Randomiser 1 - Fruit machine</div>
+
+<script type="module">
+import {
+  REEL_KEYS, buildReels, strapline, typeLine, underneathLine, hookLine,
+  pickDifferent, encodeHash, decodeHash
+} from './randomiser.js';
+
+const LABELS = { f: 'Flavour', t: 'Game type', h: 'Hook' };
+const SPIN_MS = { f: 1300, t: 1750, h: 2200 };   // reels stop left to right
+const STRIP_BASE = 14;                             // entries scrolled through on the first reel
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+
+const $ = id => document.getElementById(id);
+const spinBtn = $('spin'), unlockBtn = $('unlock-spin'), lever = $('lever');
+const statusEl = $('status');
+
+let reels = null;
+let state = { f: null, t: null, h: null, locked: { f: false, t: false, h: false } };
+let spinning = false;
+const ui = {};                       // per reel: { root, window, strip, lock }
+const missingImages = new Set();     // image paths known to 404, so spins don't keep asking
+
+/* ---------- Rendering one entry ---------- */
+
+function initials(name) {
+  const words = name.replace(/[^\p{L}\p{N}\s-]/gu, '').split(/[\s-]+/).filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return words.slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
+function placeholder(entry) {
+  const ph = document.createElement('div');
+  ph.className = 'ph';
+  ph.setAttribute('aria-hidden', 'true');
+  ph.innerHTML = `<span class="initials"></span><span class="coming">Image coming</span>`;
+  ph.querySelector('.initials').textContent = initials(entry.name);
+  return ph;
+}
+
+function itemEl(entry) {
+  const item = document.createElement('div');
+  if (!entry) {
+    item.className = 'item empty';
+    item.innerHTML = `<div class="pic"><span class="q" aria-hidden="true">?</span></div><div class="name">Spin to start</div>`;
+    return item;
+  }
+  item.className = `item k-${entry.kind}`;
+  const pic = document.createElement('div');
+  pic.className = 'pic';
+  if (missingImages.has(entry.image)) {
+    pic.append(placeholder(entry));
+  } else {
+    const img = new Image();
+    img.alt = '';
+    img.decoding = 'async';
+    img.addEventListener('error', () => {
+      missingImages.add(entry.image);
+      img.replaceWith(placeholder(entry));
+    }, { once: true });
+    img.src = entry.image;
+    pic.append(img);
+  }
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.textContent = entry.name;
+  item.append(pic);
+  if (entry.kind === 'brand') {
+    const tag = document.createElement('span');
+    tag.className = 'kind-tag';
+    tag.textContent = 'Brand';
+    item.append(tag);
+  }
+  item.append(name);
+  return item;
+}
+
+/** Show a single resting entry in a reel. */
+function showStill(key) {
+  const { strip } = ui[key];
+  strip.classList.remove('moving');
+  strip.style.transition = 'none';
+  strip.style.transform = 'translateY(0)';
+  strip.replaceChildren(itemEl(reels[key][state[key]]));
+}
+
+/* ---------- Building the reels ---------- */
+
+const PADLOCK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+  <path class="shackle" d="M7.5 11V7.5a4.5 4.5 0 0 1 9 0V11"/><rect x="4.5" y="11" width="15" height="10" rx="2.2" fill="currentColor" fill-opacity=".18"/></svg>`;
+
+function buildReel(key) {
+  const root = document.createElement('div');
+  root.className = 'reel';
+  root.innerHTML = `
+    <p class="reel-label" id="lbl-${key}">${LABELS[key]}</p>
+    <div class="window"><div class="strip"></div></div>
+    <button class="lock" type="button" aria-pressed="false" aria-describedby="lbl-${key}">${PADLOCK}<span class="lock-text">Lock</span></button>`;
+  const lock = root.querySelector('.lock');
+  lock.addEventListener('click', () => {
+    if (spinning || state[key] === null) return;
+    state.locked[key] = !state.locked[key];
+    render();
+    saveHash();
+  });
+  ui[key] = { root, window: root.querySelector('.window'), strip: root.querySelector('.strip'), lock };
+  return root;
+}
+
+/* ---------- Whole-page render (everything except reel motion) ---------- */
+
+function render() {
+  const allLocked = REEL_KEYS.every(k => state.locked[k]);
+  for (const key of REEL_KEYS) {
+    const { root, lock } = ui[key];
+    const locked = state.locked[key];
+    root.classList.toggle('locked', locked);
+    lock.setAttribute('aria-pressed', String(locked));
+    lock.querySelector('.lock-text').textContent = locked ? 'Locked' : 'Lock';
+    lock.setAttribute('aria-label', `${locked ? 'Unlock' : 'Lock'} ${LABELS[key].toLowerCase()}`);
+    lock.disabled = spinning || state[key] === null;
+    lock.title = state[key] === null ? 'Spin first' : '';
+  }
+  spinBtn.disabled = spinning || allLocked;
+  spinBtn.textContent = allLocked ? 'Unlock a reel to spin' : spinning ? 'Spinning…' : 'Spin';
+  unlockBtn.disabled = spinning;
+  lever.disabled = spinning || allLocked;
+
+  const f = reels.f[state.f], t = reels.t[state.t], h = reels.h[state.h];
+  const done = f && t && h && !spinning;
+  if (!spinning) $('result').hidden = !(f && t && h);
+  $('result').classList.toggle('stale', spinning);
+  if (done) {
+    $('strapline').textContent = strapline(f, t, h);
+    const typeP = $('type-detail');
+    typeP.replaceChildren();
+    const [tName, ...tRest] = typeLine(t).split(' - ');
+    const strong = document.createElement('strong');
+    strong.textContent = tName;
+    typeP.append(strong, ` - ${tRest.join(' - ')}`);
+    const under = underneathLine(t);
+    if (under) {
+      const span = document.createElement('span');
+      span.className = 'under';
+      span.textContent = under;
+      typeP.append(span);
+    }
+    const hookP = $('hook-detail');
+    const hStrong = document.createElement('strong');
+    hStrong.textContent = h.name;
+    hookP.replaceChildren(hStrong, hookLine(h).slice(h.name.length));
+  }
+}
+
+/* ---------- URL hash ---------- */
+
+function saveHash() {
+  const hash = encodeHash(state, reels);
+  history.replaceState(null, '', hash || location.pathname + location.search);
+}
+
+function loadHash() {
+  state = decodeHash(location.hash, reels);
+  for (const key of REEL_KEYS) showStill(key);
+  render();
+}
+
+/* ---------- Spinning ---------- */
+
+function animateReel(key, from, to, duration, extra) {
+  return new Promise(resolve => {
+    const { root, window: win, strip } = ui[key];
+    if (reducedMotion.matches) {
+      showStill(key);
+      return resolve();
+    }
+    const list = reels[key];
+    // Strip: the entry shown now, a run of random entries, then the target.
+    const entries = [list[from] ?? null];
+    const count = STRIP_BASE + extra;
+    let prev = from;
+    for (let i = 0; i < count; i++) {
+      prev = pickDifferent(list.length, prev);
+      entries.push(list[prev]);
+    }
+    if (entries[entries.length - 1] === list[to]) entries.pop();
+    entries.push(list[to]);
+    strip.replaceChildren(...entries.map(itemEl));
+
+    const itemH = win.clientHeight;
+    const distance = (entries.length - 1) * itemH;
+    root.classList.add('spinning');
+    strip.classList.add('moving');
+    strip.style.transition = 'none';
+    strip.style.transform = 'translateY(0)';
+    strip.getBoundingClientRect();     // commit the start position
+    // Ease out with a small overshoot, so the reel settles back onto the entry.
+    strip.style.transition = `transform ${duration}ms cubic-bezier(.15,.55,.25,1.06)`;
+    strip.style.transform = `translateY(${-distance}px)`;
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      root.classList.remove('spinning');
+      showStill(key);
+      resolve();
+    };
+    strip.addEventListener('transitionend', finish, { once: true });
+    setTimeout(finish, duration + 200);   // in case transitionend never fires (hidden tab)
+  });
+}
+
+async function spin() {
+  if (spinning) return;
+  const keys = REEL_KEYS.filter(k => !state.locked[k]);
+  if (!keys.length) return;
+  spinning = true;
+  statusEl.textContent = 'Spinning…';
+  lever.classList.add('pulled');
+  setTimeout(() => lever.classList.remove('pulled'), 350);
+
+  const from = {};
+  for (const key of keys) {
+    from[key] = state[key];
+    state[key] = pickDifferent(reels[key].length, state[key]);
+  }
+  render();
+
+  const quick = reducedMotion.matches;
+  await Promise.all(keys.map((key, i) =>
+    animateReel(key, from[key], state[key], quick ? 0 : SPIN_MS[key], i * 4)));
+
+  spinning = false;
+  render();
+  saveHash();
+  statusEl.textContent = '';
+  if (quick) $('result').animate?.([{ opacity: .4 }, { opacity: 1 }], { duration: 150 });
+}
+
+/* ---------- Wire up ---------- */
+
+async function init() {
+  let data;
+  try {
+    const res = await fetch('/data/randomiser.json', { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    data = await res.json();
+  } catch (err) {
+    statusEl.textContent = `Couldn't load the reels (${err.message}). Reload to try again.`;
+    statusEl.classList.add('error');
+    return;
+  }
+  reels = buildReels(data);
+  $('reels').append(...REEL_KEYS.map(buildReel));
+  statusEl.textContent = '';
+  loadHash();
+
+  spinBtn.addEventListener('click', spin);
+  lever.addEventListener('click', spin);
+  unlockBtn.addEventListener('click', () => {
+    if (spinning) return;
+    for (const k of REEL_KEYS) state.locked[k] = false;
+    spin();
+  });
+  addEventListener('hashchange', () => { if (!spinning) loadHash(); });
+
+  document.querySelectorAll('[data-todo]').forEach(btn => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.textContent}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+}
+
+init();
+</script>
+</body>
+</html>
