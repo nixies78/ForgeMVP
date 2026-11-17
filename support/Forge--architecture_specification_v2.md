@@ -146,6 +146,20 @@ does less than the changelog's wording says.
     *   **System Status** indicator (its dot, and the status line)
     *   **Dev mode** link — a control that states its own on/off value, relocated here from the header in
         1.2.0
+    *   **`"Home page mockups"`** — a link to the design explorations under `public/mockups/`, added after
+        1.2.2 and the only footer entry that points outside the app. It is a door to work in progress, not
+        part of the guide, which is why it sits in the utility bar rather than in the navigation: the
+        header's one item stays "Home".
     *   **Admin Navigation Link:** `"Go to admin page"`
 *   **Removed in 1.2.0:** everything else the footer used to carry. The guide's own footnotes (sources, the
     Epic disclaimer) live at the end of the home screen, where a reader is when they matter.
+
+---
+
+## Not part of this specification
+
+`public/concepts/` (the home-page mockups, and the prototype pages under them) and `public/mockups/` are
+design explorations kept in this repository: they are experiments about what the page could be, they are
+served from the same `public/` tree, and nothing in the app depends on them. This document describes the
+app. Where the two disagree, the app wins — the concepts are allowed to disagree, which is the point of
+them.

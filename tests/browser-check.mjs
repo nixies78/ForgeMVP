@@ -98,6 +98,26 @@ function isColour(colour, rgb, alpha) {
   return new RegExp(`^rgba\\(${rgb},`).test(colour || '') && Math.abs(alphaOf(colour) - alpha) < 0.01;
 }
 
+/** Does the footer's href actually lead somewhere? A link whose label is right and whose target 404s is
+ * the failure that a text assertion cannot see, so each unique href is fetched once against this run's
+ * base URL and the answer is kept. */
+const resolvedLinks = new Map();
+async function linkResolves(href) {
+  if (!href) return false;
+  const url = new URL(href, BASE).href;
+  if (resolvedLinks.has(url)) return resolvedLinks.get(url);
+  let ok = false;
+  try {
+    const response = await fetch(url, { redirect: 'follow' });
+    ok = response.ok;
+    await response.arrayBuffer();
+  } catch {
+    ok = false;
+  }
+  resolvedLinks.set(url, ok);
+  return ok;
+}
+
 async function cdp(wsUrl) {
   const ws = new WebSocket(wsUrl);
   const pending = new Map();
@@ -299,6 +319,17 @@ async function main() {
               })(),
               footerBg: footer ? getComputedStyle(footer).backgroundColor : '',
               footerAdminLinks: admin.length,
+              /* The footer's links as the check needs them: what each one says, where it points, and — for
+               * the hrefs the app builds itself — whether that is somewhere. labels is the lowercased,
+               * whitespace-collapsed text, which is what the "is this link still here" assertion compares
+               * against, so a label that gains a stray space does not fail the run. */
+              footerLinkList: [...document.querySelectorAll('.sh-footer-link')].map((el) => ({
+                label: (el.textContent || '').replace(/\\s+/g, ' ').trim(),
+                raw: el.getAttribute('href') || ''
+              })),
+              footerLinkLabels: [...document.querySelectorAll('.sh-footer-link')].map((el) =>
+                (el.textContent || '').replace(/\\s+/g, ' ').trim().toLowerCase()
+              ),
               footerLinks: footer ? footer.querySelectorAll('.sh-footer-link').length : -1,
               footerText: footer ? footer.textContent.replace(/\\s+/g, ' ').trim() : '',
               progressBg: bar ? getComputedStyle(bar).backgroundImage : '',
@@ -371,6 +402,13 @@ async function main() {
 
     const state = dump.result.value;
     const problems = [];
+    /* A footer link's href is only worth what the page behind it is worth, so each one is resolved against
+     * this run's base URL before it is judged. Cached, because the same links appear on all thirteen
+     * routes and the answer cannot change between them. The Dev mode entry is a button, so it has no href
+     * to resolve and is judged on its label alone. */
+    for (const link of state.shell.footerLinkList || []) {
+      if (link.raw) link.ok = await linkResolves(link.raw);
+    }
     if (!state.ready) problems.push('the module never set data-app-ready');
     if (!state.rendered) problems.push('nothing rendered into #screen');
     if (state.bootError) problems.push('the boot error banner is showing');
@@ -481,8 +519,24 @@ async function main() {
     }
     if (state.shell.footerAdminLinks < 1) problems.push('the footer carries no "Go to admin page" link');
     if (!/go to admin page/i.test(state.shell.footerText)) problems.push('the footer admin link is not labelled "Go to admin page"');
-    if (state.shell.footerLinks !== 2) {
-      problems.push(`the footer should carry exactly two utility links (Dev mode and Admin), it carries ${state.shell.footerLinks}`);
+    /* The footer's utility links, named rather than counted. The count said "two" until the mockups page
+     * landed and its link was put here, and a number that has to be edited every time the app grows a page
+     * is a check on the number instead of on the links. So: every link the footer carries must point at a
+     * page that exists, and the three it should carry must all be there.
+     *
+     * Dev mode is matched by prefix on purpose: it is a button that states its own state, so its label is
+     * "Dev mode on" or "Dev mode off" depending on the setting - and it is the one footer entry with no
+     * href, which is why an empty href is not a broken one. */
+    for (const link of state.shell.footerLinkList) {
+      if (link.raw && !link.ok) {
+        problems.push(`the footer link "${link.label}" points at ${link.raw}, which is not a page that exists`);
+      }
+    }
+    for (const want of ['dev mode', 'home page mockups', 'go to admin page']) {
+      const found = state.shell.footerLinkLabels.some((label) => label.startsWith(want));
+      if (!found) {
+        problems.push(`the footer is missing its "${want}" link; it carries: ${state.shell.footerLinkLabels.join(', ')}`);
+      }
     }
     if (!/dev mode/i.test(state.shell.footerText)) problems.push('the footer does not mention Dev mode, which 1.2.0 moved into it');
     /* And nothing of the old footer content came back with it. */

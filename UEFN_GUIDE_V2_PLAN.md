@@ -197,14 +197,15 @@ one-command restore).
 | Area | Where |
 |---|---|
 | Style library (workspace) | `support/library.html` (the palette, as of 1.2.0) → `public/css/tokens.css` + `public/css/guide.css` (no hex value in `guide.css`; retheming is a token edit). `support/FORTNITE_STYLE_LIBRARY.md` is the record of the palette used up to 1.1.0 |
-| Architecture spec (page shell) | `support/Forge--architecture_specification_v2.md` (current, revised in place to 1.2.0) and `..._v1.md` (the version it replaced) → `public/css/shell.css` (frame geometry and aliases onto the one palette; the progress ramp's yellow is the only colour it still declares) |
+| Architecture spec (page shell) | `support/Forge--architecture_specification_v2.md` (current, revised in place to 1.2.2) and `..._v1.md` (the version it replaced) → `public/css/shell.css` (frame geometry and aliases onto the one palette; as of 1.2.1 it declares no colour of its own at all) |
 | Data | `public/data/uefn_device_logic.json` (one copy, fetched once), `public/js/guide/data.js` |
 | Engine | `public/js/guide/resolve.js` (v1's five-step merge, provenance, appended overrides, memoised) |
 | Session | `public/js/guide/state.js`, `store.js` (schema 3, v1 import, quota/cap reporting), `router.js`, `share.js` |
 | Shell behaviour | `public/js/guide/chrome.js` (header measurement; the search field it used to wire left in 1.2.0) |
 | Screens | `public/js/guide/screens/` — ten modules, one per screen |
 | Rendering | `public/js/guide/dom.js` (no `innerHTML` anywhere), `render/ui.js`, `render/devices.js`, `render/loop.js` |
-| Tests | `tests/guide.test.mjs` (55), `tests/server.test.mjs` (19, updated for the new page), `tests/browser-check.mjs` (`npm run verify`) |
+| Tests | `tests/guide.test.mjs` (55), `tests/server.test.mjs` (23, updated for the new page), `tests/randomiser.test.mjs` (13, for the randomiser concept page), `tests/browser-check.mjs` (`npm run verify`) |
+| Explorations (not the app) | `public/concepts/` and `public/mockups/` — home-page mockups and the prototype pages under them, with the brief in `support/home-concepts-brief.md`. Served from the same `public/` tree, linked from the footer, depended on by nothing in the guide; see the closing note of the architecture spec |
 
 **The page around the app (as v2 described it, the day v2 landed).** `public/index.html` is the Forge page v2 describes:
 a **fixed** 72px header with no bottom border, painted with the body colour at 95% (`rgba(16,16,20,.95)`)
@@ -276,15 +277,16 @@ link — so it is reached from the "Chat with AI" stub screen, and the admin pag
 wizard step has a visible Back button, and home has none because there is nothing before it; and a screen
 change returns to the top of the page, since there is no longer a hero to scroll past.
 
-**Automated checks.** `npm test` runs 111 assertions across four files (21 + 55 + 19 + 16). `npm run verify` drives headless
+**Automated checks.** `npm test` runs 128 assertions across five files (21 + 55 + 23 + 16 + 13). `npm run verify` drives headless
 Chrome over the DevTools Protocol in two phases: all thirteen routes at desktop and phone width
 (asserting rendered text, heading structure, exactly one `<h1>` and it being the screen's own title,
 focus landing on it with no ring drawn around it, the fixed 72px header painted `rgba(16,16,20,0.9)` with a
 backdrop blur and the page clearing it, the single "Home" nav item, the Epic mark from the spec with
 `0px` of border, the panel trio (`#1c1c20` on `#343437`), the control heights (32px in the navigation, 40px
-in the body), no trace of the hero, a breadcrumb trail with at least one working link, the footer's admin
-link, the blue-to-indigo progress ramp, a visible Back button
-on every screen of the wizard, no content overflowing its box, no console errors, and a screenshot each),
+in the body), no trace of the hero, a breadcrumb trail with at least one working link, the footer's three
+utility links each checked against the page it points at, the blue-to-indigo progress ramp, a visible Back
+button on every screen of the wizard, no content overflowing its box, no console errors, and a screenshot
+each),
 then a click-through of the whole wizard with no deep links at all — category to game type to four
 questions to brand to the usage-rules gate to the summary, naming and saving the game, the experience
 question, all five build steps, finishing, the saved game surviving a reload, the Dev mode button
