@@ -93,6 +93,9 @@
   .reel.spinning .window::after { opacity: 1; }
   .reel.locked .window { border-color: var(--accent); }
   .strip { will-change: transform; }
+  /* Motion blur only while the reel is fast; it fades out before the reel stops
+     rather than switching off on the last frame. */
+  .item { transition: filter .35s ease-out; }
   .strip.moving .item { filter: blur(.6px); }
 
   .item {
@@ -540,29 +543,49 @@ function animateReel(key, from, to, duration, extra) {
     }
     if (entries[entries.length - 1] === list[to]) entries.pop();
     entries.push(list[to]);
-    strip.replaceChildren(...entries.map(itemEl));
+    const items = entries.map(itemEl);
+    strip.replaceChildren(...items);
+    const last = items[items.length - 1];
 
-    const itemH = win.clientHeight;
-    const distance = (entries.length - 1) * itemH;
     root.classList.add('spinning');
     strip.classList.add('moving');
     strip.style.transition = 'none';
     strip.style.transform = 'translateY(0)';
-    strip.getBoundingClientRect();     // commit the start position
-    // Ease out with a small overshoot, so the reel settles back onto the entry.
-    strip.style.transition = `transform ${duration}ms cubic-bezier(.15,.55,.25,1.06)`;
-    strip.style.transform = `translateY(${-distance}px)`;
+    // Measure the real distance to the target entry (not count x height), so the
+    // last frame lands on exactly the pixel the resting reel will use.
+    const distance = last.getBoundingClientRect().top - strip.getBoundingClientRect().top;
+    const settle = Math.min(10, win.clientHeight * 0.06);
+
+    // One continuous motion: decelerate to a near-stop just past the target, then
+    // ease back onto it. Velocity is (close to) zero where the two parts meet, so
+    // there is no visible kink - unlike a cubic-bezier overshoot, which reverses
+    // abruptly on the final frames.
+    const anim = strip.animate([
+      { transform: 'translateY(0)', easing: 'cubic-bezier(.2, .62, .28, 1)' },
+      { transform: `translateY(${-(distance + settle)}px)`, offset: 0.9, easing: 'cubic-bezier(.45, 0, .55, 1)' },
+      { transform: `translateY(${-distance}px)` },
+    ], { duration, fill: 'forwards' });
+
+    // Drop the blur while the reel is still slowing, not on the last frame.
+    const unblur = setTimeout(() => strip.classList.remove('moving'), duration * 0.55);
 
     let finished = false;
     const finish = () => {
       if (finished) return;
       finished = true;
+      clearTimeout(unblur);
       root.classList.remove('spinning');
-      showStill(key);
+      strip.classList.remove('moving');
+      // Keep the element that is already on screen (its image is loaded) and
+      // remove the rest in the same frame as resetting the offset, so nothing
+      // moves, re-renders or reloads when the reel comes to rest.
+      for (const el of items) if (el !== last) el.remove();
+      anim.cancel();
+      strip.style.transform = 'translateY(0)';
       resolve();
     };
-    strip.addEventListener('transitionend', finish, { once: true });
-    setTimeout(finish, duration + 200);   // in case transitionend never fires (hidden tab)
+    anim.finished.then(finish, finish);
+    setTimeout(finish, duration + 300);   // a hidden tab may never finish the animation
   });
 }
 
