@@ -14,6 +14,12 @@
     font-weight: 100 900;
     font-display: swap;
   }
+  @font-face {
+    font-family: "Archivo Black";
+    src: url("/assets/fonts/archivo-black-latin.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
 
   :root {
     --paper: #F5F5F2;
@@ -22,9 +28,12 @@
     --grey: #5C5C5A;     /* AA on paper and white for small text */
     --rule: #000000;
     --pink: #E166B6;
+    --display: "Archivo Black", "Inter Tight", "Arial Black", sans-serif;
+    --title: "Inter Tight", "Inter", sans-serif;
     --u: 8px;            /* base unit, everything is a multiple */
     --gutter: clamp(20px, 4vw, 48px);
-    --max: 1200px;
+    --max: 1240px;
+    --ease: cubic-bezier(.2, .8, .2, 1);
   }
 
   * { box-sizing: border-box; }
@@ -45,14 +54,11 @@
     margin: 0 auto;
     padding-inline: var(--gutter);
   }
-
-  /* 12-column grid */
   .grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: calc(var(--u) * 3);
   }
-
   .label {
     margin: 0;
     font: 700 13px/1 "Inter", sans-serif;
@@ -62,57 +68,42 @@
 
   /* ---------- Header: logo only ---------- */
   header { padding-block: calc(var(--u) * 3); }
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--u) * 1.5);
-    text-decoration: none;
-  }
-  .brand .mark {
-    width: 40px; height: 40px;
-    background: var(--ink);
-    display: grid; place-items: center;
-  }
+  .brand { display: inline-flex; align-items: center; gap: calc(var(--u) * 1.5); text-decoration: none; }
+  .brand .mark { width: 40px; height: 40px; background: var(--ink); display: grid; place-items: center; }
   .brand .mark img { width: 22px; height: auto; display: block; }
   .brand span { font: 700 15px/1 "Inter", sans-serif; letter-spacing: 0.02em; }
 
-  /* ---------- Hero ---------- */
+  /* ---------- Hero (compact: the cards are the hero) ---------- */
   .hero {
     border-top: 2px solid var(--rule);
-    padding-block: calc(var(--u) * 7) calc(var(--u) * 7);
-    row-gap: calc(var(--u) * 4);
+    padding-block: calc(var(--u) * 5) calc(var(--u) * 4);
+    row-gap: calc(var(--u) * 3);
     align-items: end;
   }
   .hero .label { grid-column: 1 / -1; }
   h1 {
     grid-column: 1 / 8;
     margin: 0;
-    font-family: "Inter Tight", "Inter", sans-serif;
+    font-family: var(--title);
     font-weight: 700;
-    font-size: clamp(52px, 9vw, 128px);
+    font-size: clamp(48px, 7.4vw, 108px);
     line-height: 0.9;
     letter-spacing: -0.045em;
   }
   h1 .dot { color: var(--pink); }
   .hero-side {
     grid-column: 8 / -1;
-    display: flex;
-    flex-direction: column;
-    gap: calc(var(--u) * 3);
-    align-items: flex-start;
+    display: flex; flex-direction: column; gap: calc(var(--u) * 2.5); align-items: flex-start;
   }
-  .lede { margin: 0; font-size: 18px; line-height: 1.45; max-width: 40ch; }
+  .lede { margin: 0; font-size: 17px; line-height: 1.45; max-width: 42ch; }
 
   /* ---------- Buttons ---------- */
   .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
+    display: inline-flex; align-items: center; justify-content: space-between;
     gap: calc(var(--u) * 2);
     height: 56px;
     padding-inline: calc(var(--u) * 3);
-    background: var(--pink);
-    color: var(--ink);
+    background: var(--pink); color: var(--ink);
     font: 700 16px/1 "Inter", sans-serif;
     text-decoration: none;
     border: 2px solid var(--ink);
@@ -121,188 +112,236 @@
   .btn:hover, .btn:focus-visible { background: var(--ink); color: var(--paper); }
   .btn:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
   .btn .arrow { font-weight: 400; font-size: 20px; }
-  .btn.secondary { background: transparent; }
-  .btn.secondary:hover, .btn.secondary:focus-visible { background: var(--ink); color: var(--paper); }
 
-  /* ---------- Three ways in ---------- */
+  /* ---------- Three ways in: poster cards ---------- */
   .ways-head {
     border-top: 2px solid var(--rule);
-    padding-block: calc(var(--u) * 2) calc(var(--u) * 3);
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: calc(var(--u) * 2);
-    flex-wrap: wrap;
+    padding-block: calc(var(--u) * 2) 0;
+    display: flex; justify-content: space-between; align-items: baseline;
+    gap: calc(var(--u) * 2); flex-wrap: wrap;
   }
   .ways-head p:last-child { margin: 0; color: var(--grey); font-size: 15px; }
 
-  .ways { list-style: none; margin: 0; padding: 0; row-gap: calc(var(--u) * 3); }
-  .way {
+  .ways {
+    list-style: none; margin: 0;
+    padding: calc(var(--u) * 9) 0 0;   /* room for heads breaking out of the frames */
+    row-gap: calc(var(--u) * 12);
+  }
+  .poster {
     grid-column: span 4;
-    display: flex;
-    flex-direction: column;
+    position: relative;
+    display: flex; flex-direction: column;
     background: var(--card);
     border: 2px solid var(--ink);
   }
-  .way-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: calc(var(--u) * 2.5) calc(var(--u) * 3) 0;
+
+  /* art block */
+  .art {
+    position: relative;
+    height: clamp(260px, 24vw, 320px);
+    margin: -2px -2px 0;               /* sit flush on the card border */
+    border: 2px solid var(--ink);
+    background: var(--pink);
+    isolation: isolate;
   }
+  .art.black { background: var(--ink); }
+  .art::before {                         /* offset block that slides on hover */
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background: var(--ink);
+    transform: translate(0, 0);
+    transition: transform .45s var(--ease);
+  }
+  .art.black::before { background: var(--pink); }
+  .poster:hover .art::before, .poster:focus-within .art::before { transform: translate(14px, 14px); }
+  .art .fill { position: absolute; inset: 0; background: inherit; z-index: -1; }
+
+  .art img {
+    position: absolute; bottom: 0; right: 4%;
+    height: 122%; width: auto;
+    transform-origin: 50% 100%;
+    transition: transform .6s var(--ease);
+    pointer-events: none;
+  }
+  .poster:hover .art img, .poster:focus-within .art img { transform: translateY(-10px) scale(1.04); }
+
   .num {
-    font-family: "Inter Tight", "Inter", sans-serif;
-    font-weight: 700;
-    font-size: clamp(88px, 9vw, 128px);
-    line-height: 0.8;
-    letter-spacing: -0.06em;
-    margin-left: -0.05em;
+    position: absolute; left: 14px; bottom: -0.11em; z-index: 2;
+    font-family: var(--display);
+    font-size: clamp(170px, 17vw, 236px);
+    line-height: 1;
+    color: var(--ink);
+    pointer-events: none;
   }
+  .art.black .num { color: var(--pink); }
+
   .badge {
-    display: inline-block;
-    padding: 6px 8px;
-    font: 700 11px/1 "Inter", sans-serif;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    position: absolute; top: 14px; left: 14px; z-index: 3;
+    padding: 7px 9px;
+    font: 700 11px/1 "Inter", sans-serif; letter-spacing: 0.1em; text-transform: uppercase;
+    background: var(--card); color: var(--ink);
     border: 2px solid var(--ink);
   }
   .badge.ready { background: var(--ink); color: var(--card); }
+  .art.black .badge { border-color: var(--card); }
 
-  .icon {
-    display: block;
-    margin: calc(var(--u) * 3) calc(var(--u) * 3) 0;
+  /* body */
+  .p-body { display: flex; flex-direction: column; flex: 1; padding: calc(var(--u) * 3); }
+  .poster h2 {
+    margin: 0 0 calc(var(--u) * 1.5);
+    font-family: var(--display); font-weight: 400;
+    font-size: clamp(30px, 2.8vw, 38px);
+    line-height: 0.95;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    min-height: 1.9em;          /* titles align across cards */
+  }
+  .poster p.desc { margin: 0 0 calc(var(--u) * 3); color: var(--grey); font-size: 15.5px; }
+
+  /* mini diagrams */
+  .dia {
     border-top: 1px solid var(--ink);
     border-bottom: 1px solid var(--ink);
-    padding-block: calc(var(--u) * 3);
+    padding-block: calc(var(--u) * 2);
+    margin-bottom: calc(var(--u) * 2.5);
+    min-height: 176px;
+    display: flex; flex-direction: column; justify-content: center;
+    font-size: 14px;
   }
-  .icon svg { display: block; width: 100%; height: 96px; }
+  .dia .meta {
+    display: flex; justify-content: space-between; align-items: center;
+    font: 700 11px/1 "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: calc(var(--u) * 1.5);
+  }
 
-  .way-body {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    padding: calc(var(--u) * 3);
+  /* 1: question */
+  .steps-bar { display: flex; gap: 4px; }
+  .steps-bar i { width: 18px; height: 6px; background: transparent; border: 1px solid var(--ink); }
+  .steps-bar i.on { background: var(--pink); border-color: var(--pink); }
+  .qtext { font: 700 18px/1.25 var(--title); letter-spacing: -0.01em; margin: 0 0 calc(var(--u) * 1.5); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    font: 600 13px/1 "Inter", sans-serif;
+    padding: 9px 11px;
+    border: 1.5px solid var(--ink);
+    transition: background-color .2s, color .2s;
   }
-  .way h2 {
-    margin: 0 0 var(--u);
-    font-family: "Inter Tight", "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 28px;
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+  .chip.on { background: var(--ink); color: var(--card); }
+  .poster:hover .chip.on { background: var(--pink); color: var(--ink); border-color: var(--ink); }
+
+  /* 2: wheel */
+  .wheel-row { display: grid; grid-template-columns: 148px 1fr; gap: calc(var(--u) * 2.5); align-items: center; }
+  .wheel-box { position: relative; width: 148px; height: 148px; margin-top: 8px; }
+  .wheel {
+    position: absolute; inset: 0;
+    transform: rotate(-30deg);  /* pink Tycoon segment under the pointer */
+    transition: transform 2.4s cubic-bezier(.15, .7, .2, 1);
   }
-  .way p { margin: 0 0 calc(var(--u) * 3); color: var(--grey); font-size: 16px; }
-  .way .btn { margin-top: auto; width: 100%; }
+  .wheel svg { display: block; width: 100%; height: 100%; }
+  .poster:hover .wheel { transform: rotate(690deg); }
+  .pointer {
+    position: absolute; left: 50%; top: -10px; z-index: 2;
+    width: 0; height: 0; margin-left: -9px;
+    border-left: 9px solid transparent; border-right: 9px solid transparent;
+    border-top: 16px solid var(--ink);
+  }
+  .landed { display: grid; gap: 6px; }
+  .landed .k { font: 700 11px/1 "Inter", sans-serif; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey); }
+  .landed .v { font: 400 22px/1 var(--display); text-transform: uppercase; }
+  .landed .plus { font: 600 13px/1.35 "Inter", sans-serif; }
+  .landed .plus b { display: inline-block; width: 9px; height: 9px; background: var(--pink); margin-right: 6px; }
+
+  /* 3: chat */
+  .msgs { display: grid; gap: 8px; }
+  .msg { max-width: 88%; padding: 9px 11px; font: 500 13.5px/1.35 "Inter", sans-serif; border: 1.5px solid var(--ink); }
+  .msg .who { display: block; font: 700 10px/1 "Inter", sans-serif; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+  .msg.me { justify-self: end; background: var(--ink); color: var(--card); }
+  .msg.me .who { color: var(--pink); }
+  .msg.ai { background: var(--card); }
+  .typing { display: inline-flex; gap: 4px; padding: 11px 12px; border: 1.5px solid var(--ink); justify-self: start; }
+  .typing b { width: 6px; height: 6px; background: var(--ink); animation: blink 1.2s infinite; }
+  .typing b:nth-child(2) { animation-delay: .2s; }
+  .typing b:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 50% { opacity: .15; } }
+
+  /* card button */
+  .go {
+    margin-top: auto;
+    display: flex; align-items: stretch; justify-content: space-between;
+    height: 56px;
+    border: 2px solid var(--ink);
+    text-decoration: none;
+    font: 700 16px/1 "Inter", sans-serif;
+    background: transparent;
+    transition: background-color .2s, color .2s;
+  }
+  .go span { display: flex; align-items: center; padding-inline: calc(var(--u) * 2.5); }
+  .go .sq {
+    width: 56px; justify-content: center; padding: 0;
+    border-left: 2px solid var(--ink);
+    font-size: 22px; font-weight: 400;
+    overflow: hidden;
+  }
+  .go .sq i { font-style: normal; transition: transform .35s var(--ease); }
+  .go.primary { background: var(--pink); }
+  .poster:hover .go .sq i, .go:focus-visible .sq i { transform: translateX(8px); }
+  .go:hover, .go:focus-visible { background: var(--ink); color: var(--card); }
+  .go:hover .sq, .go:focus-visible .sq { border-color: var(--card); }
+  .go:focus-visible { outline: 3px solid var(--pink); outline-offset: 3px; }
 
   /* ---------- Walk-away strip ---------- */
-  .strip {
-    margin-top: calc(var(--u) * 10);
-    border-top: 2px solid var(--rule);
-    list-style: none;
-    padding: 0;
-  }
-  .strip li {
-    grid-column: span 4;
-    padding-block: calc(var(--u) * 2) 0;
-    display: flex;
-    align-items: baseline;
-    gap: calc(var(--u) * 2);
-  }
-  .strip b {
-    font-family: "Inter Tight", "Inter", sans-serif;
-    font-weight: 700;
-    font-size: 56px;
-    line-height: 1;
-    letter-spacing: -0.04em;
-  }
+  .strip { margin-top: calc(var(--u) * 10); border-top: 2px solid var(--rule); list-style: none; padding: 0; }
+  .strip li { grid-column: span 4; padding-block: calc(var(--u) * 2) 0; display: flex; align-items: baseline; gap: calc(var(--u) * 2); }
+  .strip b { font-family: var(--display); font-weight: 400; font-size: 52px; line-height: 1; }
   .strip span { font-size: 16px; line-height: 1.3; }
 
-  /* ---------- Image ---------- */
-  figure { margin: 0; }
-  .art { margin-top: calc(var(--u) * 10); }
-  .art .frame {
-    border: 2px solid var(--ink);
-    aspect-ratio: 21 / 9;
-    overflow: hidden;
-    background: var(--ink);
-  }
-  .art img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    object-position: 50% 78%;
-    display: block;
-  }
-  .art figcaption {
-    display: flex;
-    justify-content: space-between;
-    gap: calc(var(--u) * 2);
-    margin-top: calc(var(--u) * 1.5);
-    font: 700 12px/1.3 "Inter", sans-serif;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .art figcaption span:last-child { color: var(--grey); text-align: right; }
-
   /* ---------- Final CTA ---------- */
-  .final {
-    text-align: center;
-    padding-block: calc(var(--u) * 12) calc(var(--u) * 14);
-  }
+  .final { text-align: center; padding-block: calc(var(--u) * 12) calc(var(--u) * 14); }
   .final h2 {
     margin: 0 0 calc(var(--u) * 4);
-    font-family: "Inter Tight", "Inter", sans-serif;
-    font-weight: 700;
-    font-size: clamp(36px, 5vw, 64px);
-    line-height: 1;
-    letter-spacing: -0.035em;
+    font-family: var(--title); font-weight: 700;
+    font-size: clamp(36px, 5vw, 64px); line-height: 1; letter-spacing: -0.035em;
   }
 
   footer .inner {
     border-top: 2px solid var(--rule);
     padding-block: calc(var(--u) * 3) calc(var(--u) * 10);
-    font-size: 13px;
-    color: var(--grey);
+    font-size: 13px; color: var(--grey);
   }
 
-  /* Concept tag */
   .concept-tag {
-    position: fixed;
-    right: 12px; bottom: 12px;
-    z-index: 10;
+    position: fixed; right: 12px; bottom: 12px; z-index: 10;
     padding: 6px 10px;
-    background: var(--ink);
-    color: var(--paper);
-    font: 700 11px/1 "Inter", sans-serif;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    background: var(--ink); color: var(--paper);
+    font: 700 11px/1 "Inter", sans-serif; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before { transition: none !important; animation: none !important; }
   }
 
   /* ---------- Responsive ---------- */
-  @media (max-width: 980px) {
+  @media (max-width: 1040px) {
     h1, .hero-side { grid-column: 1 / -1; }
-    .way { grid-column: 1 / -1; }
-    .way { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); }
-    .way-top { grid-column: 1; grid-row: 1; }
-    .icon { grid-column: 1; grid-row: 2; }
-    .way-body { grid-column: 2; grid-row: 1 / span 2; border-left: 1px solid var(--ink); }
-    .strip li { grid-column: span 4; flex-direction: column; gap: 4px; }
+    .poster { grid-column: 3 / span 8; }
+    .art { height: 320px; }
+    .strip li { flex-direction: column; gap: 4px; }
   }
-  @media (max-width: 640px) {
+  @media (max-width: 720px) {
     .grid { column-gap: calc(var(--u) * 2); }
-    .hero { padding-block: calc(var(--u) * 5); row-gap: calc(var(--u) * 3); }
-    .way { display: flex; }
-    .way-body { border-left: 0; }
-    .icon { margin-top: calc(var(--u) * 2); padding-block: calc(var(--u) * 2); }
-    .icon svg { height: 72px; }
-    .num { font-size: 80px; }
+    .hero { padding-block: calc(var(--u) * 4) calc(var(--u) * 3); }
+    .poster { grid-column: 1 / -1; }
+    .ways { row-gap: calc(var(--u) * 10); }
+    .art { height: 260px; }
+    .poster h2 { min-height: 0; }
+    .num { font-size: 168px; }
+    .p-body { padding: calc(var(--u) * 2.5); }
+    .wheel-row { grid-template-columns: 124px 1fr; gap: calc(var(--u) * 2); }
+    .wheel-box { width: 124px; height: 124px; }
     .strip li { grid-column: 1 / -1; flex-direction: row; gap: calc(var(--u) * 2);
                 border-top: 1px solid var(--rule); padding-block: calc(var(--u) * 1.5); }
     .strip li:first-child { border-top: 0; }
-    .strip b { font-size: 44px; min-width: 2ch; }
-    .art .frame { aspect-ratio: 2 / 1; }
-    .art img { object-position: 50% 100%; }
-    .art figcaption { flex-direction: column; gap: 4px; }
-    .art figcaption span:last-child { text-align: left; }
+    .strip b { font-size: 40px; min-width: 2ch; }
     .final { padding-block: calc(var(--u) * 9) calc(var(--u) * 10); }
   }
 </style>
@@ -333,60 +372,96 @@
       <p class="label" id="ways-title">Three ways in</p>
       <p>Pick how you&rsquo;d like to design it.</p>
     </div>
+
     <ol class="grid ways">
-      <li class="way" id="questions">
-        <div class="way-top"><span class="num" aria-hidden="true">1</span><span class="badge ready">Ready</span></div>
-        <span class="icon" aria-hidden="true">
-          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
-            <rect x="0" y="8" width="24" height="24" fill="#E166B6"/>
-            <rect x="40" y="14" width="160" height="12" fill="#000"/>
-            <rect x="0" y="40" width="24" height="24" fill="none" stroke="#000" stroke-width="3"/>
-            <rect x="40" y="46" width="120" height="12" fill="#000"/>
-            <rect x="0" y="72" width="24" height="24" fill="none" stroke="#000" stroke-width="3"/>
-            <rect x="40" y="78" width="140" height="12" fill="#000"/>
-          </svg>
-        </span>
-        <div class="way-body">
-          <h2>Answer Questions</h2>
-          <p>Work through a short set of questions about the game you want. We&rsquo;ll narrow it down to an exact game type and build you a step-by-step plan.</p>
-          <a class="btn" href="#">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
+      <!-- 1 -->
+      <li class="poster" id="questions">
+        <div class="art">
+          <span class="fill"></span>
+          <span class="badge ready">Ready</span>
+          <img src="../_media/char-fn-18-outfit-jett.webp" alt="" width="875" height="1400">
+          <span class="num" aria-hidden="true">1</span>
+        </div>
+        <div class="p-body">
+          <h2>Answer<br>Questions</h2>
+          <div class="dia" aria-hidden="true">
+            <div class="meta"><span>Question 2 of 5</span><span class="steps-bar"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span></div>
+            <p class="qtext">Who are players up against?</p>
+            <div class="chips"><span class="chip">Free-for-all</span><span class="chip on">Teams &check;</span><span class="chip">Co-op vs AI</span></div>
+          </div>
+          <p class="desc">Work through a short set of questions about the game you want. We&rsquo;ll narrow it down to an exact game type and build you a step-by-step plan.</p>
+          <a class="go primary" href="#"><span>Start questions</span><span class="sq" aria-hidden="true"><i>&rarr;</i></span></a>
         </div>
       </li>
-      <li class="way">
-        <div class="way-top"><span class="num" aria-hidden="true">2</span><span class="badge">Coming soon</span></div>
-        <span class="icon" aria-hidden="true">
-          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
-            <circle cx="48" cy="48" r="45" fill="none" stroke="#000" stroke-width="3"/>
-            <path d="M48 48 L48 3 A45 45 0 0 1 86.97 25.5 Z" fill="#E166B6"/>
-            <line x1="48" y1="3" x2="48" y2="93" stroke="#000" stroke-width="3"/>
-            <line x1="9" y1="25.5" x2="87" y2="70.5" stroke="#000" stroke-width="3"/>
-            <line x1="9" y1="70.5" x2="87" y2="25.5" stroke="#000" stroke-width="3"/>
-            <circle cx="48" cy="48" r="7" fill="#000"/>
-            <path d="M120 40 L150 48 L120 56 Z" fill="#000"/>
-          </svg>
-        </span>
-        <div class="way-body">
+
+      <!-- 2 -->
+      <li class="poster">
+        <div class="art black">
+          <span class="fill"></span>
+          <span class="badge">Coming soon</span>
+          <img src="../_media/char-fn-38-outfit-malibu-hat-off.webp" alt="" width="877" height="1400" loading="lazy">
+          <span class="num" aria-hidden="true">2</span>
+        </div>
+        <div class="p-body">
           <h2>Randomise</h2>
-          <p>Not sure what to make? Spin the wheel and let it pick a game idea for you &mdash; a game type, a twist and a brand to build around.</p>
-          <a class="btn secondary" href="#">Spin the wheel <span class="arrow" aria-hidden="true">&rarr;</span></a>
+          <div class="dia" aria-hidden="true">
+            <div class="wheel-row">
+              <div class="wheel-box" id="wheel-box">
+                <span class="pointer"></span>
+                <div class="wheel" id="wheel">
+                  <svg viewBox="0 0 160 160">
+                    <g stroke="#000" stroke-width="2" stroke-linejoin="round">
+                      <path d="M80 80 L80 4 A76 76 0 0 1 145.82 42 Z" fill="#E166B6"/>
+                      <path d="M80 80 L145.82 42 A76 76 0 0 1 145.82 118 Z" fill="#fff"/>
+                      <path d="M80 80 L145.82 118 A76 76 0 0 1 80 156 Z" fill="#F5F5F2"/>
+                      <path d="M80 80 L80 156 A76 76 0 0 1 14.18 118 Z" fill="#fff"/>
+                      <path d="M80 80 L14.18 118 A76 76 0 0 1 14.18 42 Z" fill="#F5F5F2"/>
+                      <path d="M80 80 L14.18 42 A76 76 0 0 1 80 4 Z" fill="#fff"/>
+                    </g>
+                    <g font-family="Inter, sans-serif" font-weight="700" font-size="8.6" letter-spacing=".3" fill="#000">
+                      <text x="91" y="83" transform="rotate(-60 80 80)">TYCOON</text>
+                      <text x="91" y="83" transform="rotate(0 80 80)">PARKOUR</text>
+                      <text x="91" y="83" transform="rotate(60 80 80)">PROP HUNT</text>
+                      <text x="91" y="83" transform="rotate(120 80 80)">RACING</text>
+                      <text x="91" y="83" transform="rotate(180 80 80)">BOX FIGHTS</text>
+                      <text x="91" y="83" transform="rotate(240 80 80)">ESCAPE</text>
+                    </g>
+                    <circle cx="80" cy="80" r="9" fill="#000"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="landed">
+                <span class="k">Landed on</span>
+                <span class="v">Tycoon</span>
+                <span class="plus"><b></b>+ a twist</span>
+                <span class="plus"><b></b>+ a brand</span>
+              </div>
+            </div>
+          </div>
+          <p class="desc">Not sure what to make? Spin the wheel and let it pick a game idea for you &mdash; a game type, a twist and a brand to build around.</p>
+          <a class="go" href="#"><span>Spin the wheel</span><span class="sq" aria-hidden="true"><i>&rarr;</i></span></a>
         </div>
       </li>
-      <li class="way">
-        <div class="way-top"><span class="num" aria-hidden="true">3</span><span class="badge">Coming soon</span></div>
-        <span class="icon" aria-hidden="true">
-          <svg viewBox="0 0 240 96" preserveAspectRatio="xMinYMid meet">
-            <rect x="1.5" y="1.5" width="120" height="44" fill="none" stroke="#000" stroke-width="3"/>
-            <path d="M16 45 L16 62 L34 45" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="miter"/>
-            <rect x="64" y="52" width="120" height="44" fill="#E166B6"/>
-            <path d="M170 96 L170 96" stroke="none"/>
-            <rect x="16" y="18" width="72" height="10" fill="#000"/>
-            <rect x="80" y="69" width="88" height="10" fill="#000"/>
-          </svg>
-        </span>
-        <div class="way-body">
-          <h2>Chat with AI</h2>
-          <p>Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
-          <a class="btn secondary" href="#">Start chatting <span class="arrow" aria-hidden="true">&rarr;</span></a>
+
+      <!-- 3 -->
+      <li class="poster">
+        <div class="art">
+          <span class="fill"></span>
+          <span class="badge">Coming soon</span>
+          <img src="../_media/char-fn-40-outfit-toon-bomber.webp" alt="" width="875" height="1400" loading="lazy">
+          <span class="num" aria-hidden="true">3</span>
+        </div>
+        <div class="p-body">
+          <h2>Chat<br>with AI</h2>
+          <div class="dia" aria-hidden="true">
+            <div class="msgs">
+              <div class="msg me"><span class="who">You</span>Racing, but the track is a giant kitchen.</div>
+              <div class="msg ai"><span class="who">AI</span>Fun. Solo time trials, or eight-player races?</div>
+              <span class="typing"><b></b><b></b><b></b></span>
+            </div>
+          </div>
+          <p class="desc">Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
+          <a class="go" href="#"><span>Start chatting</span><span class="sq" aria-hidden="true"><i>&rarr;</i></span></a>
         </div>
       </li>
     </ol>
@@ -396,15 +471,6 @@
       <li><b>59</b><span>UEFN devices mapped to them</span></li>
       <li><b>5</b><span>build steps to follow in UEFN</span></li>
     </ul>
-
-    <figure class="art">
-      <div class="frame">
-        <img src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp"
-             alt="A Fall Guys bean holds a blueprint while a wireframe arch becomes a real obstacle course"
-             width="1920" height="1080" loading="lazy">
-      </div>
-      <figcaption><span>Fig. 1</span><span>Plan first. Then build.</span></figcaption>
-    </figure>
   </section>
 
   <section class="wrap final">
@@ -417,5 +483,16 @@
 
 <div class="concept-tag">Concept 7 &mdash; Three Steps</div>
 
+<script>
+// Touch devices: tap the wheel to spin it (hover spins it on desktop).
+(function () {
+  var box = document.getElementById('wheel-box'), w = document.getElementById('wheel'), turn = 0;
+  if (!box || matchMedia('(hover: hover)').matches) return;
+  box.addEventListener('click', function () {
+    turn += 720 + Math.floor(Math.random() * 360);
+    w.style.transform = 'rotate(' + turn + 'deg)';
+  });
+})();
+</script>
 </body>
 </html>

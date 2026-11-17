@@ -18,10 +18,12 @@
     --ink: #101014;
     --muted: #55555c;
     --line: #e4e4e9;
-    --soft: #f5f6f8;
+    --soft: #f4f5f7;
     --blue: #33BFFF;
     --blue-ink: #185977;
     --blue-wash: #eaf8ff;
+    --grad: linear-gradient(135deg, #33BFFF 0%, #DFBAF8 100%);
+    --ease: cubic-bezier(.2, .8, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
@@ -37,29 +39,25 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
+  img { max-width: 100%; }
 
   /* thin progress bar, like a form you are moving through */
-  .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--line); z-index: 10; }
+  .progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--line); z-index: 20; }
   .progress span { display: block; height: 100%; width: 0; background: var(--blue); transition: width .2s linear; }
 
-  .wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 56px); }
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-inline: clamp(20px, 5vw, 56px); }
   section { padding-block: clamp(64px, 9vw, 120px); }
-  .hero { padding-top: clamp(64px, 7vw, 96px); padding-bottom: clamp(48px, 7vw, 96px); }
+  .hero { padding-top: clamp(56px, 6vw, 88px); padding-bottom: clamp(56px, 7vw, 104px); }
 
-  .label {
-    font-weight: 700; font-size: 15px; color: var(--blue-ink);
-    margin: 0 0 22px;
-  }
+  .label { font-weight: 700; font-size: 15px; color: var(--blue-ink); margin: 0 0 20px; }
   h1, h2, h3 { font-family: var(--title); font-weight: 700; letter-spacing: -0.025em; margin: 0; }
   h1 { font-size: clamp(42px, 6vw, 76px); line-height: 1.02; max-width: 14em; }
   h2 { font-size: clamp(32px, 4.4vw, 54px); line-height: 1.06; }
-  .lede {
-    color: var(--muted); font-size: clamp(18px, 1.6vw, 21px);
-    max-width: 38em; margin: 24px 0 0;
-  }
+  .lede { color: var(--muted); font-size: clamp(18px, 1.6vw, 21px); max-width: 38em; margin: 22px 0 0; }
+
   .prompt {
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    margin: clamp(36px, 4vw, 52px) 0 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    margin: clamp(40px, 7vw, 100px) 0 22px;
     font-weight: 700; font-size: 15px;
   }
   .prompt .hint { font-weight: 400; color: var(--muted); font-size: 14px; }
@@ -69,67 +67,187 @@
     background: #fff; color: var(--ink);
   }
 
-  /* the three answers */
-  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .card {
-    position: relative;
-    display: flex; flex-direction: column;
-    border: 1.5px solid var(--line); border-radius: 14px;
-    background: #fff; overflow: hidden;
-    transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
-  }
-  .card:hover { border-color: var(--ink); transform: translateY(-3px); box-shadow: 0 14px 36px rgba(16,16,20,.08); }
-  .card.ready { border-color: var(--blue); }
-  .card.ready:hover { border-color: var(--blue); box-shadow: 0 14px 36px rgba(51,191,255,.25); }
+  /* ---------- the three answers ---------- */
+  .options { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(16px, 2vw, 28px); align-items: stretch; }
 
-  .visual {
-    position: relative;
-    aspect-ratio: 2 / 1; max-width: 100%;
+  .shell { position: relative; transition: transform .5s var(--ease); }
+  .shell:hover { transform: translateY(-8px); }
+  .peek {
+    position: absolute; z-index: 0; pointer-events: none;
+    width: 230px; right: -56px; bottom: calc(100% - 175px);
+    transform-origin: bottom center;
+    transition: transform .6s var(--ease);
+  }
+  .shell:hover .peek { transform: translateY(-14px) rotate(-3deg); }
+
+  .card {
+    position: relative; z-index: 1; height: 100%;
+    display: flex; flex-direction: column;
+    background: #fff;
+    border: 1.5px solid var(--line); border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(16,16,20,.04), 0 12px 32px -18px rgba(16,16,20,.18);
+    transition: border-color .3s ease, box-shadow .5s var(--ease);
+  }
+  .shell:hover .card { border-color: var(--ink); box-shadow: 0 2px 4px rgba(16,16,20,.05), 0 36px 70px -28px rgba(16,16,20,.35); }
+  .card.ready { border-color: var(--blue); }
+  .shell:hover .card.ready { border-color: var(--blue); box-shadow: 0 2px 4px rgba(51,191,255,.1), 0 36px 70px -24px rgba(51,191,255,.55); }
+
+  .stage {
+    position: relative; height: 280px;
     display: grid; place-items: center;
     background: var(--soft);
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1.5px solid var(--line);
+    overflow: hidden;
   }
-  .card.ready .visual { background: var(--blue-wash); border-bottom-color: #cdeefd; }
-  .visual svg { width: 34%; max-width: 120px; height: auto; }
+  .card.ready .stage { background: var(--grad); border-bottom-color: transparent; }
+  /* faint dot grid so the stage reads as a canvas */
+  .stage::before {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(16,16,20,.09) 1px, transparent 1.2px);
+    background-size: 16px 16px;
+  }
+  .card.ready .stage::before { background-image: radial-gradient(rgba(255,255,255,.45) 1px, transparent 1.2px); }
+  .stage > * { position: relative; }
+
   .key {
-    position: absolute; top: 14px; left: 14px;
-    width: 30px; height: 30px; border-radius: 7px;
+    position: absolute; top: 16px; left: 16px; z-index: 2;
+    width: 32px; height: 32px; border-radius: 8px;
     display: grid; place-items: center;
     font-weight: 700; font-size: 14px;
     border: 1.5px solid var(--ink); background: #fff;
   }
-  .card.ready .key { background: var(--blue); border-color: var(--blue); }
 
-  .body { display: flex; flex-direction: column; flex: 1; padding: 22px 22px 24px; }
-  .badge {
-    align-self: flex-start;
-    font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    padding: 4px 9px; border-radius: 999px; margin-bottom: 12px;
+  /* mini form (Answer Questions) */
+  .form {
+    width: 84%; background: #fff; border-radius: 14px; padding: 16px 16px 14px;
+    box-shadow: 0 18px 40px -16px rgba(16,16,20,.35);
+    transition: transform .6s var(--ease);
   }
-  .badge.on { background: var(--blue-wash); color: var(--blue-ink); }
-  .badge.soon { background: var(--soft); color: var(--muted); border: 1px solid var(--line); }
-  h3 { font-size: 26px; line-height: 1.15; }
+  .shell:hover .form { transform: translateY(-4px) scale(1.02); }
+  .form-top { display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; font-weight: 700; color: var(--muted); }
+  .form-bar { height: 4px; background: var(--line); border-radius: 4px; margin: 8px 0 12px; overflow: hidden; }
+  .form-bar i { display: block; height: 100%; width: 17%; background: var(--blue); border-radius: 4px; transition: width .6s var(--ease); }
+  .form.answered .form-bar i { width: 34%; }
+  .form-q { font-family: var(--title); font-weight: 700; font-size: 17px; line-height: 1.2; letter-spacing: -0.015em; margin-bottom: 10px; }
+  .choices { display: grid; gap: 6px; }
+  .choice {
+    display: flex; align-items: center; gap: 9px; width: 100%;
+    font: 600 13.5px/1.2 var(--body); color: var(--ink); text-align: left;
+    background: #fff; border: 1.5px solid var(--line); border-radius: 8px;
+    padding: 6px 8px; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .choice b {
+    flex: none; width: 20px; height: 20px; border-radius: 5px; display: grid; place-items: center;
+    font-size: 11px; border: 1px solid var(--line); background: #fff;
+  }
+  .choice:hover { border-color: var(--ink); }
+  .choice.on { border-color: var(--blue); background: var(--blue-wash); }
+  .choice.on b { background: var(--blue); border-color: var(--blue); }
+  .choice .tick { margin-left: auto; color: var(--blue-ink); opacity: 0; transition: opacity .2s; }
+  .choice.on .tick { opacity: 1; }
+  .choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  /* wheel (Randomise) */
+  .wheel-box { display: grid; justify-items: center; gap: 14px; }
+  .wheel-wrap { position: relative; width: 196px; height: 196px; }
+  .pointer {
+    position: absolute; left: 50%; top: -12px; z-index: 3; margin-left: -11px;
+    width: 0; height: 0; border-left: 11px solid transparent; border-right: 11px solid transparent; border-top: 20px solid var(--blue);
+    filter: drop-shadow(0 2px 0 var(--ink));
+  }
+  .wheel {
+    position: absolute; inset: 0; border-radius: 50%;
+    background:
+      repeating-conic-gradient(from -30deg, #fff 0 60deg, #e9eaee 60deg 120deg);
+    border: 2px solid var(--ink);
+    box-shadow: 0 16px 34px -14px rgba(16,16,20,.4);
+    transition: transform 2.8s cubic-bezier(.15, .75, .15, 1);
+  }
+  .wheel::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background: repeating-conic-gradient(from -30deg, var(--ink) 0 .9deg, transparent .9deg 60deg);
+  }
+  .wheel span {
+    position: absolute; left: 50%; top: 50%;
+    font: 800 10.5px/1 var(--body); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+    transform: translate(-50%, -50%) rotate(var(--a)) translateY(-64px);
+  }
+  /* keep the lower labels readable */
+  .wheel span.flip { transform: translate(-50%, -50%) rotate(var(--a)) translateY(-64px) rotate(180deg); }
+  .hub {
+    position: absolute; left: 50%; top: 50%; z-index: 2; width: 34px; height: 34px; margin: -17px 0 0 -17px;
+    border-radius: 50%; background: var(--ink); border: 4px solid #fff; box-shadow: 0 0 0 2px var(--ink);
+  }
+  .result {
+    font-size: 13px; color: var(--muted); font-weight: 600;
+    background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 12px;
+  }
+  .result b { color: var(--ink); }
+
+  /* chat (Chat with AI) */
+  .chat { width: 86%; display: grid; gap: 9px; }
+  .msg {
+    max-width: 86%; font-size: 13.5px; line-height: 1.35; font-weight: 500;
+    padding: 9px 12px; border-radius: 14px;
+  }
+  .msg.me { justify-self: end; background: var(--ink); color: #fff; border-bottom-right-radius: 4px; }
+  .ai { display: flex; align-items: flex-end; gap: 8px; }
+  .ai .av {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--blue); display: grid; place-items: center;
+    font: 800 11px/1 var(--title);
+  }
+  .ai .msg { background: #fff; border: 1.5px solid var(--line); border-bottom-left-radius: 4px; }
+  .typing { display: inline-flex; gap: 4px; padding: 3px 0; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink); animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; }
+  .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 50% { opacity: .2; } }
+  .chat.play .step { opacity: 0; animation: pop .45s var(--ease) forwards; }
+  .chat.play .step:nth-child(1) { animation-delay: .15s; }
+  .chat.play .step:nth-child(2) { animation-delay: 1.1s; }
+  .chat.play .step:nth-child(3) { animation-delay: 2.1s; }
+  @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.97); } to { opacity: 1; transform: none; } }
+
+  /* card text */
+  .body { display: flex; flex-direction: column; flex: 1; padding: 24px 24px 26px; }
+  .meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .num { font-family: var(--title); font-weight: 700; font-size: 14px; color: var(--muted); letter-spacing: .06em; }
+  .badge {
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: 6px 11px; border-radius: 999px;
+  }
+  .badge.on { background: var(--grad); color: var(--ink); }
+  .badge.soon { background: var(--ink); color: #fff; }
+  h3 { font-size: clamp(28px, 2.5vw, 34px); line-height: 1.05; letter-spacing: -0.03em; }
   .body p { color: var(--muted); font-size: 16px; margin: 10px 0 24px; flex: 1; }
 
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 10px;
     font-family: var(--body); font-weight: 700; font-size: 17px;
     text-decoration: none; color: var(--ink);
-    padding: 14px 22px; border-radius: 8px;
+    padding: 14px 22px; border-radius: 10px;
     border: 1.5px solid var(--ink); background: #fff;
-    transition: background .15s ease, box-shadow .15s ease;
+    transition: background .15s ease, color .15s ease, box-shadow .2s ease;
   }
-  .btn:hover { background: var(--soft); }
-  .btn.primary { background: var(--blue); border-color: var(--blue); }
-  .btn.primary:hover { box-shadow: 0 8px 24px rgba(51,191,255,.4); }
+  .btn:hover { background: var(--ink); color: #fff; }
+  .btn.primary { background: var(--blue); border-color: var(--blue); color: var(--ink); }
+  .btn.primary:hover { box-shadow: 0 10px 26px rgba(51,191,255,.45); }
   .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  .btn .arrow { transition: transform .15s ease; }
-  .btn:hover .arrow { transform: translateX(3px); }
-  .card .btn { width: 100%; }
-  .btn.big { font-size: 19px; padding: 16px 30px; }
+  .btn .arrow {
+    width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--ink); color: #fff; font-size: 14px;
+    transition: transform .2s var(--ease);
+  }
+  .btn:not(.primary) .arrow { background: transparent; color: inherit; border: 1.5px solid currentColor; }
+  .shell:hover .btn .arrow, .btn:hover .arrow { transform: translateX(4px); }
+  .card .btn { width: 100%; justify-content: space-between; }
+  .btn.big { font-size: 19px; padding: 16px 18px 16px 30px; gap: 16px; }
 
-  /* what you walk away with */
-  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; }
+  /* ---------- what you walk away with ---------- */
+  .strip { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .strip-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 40px 72px; align-items: end; }
   .facts { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 20px 56px; }
   .facts div { font-size: 15px; color: var(--muted); }
@@ -143,7 +261,7 @@
   .final .lede { margin: 18px auto 36px; }
 
   .tag {
-    position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
+    position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20;
     font-size: 12px; font-weight: 700; color: var(--muted);
     background: rgba(255,255,255,.92); border: 1px solid var(--line);
     padding: 5px 10px; border-radius: 999px;
@@ -156,19 +274,23 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .reveal, .reveal.in { opacity: 1; transform: none; transition: none; }
-    .card:hover { transform: none; }
+    .shell, .shell:hover, .shell:hover .peek, .shell:hover .form { transform: none; }
+    .wheel { transition: none; }
+    .chat.play .step { animation: none; opacity: 1; }
   }
 
-  @media (max-width: 920px) {
-    .options { grid-template-columns: 1fr; max-width: 560px; }
+  @media (max-width: 980px) {
+    .options { grid-template-columns: 1fr; max-width: 560px; row-gap: 40px; }
     .strip-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 560px) {
     .prompt .hint { display: none; }
-    .visual { aspect-ratio: 5 / 2; }
-    .visual svg { width: 22%; }
+    .stage { height: 260px; }
+    .prompt { margin-top: 72px; }
+    .peek { width: 150px; right: -10px; bottom: calc(100% - 132px); }
+    .key { display: none; }
     .facts { gap: 20px 32px; }
-    .final .btn { width: 100%; }
+    .final .btn { width: 100%; justify-content: space-between; }
   }
 </style>
 </head>
@@ -182,59 +304,82 @@
       <h1>What game do you want to&nbsp;make?</h1>
       <p class="lede">Forge turns your idea into an exact game type, the devices it needs and five build steps. Then build it in Unreal Editor for Fortnite and tap into Fortnite's developer economy.</p>
 
-      <p class="prompt">Choose how to start <span class="hint">&mdash; press <kbd>A</kbd> <kbd>B</kbd> or <kbd>C</kbd></span></p>
+      <p class="prompt">Choose how to start <span class="hint">press <kbd>A</kbd> <kbd>B</kbd> or <kbd>C</kbd></span></p>
       <div class="options">
-        <article class="card ready">
-          <div class="visual">
-            <span class="key">A</span>
-            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <rect x="14" y="14" width="92" height="92" rx="14"/>
-              <path d="M32 42h10M32 62h10M32 82h10" stroke="#33BFFF" stroke-width="7"/>
-              <path d="M52 42h36M52 62h28M52 82h32"/>
-            </svg>
-          </div>
-          <div class="body">
-            <span class="badge on">Ready</span>
-            <h3>Answer Questions</h3>
-            <p>Work through a short set of questions about the game you want. We'll narrow it down to an exact game type and build you a step-by-step plan.</p>
-            <a class="btn primary" href="#" data-key="a">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
-          </div>
-        </article>
 
-        <article class="card">
-          <div class="visual">
-            <span class="key">B</span>
-            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="60" cy="64" r="44"/>
-              <path d="M60 64V20M60 64l38 22M60 64l-38 22"/>
-              <circle cx="60" cy="64" r="8" fill="#33BFFF" stroke="#33BFFF"/>
-              <path d="M52 8h16l-8 12z" fill="#101014"/>
-            </svg>
-          </div>
-          <div class="body">
-            <span class="badge soon">Coming soon</span>
-            <h3>Randomise</h3>
-            <p>Not sure what to make? Spin the wheel and let it pick a game idea for you - a game type, a twist and a brand to build around.</p>
-            <a class="btn" href="#" data-key="b">Spin the wheel</a>
-          </div>
-        </article>
+        <div class="shell">
+          <img class="peek" src="../_media/char-fn-18-outfit-shadow-midas-mid-reactive-alt.webp" alt="">
+          <article class="card ready">
+            <div class="stage">
+              <span class="key">A</span>
+              <div class="form" id="form">
+                <div class="form-top"><span>Question 1 of 6</span><span>&uarr; &darr;</span></div>
+                <div class="form-bar"><i></i></div>
+                <div class="form-q">How do players win?</div>
+                <div class="choices" role="radiogroup" aria-label="Example question">
+                  <button type="button" class="choice" role="radio" aria-checked="false"><b>A</b>Last one standing<span class="tick">&check;</span></button>
+                  <button type="button" class="choice on" role="radio" aria-checked="true"><b>B</b>Most points<span class="tick">&check;</span></button>
+                  <button type="button" class="choice" role="radio" aria-checked="false"><b>C</b>First to the finish<span class="tick">&check;</span></button>
+                </div>
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta"><span class="num">01</span><span class="badge on">Ready today</span></div>
+              <h3>Answer Questions</h3>
+              <p>Work through a short set of questions about the game you want. We'll narrow it down to an exact game type and build you a step-by-step plan.</p>
+              <a class="btn primary" href="#" data-key="a">Start questions <span class="arrow" aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+        </div>
 
-        <article class="card">
-          <div class="visual">
-            <span class="key">C</span>
-            <svg viewBox="0 0 120 120" fill="none" stroke="#101014" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M14 26a10 10 0 0 1 10-10h50a10 10 0 0 1 10 10v28a10 10 0 0 1-10 10H40L24 76V64a10 10 0 0 1-10-10z"/>
-              <path d="M98 50a8 8 0 0 1 8 8v26a8 8 0 0 1-8 8v12L84 92H58a8 8 0 0 1-8-8v-6"/>
-              <path d="M32 40h34" stroke="#33BFFF" stroke-width="7"/>
-            </svg>
-          </div>
-          <div class="body">
-            <span class="badge soon">Coming soon</span>
-            <h3>Chat with AI</h3>
-            <p>Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
-            <a class="btn" href="#" data-key="c">Start chatting</a>
-          </div>
-        </article>
+        <div class="shell" id="spin">
+          <article class="card">
+            <div class="stage">
+              <span class="key">B</span>
+              <div class="wheel-box" aria-hidden="true">
+                <div class="wheel-wrap">
+                  <div class="pointer"></div>
+                  <div class="wheel" id="wheel">
+                    <span style="--a:0deg">Tycoon</span>
+                    <span style="--a:60deg">Parkour</span>
+                    <span class="flip" style="--a:120deg">Prop Hunt</span>
+                    <span class="flip" style="--a:180deg">Racing</span>
+                    <span class="flip" style="--a:240deg">Box Fights</span>
+                    <span style="--a:300deg">Escape</span>
+                  </div>
+                  <div class="hub"></div>
+                </div>
+                <div class="result" id="result">Hover to spin</div>
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta"><span class="num">02</span><span class="badge soon">Coming soon</span></div>
+              <h3>Randomise</h3>
+              <p>Not sure what to make? Spin the wheel and let it pick a game idea for you - a game type, a twist and a brand to build around.</p>
+              <a class="btn" href="#" data-key="b">Spin the wheel <span class="arrow" aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+        </div>
+
+        <div class="shell" id="chatcard">
+          <article class="card">
+            <div class="stage">
+              <span class="key">C</span>
+              <div class="chat" id="chat" aria-hidden="true">
+                <div class="msg me step">A racing map where the city floods a little more every lap</div>
+                <div class="ai step"><span class="av">F</span><div class="msg">Love it. Solo racers, or teams of two?</div></div>
+                <div class="ai step"><span class="av">F</span><div class="msg"><span class="typing"><i></i><i></i><i></i></span></div></div>
+              </div>
+            </div>
+            <div class="body">
+              <div class="meta"><span class="num">03</span><span class="badge soon">Coming soon</span></div>
+              <h3>Chat with AI</h3>
+              <p>Describe your idea in your own words and talk it through. The AI asks follow-ups and turns the conversation into a buildable plan.</p>
+              <a class="btn" href="#" data-key="c">Start chatting <span class="arrow" aria-hidden="true">&rarr;</span></a>
+            </div>
+          </article>
+        </div>
+
       </div>
     </div>
   </section>
@@ -266,15 +411,16 @@
 
 <script>
   document.body.classList.remove('no-js');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* fade-in */
   var items = document.querySelectorAll('.reveal');
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-    }, { threshold: 0.2 });
-    items.forEach(function (el) { io.observe(el); });
-  } else {
-    items.forEach(function (el) { el.classList.add('in'); });
-  }
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.2 }) : null;
+  items.forEach(function (el) { io ? io.observe(el) : el.classList.add('in'); });
+
+  /* progress bar */
   var bar = document.getElementById('bar');
   function progress() {
     var max = document.documentElement.scrollHeight - innerHeight;
@@ -283,6 +429,52 @@
   addEventListener('scroll', progress, { passive: true });
   addEventListener('resize', progress);
   progress();
+
+  /* A: answer chips select on click or hover */
+  var form = document.getElementById('form');
+  var choices = form.querySelectorAll('.choice');
+  function pick(c) {
+    choices.forEach(function (o) { o.classList.toggle('on', o === c); o.setAttribute('aria-checked', o === c); });
+    form.classList.add('answered');
+  }
+  choices.forEach(function (c) {
+    c.addEventListener('click', function () { pick(c); });
+    c.addEventListener('mouseenter', function () { pick(c); });
+  });
+
+  /* B: wheel spins on hover (tap on touch) and lands on a segment */
+  var names = ['Tycoon', 'Parkour', 'Prop Hunt', 'Racing', 'Box Fights', 'Escape'];
+  var wheel = document.getElementById('wheel'), result = document.getElementById('result');
+  var turn = 0, spinning = false;
+  function spin() {
+    if (spinning) return;
+    spinning = true;
+    var k = Math.floor(Math.random() * 6);
+    turn += 1080 + k * 60 + (60 - ((turn % 360) % 60)) % 60;
+    result.textContent = 'Spinning…';
+    wheel.style.transform = 'rotate(' + turn + 'deg)';
+    setTimeout(function () {
+      var idx = Math.round(((360 - (turn % 360)) % 360) / 60) % 6;
+      result.innerHTML = 'You got: <b>' + names[idx] + '</b>';
+      spinning = false;
+    }, reduce ? 50 : 2800);
+  }
+  var spinCard = document.getElementById('spin');
+  spinCard.addEventListener('mouseenter', spin);
+  spinCard.querySelector('.stage').addEventListener('click', spin);
+
+  /* C: chat types itself out when seen, and again on hover */
+  var chat = document.getElementById('chat');
+  function play() {
+    if (reduce) return;
+    chat.classList.remove('play'); void chat.offsetWidth; chat.classList.add('play');
+  }
+  if (io) {
+    var cio = new IntersectionObserver(function (e) { if (e[0].isIntersecting) { play(); cio.disconnect(); } }, { threshold: 0.5 });
+    cio.observe(chat);
+  }
+  document.getElementById('chatcard').addEventListener('mouseenter', play);
+
   /* Typeform-style keys: A, B or C picks an answer */
   addEventListener('keydown', function (e) {
     if (e.ctrlKey || e.metaKey || e.altKey || /input|textarea/i.test(document.activeElement.tagName)) return;
