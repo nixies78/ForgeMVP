@@ -163,3 +163,9 @@ design explorations kept in this repository: they are experiments about what the
 served from the same `public/` tree, and nothing in the app depends on them. This document describes the
 app. Where the two disagree, the app wins — the concepts are allowed to disagree, which is the point of
 them.
+
+They are also opened straight from disk, which the app is not: every path in them is relative to the file
+that names it, and every link to a page names its `index.html`. A server resolves `/assets/x` to
+`public/assets/x` and `dir/` to `dir/index.html`; a filesystem resolves them to `C:/assets/x` and a
+directory listing. `tests/paths.test.mjs` enforces both rules against the filesystem, because no check that
+runs through the server can see either fault.

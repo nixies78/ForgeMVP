@@ -31,7 +31,7 @@ export function slugify(name) {
 
 /** Image folder per kind of entry: /concepts/_media/randomiser/<folder>/<slug>.webp */
 export const IMAGE_FOLDERS = { flavour: 'flavours', brand: 'brands', type: 'game-types', hook: 'hooks' };
-export const IMAGE_ROOT = '/concepts/_media/randomiser';
+export const IMAGE_ROOT = '../_media/randomiser';
 
 export function imagePath(entry) {
   return `${IMAGE_ROOT}/${IMAGE_FOLDERS[entry.kind]}/${entry.slug}.webp`;

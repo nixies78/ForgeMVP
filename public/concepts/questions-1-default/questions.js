@@ -8,7 +8,7 @@
 (function () {
   'use strict';
 
-  const DATA_URL = '/data/uefn_device_logic.json';
+  const DATA_URL = '../../data/uefn_device_logic.json';
   const PROGRESS = { 1: 4, 2: 12 }; /* percent filled per step */
 
   const els = {
@@ -89,7 +89,7 @@
       els.question.textContent = 'What type of game do you want to make?';
       els.sub.textContent = "Pick the broad category first — you'll choose the exact game type next.";
       els.back.textContent = '← Back to my games';
-      els.back.setAttribute('href', '/#/home');
+      els.back.setAttribute('href', '../../index.html#/home');
       els.back.onclick = null;
       data.meta.game_categories.forEach((c) => {
         els.grid.appendChild(tile({

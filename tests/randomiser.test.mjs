@@ -52,10 +52,13 @@ test('reels: flavour reel holds the flavours then the brands', () => {
   assert.equal(reels.f.length, data.flavours.length + data.brands_on_flavour_reel.length);
   assert.equal(reels.t.length, data.game_types.length);
   assert.equal(reels.h.length, data.hooks.length);
-  assert.equal(find('f', 'Vampires').image, '/concepts/_media/randomiser/flavours/vampires.webp');
-  assert.equal(find('f', 'LEGO').image, '/concepts/_media/randomiser/brands/lego.webp');
-  assert.equal(find('t', 'Box Fight').image, '/concepts/_media/randomiser/game-types/box-fight.webp');
-  assert.equal(find('h', 'Weird, played straight').image, '/concepts/_media/randomiser/hooks/weird-played-straight.webp');
+  /* Relative to the page that shows them, not to a web root: the concept pages are opened from disk as
+   * well as served, and "/concepts/_media/..." is C:/concepts/_media/... over file://. tests/paths.test.mjs
+   * holds the same line for everything else in public/. */
+  assert.equal(find('f', 'Vampires').image, '../_media/randomiser/flavours/vampires.webp');
+  assert.equal(find('f', 'LEGO').image, '../_media/randomiser/brands/lego.webp');
+  assert.equal(find('t', 'Box Fight').image, '../_media/randomiser/game-types/box-fight.webp');
+  assert.equal(find('h', 'Weird, played straight').image, '../_media/randomiser/hooks/weird-played-straight.webp');
 });
 
 test('article is right for every game type', () => {

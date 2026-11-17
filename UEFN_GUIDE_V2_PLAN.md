@@ -204,7 +204,7 @@ one-command restore).
 | Shell behaviour | `public/js/guide/chrome.js` (header measurement; the search field it used to wire left in 1.2.0) |
 | Screens | `public/js/guide/screens/` — ten modules, one per screen |
 | Rendering | `public/js/guide/dom.js` (no `innerHTML` anywhere), `render/ui.js`, `render/devices.js`, `render/loop.js` |
-| Tests | `tests/guide.test.mjs` (55), `tests/server.test.mjs` (23, updated for the new page), `tests/randomiser.test.mjs` (13, for the randomiser concept page), `tests/browser-check.mjs` (`npm run verify`) |
+| Tests | `tests/guide.test.mjs` (55), `tests/server.test.mjs` (23, updated for the new page), `tests/randomiser.test.mjs` (13, for the randomiser concept page), `tests/paths.test.mjs` (3, that every page in `public/` resolves from disk and not only through the server), `tests/browser-check.mjs` (`npm run verify`) |
 | Explorations (not the app) | `public/concepts/` and `public/mockups/` — home-page mockups and the prototype pages under them, with the brief in `support/home-concepts-brief.md`. Served from the same `public/` tree, linked from the footer, depended on by nothing in the guide; see the closing note of the architecture spec |
 
 **The page around the app (as v2 described it, the day v2 landed).** `public/index.html` is the Forge page v2 describes:
@@ -277,7 +277,7 @@ link — so it is reached from the "Chat with AI" stub screen, and the admin pag
 wizard step has a visible Back button, and home has none because there is nothing before it; and a screen
 change returns to the top of the page, since there is no longer a hero to scroll past.
 
-**Automated checks.** `npm test` runs 128 assertions across five files (21 + 55 + 23 + 16 + 13). `npm run verify` drives headless
+**Automated checks.** `npm test` runs 131 assertions across six files (21 + 55 + 23 + 16 + 13 + 3). `npm run verify` drives headless
 Chrome over the DevTools Protocol in two phases: all thirteen routes at desktop and phone width
 (asserting rendered text, heading structure, exactly one `<h1>` and it being the screen's own title,
 focus landing on it with no ring drawn around it, the fixed 72px header painted `rgba(16,16,20,0.9)` with a
