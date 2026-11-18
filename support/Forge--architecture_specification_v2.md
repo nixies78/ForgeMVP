@@ -170,8 +170,13 @@ that names it, and every link to a page names its `index.html`. A server resolve
 directory listing. `tests/paths.test.mjs` enforces both rules against the filesystem, because no check that
 runs through the server can see either fault.
 
-The one rule they share with the app is the header's two dimensions: a 72px bar carrying the Epic mark at
-44px, the same numbers as the shell, so the mockups can be compared against each other and against it.
+What they do share with the app is its chrome: a 72px header, a 44px Epic mark that shades to 80% under the
+pointer, and a content column. That chrome is defined once, in `public/concepts/_shared/chrome.css`, which
+every mockup links - one definition rather than fifteen that drift - and `npm run verify` measures each page
+against it: the bar's height, the mark's size, the class names (`logo-wrap` / `logo-img`), the absence of
+any box around the mark, the hover shade, the mark's contrast against whatever it sits on, and the column.
 Everything else about a mockup's header - colour, rule, type, the nav it holds - is the mockup's own.
-`npm run verify` measures all thirteen pages against those two numbers, and `support/home-concepts-brief.md`
-states the rule for whoever writes the next one.
+
+The column is the one place they deliberately differ from the app: mockups use 1136px where the shell above
+uses 1240px (`--sh-content-max`), because a mockup is a pitch page read on its own and the narrower column
+suits it. `support/home-concepts-brief.md` states all of this for whoever writes the next one.

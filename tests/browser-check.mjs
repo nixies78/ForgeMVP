@@ -709,26 +709,29 @@ async function main() {
 
 /* ============================ phase three: the mockups' header ============================ */
 
-/** The one header all the home-page mockups share, so that they can be compared against each other and
- * against the app: a 72px bar carrying the Epic mark at 44px, which is what the app's own header is
- * (public/css/shell.css: `.sh-header-inner { min-height: 72px }`, `.sh-logo img { height: 44px }`).
+/** The chrome every mockup page shares, so the pages can be compared against each other and against the
+ * app. The whole treatment is in one place - public/concepts/_shared/chrome.css - which is also what makes
+ * it checkable, because there is one definition to measure rather than thirteen.
  *
- * The mockups are thirteen separate pages, each with its own markup and its own stylesheet, so the only
- * thing that keeps them agreeing is a check that measures them. They are listed from the disk rather
- * than from a list here: a fourteenth mockup is covered the day it appears, not the day someone
- * remembers to add it.
+ * What is asserted, per page:
+ *   - a <header> that is 72px, and a 44px Epic mark inside it, loaded, sitting within the bar;
+ *   - that mark wrapped in .logo-wrap, with no box of its own: no background, no border;
+ *   - a hover shade on the mark (measured by moving the pointer onto it, since only the browser knows);
+ *   - a mark that contrasts with what is behind it, computed rather than assumed: the SVG is white, so a
+ *     page either shows it that way or recolours it with .logo-img-black, and either choice has to work;
+ *   - the shared stylesheet actually linked, and the column at 1136px.
  *
- * Each page keeps its own colours, dividing rule and typography - this is about the two dimensions, so
- * the check measures two numbers and nothing else. */
+ * The pages are listed from the disk rather than from a list here: a new mockup is covered the day it
+ * appears, not the day someone remembers to add it. Everything below is measured, never assumed. */
 async function checkMockupHeaders(send, results) {
   const problems = [];
   const dir = path.join(process.cwd(), 'public', 'concepts');
 
   const pages = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
-    /* _media is the asset folder, not a page, and concepts/index.html is a one-line pointer to the
-     * mockups index rather than a mockup. */
-    if (entry.isDirectory() && entry.name !== '_media') pages.push(`concepts/${entry.name}/index.html`);
+    /* Folders beginning with _ hold assets and the shared stylesheet, not pages; concepts/index.html is a
+     * one-line pointer to the mockups index rather than a mockup. */
+    if (entry.isDirectory() && !entry.name.startsWith('_')) pages.push(`concepts/${entry.name}/index.html`);
   }
   pages.push('mockups/index.html');
   pages.sort();
@@ -743,17 +746,61 @@ async function checkMockupHeaders(send, results) {
       expression: `(() => {
         const header = document.querySelector('header');
         if (!header) return { header: null };
-        const mark = [...header.querySelectorAll('img')].find((i) => /logo_epic/.test(i.getAttribute('src') || ''))
-          || header.querySelector('img');
-        /* The bar is measured by its rendered box. The mark is measured by offsetHeight, its laid-out
-         * height: 2-funky sets the mark inside a frame rotated 4deg, and a rotated square's bounding box
-         * is 47px for a 44px image, which says something about the frame rather than about the logo. */
+        /* Every mark on the page, not just the header's: three mockups carry a second one in the footer,
+         * and those were the ones measuring 23px and 26px and sitting inside a rotated pink frame. */
+        const marks = [...document.images].filter((i) => /logo_epic/.test(i.getAttribute('src') || ''));
+        const mark = marks.find((i) => header.contains(i)) || marks[0] || header.querySelector('img');
+
+        /* What the mark sits on, composited from the outermost painted layer inwards. Reading one
+         * element's background would report the wrong colour wherever a translucent sticky bar sits over
+         * a coloured section, which is most of these pages; a gradient counts as a layer too, because
+         * 9-spotlight paints its header with one. */
+        const parse = (value) => {
+          const m = /rgba?\\(([^)]+)\\)/.exec(value || '');
+          if (!m) return null;
+          const p = m[1].split(',').map((v) => parseFloat(v));
+          return { r: p[0], g: p[1], b: p[2], a: p.length === 4 ? p[3] : 1 };
+        };
+        const gradientStop = (value) => {
+          const hex = /#([0-9a-f]{6})/i.exec(value || '');
+          if (hex) return { r: parseInt(hex[1].slice(0, 2), 16), g: parseInt(hex[1].slice(2, 4), 16), b: parseInt(hex[1].slice(4, 6), 16), a: 1 };
+          return parse(/rgb\\([^)]+\\)/.exec(value || '')?.[0] || '');
+        };
+        const behindOf = (el) => {
+          const layers = [];
+          let cursor = el ? el.parentElement : null;
+          while (cursor) {
+            const cs = getComputedStyle(cursor);
+            let layer = parse(cs.backgroundColor);
+            if (!layer || layer.a === 0) layer = gradientStop(cs.backgroundImage);
+            if (layer && layer.a > 0) layers.push(layer);
+            cursor = cursor.parentElement;
+          }
+          let behind = { r: 255, g: 255, b: 255 };
+          for (const layer of layers.reverse()) {
+            behind = {
+              r: layer.r * layer.a + behind.r * (1 - layer.a),
+              g: layer.g * layer.a + behind.g * (1 - layer.a),
+              b: layer.b * layer.a + behind.b * (1 - layer.a)
+            };
+          }
+          return behind;
+        };
+        const wrap = mark ? mark.parentElement : null;
+        const wrapStyle = wrap ? getComputedStyle(wrap) : null;
+        const behind = behindOf(wrap);
+        const luminance = (c) => (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255;
+        const markBlack = mark ? /brightness\\(0\\)/.test(getComputedStyle(mark).filter) : false;
+        const light = Math.max(luminance(behind), markBlack ? 0 : 1);
+        const dark = Math.min(luminance(behind), markBlack ? 0 : 1);
+        /* The bar is measured by its rendered box. A mark is measured by offsetHeight, its laid-out
+         * height, because a rotated frame's bounding box is bigger than the image inside it - which is how
+         * 2-funky's mark measured 47px for a 44px image. */
         return {
           header: header.getBoundingClientRect().height,
           mark: mark ? mark.offsetHeight : null,
-          /* A mark that measures 44px but sits outside the bar it belongs to is not a 72px header: the
-           * two prototype pages used to carry a 156px lockup that overhung its bar by ten pixels, which
-           * the two numbers alone cannot see. */
+          /* A mark that measures 44px but sits outside the bar it belongs to is not a 72px header: the two
+           * prototype pages used to carry a 156px lockup overhanging its bar, which two numbers cannot see. */
           markInside: mark
             ? (() => {
                 const bar = header.getBoundingClientRect();
@@ -762,7 +809,37 @@ async function checkMockupHeaders(send, results) {
               })()
             : false,
           markSrc: mark ? mark.getAttribute('src') : null,
+          markClass: mark ? String(mark.className || '') : null,
           markLoaded: mark ? (mark.loading === 'lazy' ? true : mark.complete && mark.naturalWidth > 0) : false,
+          wrapClass: wrap ? String(wrap.className || '') : null,
+          wrapBackground: wrapStyle ? wrapStyle.backgroundColor : null,
+          wrapBorder: wrapStyle ? wrapStyle.borderTopWidth : null,
+          sharedLink: !!document.querySelector('link[href*="_shared/chrome.css"]'),
+          columns: [...document.querySelectorAll('.wrap')].map((el) => Math.round(el.getBoundingClientRect().width)),
+          markColour: markBlack ? 'black' : 'white',
+          behind: 'rgb(' + Math.round(behind.r) + ', ' + Math.round(behind.g) + ', ' + Math.round(behind.b) + ')',
+          contrast: +((light + 0.05) / (dark + 0.05)).toFixed(2),
+          /* Every other mark on the page gets the same treatment as the header's: three mockups carry a
+           * second one in the footer, and those were the ones at 23px and 26px. */
+          others: marks.filter((i) => i !== mark).map((i) => {
+            const w = i.parentElement;
+            const ws = w ? getComputedStyle(w) : null;
+            return {
+              size: i.offsetHeight,
+              loaded: i.loading === 'lazy' ? true : i.complete && i.naturalWidth > 0,
+              cls: String(i.className || ''),
+              wrapCls: w ? String(w.className || '') : '',
+              background: ws ? ws.backgroundColor : null,
+              border: ws ? ws.borderTopWidth : null,
+              contrast: (() => {
+                const b = behindOf(w);
+                const black = /brightness\\(0\\)/.test(getComputedStyle(i).filter);
+                const l1 = Math.max(luminance(b), black ? 0 : 1);
+                const l2 = Math.min(luminance(b), black ? 0 : 1);
+                return +((l1 + 0.05) / (l2 + 0.05)).toFixed(2);
+              })()
+            };
+          }),
           /* Below-the-fold images are marked loading="lazy" and have not been fetched yet, which is not
            * a fault - they are left out so that the check reports the ones that really failed. */
           images: [...document.images]
@@ -779,23 +856,86 @@ async function checkMockupHeaders(send, results) {
       continue;
     }
     if (Math.round(state.header) !== 72) problems.push(`${page} has a ${Math.round(state.header)}px header, not 72px`);
-    if (state.mark == null) problems.push(`${page} has no mark image in its header`);
-    else if (Math.round(state.mark) !== 44) problems.push(`${page} shows its header mark at ${Math.round(state.mark)}px, not 44px`);
-    if (state.mark && !state.markLoaded) problems.push(`${page} shows a mark that did not load (${state.markSrc})`);
-    if (state.mark && !state.markInside) problems.push(`${page} draws its mark outside the header bar it belongs to`);
+    if (state.mark == null) {
+      problems.push(`${page} has no mark image in its header`);
+    } else {
+      if (Math.round(state.mark) !== 44) problems.push(`${page} shows its header mark at ${Math.round(state.mark)}px, not 44px`);
+      if (!state.markInside) problems.push(`${page} draws its mark outside the header bar it belongs to`);
+      if (!/\blogo-img\b/.test(state.markClass || '')) problems.push(`${page} does not give its mark the shared class logo-img (${state.markClass})`);
+      if (!/\blogo-wrap\b/.test(state.wrapClass || '')) problems.push(`${page} does not give the mark's wrapper the shared class logo-wrap (${state.wrapClass})`);
+      /* No box around the mark: the app's own logo has none, and a tile is what the owner asked to be rid of. */
+      if (!/rgba\(0, 0, 0, 0\)|transparent/.test(state.wrapBackground || '')) {
+        problems.push(`${page} paints a background behind its mark (${state.wrapBackground}) instead of letting the page show through`);
+      }
+      if (parseFloat(state.wrapBorder) > 0) problems.push(`${page} draws a ${state.wrapBorder} border around its mark`);
+      if (state.contrast < 3) {
+        problems.push(`${page} shows a ${state.markColour} mark on ${state.behind}, a contrast of ${state.contrast}:1`);
+      }
+    }
+    /* A mark that did not load is invisible, and invisible is what the owner asked about, so loading is
+     * checked on every mark rather than only on the header's. */
+    if (state.mark != null && !state.markLoaded) problems.push(`${page} shows a mark that did not load (${state.markSrc})`);
+    const otherMarks = state.others || [];
+    otherMarks.forEach((m, n) => {
+      const which = `the ${n === 0 ? 'second' : n + 1 + 'th'} mark on the page`;
+      if (Math.round(m.size) !== 44) problems.push(`${page} shows ${which} at ${Math.round(m.size)}px, not 44px`);
+      if (!m.loaded) problems.push(`${page} shows ${which} unloaded, so it is not visible`);
+      if (!/\blogo-img\b/.test(m.cls)) problems.push(`${page} does not give ${which} the shared class logo-img (${m.cls})`);
+      if (!/\blogo-wrap\b/.test(m.wrapCls)) problems.push(`${page} does not give ${which} the shared wrapper logo-wrap (${m.wrapCls})`);
+      if (!/rgba\(0, 0, 0, 0\)|transparent/.test(m.background || '')) problems.push(`${page} paints a box behind ${which} (${m.background})`);
+      if (parseFloat(m.border) > 0) problems.push(`${page} draws a ${m.border} border around ${which}`);
+      if (m.contrast < 3) problems.push(`${page} shows ${which} at a contrast of only ${m.contrast}:1`);
+    });
+    if (!state.sharedLink) problems.push(`${page} does not link public/concepts/_shared/chrome.css`);
+    if (!state.columns.length) problems.push(`${page} has no .wrap column`);
+    else {
+      const tooWide = state.columns.filter((w) => w > 1136);
+      if (tooWide.length) problems.push(`${page} has a .wrap column ${Math.max(...tooWide)}px wide, over the shared 1136px`);
+      else if (!state.columns.includes(1136)) problems.push(`${page} has no .wrap column at the shared 1136px (widest ${Math.max(...state.columns)}px)`);
+    }
     for (const src of state.images || []) problems.push(`${page} has an image that did not load: ${src}`);
+
+    /* The hover shade is a browser fact, so it is measured by putting the pointer on the mark. The pointer
+     * is parked off the bar first: it keeps its position across navigations, and a mark left hovered from
+     * the previous page would read as a shade that was never there. */
+    let shade = '';
+    if (state.mark != null) {
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 4, y: 990, buttons: 0 });
+      await sleep(200);
+      const at = await send('Runtime.evaluate', {
+        expression: `(() => {
+          const m = document.querySelector('.logo-img');
+          const r = m.getBoundingClientRect();
+          return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), before: getComputedStyle(m).opacity };
+        })()`,
+        returnByValue: true
+      });
+      const spot = at.result.value || {};
+      await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: spot.x, y: spot.y, buttons: 0 });
+      await sleep(300);
+      const hovered = await send('Runtime.evaluate', {
+        expression: `getComputedStyle(document.querySelector('.logo-img')).opacity`,
+        returnByValue: true
+      });
+      const after = Number(hovered.result.value);
+      shade = `${spot.before} -> ${hovered.result.value}`;
+      if (!(after < Number(spot.before) - 0.01)) {
+        problems.push(`${page} shows no shade when the pointer is on its mark (opacity ${spot.before} -> ${hovered.result.value})`);
+      }
+    }
 
     const verdict = problems.length > before ? 'FAIL ' : 'ok   ';
     console.log(
-      `${verdict}headers · ${page.replace('concepts/', '').replace('/index.html', '').padEnd(20)} ` +
-        `header ${Math.round(state.header)}px, mark ${state.mark == null ? 'none' : Math.round(state.mark) + 'px'}` +
-        `${state.mark && !state.markLoaded ? ' (did not load)' : ''}`
+      `${verdict}chrome · ${page.replace('concepts/', '').replace('/index.html', '').padEnd(26)} ` +
+        `header ${Math.round(state.header)}px, mark ${state.mark == null ? 'none' : Math.round(state.mark) + 'px'} ` +
+        `${state.markColour} on ${state.behind} (${state.contrast}:1), column ${Math.max(0, ...(state.columns || [0]))}px` +
+        (shade ? `, hover ${shade}` : '')
     );
   }
 
   for (const problem of problems) console.log(`       ! ${problem}`);
   results.push({
-    name: `mockup headers (${pages.length} pages)`,
+    name: `mockup chrome (${pages.length} pages)`,
     state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none',
       shell: { backButtons: 0, h1Count: 0, navItems: 0, crumbLinks: 0 } },
     problems,

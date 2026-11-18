@@ -10,16 +10,46 @@ lists them all are in `public/concepts/<slug>/` and `public/mockups/`.
 ## What every concept must share
 
 The direction is yours; the frame around it is not, because the mock-ups are compared against each other
-and against the app. One header, in every concept:
+and against the app. The frame lives in one file, and you link it:
 
-- **72px tall**, carrying the **Epic mark at 44px** (`../../assets/logo_epic.svg`, `height: 44px;
-  width: auto`). Those two numbers are the app's own header (`public/css/shell.css`: `.sh-header-inner {
-  min-height: 72px }`, `.sh-logo img { height: 44px }`), and `npm run verify` measures all thirteen pages
-  against them, so a mock-up that drifts is reported as a failed check rather than discovered later.
-- Your header keeps **your** colours, your dividing rule, your type and your nav - it is the two
-  dimensions that are fixed, not the treatment.
-- Small-screen rules are yours: the 72/44 contract is the desktop rendering, and a `@media` block may do
-  what your design needs below that.
+```html
+<link rel="stylesheet" href="../_shared/chrome.css" />
+```
+
+That link goes **last in `<head>`**, after your own `<style>`, so the shared rules win a tie. It gives you
+four class names and nothing else. `npm run verify` measures every page in the set against all of it, so a
+mock-up that drifts is a failed check rather than something the owner finds later.
+
+**The logo - `logo-wrap` and `logo-img`, one way, everywhere.** Header, footer, anywhere else, every
+instance:
+
+```html
+<span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+```
+
+- The wrapper around the mark is `.logo-wrap` - that exact name on every page - and it is the *only* thing
+  around the mark: no tile, badge, disc, frame, rotation, shadow, background or border. A box around a
+  logo reads as a button, and it is what made thirteen pages look like thirteen sets of chrome.
+- The mark is `.logo-img`: **44px**, hover shading to 80% - the app's own treatment
+  (`public/css/shell.css`: `.sh-logo`, `.sh-logo img`, `.sh-logo:hover img`).
+- **Do not style the logo in your page.** No `height`, `width`, `background`, `border`, `filter`,
+  `transform` or `object-fit` on a mark or its wrapper, no `header img` / `footer img` rule that reaches it.
+  If a rule of yours matches a mark, delete it.
+- On a light page add `logo-img-black` to the mark. `logo_epic.svg` is a single white path, so the mark is
+  recoloured (`filter: brightness(0)`) rather than seated on a dark tile: the tile is a second design to
+  keep in step, and on a page whose own ink is black the mark then matches nothing.
+
+**The header is 72px tall.** Same as the app's (`--sh-header-base`). Your bar keeps **your** colours, rule,
+type and nav - the height and the mark are the two things that are fixed.
+
+**The column is `.wrap`, 1136px.** Every page's content and header sit in that one width, so the mark and
+the wordmark line up down the page. The shared file owns the `max-width`; keep your own gutter
+(`padding-inline`) and never set `max-width` on `.wrap` in your page. The app's own shell is wider (1240px,
+`--sh-content-max`) - a deliberate difference, not drift: a mock-up is a pitch page read on its own, and the
+narrower column suits it.
+
+Small-screen rules are yours: the 72/44/1136 contract is the desktop rendering, and a `@media` block may do
+what your design needs below that.
 
 ## What the page is for
 

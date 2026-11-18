@@ -25,7 +25,6 @@
   --display:"Archivo Black","Arial Black",Impact,sans-serif;
   --title:"Inter Tight","Inter",system-ui,sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  --wrap:1180px;
   --gutter:clamp(16px,4vw,40px);
 }
 *{box-sizing:border-box}
@@ -34,7 +33,7 @@ body{margin:0;background:var(--yellow);color:var(--ink);font-family:var(--body);
   -webkit-font-smoothing:antialiased}
 img{max-width:100%;display:block}
 a{color:inherit}
-.wrap{max-width:var(--wrap);margin:0 auto;padding-inline:var(--gutter)}
+.wrap{margin:0 auto;padding-inline:var(--gutter)}
 h1,h2,h3{margin:0}
 p{margin:0}
 
@@ -77,9 +76,6 @@ p{margin:0}
 .nav{position:sticky;top:0;z-index:40;height:72px;display:flex;align-items:center;background:var(--yellow);border-bottom:var(--line)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;height:100%}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.brand .logo{width:44px;height:44px;background:var(--ink);border-radius:10px;display:grid;place-items:center;transform:rotate(-4deg)}
-.brand .logo img{width:24px;height:auto}
-.nav .brand .logo img{height:44px;width:auto} /* header mark: 44px (the footer logo keeps its 24px mark) */
 .brand b{font:400 26px/1 var(--display);letter-spacing:.01em}
 .nav-links{display:flex;gap:26px;font-weight:700;font-size:15px}
 .nav-links a{text-decoration:none}
@@ -262,7 +258,6 @@ p{margin:0}
 footer{border-top:var(--line);background:var(--ink);color:var(--paper)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;padding-block:28px;font-size:14px}
 footer .brand b{font-size:22px}
-footer .brand .logo{border:2px solid var(--pink);transform:rotate(4deg)}
 
 /* ---------- responsive ---------- */
 @media (max-width:980px){
@@ -308,6 +303,7 @@ footer .brand .logo{border:2px solid var(--pink);transform:rotate(4deg)}
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
 </style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
 
@@ -316,7 +312,7 @@ footer .brand .logo{border:2px solid var(--pink);transform:rotate(4deg)}
 <header class="nav">
   <div class="wrap">
     <a class="brand" href="#" aria-label="Forge home">
-      <span class="logo"><img src="../../assets/logo_epic.svg" alt="Epic Games"></span>
+      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
       <b>Forge</b>
     </a>
     <nav class="nav-links" aria-label="Sections">
@@ -548,7 +544,7 @@ footer .brand .logo{border:2px solid var(--pink);transform:rotate(4deg)}
 
 <footer>
   <div class="wrap">
-    <a class="brand" href="#"><span class="logo"><img src="../../assets/logo_epic.svg" alt="Epic Games"></span><b>Forge</b></a>
+    <a class="brand" href="#"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><b>Forge</b></a>
     <span>Design in Forge. Build in UEFN. Play in Fortnite.</span>
   </div>
 </footer>

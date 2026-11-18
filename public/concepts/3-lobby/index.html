@@ -21,7 +21,6 @@
   --title:"Inter Tight","Inter",system-ui,sans-serif;
   --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
   --gutter:clamp(16px,4vw,48px);
-  --max:1240px;
 }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -35,7 +34,7 @@ body{
 }
 img{max-width:100%;display:block}
 a{color:inherit}
-.wrap{max-width:var(--max);margin:0 auto;padding-inline:var(--gutter)}
+.wrap{margin:0 auto;padding-inline:var(--gutter)}
 .eyebrow{font:800 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--purple-4)}
 .eyebrow .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:1px;box-shadow:0 0 10px var(--green)}
 .energy-text{background:var(--energy);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -63,7 +62,6 @@ h2{font:700 clamp(32px,4.6vw,56px)/1 var(--title);letter-spacing:-.02em;text-tra
 .topbar{position:sticky;top:0;z-index:20;height:72px;display:flex;align-items:center;background:rgba(22,14,34,.78);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
 .topbar .wrap{display:flex;align-items:center;gap:20px;width:100%;height:100%}
 .brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
-.brand img{height:44px;width:auto}
 .brand b{font:400 20px/1 var(--display);letter-spacing:.04em}
 .tabs{display:flex;gap:4px;margin-left:12px;height:100%}
 .tabs a{display:flex;align-items:center;padding:0 14px;text-decoration:none;font:800 13px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;border-bottom:3px solid transparent}
@@ -218,7 +216,6 @@ h2{font:700 clamp(32px,4.6vw,56px)/1 var(--title);letter-spacing:-.02em;text-tra
 
 footer{padding-block:40px 70px;color:#BDB5CC;font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
-footer img{height:36px;width:auto}
 
 .concept-tag{position:fixed;left:12px;bottom:12px;z-index:50;font:800 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;background:rgba(16,16,20,.88);color:#fff;border:1px solid var(--yellow);padding:8px 10px;border-radius:4px}
 
@@ -247,7 +244,6 @@ footer img{height:36px;width:auto}
   .topbar .wrap{gap:10px;height:58px}
   .vbucks{display:none}
   .brand b{font-size:17px}
-  .brand img{height:26px}
   .hero h1{font-size:clamp(44px,13vw,64px)}
   .btn-play{width:100%;justify-content:center}
   .btn-ghost{width:100%;justify-content:center}
@@ -266,12 +262,13 @@ footer img{height:36px;width:auto}
   .concept-tag{font-size:10px;padding:6px 8px}
 }
 </style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
 
 <header class="topbar">
   <div class="wrap">
-    <a class="brand" href="#"><img src="../../assets/logo_epic.svg" alt="Epic Games"><b>FORGE</b></a>
+    <a class="brand" href="#"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><b>FORGE</b></a>
     <nav class="tabs" aria-label="Lobby">
       <a class="on" href="#top">Play</a>
       <a href="#modes">Modes</a>
@@ -476,7 +473,7 @@ footer img{height:36px;width:auto}
 
 <footer>
   <div class="wrap">
-    <img src="../../assets/logo_epic.svg" alt="Epic Games">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
     <span>Forge helps you design Fortnite islands to build in Unreal Editor for Fortnite. Concept mock-up.</span>
   </div>
 </footer>

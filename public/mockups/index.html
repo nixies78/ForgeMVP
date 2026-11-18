@@ -10,11 +10,10 @@
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
     body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding: 0 20px 72px; }
-    main { max-width: 980px; margin: 0 auto; }
+    main { margin: 0 auto; }
     /* The app's header measurement - a 72px bar (css/shell.css .sh-header-inner) carrying the 44px Epic
        mark (.sh-logo img). The bar now starts the page, so body's 56px top pad went with the old 46px row. */
     header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; height: 72px; box-sizing: border-box; }
-    header img { height: 44px; width: auto; }
     h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
     h2 { font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #ACACAD; margin: 40px 0 12px; }
     .lede { color: #ACACAD; margin: 0 0 8px; max-width: 62ch; }
@@ -40,11 +39,12 @@
     footer { margin-top: 40px; color: #787678; font-size: 13px; }
     @media (max-width: 520px) { a.card { grid-template-columns: 44px 1fr; } .num { width: 44px; height: 44px; font-size: 18px; } .go { display: none; } }
   </style>
+  <link rel="stylesheet" href="../concepts/_shared/chrome.css" />
 </head>
 <body>
-  <main>
+  <main class="wrap">
     <header>
-      <a href="../index.html" title="Back to the Forge home page"><img src="../assets/logo_epic.svg" alt="Epic Games" /></a>
+      <a class="logo-wrap" href="../index.html" title="Back to the Forge home page"><img class="logo-img" src="../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></a>
       <h1>Mockups</h1>
     </header>
     <p class="lede">Design options for each kind of Forge page. Pick a page type, then open the designs to compare directions. None of them is wired to the app yet - <a href="../index.html">the current Forge</a> is still the real one.</p>

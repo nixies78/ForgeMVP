@@ -1,0 +1,57 @@
+/* ------------------------------------------------------------------------------------------------
+ * The chrome every mockup page shares.
+ *
+ * Thirteen pages, thirteen stylesheets, and a logo that came out a different size and shape on each of
+ * them - 22px here, 34px there, inside a black tile on one page, a rotated sticker on the next, a white
+ * disc on another. The design of each mockup is its own; the frame around it is not. This file is that
+ * frame, in one place, so a mockup cannot drift from the others by accident.
+ *
+ * Linked by every page in public/concepts/<name>/ after the page's own <style>, so that these two rules
+ * win a tie against whatever the page once said about the same properties.
+ *
+ * The logo is the app's own treatment (public/css/shell.css, .sh-logo): a 44px mark in a wrapper with
+ * 4px of padding, no background, no border, and the mark itself shading to 80% under the pointer.
+ * ------------------------------------------------------------------------------------------------ */
+
+.logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-decoration: none;
+}
+
+.logo-img {
+  display: block;
+  height: 44px;
+  width: auto;
+  transition: opacity .15s ease;
+}
+
+/* The shade under the pointer. The app eases the mark's own opacity rather than adding a wash behind it:
+ * a box that appears on hover reads as a button, and this is a logo. */
+.logo-wrap:hover .logo-img { opacity: .8; }
+
+/* public/assets/logo_epic.svg is a single white path, so a light page would show a white mark on white.
+ * The answer is to recolour the mark itself with brightness(0) rather than to seat it on a dark tile: a
+ * tile is a second design to keep in step, it makes the mark look like a button, and on a page whose own
+ * ink is black the mark ends up matching nothing. Measured, at the time of writing, on 2-funky (yellow),
+ * 4-editorial (white), 6-one-question (white), 7-three-steps (off-white) and 9-spotlight (indigo). */
+.logo-img-black { filter: brightness(0); }
+
+/* The column. Every mockup's content sits in this one width - 1136px - and every mockup's header sits in
+ * it too, so the mark and the wordmark line up down the page.
+ *
+ * The app's own shell is wider: --sh-content-max is 1240px (public/css/shell.css). That difference is
+ * deliberate rather than drift. A mockup is a pitch page read on its own, and the narrower column suits
+ * it; the app is an interface with a device list and a plan in it. If the two ever need to match, this is
+ * the one number to change, and tests/browser-check.mjs measures it on every page.
+ *
+ * Only the width lives here: each page keeps its own gutter, because a gutter is part of a layout. */
+.wrap {
+  max-width: 1136px;
+  margin-inline: auto;
+}

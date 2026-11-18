@@ -45,13 +45,12 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-inline: 24px; }
+  .wrap { width: 100%; margin: 0 auto; padding-inline: 24px; }
 
   /* Header: the shared one - a 72px bar carrying the 44px Epic mark, which is the app's own
      header measurement (public/css/shell.css: .sh-header-inner is min-height 72px, .sh-logo img
      is 44px). Concept 8's treatment: the mark alone, no rule and no nav. */
   header { height: 72px; display: flex; align-items: center; }
-  header img { display: block; height: 44px; width: auto; }
 
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 
@@ -388,7 +387,6 @@
   }
   @media (max-width: 760px) {
     .wrap { padding-inline: 18px; }
-    header img { height: 32px; }
     .hero { padding-block: 16px 20px; }
     .hero p { margin: 11px auto 0; }
     .card { padding: 18px; border-radius: 16px; }
@@ -418,11 +416,12 @@
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
 
 <header class="wrap">
-  <a href="#" aria-label="Forge home"><img src="../../assets/logo_epic.svg" alt="Epic Games"></a>
+  <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
 </header>
 
 <main>

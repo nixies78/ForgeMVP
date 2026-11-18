@@ -41,11 +41,10 @@
     overflow-x: hidden;
   }
   a { color: inherit; }
-  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-inline: 24px; }
+  .wrap { width: 100%; margin: 0 auto; padding-inline: 24px; }
 
   /* Header: logo only */
   header { height: 72px; display: flex; align-items: center; }
-  header img { display: block; height: 44px; width: auto; }
 
   /* Hero - no call-to-action here: the three ways in below are the way forward. */
   .hero { padding-block: 48px 72px; text-align: center; position: relative; }
@@ -327,7 +326,6 @@
   }
   @media (max-width: 760px) {
     header { padding-block: 20px; }
-    header img { height: 28px; }
     .hero { padding-block: 36px 56px; }
     .hero p { margin: 22px auto 0; }
     .ways { padding-bottom: 72px; }
@@ -342,11 +340,12 @@
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
 
 <header class="wrap">
-  <a href="#" aria-label="Forge home"><img src="../../assets/logo_epic.svg" alt="Epic Games"></a>
+  <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
 </header>
 
 <main>
