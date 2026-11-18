@@ -725,6 +725,7 @@ async function main() {
  * appears, not the day someone remembers to add it. Everything below is measured, never assumed. */
 async function checkMockupHeaders(send, results) {
   const problems = [];
+  const insets = [];
   const dir = path.join(process.cwd(), 'public', 'concepts');
 
   const pages = [];
@@ -816,6 +817,20 @@ async function checkMockupHeaders(send, results) {
           wrapBorder: wrapStyle ? wrapStyle.borderTopWidth : null,
           sharedLink: !!document.querySelector('link[href*="_shared/chrome.css"]'),
           columns: [...document.querySelectorAll('.wrap')].map((el) => Math.round(el.getBoundingClientRect().width)),
+          /* Where the mark sits inside its column. The absolute x is not the thing to compare between
+           * pages: a page tall enough to scroll loses a scrollbar's width to the viewport and everything
+           * shifts about 7px with it. The inset is what "the logo is in the same place" means, and it is
+           * where a page that kept its own gutter, or centred its lockup, gives itself away. */
+          inset: (() => {
+            const column = mark ? mark.closest('.wrap') : null;
+            if (!column) return null;
+            return {
+              px: Math.round(mark.getBoundingClientRect().left - column.getBoundingClientRect().left),
+              column: Math.round(column.getBoundingClientRect().left),
+              mark: Math.round(mark.getBoundingClientRect().left),
+              padding: getComputedStyle(column).paddingLeft
+            };
+          })(),
           markColour: markBlack ? 'black' : 'white',
           behind: 'rgb(' + Math.round(behind.r) + ', ' + Math.round(behind.g) + ', ' + Math.round(behind.b) + ')',
           contrast: +((light + 0.05) / (dark + 0.05)).toFixed(2),
@@ -929,8 +944,26 @@ async function checkMockupHeaders(send, results) {
       `${verdict}chrome · ${page.replace('concepts/', '').replace('/index.html', '').padEnd(26)} ` +
         `header ${Math.round(state.header)}px, mark ${state.mark == null ? 'none' : Math.round(state.mark) + 'px'} ` +
         `${state.markColour} on ${state.behind} (${state.contrast}:1), column ${Math.max(0, ...(state.columns || [0]))}px` +
+        `, x ${state.inset ? state.inset.mark + 'px' : '?'}` +
         (shade ? `, hover ${shade}` : '')
     );
+    if (state.inset) insets.push({ page, px: state.inset.px, padding: state.inset.padding, mark: state.inset.mark });
+  }
+
+  /* One inset and one absolute position, or the logo is in a different place on every page - which is
+   * exactly what the owner saw when the column width was shared but the gutter was still each page's own
+   * business, and what the two prototype pages did by centring their lockup between two pills. Reported
+   * with the pages attached, because "these five disagree" is the useful sentence and a number is not. */
+  if (insets.length) {
+    for (const [what, of] of [['inset inside its column', (i) => i.px], ['x on the page', (i) => i.mark]]) {
+      const values = [...new Set(insets.map(of))].sort((a, b) => a - b);
+      if (values.length > 1) {
+        const byValue = values.map(
+          (v) => `${v}px on ${insets.filter((i) => of(i) === v).map((i) => i.page.replace('concepts/', '').replace('/index.html', '')).join(', ')}`
+        );
+        problems.push(`the mark sits at ${values.length} different ${what}: ${byValue.join('; ')}`);
+      }
+    }
   }
 
   for (const problem of problems) console.log(`       ! ${problem}`);

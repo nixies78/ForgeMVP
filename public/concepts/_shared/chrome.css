@@ -45,13 +45,32 @@
 /* The column. Every mockup's content sits in this one width - 1136px - and every mockup's header sits in
  * it too, so the mark and the wordmark line up down the page.
  *
+ * The gutter is here for the same reason the width is, and for a while it was not: the width was shared
+ * and the gutter was left to each page, which measured 0px on some, 20, 24, 40, 48, 56 and 72px on others.
+ * A column that starts 72px from the edge on one page and 24px on the next puts the mark - and every
+ * heading and paragraph under it - at a different x on each page, which is what the owner saw as the logo
+ * moving left and right between mockups.
+ *
+ * The value is the app's own --sh-inset (public/css/shell.css): clamp(16px, 5vw, 64px), so 64px each side
+ * at 1440px and 16px on a phone, the same gutter the app's own header and screens use. Because this file
+ * is linked last, it also wins wherever a page set its own padding on a .wrap - including inside a media
+ * query, which is deliberate: the gutter is no longer a per-page decision.
+ *
+ * Only the width and the gutter live here. Whatever else a page puts in its column - its own section
+ * spacing, its grid, its cards - stays the page's.
+ *
  * The app's own shell is wider: --sh-content-max is 1240px (public/css/shell.css). That difference is
  * deliberate rather than drift. A mockup is a pitch page read on its own, and the narrower column suits
  * it; the app is an interface with a device list and a plan in it. If the two ever need to match, this is
- * the one number to change, and tests/browser-check.mjs measures it on every page.
- *
- * Only the width lives here: each page keeps its own gutter, because a gutter is part of a layout. */
+ * the one number to change, and tests/browser-check.mjs measures it on every page. */
 .wrap {
   max-width: 1136px;
   margin-inline: auto;
+  padding-inline: clamp(16px, 5vw, 64px);
 }
+
+/* One thing can still move the column, and it is not a page's styling: a page short enough not to scroll
+ * keeps the whole viewport, while a page that scrolls gives a scrollbar's width to it, which shifts every
+ * centred column about 7px. Reserving the gutter makes the column's position depend on the page's content
+ * rather than on how tall the page happens to be. */
+html { scrollbar-gutter: stable; }
