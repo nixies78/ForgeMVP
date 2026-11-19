@@ -837,6 +837,10 @@ async function checkMockupHeaders(send, results) {
           wrapBackground: wrapStyle ? wrapStyle.backgroundColor : null,
           wrapBorder: wrapStyle ? wrapStyle.borderTopWidth : null,
           sharedLink: !!document.querySelector('link[href*="_shared/chrome.css"]'),
+          /* A footer link on a long mockup eases instead of snapping, on every page rather than on the seven
+           * that had thought of it. */
+          scrollBehaviour: getComputedStyle(document.documentElement).scrollBehavior,
+          subLabel: document.querySelectorAll('.logo-sub, [class*="logo-sub"]').length,
           columns: [...document.querySelectorAll('.wrap')].map((el) => Math.round(el.getBoundingClientRect().width)),
           /* Where the mark sits inside its column, and how wide that column's content is. The absolute x
            * is not the thing to compare between pages: a page tall enough to scroll loses a scrollbar's
@@ -873,6 +877,9 @@ async function checkMockupHeaders(send, results) {
             const slogan = foot.querySelector('.foot-slogan');
             const footMark = foot.querySelector('.logo-img');
             const row = foot.querySelector('.foot-inner');
+            const footWordCs = word ? getComputedStyle(word) : null;
+            const headWord = document.querySelector('header .logo-word');
+            const headWordCs = headWord ? getComputedStyle(headWord) : null;
             return {
               height: Math.round(foot.getBoundingClientRect().height),
               cls: String(foot.className || ''),
@@ -884,6 +891,12 @@ async function checkMockupHeaders(send, results) {
               transform: cs ? cs.textTransform : null,
               headerSize: hcs ? hcs.fontSize : null,
               slogan: slogan ? slogan.textContent.replace(/\\s+/g, ' ').trim() : null,
+              /* The wordmark takes the mark's colour - white, or black beside a recoloured mark - in the
+               * footer and in the header. Inheriting instead made "FORGE" grey in most footers while the mark
+               * beside it stayed white, which is what the owner reported. */
+              wordColour: footWordCs ? footWordCs.color : null,
+              footMarkBlack: footMark ? /logo-img-black/.test(String(footMark.className || '')) : null,
+              headWordColour: headWordCs ? headWordCs.color : null,
               /* Links the page put in its footer, not counting the lockup's own link. */
               links: [...foot.querySelectorAll('a')].filter((a) => !a.closest('.logo-lockup')).length,
               separators: document.querySelectorAll('.brand-sep, .logo-sep, .foot-sep, [class*="brand-sep"]').length,
@@ -978,7 +991,13 @@ async function checkMockupHeaders(send, results) {
         if (f.face !== 'Archivo Black') problems.push(`${page}'s footer wordmark is set in ${f.face}, not the locked Archivo Black`);
         if (f.size !== '15px') problems.push(`${page}'s footer wordmark is ${f.size}, not the locked 15px`);
         if (f.transform !== 'uppercase') problems.push(`${page}'s footer wordmark is not uppercased by the shared rule`);
-        if (f.headerSize && f.headerSize !== '20px') problems.push(`${page}'s header wordmark is ${f.headerSize}, not the locked 20px`);
+        if (f.headerSize !== '20px') problems.push(`${page}'s header wordmark is ${f.headerSize}, not the locked 20px`);
+        /* The wordmark's colour is the mark's colour. Two pages were missing a header wordmark entirely
+         * (8-quiet-dark and its indigo sibling) and the rest had a grey one in the footer. */
+        const wantWord = f.footMarkBlack ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
+        if (f.wordColour !== wantWord) problems.push(`${page}'s footer wordmark is ${f.wordColour} beside a ${f.footMarkBlack ? 'black' : 'white'} mark, not ${wantWord}`);
+        const wantHeadWord = state.markColour === 'black' ? 'rgb(0, 0, 0)' : 'rgb(255, 255, 255)';
+        if (f.headWordColour !== wantHeadWord) problems.push(`${page}'s header wordmark is ${f.headWordColour} beside a ${state.markColour} mark, not ${wantHeadWord}`);
         if (f.slogan !== SLOGAN) problems.push(`${page}'s footer says ${JSON.stringify(f.slogan)}, not the shared slogan`);
         if (f.separators) problems.push(`${page} still has ${f.separators} brand separator element(s), which the owner had removed`);
         /* The footer's lockup is the header's lockup, so it has to land on the same x - and the failure that
@@ -995,6 +1014,8 @@ async function checkMockupHeaders(send, results) {
       problems.push(`${page} has gained a <footer>, and the app prototypes were to keep none for now`);
     }
     if (!state.sharedLink) problems.push(`${page} does not link public/concepts/_shared/chrome.css`);
+    if (state.scrollBehaviour !== 'smooth') problems.push(`${page} jumps to an anchor instead of scrolling to it (scroll-behavior: ${state.scrollBehaviour})`);
+    if (state.subLabel) problems.push(`${page} still carries a lockup sub-label beside the wordmark, which the owner had removed`);
     if (!state.columns.length) problems.push(`${page} has no .wrap column`);
     else {
       const tooWide = state.columns.filter((w) => w > 1136);
@@ -1039,6 +1060,59 @@ async function checkMockupHeaders(send, results) {
       }
     }
 
+    /* The wordmark shades with the mark - pointing at either shades both, which is what the owner asked for.
+     * The footer is below the fold, so the page is scrolled to it before the pointer is placed. */
+    let wordShade = '';
+    if (state.footer && state.footer.word != null) {
+      /* Scrolling once is not enough: three of these pages grow as their lazy images arrive, so one scroll
+       * leaves the footer a thousand pixels below the fold and the pointer lands on nothing. Re-scroll until
+       * the footer's own box says it is in view, exactly as the screenshot script has to. */
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        await send('Runtime.evaluate', { expression: 'window.scrollTo(0, document.documentElement.scrollHeight); 1' });
+        await sleep(500);
+        const inView = await send('Runtime.evaluate', {
+          expression: `(() => {
+            const w = document.querySelector('footer .logo-word');
+            if (!w) return true;
+            const r = w.getBoundingClientRect();
+            return r.bottom > 0 && r.bottom <= innerHeight + 1;
+          })()`,
+          returnByValue: true
+        });
+        if (inView.result.value) break;
+      }
+      const spot = await send('Runtime.evaluate', {
+        expression: `(() => {
+          const w = document.querySelector('footer .logo-word');
+          if (!w) return null;
+          const r = w.getBoundingClientRect();
+          return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+        })()`,
+        returnByValue: true
+      });
+      const at2 = spot.result.value;
+      if (at2) {
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 4, y: 300, buttons: 0 });
+        await sleep(200);
+        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at2.x, y: at2.y, buttons: 0 });
+        await sleep(300);
+        const hovered = await send('Runtime.evaluate', {
+          expression: `(() => {
+            const w = document.querySelector('footer .logo-word');
+            const m = document.querySelector('footer .logo-img');
+            return { word: getComputedStyle(w).opacity, mark: m ? getComputedStyle(m).opacity : null };
+          })()`,
+          returnByValue: true
+        });
+        const v = hovered.result.value || {};
+        wordShade = `word ${v.word}, mark ${v.mark}`;
+        if (!(Number(v.word) < 0.99)) problems.push(`${page}'s footer wordmark does not shade under the pointer (opacity ${v.word})`);
+        if (v.mark != null && !(Number(v.mark) < 0.99)) {
+          problems.push(`${page}'s footer mark does not shade when the wordmark beside it is pointed at (opacity ${v.mark})`);
+        }
+      }
+    }
+
     const verdict = problems.length > before ? 'FAIL ' : 'ok   ';
     console.log(
       `${verdict}chrome · ${page.replace('concepts/', '').replace('/index.html', '').padEnd(26)} ` +
@@ -1046,7 +1120,8 @@ async function checkMockupHeaders(send, results) {
         `${state.markColour} on ${state.behind} (${state.contrast}:1), column ${Math.max(0, ...(state.columns || [0]))}px` +
         `, x ${state.inset ? state.inset.mark + 'px' : '?'}` +
         (state.footer ? `, footer ${state.footer.height}px` : '') +
-        (shade ? `, hover ${shade}` : '')
+        (shade ? `, hover ${shade}` : '') +
+        (wordShade ? `, footer hover ${wordShade}` : '')
     );
     if (state.inset) insets.push({ page, px: state.inset.px, padding: state.inset.padding, mark: state.inset.mark });
   }

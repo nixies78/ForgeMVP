@@ -72,6 +72,11 @@
   color: inherit;
 }
 
+/* The wordmark is the same colour as the mark beside it, which is the only colour that can be right: the
+ * mark is white unless the page recolours it with .logo-img-black, and whatever ground made that decision
+ * necessary is the ground the word sits on too. Inheriting instead made "FORGE" grey in most footers - it
+ * was picking up the footer's muted text colour while the mark beside it stayed white - which is what the
+ * owner saw. :has() keeps the two tied together without a second class to forget on the next page. */
 .logo-word {
   font-family: "Archivo Black", "Inter Tight", "Inter", system-ui, sans-serif;
   font-size: 20px;
@@ -79,7 +84,16 @@
   line-height: 1;
   letter-spacing: .06em;
   text-transform: uppercase;
+  color: #fff;
 }
+
+.logo-lockup:has(.logo-img-black) .logo-word { color: #000; }
+
+/* The shade under the pointer, on the whole lockup: the mark and the wordmark are one brand mark, so
+ * pointing at either shades both. The rule above this one covers a page that has a bare mark and no
+ * wordmark (the app prototypes do). */
+.logo-lockup:hover .logo-img,
+.logo-lockup:hover .logo-word { opacity: .8; }
 
 /* ------------------------------------------------------------------------------------------------
  * The footer. One footer for the set: the mark, the wordmark, the slogan, and each page's own links. What
@@ -172,3 +186,14 @@
  * centred column about 7px. Reserving the gutter makes the column's position depend on the page's content
  * rather than on how tall the page happens to be. */
 html { scrollbar-gutter: stable; }
+
+/* Anchor jumps ease rather than snap. Seven pages had worked this out for themselves and the rest had not,
+ * so a footer link scrolled smoothly on most mockups and jumped on 5-bento, 7-three-steps and 2-funky - one
+ * more thing that should not be a per-page decision. The reduced-motion block is part of the rule rather
+ * than an afterthought: smooth scrolling is exactly the kind of movement that setting exists for. */
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+

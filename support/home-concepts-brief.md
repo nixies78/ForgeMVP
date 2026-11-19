@@ -68,6 +68,16 @@ your page**. Write it as `<span class="logo-word">Forge</span>` and let the shar
 is no vertical rule between the mark and the word: a separator element, or a `border-left` on the wordmark,
 is not part of the design.
 
+**Its colour is the mark's colour, and the shared file decides that too.** The wordmark is white, or black
+where the mark beside it carries `logo-img-black` - never the surrounding text colour. It used to inherit,
+which made "FORGE" grey in most footers while the white mark next to it stayed white. So do not set a
+`color` on `.logo-word`: if you recolour the mark, the word follows on its own. Pointing at either the mark
+or the word darkens both to 80% as one brand mark.
+
+**Every header carries the lockup**, not a bare mark - the mark and "Forge" together, in that order, as an
+`<a class="logo-lockup">`. Two pages and the mockups index shipped with the mark alone, which the owner
+read as missing branding.
+
 **The footer is shared as well**, on every pitch page - the four app screens (lessons-1-default,
 questions-1-default, randomiser-1-slots, randomiser-2-quiet-blue) are screens of the app rather than pitch
 pages and carry none. Where it appears it is always this, including the wording:
@@ -94,6 +104,11 @@ The footer has to be distinguishable from what sits behind it, and once is enoug
 differs from the page needs no rule (2-funky's ink on yellow), and one at the page's own colour needs a 1px
 `border-top` in the page's rule colour (5-bento, 9-spotlight). Not both. The mark has to stay legible, so a
 light footer takes `logo-img-black`.
+
+**Anchors ease rather than snap.** The shared file sets `scroll-behavior: smooth` on `html` (with a
+`prefers-reduced-motion` override back to `auto`), so a footer link dissolves to its target on every page:
+seven pages had worked this out for themselves and 5-bento, 7-three-steps and 2-funky had not, which the
+owner noticed. Do not declare it in your page.
 
 ## What the page is for
 

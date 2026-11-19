@@ -42,7 +42,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { overflow-x: clip; scroll-behavior: smooth; background: #000; }
+html { overflow-x: clip; background: #000; }
 body {
   margin: 0;
   background: #000;
@@ -346,7 +346,6 @@ a { color: inherit; }
 
 /* ---------- footer ---------- */
 footer { background: #000; border-top: 1px solid var(--ink-2); color: var(--dim); }
-footer .logo-word { color: var(--white); }
 
 /* ---------- concept tag ---------- */
 .concept-tag {
@@ -369,7 +368,6 @@ footer .logo-word { color: var(--white); }
 .js .hero .reveal { transform: translateY(24px); }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
   .hero-art { animation: none; transform: none; }
   .scroll-cue::after { animation: none; }
   .js .reveal { opacity: 1; transform: none; filter: none; transition: none; }

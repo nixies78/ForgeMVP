@@ -184,4 +184,8 @@ padding in the column at all, and below it the shared file adds the app's own `-
 the column's box by the same amount, so the content is 1136px wherever the window can spare it and the two
 regimes meet without a step. The same file owns the footer - the mark and a locked wordmark, one slogan, 120px
 - and the four app screens deliberately carry none, because they are screens of the app rather than pitch
-pages. `support/home-concepts-brief.md` states all of this for whoever writes the next one.
+pages. It also owns the brand mark's two behaviours: the wordmark takes the mark's colour rather than the
+surrounding text colour (white, or black beside a recaloured mark, so "FORGE" is never grey next to a white
+mark), the whole lockup darkens together under the pointer, and anchor jumps ease rather than snap on every
+page, with a `prefers-reduced-motion` override. `support/home-concepts-brief.md` states all of this for
+whoever writes the next one.
