@@ -18,13 +18,11 @@
     --bg: #101014;
     --tile: #18181C;
     --tile-2: #202024;
-    --line: #28282C;
     --line-2: #303034;
     --line-3: #404044;
     --muted: #ACACAD;
     --dim: #787678;
     --accent: #F9A91F;        /* UEFN Amber: spin / locked */
-    --accent-dark: #322206;
     --accent-2: #33BFFF;      /* UEFN Blue: links, focus */
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -39,7 +37,7 @@
     font: 400 1rem/1.5 var(--body);
     min-height: 100vh;
   }
-  .wrap { margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+  .wrap { margin: 0 auto; padding-block: 2rem 5rem; }
   /* The Epic mark in a 72px bar - the app's own header measurement (css/shell.css .sh-header-inner is
      min-height: 72px, .sh-logo img is 44px) - drawn in this page's tokens and rule colour. */
   .top {
@@ -47,7 +45,7 @@
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    padding: 0 1.25rem;
+    padding-block: 0;
     border-bottom: 1px solid var(--line-2);
   }
   h1 {
@@ -303,11 +301,6 @@
     font: 600 .75rem/1 var(--body);
     padding: .5rem .625rem; border-radius: .5rem;
   }
-  .sr-only {
-    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-  }
-
   /* ---------- Narrow ---------- */
   @media (max-width: 52rem) {
     .machine { grid-template-columns: 1fr; }
@@ -318,7 +311,6 @@
   }
   @media (max-width: 40rem) {
     :root { --item-h: 10rem; }
-    .wrap { padding-top: 2rem; }
     .reels { gap: .5rem; }
     .item { padding: .5rem; gap: .375rem; }
     .name { font-size: .8125rem; }

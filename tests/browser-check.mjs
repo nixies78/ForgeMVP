@@ -817,18 +817,23 @@ async function checkMockupHeaders(send, results) {
           wrapBorder: wrapStyle ? wrapStyle.borderTopWidth : null,
           sharedLink: !!document.querySelector('link[href*="_shared/chrome.css"]'),
           columns: [...document.querySelectorAll('.wrap')].map((el) => Math.round(el.getBoundingClientRect().width)),
-          /* Where the mark sits inside its column. The absolute x is not the thing to compare between
-           * pages: a page tall enough to scroll loses a scrollbar's width to the viewport and everything
-           * shifts about 7px with it. The inset is what "the logo is in the same place" means, and it is
-           * where a page that kept its own gutter, or centred its lockup, gives itself away. */
+          /* Where the mark sits inside its column, and how wide that column's content is. The absolute x
+           * is not the thing to compare between pages: a page tall enough to scroll loses a scrollbar's
+           * width to the viewport and everything shifts about 7px with it. The inset is what "the logo is
+           * in the same place" means, and it is where a page that kept its own gutter, or centred its
+           * lockup, gives itself away. The content width is what the owner chose: 1136px with no gutter at
+           * a desktop width, which is not the same as a 1136px box with a gutter inside it. */
           inset: (() => {
             const column = mark ? mark.closest('.wrap') : null;
             if (!column) return null;
+            const cs = getComputedStyle(column);
+            const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
             return {
               px: Math.round(mark.getBoundingClientRect().left - column.getBoundingClientRect().left),
               column: Math.round(column.getBoundingClientRect().left),
               mark: Math.round(mark.getBoundingClientRect().left),
-              padding: getComputedStyle(column).paddingLeft
+              padding: cs.paddingLeft,
+              content: Math.round(column.clientWidth - pad)
             };
           })(),
           markColour: markBlack ? 'black' : 'white',
@@ -906,7 +911,14 @@ async function checkMockupHeaders(send, results) {
     else {
       const tooWide = state.columns.filter((w) => w > 1136);
       if (tooWide.length) problems.push(`${page} has a .wrap column ${Math.max(...tooWide)}px wide, over the shared 1136px`);
-      else if (!state.columns.includes(1136)) problems.push(`${page} has no .wrap column at the shared 1136px (widest ${Math.max(...state.columns)}px)`);
+      /* The desktop contract: the column is 1136px of content, and no padding sits inside it. A page that
+       * kept its own gutter would show up here as both a padding and a content width under 1136px. */
+      else if (state.inset) {
+        if (state.inset.padding !== '0px') problems.push(`${page} pads its column by ${state.inset.padding} at a desktop width, where the shared rule has no gutter`);
+        if (state.inset.content !== 1136) problems.push(`${page} gives its column ${state.inset.content}px of content, not the shared 1136px`);
+      } else if (!state.columns.includes(1136)) {
+        problems.push(`${page} has no .wrap column at the shared 1136px (widest ${Math.max(...state.columns)}px)`);
+      }
     }
     for (const src of state.images || []) problems.push(`${page} has an image that did not load: ${src}`);
 
@@ -949,6 +961,52 @@ async function checkMockupHeaders(send, results) {
     );
     if (state.inset) insets.push({ page, px: state.inset.px, padding: state.inset.padding, mark: state.inset.mark });
   }
+
+  /* The column has two regimes, and the point of measuring them is the seam between them: no gutter at a
+   * desktop width, where 1136px is the content; a gutter below 1280px, where the window is too narrow for
+   * the column to keep itself off the screen edge. They have to meet without the content jumping, so the
+   * three widths either side of the breakpoint are measured and compared. One page is enough - the rule is
+   * one shared rule, and the page-by-page pass above has already checked every page follows it at 1440. */
+  const regimePage = pages[0];
+  await send('Page.navigate', { url: new URL(regimePage, BASE).href });
+  await sleep(900);
+  const regimes = [];
+  for (const width of [1440, 1281, 1280, 1279, 900, 600, 375]) {
+    await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
+    await sleep(250);
+    const res = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const c = document.querySelector('.wrap');
+        if (!c) return null;
+        const cs = getComputedStyle(c);
+        const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+        return { gutter: parseFloat(cs.paddingLeft), content: Math.round(c.clientWidth - pad), available: document.documentElement.clientWidth };
+      })()`,
+      returnByValue: true
+    });
+    regimes.push({ width, ...res.result.value });
+  }
+  const at = (w) => regimes.find((r) => r.width === w) || {};
+  for (const r of regimes) {
+    /* Above the breakpoint the window's own margin is the gutter, so there must be none inside the column
+     * and the content must be the full 1136px. Below it the gutter is the only margin, so it has to exist
+     * and the content has to be narrower than the window. */
+    if (r.width > 1280 && (r.gutter !== 0 || r.content !== 1136)) {
+      problems.push(`at a ${r.width}px window the column has a ${r.gutter}px gutter and ${r.content}px of content, where the shared rule gives no gutter and 1136px`);
+    }
+    if (r.width <= 1280 && (r.gutter < 16 || r.content >= r.available)) {
+      problems.push(`at a ${r.width}px window the column has a ${r.gutter}px gutter and ${r.content}px of content, where the shared rule gives it a real gutter inside the window`);
+    }
+  }
+  const seam = [at(1279), at(1280), at(1281)].map((r) => r.content);
+  if (Math.max(...seam) - Math.min(...seam) > 3) {
+    problems.push(`the column's content jumps across the 1280px breakpoint: ${seam.join('px, ')}px at 1279/1280/1281`);
+  }
+  console.log(
+    `ok   chrome · regimes               ` +
+      regimes.map((r) => `${r.width}: ${r.content}px${r.gutter ? ` + ${r.gutter}px gutter` : ''}`).join(' · ')
+  );
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 
   /* One inset and one absolute position, or the logo is in a different place on every page - which is
    * exactly what the owner saw when the column width was shared but the gutter was still each page's own

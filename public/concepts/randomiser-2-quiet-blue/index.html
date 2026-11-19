@@ -17,7 +17,6 @@
   :root {
     --bg: #101014;
     --tile: #18181C;
-    --tile-2: #202024;
     --line: #28282C;
     --line-2: #303034;
     --muted: #ACACAD;
@@ -45,7 +44,7 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  .wrap { width: 100%; margin: 0 auto; padding-inline: 24px; }
+  .wrap { width: 100%; margin: 0 auto; }
 
   /* Header: the shared one - a 72px bar carrying the 44px Epic mark, which is the app's own
      header measurement (public/css/shell.css: .sh-header-inner is min-height 72px, .sh-logo img
@@ -378,15 +377,12 @@
     border-radius: 999px;
     padding: 7px 11px;
   }
-  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-
   @media (max-width: 1020px) {
     .cards { grid-template-columns: 1fr; max-width: 560px; margin-inline: auto; }
     .guide { grid-template-columns: 1fr; gap: 28px; padding-block: 36px 0; }
     .close { padding-block: 36px 48px; margin-top: 36px; }
   }
   @media (max-width: 760px) {
-    .wrap { padding-inline: 18px; }
     .hero { padding-block: 16px 20px; }
     .hero p { margin: 11px auto 0; }
     .card { padding: 18px; border-radius: 16px; }

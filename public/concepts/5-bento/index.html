@@ -35,7 +35,7 @@ body { font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-font
 img { max-width: 100%; display: block; }
 a { color: inherit; text-decoration: none; }
 
-.wrap { width: 100%; margin: 0 auto; padding-inline: 24px; }
+.wrap { width: 100%; margin: 0 auto; }
 
 /* ---------- nav ---------- */
 .nav { position: sticky; top: 0; z-index: 20; height: 72px; display: flex; align-items: center; background: rgba(16,16,20,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
@@ -80,7 +80,7 @@ a { color: inherit; text-decoration: none; }
 .tile h3 { font-family: var(--title); font-weight: 700; font-size: 24px; line-height: 1.1; letter-spacing: -.02em; margin: 0 0 8px; }
 .tile p { color: var(--muted); margin: 0; font-size: 15px; }
 .label { font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
-.s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; } .s6 { grid-column: span 6; }
+.s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; }
 .r2 { grid-row: span 2; }
 
 /* big breakout tile */
@@ -215,7 +215,6 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 }
 @media (max-width: 560px) {
   :root { --gap: 12px; --radius: 18px; }
-  .wrap { padding-inline: 16px; }
   .hero { padding-block: 64px 24px; }
   .tile { padding: 22px; }
   .tile.t-games, .tile.t-art { padding: 0; }

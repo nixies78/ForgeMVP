@@ -45,28 +45,42 @@
 /* The column. Every mockup's content sits in this one width - 1136px - and every mockup's header sits in
  * it too, so the mark and the wordmark line up down the page.
  *
- * The gutter is here for the same reason the width is, and for a while it was not: the width was shared
- * and the gutter was left to each page, which measured 0px on some, 20, 24, 40, 48, 56 and 72px on others.
- * A column that starts 72px from the edge on one page and 24px on the next puts the mark - and every
- * heading and paragraph under it - at a different x on each page, which is what the owner saw as the logo
- * moving left and right between mockups.
+ * 1136px is the content: at a desktop width there is no padding inside the column and the content is the
+ * whole 1136px. The gutter is not gone, it is conditional - see the media query below. It used to be
+ * unconditional, which silently turned the owner's 1136px into 1008px of content, and before that it was
+ * each page's own business, which put the mark at eight different x positions across the set.
  *
- * The value is the app's own --sh-inset (public/css/shell.css): clamp(16px, 5vw, 64px), so 64px each side
- * at 1440px and 16px on a phone, the same gutter the app's own header and screens use. Because this file
- * is linked last, it also wins wherever a page set its own padding on a .wrap - including inside a media
- * query, which is deliberate: the gutter is no longer a per-page decision.
+ * Above 1280px the column keeps itself off the screen edge by being narrower than the window, and the
+ * window's margin does the rest. Only below 1280px, where the window is too narrow for that, does a gutter
+ * appear - on the app's own --sh-inset slope: clamp(16px, 5vw, 64px), 64px at the breakpoint and 16px on a
+ * phone, the same gutter the app's own header and screens use.
  *
- * Only the width and the gutter live here. Whatever else a page puts in its column - its own section
- * spacing, its grid, its cards - stays the page's.
+ * 1280 is where the two regimes meet, and getting that meeting right takes both declarations in the media
+ * query. The gutter is inside the column's box (everything here is border-box), so raising it alone would
+ * have shrunk the content from 1136 to 1008 at the breakpoint - a 128px cliff, which the first version of
+ * this did. Growing the box by its own gutters keeps the content at 1136px on the wide side of the seam and
+ * lets the column fill the window on the narrow side, where the content is everything the window has left.
+ * Measured at 1279, 1280 and 1281 the content is 1136px, 1136px and 1136px, and the mark does not move.
  *
- * The app's own shell is wider: --sh-content-max is 1240px (public/css/shell.css). That difference is
- * deliberate rather than drift. A mockup is a pitch page read on its own, and the narrower column suits
- * it; the app is an interface with a device list and a plan in it. If the two ever need to match, this is
- * the one number to change, and tests/browser-check.mjs measures it on every page. */
+ * Being linked last, this file also wins wherever a page set its own padding on a .wrap - including inside
+ * a page's media query. That is deliberate: the gutter is not a per-page decision. Pages therefore carry no
+ * gutter of their own at all; anything left behind was dead and has been deleted.
+ *
+ * The app's own shell is wider: --sh-content-max is 1240px. That difference is deliberate rather than
+ * drift. A mockup is a pitch page read on its own, and the narrower column suits it; the app is an
+ * interface with a device list and a plan in it. If the two ever need to match, this is the one number to
+ * change, and tests/browser-check.mjs measures it on every page. */
 .wrap {
+  --wrap-gutter: clamp(16px, 5vw, 64px);
   max-width: 1136px;
   margin-inline: auto;
-  padding-inline: clamp(16px, 5vw, 64px);
+}
+
+@media (max-width: 1280px) {
+  .wrap {
+    max-width: calc(1136px + 2 * var(--wrap-gutter));
+    padding-inline: var(--wrap-gutter);
+  }
 }
 
 /* One thing can still move the column, and it is not a page's styling: a page short enough not to scroll

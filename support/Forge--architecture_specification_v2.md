@@ -179,4 +179,8 @@ Everything else about a mockup's header - colour, rule, type, the nav it holds -
 
 The column is the one place they deliberately differ from the app: mockups use 1136px where the shell above
 uses 1240px (`--sh-content-max`), because a mockup is a pitch page read on its own and the narrower column
-suits it. `support/home-concepts-brief.md` states all of this for whoever writes the next one.
+suits it. That 1136px is the content, not a box with a gutter inside it: above a 1280px window there is no
+padding in the column at all, and below it the shared file adds the app's own `--sh-inset` gutter and grows
+the column's box by the same amount, so the content is 1136px wherever the window can spare it and the two
+regimes meet without a step. `support/home-concepts-brief.md` states all of this for whoever writes the next
+one.

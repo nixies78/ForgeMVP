@@ -9,7 +9,7 @@
     @font-face { font-family: "Inter"; src: url("../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
     :root { color-scheme: dark; }
     * { box-sizing: border-box; }
-    body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding: 0 20px 72px; }
+    body { margin: 0; background: #101014; color: #fff; font: 16px/1.5 "Inter", system-ui, sans-serif; padding-block: 0 72px; }
     main { margin: 0 auto; }
     /* The app's header measurement - a 72px bar (css/shell.css .sh-header-inner) carrying the 44px Epic
        mark (.sh-logo img). The bar now starts the page, so body's 56px top pad went with the old 46px row. */
@@ -33,9 +33,6 @@
     .count { font-size: 12px; font-weight: 700; min-width: 22px; padding: 2px 7px; border-radius: 999px; background: #303034; color: #fff; }
     .tab[aria-selected="true"] .count { background: #101014; }
     .panel h2:first-child { margin-top: 28px; }
-    .empty { margin-top: 28px; display: grid; grid-template-columns: 56px 1fr; gap: 18px; align-items: center; padding: 28px 24px; border-radius: 14px; background: #18181C; border: 1px dashed #404044; }
-    .empty .name { margin: 0 0 4px; }
-    .empty .desc { margin: 0; }
     footer { margin-top: 40px; color: #787678; font-size: 13px; }
     @media (max-width: 520px) { a.card { grid-template-columns: 44px 1fr; } .num { width: 44px; height: 44px; font-size: 18px; } .go { display: none; } }
   </style>

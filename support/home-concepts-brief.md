@@ -42,14 +42,24 @@ instance:
 **The header is 72px tall.** Same as the app's (`--sh-header-base`). Your bar keeps **your** colours, rule,
 type and nav - the height and the mark are the two things that are fixed.
 
-**The column is `.wrap`, 1136px.** Every page's content and header sit in that one width, so the mark and
-the wordmark line up down the page. The shared file owns the `max-width`; keep your own gutter
-(`padding-inline`) and never set `max-width` on `.wrap` in your page. The app's own shell is wider (1240px,
-`--sh-content-max`) - a deliberate difference, not drift: a mock-up is a pitch page read on its own, and the
-narrower column suits it.
+The 72px bar, the 44px mark and the 1136px column are the desktop rendering: a `@media` block of yours may
+do what your design needs below that, and where a bar has to grow to fit a stacked layout `min-height` is
+the way to say so.
 
-Small-screen rules are yours: the 72/44/1136 contract is the desktop rendering, and a `@media` block may do
-what your design needs below that.
+**The column is `.wrap`, 1136px of content.** Every page's content and header sit in that one width, so the
+mark and the wordmark line up down the page. The shared file owns the column entirely: `max-width` and the
+gutter. **Set neither in your page** - a page that pads its own `.wrap` is inset twice, and that is what put
+the logo in a different place on all fifteen pages once already.
+
+The gutter is conditional rather than absent. Above 1280px the column keeps itself off the screen edge by
+being narrower than the window, so there is no padding inside it and the content is the whole 1136px. Below
+1280px the shared file adds `clamp(16px, 5vw, 64px)` - the app's own `--sh-inset` - and grows the column's
+box by exactly that much, so the content stays 1136px wherever the window can spare it and becomes
+everything the window has left where it cannot. A `@media` block of yours may lay out your design for small
+screens; it must not put a gutter back on `.wrap`.
+
+The app's own shell is wider (1240px, `--sh-content-max`) - a deliberate difference, not drift: a mock-up is
+a pitch page read on its own, and the narrower column suits it.
 
 ## What the page is for
 
