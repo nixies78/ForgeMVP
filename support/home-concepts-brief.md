@@ -78,6 +78,15 @@ or the word darkens both to 80% as one brand mark.
 `<a class="logo-lockup">`. Two pages and the mockups index shipped with the mark alone, which the owner
 read as missing branding.
 
+**A fixed header has to be paid for in the page.** Every mockup's header is in the layout (`sticky` or
+`static`) except 1-cinematic's, which is `position: fixed` so its hero art can bleed behind it - and a fixed
+header takes no space, so the first section starts underneath it. That is fine until the window is too short
+to hold the section's content plus the header's 72px, at which point bottom-aligned content slides up into
+the header: 1-cinematic's eyebrow started 69px from the top in a 520px-tall window, with the header ending
+at 72. Its hero therefore reserves the band with
+`padding-top: calc(72px + env(safe-area-inset-top, 0px))`, which does nothing while there is room and is
+what keeps the content clear when there is not. If you make a header fixed, do the same.
+
 **The footer is shared as well**, on every pitch page - the four app screens (lessons-1-default,
 questions-1-default, randomiser-1-slots, randomiser-2-quiet-blue) are screens of the app rather than pitch
 pages and carry none. Where it appears it is always this, including the wording:

@@ -120,6 +120,14 @@ a { color: inherit; }
   position: relative;
   min-height: 100vh; min-height: 100svh;
   display: flex; align-items: flex-end;
+  /* The nav is the only fixed header in the set, so it takes no layout space and the hero starts underneath it.
+   * While the window is taller than the content plus the nav's 72px there is air to spare and this padding
+   * does nothing at all - the content is bottom-aligned inside a box that is already tall enough. Below that,
+   * the hero grows to fit its content and the content box starts exactly at the padding, so 72px is what keeps
+   * the eyebrow - and everything under it - out of the nav's band. Measured before the fix: at 1280x520 the
+   * eyebrow's own text started at 69px, three pixels inside the band; after it, at 72px and below. The env()
+   * term mirrors the nav's own safe-area padding for notched devices, and is zero everywhere else. */
+  padding-top: calc(72px + env(safe-area-inset-top, 0px));
   overflow: hidden;
   isolation: isolate;
 }

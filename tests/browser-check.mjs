@@ -1172,6 +1172,59 @@ async function checkMockupHeaders(send, results) {
   );
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 
+  /* A short window. 1-cinematic is the only page whose header is fixed, so it takes no layout space and its
+   * hero starts underneath - and that hero bottom-aligns its content, so on a window too short to hold the
+   * content plus the nav's band the eyebrow slid up into the band. Measured at 1280x520, where the eyebrow's
+   * text started at 69px against a 72px band. Every other page's header is sticky or static and therefore
+   * occupies layout space, which is why this is a rule for the whole set rather than one page's worry: a page
+   * that switches its header to fixed will fail here the moment it does. The tightest clearance is printed,
+   * because "how much air is left" is the number that would have caught this before the owner did. */
+  const cramped = [];
+  for (const page of pages) {
+    await send('Page.navigate', { url: new URL(page, BASE).href });
+    await sleep(700);
+    const res = await send('Runtime.evaluate', {
+      expression: `(() => {
+        const nav = document.querySelector('header');
+        if (!nav) return null;
+        const band = nav.getBoundingClientRect().bottom;
+        const leaves = [...document.querySelectorAll('body *')].filter((el) =>
+          !nav.contains(el) && !el.children.length && (el.textContent || '').trim()
+        ).filter((el) => {
+          const cs = getComputedStyle(el);
+          if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) return false;
+          return el.getBoundingClientRect().height > 0 && el.getBoundingClientRect().top >= 0;
+        }).map((el) => ({ el, top: el.getBoundingClientRect().top }));
+        const worst = leaves.slice().sort((a, b) => a.top - b.top)[0];
+        const tops = leaves.map((c) => c.top);
+        return {
+          band: Math.round(band),
+          fixed: getComputedStyle(nav).position === 'fixed',
+          clearance: tops.length ? Math.round(Math.min(...tops) - band) : null,
+          intruder: worst && worst.top < band
+            ? worst.el.tagName.toLowerCase() + '.' + String(worst.el.className || '').split(' ')[0] + '"' +
+              (worst.el.textContent || '').trim().slice(0, 20) + '" at ' + Math.round(worst.top) + 'px'
+            : null
+        };
+      })()`,
+      returnByValue: true
+    });
+    const v = res.result.value;
+    if (!v) continue;
+    cramped.push({ page, ...v });
+    if (v.intruder) {
+      problems.push(`${page} puts content inside its header's band in a 520px-tall window: ${v.intruder} against a ${v.band}px band`);
+    }
+  }
+  const tightest = cramped.filter((c) => c.clearance != null).sort((a, b) => a.clearance - b.clearance)[0];
+  console.log(
+    `ok   chrome · short window          ` +
+      (tightest
+        ? `1280x520: tightest clearance ${tightest.clearance}px on ${tightest.page.replace('concepts/', '').replace('/index.html', '')}, ` +
+          `${cramped.filter((c) => c.fixed).length} fixed header(s) of ${cramped.length}`
+        : 'no content measured')
+  );
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
   /* One inset and one absolute position, or the logo is in a different place on every page - which is
    * exactly what the owner saw when the column width was shared but the gutter was still each page's own
    * business, and what the two prototype pages did by centring their lockup between two pills. Reported
