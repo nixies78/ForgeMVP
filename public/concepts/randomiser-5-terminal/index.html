@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 5 - Terminal</title>
+<style>
+  @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+
+  /* Randomiser 5 - Terminal. The randomiser drawn as a tool and nothing else: no hero, no "how it
+     works", no closing line. A prompt, three drums, a log line and a readout - that is the whole page.
+     The behaviour is public/js/reel-machine.js, the same machine Randomisers 1-3 run on, so everything
+     here is clothes: the palette, the ASCII chrome and the copy. */
+  :root {
+    --ink: #0A0A0A;          /* the page, and what the lips of a drum fade into */
+    --panel: #111111;        /* panels: one shade up, so a 1px rule reads as an edge on black */
+    --well: #161616;         /* a thumbnail with no artwork behind it */
+    --line: #2E2E2E;         /* the hard rule - this design has no soft edges anywhere */
+    --line-2: #4A4A4A;       /* the same rule, lit: hover, and a reel that is holding */
+    --text: #F5F5F5;
+    --dim: #9C9C9C;          /* 6.9:1 on --ink, so the small print still passes AA */
+    --lime: #AAE755;         /* the one signal colour: prompts, values, the spin slab, the held state */
+    --lime-lit: #BCF06B;     /* the spin slab under the pointer */
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "Courier New", monospace;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --item-h: 48px;          /* one entry in a drum - the module measures whatever this turns out to be */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--ink); }
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.45;
+    overflow-x: hidden;
+  }
+  /* The scanline is a fixed overlay rather than a background on <body>: it has to lie over the drums and
+     the readout as well, or the page reads as flat panels with a texture somewhere behind them. */
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 5;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(245, 245, 245, .03) 0 1px, transparent 1px 3px);
+  }
+  :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+  .dim { color: var(--dim); }
+
+  /* ---------- Header: the app's 72px bar carrying the app's 44px mark, the one measurement every page
+     in this set shares. The bar stays a block so the .wrap inside it is the shared column rather than a
+     flex item that would shrink to its content; the mark's size, its wrapper and its shade are
+     chrome.css's, which is why no rule here reaches the image. ---------- */
+  header { height: 72px; border-bottom: 1px solid var(--line); }
+  header .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
+  header .id { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
+  header .id b { color: var(--lime); font-weight: 400; }
+  header .hint { margin-left: auto; color: var(--dim); font-size: 12px; }
+
+  /* The page's own rig, inside the shared column: 1000px of dense tool, left-aligned. A tool sits where
+     the column starts rather than in the middle of a poster, and 1000px is as wide as three drums need
+     to stay on one line. The column itself is chrome.css's and is never restyled here. */
+  .rig { max-width: 1000px; padding-block: 18px 40px; }
+
+  /* ---------- Section heads: the ASCII rule and its label ---------- */
+  /* The head is a rule with a label, and a hint or the live hash at its end. On a phone the hint gives
+     way rather than pushing the line past the window: it wraps to its own line, and if it still does not
+     fit - a 60-character deep-link hash at 12px mono does not - it ellipsises, because a horizontally
+     scrolling page is not worth one line of diagnostics. */
+  .head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .head::before { content: "+---"; color: var(--dim); font-size: 12px; }
+  .head .rule { flex: 1 1 auto; min-width: 12px; height: 0; border-top: 1px solid var(--line); }
+  .head .lbl { margin: 0; font: 400 12px/1 var(--mono); letter-spacing: .18em; text-transform: uppercase; min-width: 0; }
+  .head .tail { font-size: 12px; white-space: nowrap; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---------- The machine: three labelled columns in one row ---------- */
+  .reels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+  .reel {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    transition: border-color .15s;
+  }
+  /* The held state is stated three ways - rule, caption and button - because the point of a lock in a
+     tool is that you can see it from across the room. */
+  .reel.is-locked { border-color: var(--lime); }
+  .reel-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+  .reel-name { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+  .reel.is-locked .reel-name { color: var(--lime); }
+  /* The module owns the word on the lock button ("Lock"/"Unlock"), so the state itself is printed here,
+     where nothing is overwriting it. */
+  .reel.is-locked .reel-name::after { content: " [ HOLD ]"; }
+  .reel-count { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+  .reel-count b { color: var(--text); font-weight: 400; }
+
+  /* ---------- The drum ---------- */
+  [data-mount="window"] { display: block; }
+  /* One entry tall, plus the window's own two 1px rules: a resting entry then measures exactly what the
+     module measures mid-spin, so the last frame lands on the pixel the reel will rest on. */
+  .rm-window {
+    position: relative; overflow: hidden;
+    height: calc(var(--item-h) + 2px);
+    background: var(--well);
+    border: 1px solid var(--line);
+    transition: border-color .15s;
+  }
+  .reel.is-locked .rm-window { border-color: var(--line-2); }
+  /* The lips of the drum, so a moving strip reads as a reel and not as a list sliding under two rules. */
+  .rm-window::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: linear-gradient(var(--ink), transparent 30%, transparent 70%, var(--ink));
+    transition: opacity .15s;
+  }
+  .reel.is-spinning .rm-window::after { opacity: 1; }
+  .rm-strip { will-change: transform; }
+  /* Blur only while the strip is fast; the module drops the class while the reel is still slowing. */
+  .rm-strip.is-moving .entry { filter: blur(1px); }
+
+  .entry {
+    height: var(--item-h);
+    display: flex; align-items: center; gap: 8px;
+    padding-inline: 8px;
+    transition: filter .3s ease-out;
+  }
+  .entry .rm-pic {
+    flex: none; position: relative;
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    overflow: hidden;
+    background: var(--well);
+    border: 1px solid var(--line);
+    filter: grayscale(1) contrast(1.1);
+  }
+  .entry .rm-pic img { width: 100%; height: 100%; object-fit: cover; }
+  .entry .rm-ph { position: absolute; inset: 0; display: grid; place-items: center; }
+  .entry .rm-initials { font-size: 12px; color: var(--lime); }
+  /* A 40px thumbnail cannot hold two words as well as the initials, and the legend under the row says
+     why they are there at all. */
+  .entry .rm-coming { display: none; }
+  /* One mono line per entry, never two: the module measures this height, so a wrapped name would move
+     the pixel the strip lands on. A clipped name carries its full text in the title. */
+  .entry-name {
+    flex: 1 1 auto; min-width: 0;
+    font-size: 15px; text-transform: uppercase; letter-spacing: .02em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* The prompt mark of every printed line on this page, so an entry reads as a value the machine put
+     out rather than as a list item. */
+  .entry-name::before { content: "> "; color: var(--lime); }
+  .entry .mark {
+    flex: none;
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--dim);
+    border: 1px solid var(--line-2); padding: 1px 4px;
+  }
+  .entry.is-empty .entry-name { color: var(--dim); }
+
+  /* ---------- The lock: a square that inverts when it holds ---------- */
+  .lock {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 10px 6px;
+    font: 400 12px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase;
+    color: var(--text); background: none;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  /* The brackets are drawn rather than typed, so a word the module swaps in cannot move the chrome. */
+  .lock::before { content: "["; }
+  .lock::after { content: "]"; }
+  .lock svg { width: 12px; height: 12px; flex: none; }
+  .lock .rm-shackle { transition: transform .15s; }
+  /* Open shackle while the reel is free, shut once it holds: legible before the colour is. */
+  .lock:not(.is-locked) .rm-shackle { transform: translate(4px, -3px); }
+  .lock:hover:not(:disabled) { border-color: var(--lime); }
+  .lock.is-locked { background: var(--lime); border-color: var(--lime); color: var(--ink); }
+  .lock:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* ---------- Controls: one lime slab, one outlined slab, one log line ---------- */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 12px 14px;
+    font: 400 13px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text); background: none;
+    border: 1px solid var(--line-2);
+    cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .btn::before { content: "[ "; }
+  .btn::after { content: " ]"; }
+  .btn:hover:not(:disabled) { border-color: var(--text); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  /* The page's one filled slab: spinning is the only thing a visitor came here to do. */
+  .btn-spin {
+    font-size: 15px; letter-spacing: .18em;
+    background: var(--lime); border-color: var(--lime); color: var(--ink);
+  }
+  .btn-spin:hover:not(:disabled) { background: var(--lime-lit); border-color: var(--lime-lit); }
+  .btn-spin:disabled { background: none; color: var(--dim); border-color: var(--line-2); }
+
+  /* The log line is the page's live region and the module's error output in one: "Loading the reels…"
+     until the JSON lands, then what the machine is doing, then its error text if the fetch failed. */
+  .log { flex: 1 1 220px; margin: 0; font-size: 13px; color: var(--dim); }
+  .log::before { content: "> "; color: var(--lime); }
+  /* The module's failure is not a second accent: it drops to plain ink on a lit rule instead. */
+  .log.is-error {
+    color: var(--ink); background: var(--text);
+    border-left: 6px solid var(--lime);
+    padding: 2px 8px;
+  }
+  .log.is-error::before { color: var(--ink); }
+
+  /* Prose is the one place the app's own typeface appears; every value on the page is mono. */
+  .legend { margin: 10px 0 0; font-family: var(--body); font-size: 13px; color: var(--dim); }
+  .legend::before { content: "> "; font-family: var(--mono); color: var(--lime); }
+
+  /* ---------- The readout ---------- */
+  .readout { margin-top: 20px; padding: 12px; background: var(--panel); border: 1px solid var(--line); transition: opacity .2s; }
+  .readout[hidden] { display: none; }
+  /* The printed pitch is stale the moment the drums move, but it stays on screen: a readout that
+     vanished on every spin would flash. */
+  .readout.is-stale { opacity: .45; }
+  .pitch { margin: 14px 0 16px; font-size: clamp(20px, 3.2vw, 34px); line-height: 1.18; letter-spacing: -0.01em; }
+  /* The module hands the pitch over already split at the hook, and the hook is always its own line -
+     here, and in every other design that runs this machine. */
+  .pitch .hook { display: block; color: var(--lime); }
+  .pitch .hook::before { content: "> "; }
+
+  .row {
+    display: grid; grid-template-columns: 132px minmax(0, 1fr); column-gap: 12px;
+    padding: 8px 0; border-top: 1px solid var(--line);
+  }
+  .row .key { font-size: 12px; letter-spacing: .14em; color: var(--dim); }
+  .row .val { font-size: 15px; color: var(--lime); overflow-wrap: anywhere; }
+  .row .sub { grid-column: 2; font-family: var(--body); font-size: 13px; color: var(--dim); overflow-wrap: anywhere; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+  .todo { flex: 1 1 100%; margin: 0; min-height: 1.4em; font-family: var(--body); font-size: 13px; color: var(--dim); }
+
+  .tag {
+    position: fixed; left: 12px; bottom: 12px; z-index: 20;
+    font: 400 11px/1 var(--mono); letter-spacing: .08em;
+    color: var(--text); background: var(--ink);
+    border: 1px solid var(--line-2);
+    padding: 6px 8px;
+  }
+
+  @media (max-width: 760px) {
+    header .hint { display: none; }
+    .rig { padding-block: 14px 32px; }
+  }
+  @media (max-width: 620px) {
+    /* The row becomes a stack: three 110px columns on a phone clip every name to two letters, which is
+       worse than losing the one line this design is built on. */
+    .reels { grid-template-columns: 1fr; }
+    .btn { width: 100%; }
+    .row { grid-template-columns: 1fr; }
+    .row .sub { grid-column: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<!-- Last in <head>, so the shared rules win a tie: chrome.css owns the mark's wrapper and its 44px size,
+     the .wrap column and the smooth anchor scrolling. The page's own look is everything above it. -->
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
+    <span class="id">RANDOMISER<b>::</b>TERMINAL</span>
+    <span class="hint">a locked reel holds across a spin</span>
+  </div>
+</header>
+
+<main>
+      <div class="wrap">
+        <div class="rig">
+
+      <section class="machine" aria-labelledby="machine-h">
+        <div class="head">
+          <h1 class="lbl" id="machine-h">Reels</h1>
+          <span class="rule"></span>
+          <span class="tail dim">forge://tools/randomiser</span>
+        </div>
+
+        <!-- One column per reel: the module fills [data-mount="window"] and drives the [data-lock] button,
+             and the [data-lock-text] span inside it is its word to write. The count in each head is filled
+             from the data on load - never written here, or it would be wrong the day an entry is added. -->
+        <div class="reels" id="reels">
+          <section class="reel" data-reel="f">
+            <div class="reel-head">
+              <span class="reel-name">Flavour / Brand</span>
+              <span class="reel-count"><b id="count-f">&mdash;</b> in drum</span>
+            </div>
+            <div data-mount="window"></div>
+            <button class="lock" data-lock type="button" aria-pressed="false"><span data-lock-text>Lock</span></button>
+          </section>
+
+          <section class="reel" data-reel="t">
+            <div class="reel-head">
+              <span class="reel-name">Game Type</span>
+              <span class="reel-count"><b id="count-t">&mdash;</b> in drum</span>
+            </div>
+            <div data-mount="window"></div>
+            <button class="lock" data-lock type="button" aria-pressed="false"><span data-lock-text>Lock</span></button>
+          </section>
+
+          <section class="reel" data-reel="h">
+            <div class="reel-head">
+              <span class="reel-name">Hook</span>
+              <span class="reel-count"><b id="count-h">&mdash;</b> in drum</span>
+            </div>
+            <div data-mount="window"></div>
+            <button class="lock" data-lock type="button" aria-pressed="false"><span data-lock-text>Lock</span></button>
+          </section>
+        </div>
+
+        <p class="legend">Artwork for these reels is not uploaded yet, so a thumbnail falls back to the
+          entry's initials. A lock holds its reel across a spin; unlock all clears every lock and spins the
+          three of them together.</p>
+
+        <div class="controls">
+          <button class="btn btn-spin" id="spin" type="button" data-spin disabled>Spin</button>
+          <button class="btn" id="unlock-all" type="button" data-unlock-all disabled>Unlock all</button>
+          <p class="log" id="status" data-status aria-live="polite">Loading the reels&hellip;</p>
+        </div>
+      </section>
+
+      <section class="readout" id="result" data-result hidden aria-labelledby="readout-h">
+        <div class="head">
+          <h2 class="lbl" id="readout-h">Pitch</h2>
+          <span class="rule"></span>
+          <span class="tail dim" id="hash-out"></span>
+        </div>
+
+        <!-- The pitch prints in two lines, always. The lead and the hook are separate elements because the
+             module hands them over separately; the hook is block-level so it can never trail the lead. -->
+        <div class="pitch" data-pitch>
+          <span id="pitch-lead"></span><span class="hook" id="pitch-hook" aria-live="polite"></span>
+        </div>
+
+        <div class="rows">
+          <div class="row">
+            <span class="key">Game Type</span>
+            <span class="val" id="row-type"></span>
+            <span class="sub" id="row-type-sub"></span>
+          </div>
+          <div class="row">
+            <span class="key">Underneath</span>
+            <span class="val" id="row-under"></span>
+          </div>
+          <div class="row">
+            <span class="key">Hook</span>
+            <span class="val" id="row-hook"></span>
+            <span class="sub" id="row-hook-sub"></span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn" type="button" data-todo="Dispatch to plan">Dispatch to plan</button>
+          <button class="btn" type="button" data-todo="Export">Export</button>
+          <p class="todo" id="todo-note" data-todo aria-live="polite"></p>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<div class="tag">Randomiser 5 - Terminal</div>
+
+<script type="module">
+/* The machine is public/js/reel-machine.js - the behaviour Randomisers 1-3 run on - so this script is
+   only the terminal's readout: one entry in a drum, the log line, the printed pitch, and the page's own
+   reaction to the state the module reports. Nothing about spinning, locking or the URL hash is here. */
+import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+
+const $ = id => document.getElementById(id);
+const spinBtn = $('spin'), unlockBtn = $('unlock-all'), statusEl = $('status');
+let resultShown = false;
+
+/* ---------- One entry in a drum ---------- */
+function renderEntry(entry) {
+  const item = document.createElement('div');
+  item.className = 'entry';
+  if (!entry) {
+    /* Before the first spin there is no value to print, and a dashed empty thumbnail would read as a
+       broken image rather than as a drum waiting. */
+    item.classList.add('is-empty');
+    const nm = document.createElement('span');
+    nm.className = 'entry-name';
+    nm.textContent = '--';
+    item.append(nm);
+    return item;
+  }
+  const nm = document.createElement('span');
+  nm.className = 'entry-name';
+  nm.textContent = entry.name;
+  item.append(entryImage(entry), nm);
+  /* The flavour reel carries brands as well as flavours, and a brand in the pitch changes how the whole
+     idea reads - so the reel says which it is while it is spinning past. */
+  if (entry.kind === 'brand') {
+    const mark = document.createElement('span');
+    mark.className = 'mark';
+    mark.textContent = 'Brand';
+    item.append(mark);
+  }
+  /* A drum line is clipped rather than wrapped, so the full name goes where a truncated tool line puts
+     it: the title, on hover. */
+  item.title = entry.name;
+  return item;
+}
+
+/* ---------- The page's reaction to the machine's state ---------- */
+function onState(s) {
+  /* The log line is the page's only live text. The module clears it before a spin and writes its fetch
+     error into the same element, so "ready" and "spinning…" are this page's words and the failure is
+     the module's. */
+  statusEl.textContent = s.spinning ? 'spinning…' : s.allLocked ? 'all reels held - unlock one' : 'ready';
+  /* With every reel held there is nothing left to spin, and a disabled slab should say why. */
+  spinBtn.textContent = s.spinning ? 'Spinning' : s.allLocked ? 'Unlock a reel' : 'Spin';
+  $('result').classList.toggle('is-stale', s.spinning);
+  /* Counted from the data, not typed into the markup, so the numbers stay true when an entry is added. */
+  for (const [key, count] of Object.entries(s.counts)) $(`count-${key}`).textContent = count;
+}
+
+function onResult(r) {
+  const readout = $('result');
+  if (!r) {
+    /* No result while the drums are moving - but once a pitch has been printed it stays, dimmed, so the
+       page does not flash empty on every spin. */
+    if (!resultShown) readout.hidden = true;
+    return;
+  }
+  resultShown = true;
+  readout.hidden = false;
+  $('pitch-lead').textContent = r.lead ? `${r.lead} ` : '';
+  $('pitch-hook').textContent = r.hookPart;
+  /* The hash is the module's, printed rather than recomputed: this URL is the same combination, and a
+     tool should show the fact it is using. */
+  $('hash-out').textContent = r.hash || '';
+  $('row-type').textContent = r.type.name;
+  $('row-hook').textContent = r.hook.name;
+  /* The descriptions print exactly as the data holds them: a terminal line does not need a full stop
+     added to it, and the ones that have one should not get a second. */
+  $('row-type-sub').textContent = r.type.desc || '';
+  $('row-hook-sub').textContent = r.hook.desc || '';
+  const parts = r.parts.length ? r.parts.join(' · ') : 'No fixed shape.';
+  $('row-under').textContent = parts;
+}
+
+const machine = await createMachine({
+  root: $('reels'),
+  spinButtons: [spinBtn],
+  unlockButton: unlockBtn,
+  status: statusEl,
+  renderEntry,
+  onState,
+  onResult
+});
+
+/* A null machine has already written its error into the status line, so there is nothing left to wire
+   and no button should be live on a page whose reels never loaded. */
+if (machine) {
+  /* The module found the lock buttons and drives their state; the padlock mark is the page's addition. */
+  document.querySelectorAll('[data-lock]').forEach(btn => btn.insertAdjacentHTML('afterbegin', PADLOCK));
+  spinBtn.addEventListener('click', machine.spin);
+  unlockBtn.addEventListener('click', machine.unlockAllAndSpin);
+  /* Both result actions are dead on purpose: this is a design mock-up, and a dead button that says so
+     beats one that does nothing at all. The wiring looks for buttons only, because the note below them
+     carries data-todo as well - a tool looking for that attribute should find the line the message is
+     written into, not be handed a button. */
+  document.querySelectorAll('button[data-todo]').forEach(btn => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.dataset.todo}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+}
+</script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its JSON, and a
+     browser blocks both on a file:// page. This still runs there, and hands the browser over to the
+     server address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 3 - Mode Select</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+  @font-face { font-family: "Archivo Black"; src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+
+  /* Randomiser 3 - Mode Select. Landing concept 3's arcade front end (purple, indigo, yellow, heavy
+     uppercase, notched buttons) wrapped round the same machine as Randomisers 1 and 2: the behaviour
+     is public/js/reel-machine.js, the looks are all here. */
+  :root {
+    --purple-0: #251530;
+    --purple-1: #573270;
+    --purple-2: #894EB0;
+    --purple: #BB6BF0;
+    --purple-3: #CD92F4;
+    --purple-4: #DFBAF8;
+    --indigo-0: #1B1C33;
+    --indigo: #868AFD;
+    --indigo-3: #A6A9FE;
+    --yellow: #F7D82B;
+    --yellow-deep: #B59E20;
+    --green: #5FE367;
+    --energy: linear-gradient(90deg, #BB6BF0, #FEB4B4);
+    --n0: #101014;
+    --n1: #18181C;
+    --n7: #ACACAD;
+    --tile-a: #2A1B3D;
+    --tile-b: #1B1229;
+    --display: "Archivo Black", "Inter Tight", Impact, system-ui, sans-serif;
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --item-h: 11.5rem;             /* one entry in a drum */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    color: #fff;
+    background:
+      radial-gradient(1200px 700px at 78% 4%, rgba(187, 107, 240, .26), transparent 60%),
+      radial-gradient(900px 600px at 4% 38%, rgba(134, 138, 253, .16), transparent 60%),
+      linear-gradient(180deg, #241638 0%, #1E1533 32%, #141227 72%, #0F0F1E 100%);
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  /* The column, the logo lockup and the smooth anchor scrolling are not this page's business: they are
+     public/concepts/_shared/chrome.css, linked below this style block, which owns .wrap for every mockup. */
+  :focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+  /* The shared header: a 72px bar carrying the 44px Epic mark (the app's own measurements). The bar stays a
+     block so the .wrap inside it stays the shared 1136px column; as a flex item it would shrink to its
+     content and the mark would float into the middle of the bar. */
+  header { height: 72px; border-bottom: 1px solid rgba(255,255,255,.08); }
+  header .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
+  header .tagline { margin-left: auto; display: flex; align-items: center; gap: 10px; font: 800 12px/1 var(--body); letter-spacing: .16em; text-transform: uppercase; color: #CFC7DE; }
+  header .tagline i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+
+  .eyebrow { font: 800 12px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--purple-4); margin: 0; display: flex; align-items: center; gap: 10px; }
+  .eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .energy-text { background: var(--energy); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* ---------- Buttons: the lobby's notched slabs ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 14px;
+    font: 800 16px/1 var(--title); letter-spacing: .06em; text-transform: uppercase;
+    border: 0; border-radius: 6px; padding: 18px 26px; cursor: pointer;
+    transition: transform .15s, box-shadow .15s, filter .15s, background .15s, border-color .15s;
+  }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn-roll {
+    background: var(--yellow); color: #1a1300;
+    font-size: clamp(17px, 1.7vw, 20px); padding: 20px 30px 20px 32px;
+    box-shadow: 0 6px 0 var(--yellow-deep), 0 18px 40px rgba(247, 216, 43, .25);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  }
+  .btn-roll:hover:not(:disabled) { filter: brightness(1.05); box-shadow: 0 8px 0 var(--yellow-deep), 0 24px 50px rgba(247, 216, 43, .35); transform: translateY(-2px); }
+  .btn-roll:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 2px 0 var(--yellow-deep); }
+  .btn-ghost { background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.22); color: #fff; }
+  .btn-ghost:hover:not(:disabled) { border-color: var(--purple-3); background: rgba(187, 107, 240, .14); }
+  .btn-sm { padding: 12px 18px; font-size: 13px; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-block: 40px 28px; }
+  .hero h1 {
+    font: 400 clamp(40px, 6vw, 84px)/0.94 var(--display);
+    text-transform: uppercase; letter-spacing: -0.01em; margin: 18px 0 0;
+  }
+  .hero h1 span { display: block; }
+  .hero p { color: #E4DDF0; font-size: clamp(16px, 1.6vw, 19px); max-width: 46ch; margin: 18px 0 0; }
+  .hero p b { color: #fff; }
+
+  /* ---------- The machine: three mode tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .tile {
+    position: relative;
+    background: linear-gradient(180deg, var(--tile-a), var(--tile-b));
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .2s, box-shadow .3s, transform .2s;
+  }
+  .tile:hover { border-color: rgba(255,255,255,.3); transform: translateY(-3px); }
+  /* A locked tile gets the rarity treatment: yellow frame, purple bloom, corner ticks. */
+  .tile.is-locked { border-color: var(--yellow); box-shadow: 0 0 0 2px rgba(247, 216, 43, .18), 0 20px 60px -24px rgba(187, 107, 240, .95); }
+  .tile.is-locked::after {
+    content: ""; position: absolute; inset: 5px; border-radius: 4px; pointer-events: none;
+    border: 1px solid rgba(247, 216, 43, .25);
+  }
+  .tile-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .tile-name { font: 800 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--purple-4); }
+
+  .lock {
+    font: 800 12px/1 var(--body); letter-spacing: .12em; text-transform: uppercase;
+    padding: 9px 12px; border-radius: 4px; cursor: pointer;
+    background: rgba(0,0,0,.35); color: #fff; border: 1px solid rgba(255,255,255,.2);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .lock:hover:not(:disabled) { border-color: var(--purple-3); background: rgba(187, 107, 240, .18); }
+  .lock.is-locked { background: var(--yellow); border-color: var(--yellow); color: #1a1300; }
+  .lock svg { width: 14px; height: 14px; }
+  .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
+  .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
+
+  /* The drum. --item-h is this page's entry height; the module measures whatever it finds. */
+  [data-mount="window"] { display: block; }
+  .rm-window {
+    position: relative; overflow: hidden; border-radius: 6px;
+    height: calc(var(--item-h) + 2px);
+    background: rgba(0, 0, 0, .45);
+    border: 1px solid rgba(255,255,255,.1);
+  }
+  .tile.is-locked .rm-window { border-color: rgba(247, 216, 43, .5); }
+  .rm-strip { will-change: transform; }
+  /* The drum's lips, so the strip reads as a reel and not as a list. */
+  .rm-window::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .2s;
+    background: linear-gradient(rgba(20, 12, 32, .95), transparent 20%, transparent 80%, rgba(20, 12, 32, .95));
+  }
+  .tile.is-spinning .rm-window::after { opacity: 1; }
+  .rm-strip.is-moving .tile-item { filter: blur(1px); }
+
+  .tile-item {
+    height: var(--item-h);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px;
+    transition: filter .3s ease-out;
+  }
+  .tile-item .rm-pic {
+    width: 100%; flex: 1 1 auto; min-height: 0; border-radius: 4px; overflow: hidden;
+    position: relative; display: grid; place-items: center;
+    background: linear-gradient(145deg, var(--purple-1), var(--indigo-0));
+  }
+  .tile-item .rm-pic img { width: 100%; height: 100%; object-fit: cover; }
+  .tile-item .rm-ph {
+    position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    color: var(--purple-4);
+  }
+  .tile-item .rm-initials { font: 400 1.875rem/1 var(--display); letter-spacing: 0; }
+  .tile-item .rm-coming { font: 700 9px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+  .tile-item .nm { font: 800 15px/1.15 var(--title); letter-spacing: .04em; text-transform: uppercase; text-align: center; }
+  .tile-item .kind {
+    font: 800 9px/1 var(--body); letter-spacing: .14em; text-transform: uppercase;
+    color: #1a1300; background: var(--purple-3); border-radius: 3px; padding: 3px 6px;
+  }
+  .tile-item.is-empty .rm-pic { border: 1px dashed rgba(255,255,255,.25); background: none; }
+  .tile-item.is-empty .nm { color: var(--n7); font-weight: 700; }
+  .tile-note { margin: 0; color: #C9C1D8; font-size: 13px; }
+
+  /* ---------- The toolbar under the tiles ---------- */
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 18px; }
+  .status {
+    display: inline-flex; align-items: center; gap: 9px;
+    font: 800 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: #CFC7DE;
+    background: rgba(0,0,0,.35); border: 1px solid rgba(255,255,255,.12); border-radius: 4px; padding: 10px 13px;
+    margin: 0;
+  }
+  .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+  .status.is-error { color: #FFC9C9; border-color: #FD5E5E; }
+  .status.is-error::before { background: #FD5E5E; box-shadow: 0 0 10px #FD5E5E; }
+  .status.is-rolling::before { background: var(--yellow); box-shadow: 0 0 10px var(--yellow); }
+  .machine { padding-bottom: 40px; }
+
+  /* ---------- The result: your loadout ---------- */
+  .result { border-top: 1px solid rgba(255,255,255,.1); padding-block: 34px 40px; }
+  .result[hidden] { display: none; }
+  .result.is-stale { opacity: .45; }
+  .pitch {
+    font: 700 clamp(26px, 3.6vw, 42px)/1.08 var(--title);
+    letter-spacing: -0.02em; margin: 16px 0 0; max-width: 30ch;
+  }
+  .pitch .hook { display: block; }
+  .lo-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 26px; }
+  .lo-stat { background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.1); border-top: 3px solid var(--purple); border-radius: 4px; padding: 14px 16px; }
+  .lo-stat:nth-child(2) { border-top-color: var(--indigo); }
+  .lo-stat:nth-child(3) { border-top-color: var(--yellow); }
+  .lo-stat h3 { font: 800 12px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: #CFC7DE; margin: 0 0 8px; }
+  .lo-stat p { margin: 0; font: 700 18px/1.25 var(--title); }
+  .lo-stat span { display: block; margin-top: 6px; color: #C9C1D8; font-weight: 400; font-size: 14px; line-height: 1.5; font-family: var(--body); }
+  .cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 26px; }
+  .cta-note { flex-basis: 100%; margin: 0; min-height: 1.4em; color: var(--n7); font-size: 13px; }
+
+  /* ---------- HUD: what the machine is holding ---------- */
+  .hud { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hud div { background: rgba(0,0,0,.32); border: 1px solid rgba(255,255,255,.1); border-left: 3px solid var(--purple); border-radius: 4px; padding: 10px 14px; }
+  .hud div:nth-child(2) { border-left-color: var(--indigo); }
+  .hud div:nth-child(3) { border-left-color: var(--yellow); }
+  .hud b { display: block; font: 700 24px/1 var(--title); }
+  .hud span { font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: #C9C1D8; }
+
+  /* ---------- How it works ---------- */
+  .how { padding-block: 44px 0; }
+  .how h2, .close h2 { font: 700 clamp(28px, 3.4vw, 44px)/1.02 var(--title); text-transform: uppercase; letter-spacing: -0.02em; margin: 14px 0 0; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
+  .step { background: rgba(0,0,0,.28); border: 1px solid rgba(255,255,255,.1); border-radius: 6px; padding: 18px; }
+  .step b { display: block; font: 400 20px/1 var(--display); color: var(--purple-3); margin-bottom: 10px; }
+  .step h3 { font: 800 16px/1 var(--body); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; }
+  .step p { margin: 0; color: #C9C1D8; font-size: 14px; }
+
+  .close { padding-block: 44px 64px; border-top: 1px solid rgba(255,255,255,.1); margin-top: 44px; }
+
+  .tag {
+    position: fixed; right: 12px; bottom: 12px; z-index: 10;
+    font: 700 11px/1 var(--body); letter-spacing: .06em; color: #CFC7DE;
+    background: rgba(22, 14, 34, .9); border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 7px 11px;
+    backdrop-filter: blur(6px);
+  }
+
+  @media (max-width: 1020px) {
+    .tiles { grid-template-columns: 1fr; max-width: 520px; }
+    .lo-stats { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
+    header .tagline { display: none; }
+    :root { --item-h: 10rem; }
+    .hero { padding-block: 24px 18px; }
+    .toolbar .btn { width: 100%; }
+    .machine { padding-bottom: 28px; }
+    .result { padding-block: 24px 28px; }
+    .cta-row .btn { width: 100%; }
+    .how { padding-block: 28px 0; }
+    .close { padding-block: 28px 44px; margin-top: 28px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
+    <p class="tagline"><i></i> Randomiser · Mode select</p>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <p class="eyebrow"><span class="dot"></span> Three reels · one mode</p>
+    <h1><span>Roll your</span><span class="energy-text">next mode.</span></h1>
+    <p>Not sure what to build? The machine deals you <b>a flavour, a game type and a hook</b>. Lock the
+      ones you like, roll the rest, and take the mode it lands on into UEFN.</p>
+  </section>
+
+  <section class="machine wrap" aria-label="The three reels">
+    <!-- One tile per reel. The module fills [data-mount="window"] and drives the [data-lock] button. -->
+    <div class="tiles" id="reels">
+      <article class="tile" data-reel="f">
+        <div class="tile-top">
+          <span class="tile-name">Flavour or brand</span>
+          <button class="lock" data-lock type="button"><span data-lock-text>Lock</span></button>
+        </div>
+        <div data-mount="window"></div>
+        <p class="tile-note">The world the game is set in - or a brand to build it around.</p>
+      </article>
+      <article class="tile" data-reel="t">
+        <div class="tile-top">
+          <span class="tile-name">Game type</span>
+          <button class="lock" data-lock type="button"><span data-lock-text>Lock</span></button>
+        </div>
+        <div data-mount="window"></div>
+        <p class="tile-note">One of the researched game types - the exact kind of game it is.</p>
+      </article>
+      <article class="tile" data-reel="h">
+        <div class="tile-top">
+          <span class="tile-name">Hook</span>
+          <button class="lock" data-lock type="button"><span data-lock-text>Lock</span></button>
+        </div>
+        <div data-mount="window"></div>
+        <p class="tile-note">The tone it is played in, from deadpan to punishing.</p>
+      </article>
+    </div>
+
+    <div class="toolbar">
+      <button class="btn btn-roll" id="roll" type="button" data-spin disabled>Roll the reels</button>
+      <button class="btn btn-ghost btn-sm" id="unlock-roll" type="button" data-unlock-all disabled>Unlock all + roll</button>
+      <p class="status" id="status" aria-live="polite">Loading the reels…</p>
+    </div>
+  </section>
+
+  <section class="result wrap" id="result" data-result hidden aria-labelledby="result-h">
+    <p class="eyebrow" id="result-h">Your loadout</p>
+    <h2 class="pitch" data-pitch><span id="pitch-lead"></span><span class="hook energy-text" id="pitch-hook" aria-live="polite"></span></h2>
+    <div class="lo-stats">
+      <div class="lo-stat"><h3>Game type</h3><p id="lo-type"></p><span id="lo-type-desc"></span></div>
+      <div class="lo-stat"><h3>Underneath</h3><p id="lo-under"></p></div>
+      <div class="lo-stat"><h3>Hook</h3><p id="lo-hook"></p><span id="lo-hook-desc"></span></div>
+    </div>
+    <div class="cta-row">
+      <button class="btn btn-roll" type="button" data-todo="Take this mode">Take this mode</button>
+      <button class="btn btn-ghost btn-sm" type="button" data-todo="Save to my modes">Save to my modes</button>
+      <p class="cta-note" id="todo-note" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <div class="wrap" style="padding-bottom: 44px">
+    <div class="hud">
+      <div><b id="hud-f">&mdash;</b><span>flavours &amp; brands</span></div>
+      <div><b id="hud-t">&mdash;</b><span>game types</span></div>
+      <div><b id="hud-h">&mdash;</b><span>hooks</span></div>
+    </div>
+  </div>
+
+  <section class="how wrap" aria-labelledby="how-h">
+    <p class="eyebrow"><span class="dot"></span> How it works</p>
+    <h2 id="how-h">Lock, roll, build.</h2>
+    <div class="steps">
+      <article class="step"><b>01</b><h3>Lock what you like</h3><p>Happy with the flavour? Lock the tile and it holds while the others roll.</p></article>
+      <article class="step"><b>02</b><h3>Roll for the rest</h3><p>Every roll deals a new combination, and never the one you are looking at.</p></article>
+      <article class="step"><b>03</b><h3>Take the mode</h3><p>The pitch is your starting point: a game type, the devices it needs, five build steps.</p></article>
+    </div>
+  </section>
+
+  <section class="close wrap">
+    <h2>Your island starts<br>with one roll.</h2>
+    <div class="toolbar">
+      <button class="btn btn-roll" id="roll-again" type="button" data-spin disabled>Roll again</button>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Randomiser 3 - Mode Select</div>
+
+<script type="module">
+/* The machine is public/js/reel-machine.js - the same behaviour Randomisers 1 and 2 carry in their own
+   pages, so this design is only about the looks. Everything below is the tile vocabulary, the verbs
+   the lobby uses ("roll", not "spin"), and where the result goes. */
+import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+
+const $ = id => document.getElementById(id);
+const rollBtn = $('roll'), unlockBtn = $('unlock-roll'), rollAgainBtn = $('roll-again');
+const statusEl = $('status');
+let resultShown = false;
+
+/* ---------- one entry in a drum ---------- */
+function renderEntry(entry) {
+  const item = document.createElement('div');
+  item.className = 'tile-item';
+  if (!entry) {
+    item.classList.add('is-empty');
+    const pic = document.createElement('div');
+    pic.className = 'rm-pic';
+    const nm = document.createElement('span');
+    nm.className = 'nm';
+    nm.textContent = 'Roll to start';
+    item.append(pic, nm);
+    return item;
+  }
+  const nm = document.createElement('span');
+  nm.className = 'nm';
+  nm.textContent = entry.name;
+  item.append(entryImage(entry));
+  if (entry.kind === 'brand') {
+    const kind = document.createElement('span');
+    kind.className = 'kind';
+    kind.textContent = 'Brand';
+    item.append(kind);
+  }
+  item.append(nm);
+  return item;
+}
+
+/* ---------- the page's reaction to the machine's state ---------- */
+function onState(s) {
+  rollBtn.textContent = s.allLocked ? 'Unlock a reel' : s.spinning ? 'Rolling…' : 'Roll the reels';
+  rollAgainBtn.textContent = s.spinning ? 'Rolling…' : 'Roll again';
+  statusEl.textContent = s.spinning ? 'Rolling…' : 'Ready';
+  statusEl.classList.toggle('is-rolling', s.spinning);
+  /* The result dims while the reels are moving instead of vanishing, so the mode you had stays
+     readable until the new one lands. */
+  $('result').classList.toggle('is-stale', s.spinning);
+  for (const [k, count] of Object.entries(s.counts)) $(`hud-${k}`).textContent = count;
+}
+
+function onResult(r) {
+  const result = $('result');
+  if (!r) {
+    if (!resultShown) result.hidden = true;
+    return;
+  }
+  resultShown = true;
+  result.hidden = false;
+  $('pitch-lead').textContent = `${r.lead} `;
+  $('pitch-hook').textContent = r.hookPart;
+  $('lo-type').textContent = r.type.name;
+  $('lo-type-desc').textContent = r.type.desc ? `${r.type.desc}.` : '';
+  $('lo-under').textContent = r.parts.length ? r.parts.join(' · ') : 'No fixed shape.';
+  $('lo-hook').textContent = r.hook.name;
+  $('lo-hook-desc').textContent = r.hook.desc ? `${r.hook.desc}.` : '';
+}
+
+const machine = await createMachine({
+  root: $('reels'),
+  spinButtons: [rollBtn, rollAgainBtn],
+  unlockButton: unlockBtn,
+  status: statusEl,
+  renderEntry,
+  onState,
+  onResult
+});
+
+if (machine) {
+  /* The lock buttons carry the padlock mark; the module found them and drives their state. */
+  document.querySelectorAll('[data-lock]').forEach(btn => btn.insertAdjacentHTML('afterbegin', PADLOCK));
+  rollBtn.addEventListener('click', machine.spin);
+  rollAgainBtn.addEventListener('click', () => {
+    $('reels').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    machine.spin();
+  });
+  unlockBtn.addEventListener('click', machine.unlockAllAndSpin);
+  document.querySelectorAll('[data-todo]').forEach(btn => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.textContent.trim()}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+}
+</script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its JSON, and a
+     browser blocks both on a file:// page. This still runs there, and hands the browser over to the
+     server address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

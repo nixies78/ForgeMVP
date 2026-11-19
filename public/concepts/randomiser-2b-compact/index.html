@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 2b - Compact widget</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  /* Randomiser 2b - Compact widget.
+     Randomiser 2's colours, effects and page, with one thing changed: the three reels are no longer three
+     tiles with a drum each. They sit inside ONE panel - a head, one row of three drums divided by
+     hairlines, a HOLD button under each drum, and a single control bar - so the machine is one object
+     you read at a glance instead of three columns you scan across. The question this page asks is
+     whether that reads better than the tiles; everything else is deliberately Randomiser 2. */
+  :root {
+    --bg: #101014;
+    --tile: #18181C;
+    --line: #28282C;
+    --line-2: #303034;
+    --muted: #ACACAD;
+    --dim: #787678;
+    /* Main accent: --color-palette-blue-400. Secondary: --color-palette-indigo-400 - the same mapping
+       Randomiser 2 uses. Blue is the action and the focus; indigo is the state a reel holds. */
+    --accent: #33BFFF;
+    --accent-2: #868AFD;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* One reel entry is now a row - a 56px thumbnail and the name beside it - rather than Randomiser 2's
+       13.5rem stack of picture over name. That single number is most of why the machine fits on one
+       screen's worth of page. */
+    --item-h: 4.5rem;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* .wrap, the logo lockup and the smooth anchor scrolling come from public/concepts/_shared/chrome.css,
+     linked below this style block. The column is not this page's decision. */
+
+  /* Header: the shared 72px bar, the 44px Epic mark from the shared chrome. The bar stays a block, so the
+     .wrap inside it is the shared column (1136px, centred by its own margins) rather than a flex item that
+     would shrink to its content and float into the middle of the bar. */
+  header { height: 72px; }
+  header .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
+  header .bar-label { margin-left: auto; font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- Hero: one line and one sentence, because the machine is directly under it ---------- */
+  .hero { padding-block: 18px 22px; text-align: center; position: relative; }
+  .hero::before { /* blue heart, indigo falloff - kept behind the widget, not centred on an empty screen */
+    content: "";
+    position: absolute;
+    left: 50%; top: -120px;
+    width: min(900px, 100%); height: 380px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(51, 191, 255, .10), rgba(134, 138, 253, .06) 58%, transparent);
+    pointer-events: none;
+  }
+  /* Randomiser 1's headline at Randomiser 1's size: the page heading stays the biggest thing here, and
+     the result below it is the 36px strapline. */
+  .hero h1 {
+    position: relative;
+    font-family: var(--title);
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .hero h1 span { display: block; }
+  .hero h1 .dim { color: var(--dim); }
+  .hero p { position: relative; color: var(--muted); font-size: 16px; max-width: 46em; margin: 10px auto 0; }
+  .hero p strong { color: #fff; font-weight: 600; }
+
+  /* ---------- Buttons: concept 8's pill, in this page's two colours ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 24px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s, border-color .3s, color .3s, opacity .3s;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-primary { background: var(--accent); color: #101014; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(51, 191, 255, .3); }
+  .btn-glass {
+    color: #fff;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .btn-glass:hover:not(:disabled) { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ---------- The machine: one panel, three drums, one control bar ---------- */
+  .machine { padding-bottom: 38px; }
+  .rig {
+    border: 1px solid rgba(255, 255, 255, .09);
+    border-radius: 20px;
+    background: var(--tile);
+    overflow: hidden;
+  }
+  .rig-head {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 8px 20px; flex-wrap: wrap;
+    padding: 16px 20px 12px;
+  }
+  .panel-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .rig-hint { margin: 0; color: var(--dim); font-size: 13px; }
+
+  /* The window: three drums in one row, divided by hairlines. This is the whole idea of the page - the
+     three reels as one window rather than three cards. */
+  .drum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+  .col {
+    position: relative;
+    display: flex; flex-direction: column; gap: 10px;
+    /* The same 20px inset the panel's head and foot use, so the reel labels line up with "The reels". */
+    padding: 12px 20px 14px;
+    transition: background .4s var(--ease);
+  }
+  .col + .col { border-left: 1px solid var(--line); }
+  /* A reel that is holding: indigo wash, indigo edge along the top of its column. The state is visible on
+     the reel itself rather than only on the button that set it. */
+  .col.is-locked { background: rgba(134, 138, 253, .05); }
+  .col.is-locked::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+  }
+  .col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+
+  /* --item-h plus the window's own border, so a resting entry is exactly one item tall and the strip's
+     last frame lands on the pixel the resting reel uses. */
+  .rm-window {
+    position: relative;
+    height: calc(var(--item-h) + 2px);
+    overflow: hidden;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid rgba(255, 255, 255, .10);
+    transition: border-color .3s, box-shadow .3s;
+  }
+  .col.is-locked .rm-window { border-color: rgba(134, 138, 253, .5); box-shadow: inset 0 0 0 1px rgba(134, 138, 253, .18); }
+  /* Shading at the top and bottom of the drum while it is moving, so the strip reads as a reel. */
+  .rm-window::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: linear-gradient(#101014e6, transparent 26%, transparent 74%, #101014e6);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .col.is-spinning .rm-window::after { opacity: 1; }
+  .rm-strip { will-change: transform; }
+  .item {
+    height: var(--item-h);
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px;
+    transition: filter .35s ease-out;
+  }
+  /* Motion blur only while the reel is fast; it fades out before the reel stops. */
+  .rm-strip.is-moving .item { filter: blur(.6px); }
+
+  .item .rm-pic {
+    width: 3.5rem; height: 3.5rem; flex: none;
+    border-radius: 8px; overflow: hidden;
+    position: relative; display: grid; place-items: center;
+  }
+  .item .rm-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .item .cell { min-width: 0; }
+  .item .name {
+    font-family: var(--title); font-weight: 800; font-size: .9375rem; line-height: 1.2;
+    letter-spacing: -0.015em; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .item .kind-tag {
+    display: block;
+    font: 700 .625rem/1.4 var(--body);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .item.is-empty .rm-pic { border: 1px dashed rgba(255, 255, 255, .22); }
+  .item.is-empty .name { color: var(--dim); font-weight: 600; font-size: .875rem; }
+
+  /* The picture is missing until /concepts/_media/randomiser/ is filled, so the initials carry the entry.
+     At 56px there is no room for "Image coming" as well, and the well's own dashes say the picture is
+     provisional. */
+  .rm-ph {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    background: linear-gradient(145deg, var(--ph-dark), var(--ph-mid));
+    color: var(--ph-light);
+  }
+  .rm-ph .rm-initials { font-family: var(--title); font-weight: 800; font-size: 1.125rem; line-height: 1; letter-spacing: -0.02em; }
+  .rm-ph .rm-coming { display: none; }
+  .k-flavour { --ph-dark: #251530; --ph-mid: #573270; --ph-light: #DFBAF8; }
+  .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
+  .k-type    { --ph-dark: #0A2633; --ph-mid: #185977; --ph-light: #A0E1FF; }
+  .k-hook    { --ph-dark: #2D1424; --ph-mid: #693055; --ph-light: #F1B8DD; }
+
+  /* HOLD: the button under the drum, exactly where a fruit machine keeps its hold buttons. */
+  .lock {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 999px;
+    font: 700 12px/1 var(--body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #D8D8DA;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background .3s, border-color .3s, color .3s, opacity .3s;
+  }
+  .lock:hover:not(:disabled) { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .lock.is-locked { background: var(--accent-2); border-color: transparent; color: #101014; }
+  .lock svg { width: 1rem; height: 1rem; flex: none; }
+  .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
+  .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
+
+  /* One control bar for the whole machine - the other half of "one widget". */
+  .rig-foot {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
+  }
+  .rig-foot .btn-primary { padding: 15px 28px; font-size: 15.5px; }
+  .status { margin: 0 0 0 auto; color: var(--muted); font-size: 13px; text-align: right; min-height: 1.4em; }
+  .status.is-error { color: #FE8989; }
+
+  /* ---------- The result ---------- */
+  .result { border-top: 1px solid var(--line); padding-block: 30px 34px; text-align: center; transition: opacity .2s; }
+  .result.stale { opacity: .45; }
+  .eyebrow { font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  /* Randomiser 1's strapline at Randomiser 1's size - 36px at the top of its range, under the page's own
+     48px heading. */
+  .strapline {
+    font-family: var(--title);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3.6vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 10px auto 20px;
+    max-width: 26em;
+  }
+  /* The hook is a line of its own, never the tail of the sentence above it. */
+  .hook-line { display: block; }
+  /* The three facts, as the quiet strip concept 8 uses for its numbers. */
+  .details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); text-align: left; }
+  .detail { padding: 14px 22px; }
+  .detail + .detail { border-left: 1px solid var(--line); }
+  .detail h3 { font-family: var(--title); font-weight: 700; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .detail p { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; margin-top: 20px; }
+  .note { flex-basis: 100%; color: var(--muted); font-size: 13px; margin: 0; min-height: 1.4em; }
+
+  /* ---------- What the machine is holding ---------- */
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); }
+  .stat { padding: 14px 8px; text-align: center; }
+  .stat + .stat { border-left: 1px solid var(--line); }
+  .stat b { display: block; font-family: var(--title); font-weight: 700; font-size: clamp(28px, 3.2vw, 40px); line-height: 1; letter-spacing: -0.03em; }
+  .stat span { color: var(--muted); font-size: 14px; }
+
+  /* ---------- How this works ---------- */
+  .guide { padding-block: 44px 0; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; }
+  .guide h2 { font-family: var(--title); font-weight: 700; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.025em; margin: 14px 0 0; }
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li { position: relative; padding: 0 0 18px 40px; }
+  .steps li:last-child { padding-bottom: 0; }
+  .steps li::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: -6px; width: 1px; background: var(--line); }
+  .steps li:last-child::before { display: none; }
+  .steps li::after { content: ""; position: absolute; left: 0; top: 8px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--bg); }
+  .steps li:last-child::after { background: var(--accent-2); }
+  .steps h3 { font-weight: 700; font-size: 18px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .steps p { color: var(--muted); margin: 0; }
+
+  /* ---------- Close ---------- */
+  .close { padding-block: 44px 60px; text-align: center; border-top: 1px solid var(--line); margin-top: 44px; }
+  .close h2 { font-family: var(--title); font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 18px; }
+
+  .tag {
+    position: fixed; right: 12px; bottom: 12px; z-index: 10;
+    font: 600 11px/1 var(--body); letter-spacing: .04em; color: var(--muted);
+    background: rgba(24, 24, 28, .9); border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px;
+  }
+
+  /* On a phone three 100px-wide drums cannot hold a name, so the one window keeps its frame and stacks its
+     three reels: still one widget, read top to bottom. */
+  @media (max-width: 620px) {
+    .drum { grid-template-columns: 1fr; }
+    .col + .col { border-left: 0; border-top: 1px solid var(--line); }
+    .rig-foot .btn { width: 100%; }
+    .status { margin-inline: 0; text-align: left; }
+    .details { grid-template-columns: 1fr; }
+    .detail { padding: 12px 0; }
+    .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
+    .actions .btn { width: 100%; }
+    .stats { grid-template-columns: 1fr; }
+    .stat + .stat { border-left: 0; border-top: 1px solid var(--line); }
+    .guide { grid-template-columns: 1fr; gap: 28px; padding-block: 34px 0; }
+    .close { padding-block: 34px 48px; margin-top: 34px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
+    <p class="bar-label">Randomiser · compact</p>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <h1><span>Roll for a</span><span class="dim">starting point.</span></h1>
+    <p>Three reels, one idea. Forge picks <strong>a flavour, a game type and a hook</strong> and turns them
+      into a one-line pitch you can build in UEFN. Hold the parts you like and spin the rest.</p>
+  </section>
+
+  <section class="machine wrap" aria-label="The three reels">
+    <!-- One panel: a head, one window holding three drums, a hold button under each, one control bar.
+         The module (public/js/reel-machine.js) fills each [data-mount="window"] and drives the locks. -->
+    <div class="rig">
+      <div class="rig-head">
+        <p class="panel-label">The reels</p>
+        <p class="rig-hint">Hold a reel and it stays while the other two spin.</p>
+      </div>
+
+      <div class="drum" id="reels">
+        <div class="col" data-reel="f">
+          <p class="col-label">Flavour or brand</p>
+          <div data-mount="window"></div>
+          <button class="lock" data-lock type="button"><span data-lock-text>Hold</span></button>
+        </div>
+        <div class="col" data-reel="t">
+          <p class="col-label">Game type</p>
+          <div data-mount="window"></div>
+          <button class="lock" data-lock type="button"><span data-lock-text>Hold</span></button>
+        </div>
+        <div class="col" data-reel="h">
+          <p class="col-label">Hook</p>
+          <div data-mount="window"></div>
+          <button class="lock" data-lock type="button"><span data-lock-text>Hold</span></button>
+        </div>
+      </div>
+
+      <div class="rig-foot">
+        <button class="btn btn-primary" id="spin" type="button" data-spin disabled>
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.9-4.16M13.5 1.5V4.6h-3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="btn-label">Spin the reels</span>
+        </button>
+        <button class="btn btn-glass" id="unlock-spin" type="button" data-unlock-all disabled>Unlock all and spin</button>
+        <p class="status" id="status" aria-live="polite">Loading the reels…</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="result wrap" id="result" data-result hidden aria-labelledby="result-h">
+    <h2 class="eyebrow" id="result-h">Your starting point</h2>
+    <p class="strapline" data-pitch id="strapline" aria-live="polite"></p>
+    <div class="details">
+      <div class="detail">
+        <h3 id="d-type-h"></h3>
+        <p id="d-type-p"></p>
+      </div>
+      <div class="detail">
+        <h3>Underneath</h3>
+        <p id="d-under-p"></p>
+      </div>
+      <div class="detail">
+        <h3 id="d-hook-h"></h3>
+        <p id="d-hook-p"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" type="button" data-todo="Suggest a pitch">
+        <span class="btn-label">Suggest a pitch</span>
+      </button>
+      <button class="btn btn-glass" type="button" data-todo="Start a document from this">Start a document from this</button>
+      <p class="note" id="todo-note" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="stat-f">&mdash;</b><span>flavours and brands on the first reel</span></div>
+      <div class="stat"><b id="stat-t">&mdash;</b><span>researched game types</span></div>
+      <div class="stat"><b id="stat-h">&mdash;</b><span>hooks to play them in</span></div>
+    </div>
+  </div>
+
+  <section class="guide wrap" aria-labelledby="guide-h">
+    <div>
+      <p class="eyebrow">How this works</p>
+      <h2 id="guide-h">Hold, spin, build.</h2>
+    </div>
+    <ol class="steps">
+      <li><h3>Hold what you like</h3><p>Happy with the flavour? Hold it: it stays put while the other two reels spin.</p></li>
+      <li><h3>Spin for the rest</h3><p>Every spin lands on a new combination, and never on the one you are looking at.</p></li>
+      <li><h3>Take the pitch away</h3><p>The one-line pitch is your starting point: turn it into a plan and build it in UEFN.</p></li>
+    </ol>
+  </section>
+
+  <section class="close wrap">
+    <h2>Your island starts<br>with one spin.</h2>
+    <button class="btn btn-primary" id="spin-again" type="button" data-spin disabled>
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.9-4.16M13.5 1.5V4.6h-3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="btn-label">Spin the reels</span>
+    </button>
+  </section>
+</main>
+
+<div class="tag">Randomiser 2b - Compact widget</div>
+
+<script type="module">
+/* The behaviour is public/js/reel-machine.js - the same machine Randomiser 2 carries inline in its own
+   page, so this design is only about the layout. Everything here is the compact widget's vocabulary:
+   a hold per reel, one control bar, and the machine's state said once, in the bar. */
+import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+
+const $ = (id) => document.getElementById(id);
+const spinBtn = $('spin'), spinAgainBtn = $('spin-again'), unlockBtn = $('unlock-spin');
+const statusEl = $('status');
+let resultShown = false;
+
+const REEL_WORDS = { f: 'flavour', t: 'game type', h: 'hook' };
+
+/* ---------- one entry in a drum: a thumbnail and the name beside it ---------- */
+function renderEntry(entry, key) {
+  const item = document.createElement('div');
+  item.className = 'item';
+  if (!entry) {
+    item.classList.add('is-empty');
+    const pic = document.createElement('div');
+    pic.className = 'rm-pic';
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = 'Spin to start';
+    cell.append(name);
+    item.append(pic, cell);
+    return item;
+  }
+  /* The per-kind gradient the placeholder falls back to is inherited from the item, so the class goes
+     here rather than on the picture. */
+  if (entry.kind) item.classList.add(`k-${entry.kind}`);
+  const pic = entryImage(entry);
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.textContent = entry.name;
+  cell.append(name);
+  if (entry.kind === 'brand') {
+    const tag = document.createElement('span');
+    tag.className = 'kind-tag';
+    tag.textContent = 'Brand';
+    cell.append(tag);
+  }
+  item.append(pic, cell);
+  return item;
+}
+
+/* ---------- the bar's copy, from the machine's state ---------- */
+function onState(s) {
+  const free = s.keys.filter((k) => !s.locked[k]).length;
+  const held = s.keys.length - free;
+  spinBtn.querySelector('.btn-label').textContent = s.allLocked ? 'Everything is held' : s.spinning ? 'Spinning…' : 'Spin the reels';
+  spinAgainBtn.querySelector('.btn-label').textContent = s.spinning ? 'Spinning…' : 'Spin the reels';
+  /* The status says the one thing the button cannot: what is held, and how many reels are moving. */
+  statusEl.textContent = s.spinning
+    ? `${free} reel${free === 1 ? '' : 's'} spinning`
+    : held
+      ? `${held} held · ${held === 1 ? '1 reel' : held + ' reels'} ready to spin`
+      : 'Nothing held';
+  $('result').classList.toggle('stale', s.spinning);
+  $('stat-f').textContent = s.counts.f;
+  $('stat-t').textContent = s.counts.t;
+  $('stat-h').textContent = s.counts.h;
+}
+
+function onResult(r) {
+  const result = $('result');
+  if (!r) {
+    if (!resultShown) result.hidden = true;
+    return;
+  }
+  resultShown = true;
+  result.hidden = false;
+  /* The pitch arrives as one sentence; the hook is split back off it and given its own line, so
+     randomiser.js is still the only place that decides what the sentence says. */
+  const hook = document.createElement('span');
+  hook.className = 'hook-line';
+  hook.textContent = r.hookPart;
+  $('strapline').replaceChildren(r.lead ? `${r.lead} ` : '', hook);
+  $('d-type-h').textContent = r.type.name;
+  $('d-type-p').textContent = r.type.desc ? `${r.type.desc}.` : '';
+  $('d-under-p').textContent = r.parts.length ? r.parts.join(' · ') : 'No fixed shape - it is a feeling.';
+  $('d-hook-h').textContent = r.hook.name;
+  $('d-hook-p').textContent = r.hook.desc ? `${r.hook.desc}.` : '';
+}
+
+const machine = await createMachine({
+  root: $('reels'),
+  spinButtons: [spinBtn, spinAgainBtn],
+  unlockButton: unlockBtn,
+  status: statusEl,
+  renderEntry,
+  onState,
+  onResult
+});
+
+if (machine) {
+  /* The hold buttons carry the padlock; the module drives their state and their label. */
+  document.querySelectorAll('[data-lock]').forEach((btn) => btn.insertAdjacentHTML('afterbegin', PADLOCK));
+  spinBtn.addEventListener('click', machine.spin);
+  spinAgainBtn.addEventListener('click', () => {
+    $('reels').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    machine.spin();
+  });
+  unlockBtn.addEventListener('click', machine.unlockAllAndSpin);
+  document.querySelectorAll('[data-todo]').forEach((btn) => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.textContent.trim()}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+}
+</script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its JSON, and a
+     browser blocks both on a file:// page. This still runs there, and hands the browser over to the
+     server address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>
