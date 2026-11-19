@@ -71,8 +71,6 @@ p{margin:0}
 /* ---------- nav ---------- */
 .nav{position:sticky;top:0;z-index:40;height:72px;display:flex;align-items:center;background:var(--yellow);border-bottom:var(--line)}
 .nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;height:100%}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.brand b{font:400 26px/1 var(--display);letter-spacing:.01em}
 .nav-links{display:flex;gap:26px;font-weight:700;font-size:15px}
 .nav-links a{text-decoration:none}
 .nav-links a:hover{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:4px}
@@ -250,9 +248,7 @@ p{margin:0}
 .final-box .r{position:absolute;width:clamp(100px,11vw,160px);right:-5%;top:-20%;transform:rotate(9deg)}
 .final-box .gl{position:absolute;width:clamp(90px,10vw,140px);right:6%;bottom:-10%;transform:rotate(-12deg)}
 
-footer{border-top:var(--line);background:var(--ink);color:var(--paper)}
-footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;padding-block:28px;font-size:14px}
-footer .brand b{font-size:22px}
+footer{background:var(--ink);color:var(--paper)}
 
 /* ---------- responsive ---------- */
 @media (max-width:980px){
@@ -270,7 +266,6 @@ footer .brand b{font-size:22px}
   body{font-size:16px}
   .nav .wrap{height:64px}
   .nav .btn{padding:10px 14px;font-size:14px}
-  .brand b{font-size:22px}
   .hero h1{font-size:clamp(42px,12.5vw,60px)}
   .btn{padding:18px 22px}
   .stage .bubble{left:0;font-size:14px}
@@ -306,9 +301,9 @@ footer .brand b{font-size:22px}
 
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#" aria-label="Forge home">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
       <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
-      <b>Forge</b>
+      <span class="logo-word">Forge</span>
     </a>
     <nav class="nav-links" aria-label="Sections">
       <a href="#why">Why Fortnite</a>
@@ -537,10 +532,10 @@ footer .brand b{font-size:22px}
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <a class="brand" href="#"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><b>Forge</b></a>
-    <span>Design in Forge. Build in UEFN. Play in Fortnite.</span>
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><span class="logo-word">Forge</span></a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
   </div>
 </footer>
 

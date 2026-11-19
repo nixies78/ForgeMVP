@@ -117,9 +117,7 @@
     border-bottom: 1px solid var(--rule);
   }
   .nav .wrap { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 100%; gap: 20px; }
-  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-  .brand-name { font-family: var(--display); font-weight: 700; font-size: 20px; letter-spacing: -0.03em; }
-  .brand-sub { font-family: var(--text); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); border-left: 1px solid var(--rule); padding-left: 12px; }
+  .logo-sub { font-family: var(--text); font-weight: 700; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
   .nav-links { display: flex; gap: 28px; align-items: center; }
   .nav-links a { text-decoration: none; font-size: 14px; font-weight: 500; color: var(--ink-2); }
   .nav-links a:hover { color: var(--ink); }
@@ -441,10 +439,9 @@
     filter: drop-shadow(0 30px 40px rgba(0,0,0,.5));
   }
 
-  /* Footer */
-  footer { border-top: 1px solid var(--rule); padding-block: 36px 96px; font-size: 14px; color: var(--ink-3); }
-  footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; align-items: center; }
-  footer nav { display: flex; gap: 24px; flex-wrap: wrap; }
+  /* Footer. Its height, its 13px type and the row layout are the shared .foot's; the border is this page's
+   * separation from a white ground, and the colour is its own. */
+  footer { border-top: 1px solid var(--rule); color: var(--ink-3); }
   footer a { text-decoration: none; }
   footer a:hover { color: var(--ink); }
 
@@ -499,7 +496,7 @@
     .sheet-head { padding: 16px 20px; }
     .hero-frame .img { aspect-ratio: 4 / 3; }
     .plan-card { position: relative; right: auto; bottom: auto; width: auto; margin: -36px 12px 0; }
-    .brand-sub { display: none; }
+    .logo-sub { display: none; }
     details p { padding-right: 0; }
   }
   @media (max-width: 440px) {
@@ -520,10 +517,10 @@
 
 <header class="nav">
   <div class="wrap">
-    <a class="brand" href="#" aria-label="Forge home">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
       <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
-      <span class="brand-name">Forge</span>
-      <span class="brand-sub">for UEFN</span>
+      <span class="logo-word">Forge</span>
+      <span class="logo-sub">for UEFN</span>
     </a>
     <nav class="nav-links" aria-label="Primary">
       <a href="#problem">Why Forge</a>
@@ -840,10 +837,14 @@
   </section>
 </main>
 
-<footer>
-  <div class="wrap">
-    <span>Forge &middot; Design in Forge, build in UEFN.</span>
-    <nav aria-label="Footer">
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+    <nav class="foot-links" aria-label="Footer">
       <a href="#ways">How it works</a>
       <a href="#spec">What you get</a>
       <a href="#faq">FAQ</a>

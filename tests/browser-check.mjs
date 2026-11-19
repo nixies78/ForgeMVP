@@ -737,6 +737,27 @@ async function checkMockupHeaders(send, results) {
   pages.push('mockups/index.html');
   pages.sort();
 
+  /* The footer is shared chrome like the bar and the column, so it is asserted the same way. Eleven pages
+   * carry it. The four app prototypes do not, on the owner's instruction - they are screens of the app, not
+   * pitch pages - and that decision is checked from both sides, so neither a missing footer nor a stray one
+   * goes unnoticed. The slogan is the owner's wording, quoted rather than paraphrased. */
+  const SLOGAN = 'Design in Forge. Build in UEFN. Play in Fortnite.';
+  const FOOTER_PAGES = new Set([
+    'concepts/1-cinematic/index.html',
+    'concepts/2-funky/index.html',
+    'concepts/3-lobby/index.html',
+    'concepts/4-editorial/index.html',
+    'concepts/5-bento/index.html',
+    'concepts/6-one-question/index.html',
+    'concepts/7-three-steps/index.html',
+    'concepts/8-quiet-dark/index.html',
+    'concepts/8-quiet-dark-blue-indigo/index.html',
+    'concepts/9-spotlight/index.html',
+    'mockups/index.html'
+  ]);
+  /* Links the pages already had, which the owner asked to keep: 4-editorial's four, the index's one. */
+  const FOOTER_LINKS = { 'concepts/4-editorial/index.html': 4, 'mockups/index.html': 1 };
+
   await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
 
   for (const page of pages) {
@@ -839,6 +860,40 @@ async function checkMockupHeaders(send, results) {
           markColour: markBlack ? 'black' : 'white',
           behind: 'rgb(' + Math.round(behind.r) + ', ' + Math.round(behind.g) + ', ' + Math.round(behind.b) + ')',
           contrast: +((light + 0.05) / (dark + 0.05)).toFixed(2),
+          /* The footer, which is one footer across the set: the same lockup, the same wording, the same
+           * height. The owner's brief was explicit - "epic logo and forge on all of them", 120px tall, the
+           * slogan everywhere, the links kept - so each of those is measured rather than assumed. */
+          footer: (() => {
+            const foot = document.querySelector('footer');
+            if (!foot) return null;
+            const word = foot.querySelector('.logo-word');
+            const hWord = document.querySelector('header .logo-word');
+            const cs = word ? getComputedStyle(word) : null;
+            const hcs = hWord ? getComputedStyle(hWord) : null;
+            const slogan = foot.querySelector('.foot-slogan');
+            const footMark = foot.querySelector('.logo-img');
+            const row = foot.querySelector('.foot-inner');
+            return {
+              height: Math.round(foot.getBoundingClientRect().height),
+              cls: String(foot.className || ''),
+              inner: !!foot.querySelector('.foot-inner'),
+              lockup: !!foot.querySelector('.logo-lockup'),
+              word: word ? word.textContent.replace(/\\s+/g, ' ').trim() : null,
+              face: cs ? cs.fontFamily.split(',')[0].replace(/["']/g, '') : null,
+              size: cs ? cs.fontSize : null,
+              transform: cs ? cs.textTransform : null,
+              headerSize: hcs ? hcs.fontSize : null,
+              slogan: slogan ? slogan.textContent.replace(/\\s+/g, ' ').trim() : null,
+              /* Links the page put in its footer, not counting the lockup's own link. */
+              links: [...foot.querySelectorAll('a')].filter((a) => !a.closest('.logo-lockup')).length,
+              separators: document.querySelectorAll('.brand-sep, .logo-sep, .foot-sep, [class*="brand-sep"]').length,
+              /* Where the footer's own mark sits, and how wide the row is. The lockup is the same lockup as
+               * the header's, so it has to land on the same x: a footer that centred its content, or a row
+               * that shrank to fit it, puts the mark somewhere else on the page it belongs to. */
+              markLeft: footMark ? Math.round(footMark.getBoundingClientRect().left) : null,
+              rowWidth: row ? Math.round(row.getBoundingClientRect().width) : null
+            };
+          })(),
           /* Every other mark on the page gets the same treatment as the header's: three mockups carry a
            * second one in the footer, and those were the ones at 23px and 26px. */
           others: marks.filter((i) => i !== mark).map((i) => {
@@ -906,6 +961,39 @@ async function checkMockupHeaders(send, results) {
       if (parseFloat(m.border) > 0) problems.push(`${page} draws a ${m.border} border around ${which}`);
       if (m.contrast < 3) problems.push(`${page} shows ${which} at a contrast of only ${m.contrast}:1`);
     });
+    /* The footer. Eleven pages carry the shared one; the four app prototypes (lessons-1-default,
+     * questions-1-default, randomiser-1-slots, randomiser-2-quiet-blue) are screens of the app rather than
+     * pitch pages, and the owner asked for the footer to be skipped there "for now" - so their absence is
+     * checked as well, and a footer that turns up on one of them by accident is reported rather than
+     * ignored. Links are counted outside the lockup, because the lockup is itself a link. */
+    if (FOOTER_PAGES.has(page)) {
+      const f = state.footer;
+      if (!f) problems.push(`${page} has no <footer>, so it is missing the shared 120px footer`);
+      else {
+        if (!f.cls.split(/\s+/).includes('foot')) problems.push(`${page}'s footer is class "${f.cls}", not the shared "foot"`);
+        if (!f.inner) problems.push(`${page}'s footer has no .foot-inner row, so the shared footer layout is not in use`);
+        if (f.height !== 120) problems.push(`${page}'s footer is ${f.height}px tall, not the shared 120px`);
+        if (!f.lockup) problems.push(`${page}'s footer has no .logo-lockup, so the mark and the wordmark are not one unit`);
+        if (f.word == null || f.word.toLowerCase() !== 'forge') problems.push(`${page}'s footer wordmark reads ${JSON.stringify(f.word)}, not Forge`);
+        if (f.face !== 'Archivo Black') problems.push(`${page}'s footer wordmark is set in ${f.face}, not the locked Archivo Black`);
+        if (f.size !== '15px') problems.push(`${page}'s footer wordmark is ${f.size}, not the locked 15px`);
+        if (f.transform !== 'uppercase') problems.push(`${page}'s footer wordmark is not uppercased by the shared rule`);
+        if (f.headerSize && f.headerSize !== '20px') problems.push(`${page}'s header wordmark is ${f.headerSize}, not the locked 20px`);
+        if (f.slogan !== SLOGAN) problems.push(`${page}'s footer says ${JSON.stringify(f.slogan)}, not the shared slogan`);
+        if (f.separators) problems.push(`${page} still has ${f.separators} brand separator element(s), which the owner had removed`);
+        /* The footer's lockup is the header's lockup, so it has to land on the same x - and the failure that
+         * got past the first version of this check was a row that shrank to its content and centred (the
+         * lockup 343px from where it belongs on 2-funky, 3-lobby, 4-editorial, 9-spotlight and the index). */
+        if (f.rowWidth !== 1136) problems.push(`${page}'s footer row is ${f.rowWidth}px wide, not the shared 1136px column`);
+        if (state.inset && f.markLeft !== state.inset.mark) {
+          problems.push(`${page}'s footer puts its mark at x ${f.markLeft} where its own header puts it at ${state.inset.mark}`);
+        }
+        const wantLinks = FOOTER_LINKS[page] || 0;
+        if (f.links !== wantLinks) problems.push(`${page}'s footer has ${f.links} link(s) outside its lockup, where it had ${wantLinks}`);
+      }
+    } else if (state.footer) {
+      problems.push(`${page} has gained a <footer>, and the app prototypes were to keep none for now`);
+    }
     if (!state.sharedLink) problems.push(`${page} does not link public/concepts/_shared/chrome.css`);
     if (!state.columns.length) problems.push(`${page} has no .wrap column`);
     else {
@@ -957,6 +1045,7 @@ async function checkMockupHeaders(send, results) {
         `header ${Math.round(state.header)}px, mark ${state.mark == null ? 'none' : Math.round(state.mark) + 'px'} ` +
         `${state.markColour} on ${state.behind} (${state.contrast}:1), column ${Math.max(0, ...(state.columns || [0]))}px` +
         `, x ${state.inset ? state.inset.mark + 'px' : '?'}` +
+        (state.footer ? `, footer ${state.footer.height}px` : '') +
         (shade ? `, hover ${shade}` : '')
     );
     if (state.inset) insets.push({ page, px: state.inset.px, padding: state.inset.padding, mark: state.inset.mark });

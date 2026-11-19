@@ -52,11 +52,7 @@
   /* ---------- top bar: a fixed 72px band holding the brand ---------- */
   header { height: 72px; display: flex; align-items: center; border-bottom: 1px solid var(--line); }
   header .wrap { display: flex; align-items: center; justify-content: space-between; }
-  .brand {
-    display: inline-flex; align-items: center; gap: 12px;
-    font-family: var(--title); font-weight: 700; font-size: 20px; letter-spacing: -0.025em;
-    color: inherit; text-decoration: none;
-  }
+  /* The lockup's own layout and type come from _shared/chrome.css, so nothing about it is repeated here. */
 
   .label { font-weight: 700; font-size: 15px; color: var(--blue-ink); margin: 0 0 20px; }
   h1, h2, h3 { font-family: var(--title); font-weight: 700; letter-spacing: -0.025em; margin: 0; }
@@ -276,6 +272,9 @@
     padding: 5px 10px; border-radius: 999px;
   }
 
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); color: var(--muted); }
+
   /* gentle fade-in */
   .reveal { opacity: 0; transform: translateY(16px); transition: opacity .8s ease, transform .8s ease; }
   .reveal.in { opacity: 1; transform: none; }
@@ -307,8 +306,8 @@
 <body class="no-js">
 <header>
   <div class="wrap">
-    <a class="brand" href="#" aria-label="Forge home">
-      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>Forge
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><span class="logo-word">Forge</span>
     </a>
   </div>
 </header>
@@ -424,6 +423,16 @@
     </div>
   </section>
 </main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
 
 <div class="tag">Concept 6 - One Question</div>
 

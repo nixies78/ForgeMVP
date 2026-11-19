@@ -42,6 +42,90 @@
  * 4-editorial (white), 6-one-question (white), 7-three-steps (off-white) and 9-spotlight (indigo). */
 .logo-img-black { filter: brightness(0); }
 
+/* The wordmark. The owner pointed at 1-cinematic and said the wordmark there was right and should be
+ * locked for future designs, so it is locked here: Archivo Black, uppercase, .06em of tracking, 20px in a
+ * header and 15px in a footer. Every mockup used to set its own - Archivo Black at 26px on one page, Inter
+ * Tight at 800 on another, Inter at 700 and 15px on a third, and a negative -0.03em on a fourth - which is
+ * seven different brands wearing one logo.
+ *
+ * The face is declared below rather than in each page, because only some pages declared it and a page that
+ * does not is relying on the machine having Archivo Black installed, which is not a brand decision anyone
+ * made. The file is in the repository (public/assets/fonts/), so it travels with the mockups and works from
+ * disk as well as over HTTP. The path is relative to this file, which sits in public/concepts/_shared/. */
+@font-face {
+  font-family: "Archivo Black";
+  src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* The mark and the wordmark as one unit. A vertical rule used to sit between them on 1-cinematic (a 1px
+ * .brand-sep element) and on 4-editorial (a border-left on its sub-label); both are gone, so the gap is the
+ * only thing between the mark and the word and it is the same gap on every page. */
+.logo-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-word {
+  font-family: "Archivo Black", "Inter Tight", "Inter", system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * The footer. One footer for the set: the mark, the wordmark, the slogan, and each page's own links. What
+ * is not here is the part each page owns - its background, its rule colour, the colour of its links - and
+ * what is here is everything that has to agree: the lockup, the wording, the height, the layout.
+ *
+ * 120px is the footer's total height at a desktop width, border included, because everything on these pages
+ * is border-box. It is a min-height rather than a height, so the slogan can wrap on a phone and take the
+ * footer past 120px instead of being squeezed or clipped inside it.
+ *
+ * The separation from the page is the page's own decision and only has to exist once: a footer whose
+ * background differs from what is behind it does not need a rule (2-funky: ink on yellow), and a footer at
+ * the same colour does (5-bento, 9-spotlight: a 1px border-top). Not both. */
+.foot {
+  display: flex;
+  align-items: center;
+  min-height: 120px;
+  font-size: 13px;
+}
+
+.foot-inner {
+  /* The row is a flex item of the footer, and a flex item with a max-width but no flex basis shrinks to its
+   * content and is then centred by its own auto margins - which put the lockup in the middle of the footer
+   * on the five pages that do not declare `width: 100%` on .wrap. Growing it is what makes the mark sit at
+   * the column's edge here, exactly as it does in the header. */
+  flex: 1 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding-block: 24px;
+}
+
+.foot-slogan { font-size: 13px; }
+
+.foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+/* The footer's own size: the wordmark is smaller down here than in the header, which is how 1-cinematic had
+ * it - the page the owner called perfect - rather than a second opinion about how big the brand should be. */
+.foot .logo-word { font-size: 15px; }
+
 /* The column. Every mockup's content sits in this one width - 1136px - and every mockup's header sits in
  * it too, so the mark and the wordmark line up down the page.
  *

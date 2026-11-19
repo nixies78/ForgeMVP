@@ -318,6 +318,13 @@
     padding: 7px 11px;
   }
 
+  /* Footer: the shared .foot on this page's own ground, separated from it by the page's rule colour. */
+  .foot {
+    background: var(--bg);
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+  }
+
   @media (max-width: 1020px) {
     .cards { grid-template-columns: 1fr; max-width: 560px; margin-inline: auto; }
     .card { min-height: 560px; }
@@ -435,6 +442,16 @@
     </a>
   </section>
 </main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
 
 <div class="tag">Concept 8 (alt) - Quiet Power &middot; Blue + Indigo</div>
 </body>

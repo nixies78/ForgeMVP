@@ -61,6 +61,40 @@ screens; it must not put a gutter back on `.wrap`.
 The app's own shell is wider (1240px, `--sh-content-max`) - a deliberate difference, not drift: a mock-up is
 a pitch page read on its own, and the narrower column suits it.
 
+**The wordmark is locked.** The "Forge" beside the mark is Archivo Black, uppercase, with `.06em` of
+tracking, 20px in a header and 15px in a footer. That is the treatment on 1-cinematic, which the owner
+called right and asked to freeze for future designs, so **do not set its font, size, weight or tracking in
+your page**. Write it as `<span class="logo-word">Forge</span>` and let the shared rule uppercase it. There
+is no vertical rule between the mark and the word: a separator element, or a `border-left` on the wordmark,
+is not part of the design.
+
+**The footer is shared as well**, on every pitch page - the four app screens (lessons-1-default,
+questions-1-default, randomiser-1-slots, randomiser-2-quiet-blue) are screens of the app rather than pitch
+pages and carry none. Where it appears it is always this, including the wording:
+
+```html
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+    <nav class="foot-links" aria-label="Footer"><!-- the page's own links, if it has any --></nav>
+  </div>
+</footer>
+```
+
+`Design in Forge. Build in UEFN. Play in Fortnite.` is the slogan, not an example of one. `.foot` is 120px
+tall at a desktop width, and the shared file owns that height, the row layout and the 13px type. Your page
+owns the footer's background, its rule colour, its text colour and its link colours, and keeps whatever links
+it already had.
+
+The footer has to be distinguishable from what sits behind it, and once is enough: a footer whose background
+differs from the page needs no rule (2-funky's ink on yellow), and one at the page's own colour needs a 1px
+`border-top` in the page's rule colour (5-bento, 9-spotlight). Not both. The mark has to stay legible, so a
+light footer takes `logo-img-black`.
+
 ## What the page is for
 
 A **sales pitch** that encourages people to design a Fortnite island with Forge and then build it in

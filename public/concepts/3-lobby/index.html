@@ -60,8 +60,6 @@ h2{font:700 clamp(32px,4.6vw,56px)/1 var(--title);letter-spacing:-.02em;text-tra
 /* ---------- Top bar ---------- */
 .topbar{position:sticky;top:0;z-index:20;height:72px;display:flex;align-items:center;background:rgba(22,14,34,.78);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
 .topbar .wrap{display:flex;align-items:center;gap:20px;width:100%;height:100%}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex-shrink:0}
-.brand b{font:400 20px/1 var(--display);letter-spacing:.04em}
 .tabs{display:flex;gap:4px;margin-left:12px;height:100%}
 .tabs a{display:flex;align-items:center;padding:0 14px;text-decoration:none;font:800 13px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;border-bottom:3px solid transparent}
 .tabs a:hover{color:#fff}
@@ -213,8 +211,7 @@ h2{font:700 clamp(32px,4.6vw,56px)/1 var(--title);letter-spacing:-.02em;text-tra
 .ready-chars img{height:clamp(280px,32vw,420px);width:auto;margin-left:-60px;filter:drop-shadow(0 16px 24px rgba(0,0,0,.45))}
 .ready-chars img:first-child{margin-left:0}
 
-footer{padding-block:40px 70px;color:#BDB5CC;font-size:13px}
-footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
+footer{background:var(--n0);border-top:1px solid rgba(255,255,255,.08);color:#BDB5CC}
 
 .concept-tag{position:fixed;left:12px;bottom:12px;z-index:50;font:800 11px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;background:rgba(16,16,20,.88);color:#fff;border:1px solid var(--yellow);padding:8px 10px;border-radius:4px}
 
@@ -242,7 +239,6 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justif
 @media (max-width:600px){
   .topbar .wrap{gap:10px;height:58px}
   .vbucks{display:none}
-  .brand b{font-size:17px}
   .hero h1{font-size:clamp(44px,13vw,64px)}
   .btn-play{width:100%;justify-content:center}
   .btn-ghost{width:100%;justify-content:center}
@@ -267,7 +263,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justif
 
 <header class="topbar">
   <div class="wrap">
-    <a class="brand" href="#"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><b>FORGE</b></a>
+    <a class="logo-lockup" href="#"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><span class="logo-word">Forge</span></a>
     <nav class="tabs" aria-label="Lobby">
       <a class="on" href="#top">Play</a>
       <a href="#modes">Modes</a>
@@ -470,10 +466,13 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justif
 
 </main>
 
-<footer>
-  <div class="wrap">
-    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
-    <span>Forge helps you design Fortnite islands to build in Unreal Editor for Fortnite. Concept mock-up.</span>
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
   </div>
 </footer>
 
