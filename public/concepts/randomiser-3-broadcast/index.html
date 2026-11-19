@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 3 - Broadcast</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+
+  /* Randomiser 3 - Broadcast. The randomiser drawn as a live transmission: three lanes on air, a scoreboard
+     bar, a ticker under the machine and the pitch read out as a results banner. The behaviour is
+     public/js/reel-machine.js, so everything here is clothes: the palette, the flat lights and the words.
+     Broadcast graphics are flat by trade - no glass and no glow, because Randomiser 4 owns the bloom. */
+  :root {
+    --ground: #060A12;         /* the page: a night transmission monitor, not a poster */
+    --panel: #0E1725;          /* one shade up, so a 1px rule reads as an edge on the ground */
+    --well: #0A1220;           /* the inset scoreboard window inside each lane */
+    --line: rgba(255, 255, 255, .10);
+    --line-2: rgba(255, 255, 255, .22);
+    --text: #FFFFFF;
+    --muted: #9FB0C6;          /* 8.1:1 on --ground, so the small print still passes AA */
+    /* Three signal colours, one job each. They are never used decoratively: a page that leans on them for
+       looks alone has no way left to say "held" or "live". */
+    --cyan: #33BFFF;           /* the action: spin, focus, the live edge of the machine */
+    --red: #FD5E5E;            /* LIVE, and a lane in the hand */
+    --amber: #F9A91F;          /* the numbers that matter: counts, the hook line of the pitch */
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --item-h: 72px;            /* one entry in a drum; the module measures whatever this turns out to be */
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--ground); }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; }
+  p { margin: 0; }
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+
+  /* The column (.wrap) and its 1136px belong to ../_shared/chrome.css, linked last in <head>: this page
+     sets neither its max-width nor any padding, because a page that pads the shared column insets itself
+     twice. The one rule here that reaches a .wrap is the header's row - left as a flex item, the column
+     would shrink to its content and put the mark somewhere no other mock-up has it. */
+
+  /* ---------- The bar: the app's 72px and its 44px mark, in this page's colours ---------- */
+  header { height: 72px; border-bottom: 1px solid var(--line); background: var(--ground); }
+  header .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
+  /* A station name beside its logo, and the first thing to go when the window narrows. */
+  .channel { font: 700 10.5px/1.3 var(--body); letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+  /* The live bug pulses rather than glows: a shadow would be a light source on a page where nothing else is. */
+  .live {
+    margin-left: auto; display: inline-flex; align-items: center; gap: 8px;
+    font: 800 11px/1 var(--title); letter-spacing: .2em; text-transform: uppercase; color: var(--red);
+    border: 1px solid rgba(253, 94, 94, .55); padding: 8px 11px;
+  }
+  .live i { width: 8px; height: 8px; background: var(--red); animation: live-pulse 3.2s ease-in-out infinite; }
+  @keyframes live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .28; } }
+
+  /* ---------- The open: one headline, one line of lede, one slate ---------- */
+  /* Section spacing is tight throughout. The owner's standing complaint about these pages is a screenful of
+     nothing between two things that belong together, so the top of the page is 24-38px of air and no more. */
+  .hero {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 330px);
+    gap: 22px 44px; align-items: end;
+    padding-block: clamp(24px, 3.4vw, 38px) clamp(18px, 2.4vw, 26px);
+  }
+  .kicker {
+    display: flex; align-items: center; gap: 10px;
+    font: 800 11px/1 var(--body); letter-spacing: .24em; text-transform: uppercase; color: var(--cyan);
+  }
+  .kicker::before { content: ""; width: 26px; height: 2px; background: var(--cyan); }
+  .hero h1 {
+    margin: 12px 0 0; max-width: 18ch;
+    font: 800 clamp(2rem, 5vw, 3.5rem)/1.02 var(--title); letter-spacing: -.02em; text-transform: uppercase;
+  }
+  .lede { margin-top: 12px; max-width: 52ch; color: var(--muted); font-size: clamp(15px, 1.4vw, 17px); }
+  .lede b { color: var(--text); font-weight: 700; }
+  /* The slate is the graphic a broadcast puts beside the presenter - four facts, and no invented numbers. */
+  .slate { border: 1px solid var(--line); background: var(--panel); }
+  .slate-row {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+    padding: 9px 12px; border-top: 1px solid var(--line);
+  }
+  .slate-row:first-child { border-top: 0; }
+  .slate-row dt { font: 800 10px/1.4 var(--body); letter-spacing: .22em; text-transform: uppercase; color: var(--muted); }
+  .slate-row dd {
+    margin: 0; font: 800 13px/1.3 var(--title); letter-spacing: -.01em; text-transform: uppercase;
+    text-align: right; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- The scoreboard bar: what the machine is doing, and the two controls ---------- */
+  /* The bar's left edge is the machine's live edge in the action colour - the only 4px rule on the page. */
+  .board {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+    padding: 12px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--cyan);
+  }
+  .board-title { font: 800 12px/1 var(--title); letter-spacing: .16em; text-transform: uppercase; }
+  .board-sub { font: 700 10.5px/1.4 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  /* The status line is the module's failure output as well as this page's own words: "Loading the reels…"
+     until the JSON lands, then what the machine is doing, then its error text if the fetch failed. */
+  .status {
+    flex: 1 1 190px; min-width: 0; display: flex; align-items: center; gap: 9px;
+    font: 800 11px/1.45 var(--body); letter-spacing: .16em; text-transform: uppercase; color: var(--muted);
+  }
+  .status::before { content: ""; flex: none; width: 8px; height: 8px; background: var(--cyan); }
+  .status.is-rolling::before { background: var(--amber); }
+  /* A failed load is not a second accent: it is the one place the page goes red without a lane holding. */
+  .status.is-error { color: #FFD3D3; }
+  .status.is-error::before { background: var(--red); }
+  .board-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-left: auto; }
+
+  /* ---------- Controls ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 12px 18px; border-radius: 0;
+    font: 800 12px/1 var(--title); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text); background: transparent; border: 1px solid var(--line-2);
+    cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+  }
+  .btn:hover:not(:disabled) { border-color: var(--text); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  /* One filled control on the page: spinning is the only thing a visitor came here to do. */
+  .btn-spin { background: var(--cyan); border-color: var(--cyan); color: #04121C; }
+  .btn-spin:hover:not(:disabled) { background: #6FD4FF; border-color: #6FD4FF; }
+  .btn-spin:disabled { background: transparent; color: var(--muted); border-color: var(--line); }
+  .btn-lg { padding: 15px 24px; font-size: 13px; letter-spacing: .12em; }
+
+  /* ---------- The lanes: three cards on one line, each with a coloured edge ---------- */
+  .lanes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+  .lane {
+    display: flex; flex-direction: column; gap: 10px; min-width: 0;
+    padding: 12px;
+    background: var(--panel); border: 1px solid var(--line); border-top: 3px solid var(--cyan);
+    transition: border-color .18s, background .18s;
+  }
+  /* A lane edge has one meaning and no hue of its own: a per-lane colour would make "held" one of three. */
+  .lane.is-spinning { border-top-color: var(--amber); }
+  .lane.is-locked { border-color: var(--red); border-top-color: var(--red); background: #160F14; }
+  .lane-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .lane-name { font: 800 11px/1.3 var(--body); letter-spacing: .2em; text-transform: uppercase; color: var(--cyan); }
+  .lane.is-locked .lane-name { color: var(--red); }
+  /* A lane's depth is a number, so it wears the same amber tabular treatment as the standings row below. */
+  .lane-count {
+    display: flex; align-items: baseline; gap: 5px; white-space: nowrap;
+    font: 700 10px/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  }
+  .lane-count b {
+    font: 800 15px/1 var(--title); color: var(--amber); font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- The drum: a dark inset scoreboard window ---------- */
+  [data-mount="window"] { display: block; }
+  /* One entry tall, plus the window's own two 1px rules: a resting entry then measures exactly what the
+     module measures mid-spin, so the last frame lands on the pixel the reel will rest on. */
+  .rm-window {
+    position: relative; overflow: hidden;
+    height: calc(var(--item-h) + 2px);
+    background: var(--well); border: 1px solid var(--line);
+    transition: border-color .18s;
+  }
+  .lane.is-locked .rm-window { border-color: rgba(253, 94, 94, .5); }
+  /* The lips of the drum, so a moving strip reads as a reel and not as a list sliding under two rules. */
+  .rm-window::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
+    background: linear-gradient(var(--well), rgba(10, 18, 32, 0) 34%, rgba(10, 18, 32, 0) 66%, var(--well));
+    transition: opacity .15s;
+  }
+  .lane.is-spinning .rm-window::after { opacity: 1; }
+  .rm-strip { will-change: transform; }
+  /* Motion blur only while the strip is fast; the module drops the class while the reel is still slowing. */
+  .rm-strip.is-moving .rm-item { filter: blur(1px); }
+
+  .rm-item {
+    height: var(--item-h);
+    display: flex; align-items: center; gap: 11px; padding-inline: 11px;
+    transition: filter .3s ease-out;
+  }
+  .rm-pic {
+    position: relative; flex: none; width: 48px; height: 48px;
+    display: grid; place-items: center; overflow: hidden;
+    background: var(--well); border: 1px solid var(--line-2);
+  }
+  .rm-pic img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* The placeholder the module hands every page until /concepts/_media/randomiser/ has pictures in it. */
+  .rm-ph {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 3px; padding: 3px; text-align: center;
+  }
+  .rm-initials { font: 800 13px/1 var(--title); letter-spacing: -.01em; color: var(--amber); }
+  /* A 48px well is small, but the note fits under the initials at 7px and says why the tile is empty. */
+  .rm-coming { font: 700 7px/1.15 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .rm-text { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+  /* One line per entry, never two: the module measures this height, so a wrapped name would move the pixel
+     the strip lands on - the full text goes in the title instead. */
+  .rm-name {
+    font: 800 15px/1.2 var(--title); letter-spacing: -.01em; text-transform: uppercase;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .rm-kind {
+    align-self: flex-start; padding: 3px 6px;
+    font: 800 9px/1 var(--body); letter-spacing: .16em; text-transform: uppercase;
+    color: #1A1206; background: var(--amber);
+  }
+  .rm-item.is-empty .rm-pic { border-style: dashed; background: none; }
+  .rm-item.is-empty .rm-name { color: var(--muted); }
+
+  /* ---------- The hold: a square control that inverts to red when it is holding ---------- */
+  .hold {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    width: 100%; height: 48px; padding: 0 12px; border-radius: 0;
+    font: 800 11px/1 var(--body); letter-spacing: .2em; text-transform: uppercase;
+    color: var(--text); background: transparent; border: 1px solid var(--line-2);
+    cursor: pointer; transition: background .15s, color .15s, border-color .15s;
+  }
+  .hold svg { flex: none; width: 14px; height: 14px; }
+  .hold .rm-shackle { transition: transform .15s; }
+  /* Open shackle while the lane is free, shut once it holds: legible before the colour is. */
+  .hold:not(.is-locked) .rm-shackle { transform: translate(4px, -3px); }
+  .hold:hover:not(:disabled) { border-color: var(--red); }
+  .hold:disabled { opacity: .42; cursor: not-allowed; }
+  /* Declared after :disabled on purpose: a held lane's button is disabled while the rest roll, and a hold
+     that lost its fill for that moment would read as released. */
+  .hold.is-locked { background: var(--red); border-color: var(--red); color: #1A0709; }
+
+  /* ---------- The ticker: one clipped line of broadcast filler under the machine ---------- */
+  /* overflow: hidden is the only thing between a track wider than the window and a scrolling page. */
+  .ticker { margin-top: 14px; background: var(--panel); border-block: 1px solid var(--line); overflow: hidden; }
+  .ticker-track { display: flex; width: max-content; animation: ticker-move 54s linear infinite; }
+  /* Two identical groups, so translating the track by half its width lands on the frame it started on.
+     flex: none keeps both at exactly their content width, or the two halves could drift apart. */
+  .ticker-group { flex: none; display: flex; align-items: center; padding-block: 10px; }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 10px; padding-right: 10px; white-space: nowrap;
+    font: 700 11px/1 var(--body); letter-spacing: .18em; text-transform: uppercase; color: var(--muted);
+  }
+  .ticker-item::after { content: ""; width: 4px; height: 4px; background: var(--cyan); opacity: .75; }
+  @keyframes ticker-move { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ---------- The results banner ---------- */
+  .result { margin-top: clamp(18px, 2.6vw, 28px); transition: opacity .2s; }
+  .result[hidden] { display: none; }
+  /* Stale the moment the lanes move, but never emptied: a result that vanished on every spin would flash. */
+  .result.is-stale { opacity: .55; }
+  .banner { background: var(--panel); border: 1px solid var(--line); border-left: 4px solid var(--amber); }
+  .banner-bar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+    padding: 10px 14px; background: var(--well); border-bottom: 1px solid var(--line);
+  }
+  .banner-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 800 11px/1 var(--title); letter-spacing: .22em; text-transform: uppercase; color: var(--amber);
+  }
+  .banner-tag::before { content: ""; width: 8px; height: 8px; background: var(--amber); }
+  /* The hash is the module's, printed rather than recomputed: this URL is the combination just drawn. */
+  .hash {
+    margin-left: auto; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; font: 700 11px/1.4 var(--body); letter-spacing: .06em; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .banner-body { padding: 14px; }
+  /* The pitch is the page's headline, so it is the same face as every other heading, in caps, at up to 44px.
+     The lead and the hook are two lines because the module hands them over as two halves of one sentence. */
+  .pitch {
+    margin: 0; overflow-wrap: anywhere;
+    font: 800 clamp(24px, 3.4vw, 44px)/1.06 var(--title); letter-spacing: -.02em; text-transform: uppercase;
+  }
+  /* The hook gets its own line in the numbers' colour: it is the half of the pitch that carries the idea. */
+  .pitch-hook { display: block; color: var(--amber); }
+
+  /* The three facts, as a stats row: hairline-separated cells, labels in caps, numbers tabular. */
+  .stats {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px;
+    margin-top: 16px; background: var(--line); border: 1px solid var(--line);
+  }
+  .stat { min-width: 0; padding: 12px; background: var(--panel); }
+  .stat-k {
+    display: block; font: 800 10px/1.4 var(--body); letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); font-variant-numeric: tabular-nums;
+  }
+  .stat-v {
+    margin: 7px 0 0; font: 800 17px/1.25 var(--title); letter-spacing: -.01em;
+    font-variant-numeric: tabular-nums; overflow-wrap: anywhere;
+  }
+  .stat-sub { display: block; margin-top: 5px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+
+  .banner-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+  /* The line the two mock-up actions report into. Always in the DOM, so the banner never jumps. */
+  .note { flex: 1 1 100%; min-height: 1.5em; color: var(--muted); font-size: 13px; }
+
+  /* ---------- The standings: what is in the machine ---------- */
+  .standings { margin-top: clamp(20px, 3vw, 30px); }
+  .standings-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 8px; }
+  .standings-head h2 { margin: 0; font: 800 15px/1.2 var(--title); letter-spacing: .12em; text-transform: uppercase; }
+  .standings-head span {
+    margin-left: auto; font: 700 10.5px/1.4 var(--body); letter-spacing: .2em; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .standings-row {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  }
+  .standing { display: flex; flex-direction: column; gap: 4px; min-width: 0; padding: 14px 16px; }
+  .standing + .standing { border-left: 1px solid var(--line); }
+  .standing b {
+    font: 800 clamp(28px, 3.4vw, 40px)/1 var(--title); letter-spacing: -.02em; color: var(--amber);
+    font-variant-numeric: tabular-nums;
+  }
+  .standing span { font: 800 11px/1.4 var(--body); letter-spacing: .18em; text-transform: uppercase; }
+  .standing i {
+    font: 700 10px/1.4 var(--body); font-style: normal; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- How it works, as commentary on the call ---------- */
+  .commentary { margin-top: clamp(20px, 3vw, 30px); }
+  .commentary h2 { margin: 0; font: 800 clamp(1.25rem, 2.6vw, 1.9rem)/1.1 var(--title); letter-spacing: -.02em; text-transform: uppercase; }
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 12px; }
+  /* The steps are not lanes and do not borrow the lane's edge: a holding card is never a paragraph. */
+  .step { padding: 14px; background: var(--panel); border: 1px solid var(--line); }
+  .step-tag { font: 800 10px/1.4 var(--body); letter-spacing: .22em; text-transform: uppercase; color: var(--cyan); }
+  .step h3 { margin: 8px 0 0; font: 800 18px/1.2 var(--title); letter-spacing: -.015em; text-transform: uppercase; }
+  .step p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+  /* ---------- Close: the second door onto the same machine ---------- */
+  .close {
+    margin-top: clamp(22px, 3.2vw, 34px);
+    padding-block: clamp(22px, 3vw, 32px) clamp(30px, 4vw, 44px);
+    border-top: 1px solid var(--line);
+  }
+  .close h2 { margin: 0; max-width: 24ch; font: 800 clamp(1.5rem, 3.4vw, 2.5rem)/1.06 var(--title); letter-spacing: -.02em; text-transform: uppercase; }
+  .close p { margin: 12px 0 20px; max-width: 52ch; color: var(--muted); }
+
+  .tag {
+    position: fixed; left: 12px; bottom: 12px; z-index: 20;
+    font: 800 10.5px/1 var(--body); letter-spacing: .08em; color: var(--text);
+    background: var(--ground); border: 1px solid var(--line-2); padding: 7px 9px;
+  }
+
+  @media (max-width: 1020px) {
+    /* The slate drops under the headline rather than squeezing both into half a column. */
+    .hero { grid-template-columns: minmax(0, 1fr); align-items: start; }
+    .slate { max-width: 420px; }
+  }
+  @media (max-width: 820px) {
+    /* Three lanes across a tablet clip every name to a few letters - worse than losing the one row the
+       machine is built on. The 72px bar and its 44px mark stay at every width. */
+    .lanes { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr; }
+    .board-actions { margin-left: 0; }
+  }
+  @media (max-width: 700px) {
+    .channel { display: none; }
+    /* The standings row becomes three rows: big numbers, and labels with the line they need. */
+    .standings-row { grid-template-columns: 1fr; }
+    .standing + .standing { border-left: 0; border-top: 1px solid var(--line); }
+    .btn { width: 100%; }
+    .banner-actions .btn, .board-actions { width: 100%; }
+    .pitch { letter-spacing: -.015em; }
+  }
+  /* A moving ticker and a pulsing live dot are exactly the kind of movement this setting exists for. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<!-- Last in <head>, so the shared rules win a tie: chrome.css owns the mark's wrapper and its 44px size,
+     the .wrap column and the smooth anchor scrolling. The page's own look is everything above it. -->
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
+    <p class="channel">Forge &middot; build desk</p>
+    <p class="live"><i aria-hidden="true"></i>Live</p>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div>
+      <p class="kicker">Three lanes on air</p>
+      <h1>Roll the next mode.</h1>
+      <p class="lede">Not sure what to build? The randomiser calls <b>a flavour, a game type and a hook</b>,
+        then reads the three of them back as one pitch you can take into UEFN.</p>
+    </div>
+    <!-- The slate: what this feed is, in four lines. Nothing here is a statistic; the counts are read off
+         the loaded reels and printed in the standings row further down. -->
+    <dl class="slate">
+      <div class="slate-row"><dt>Feed</dt><dd>Randomiser 3</dd></div>
+      <div class="slate-row"><dt>Lanes</dt><dd>Three</dd></div>
+      <div class="slate-row"><dt>Output</dt><dd>One pitch</dd></div>
+      <div class="slate-row"><dt>Link</dt><dd>Copy it</dd></div>
+    </dl>
+  </section>
+
+  <section class="machine wrap" aria-label="The three lanes">
+    <!-- The scoreboard bar: the machine's label, the module's status line and the two controls that drive
+         it. The status is the page's live region and the module's error output in one element. -->
+    <div class="board">
+      <p class="board-title">Randomiser 3</p>
+      <p class="board-sub">Three lanes &middot; one call</p>
+      <p class="status" id="status" aria-live="polite">Loading the reels&hellip;</p>
+      <div class="board-actions">
+        <button class="btn btn-spin" id="spin" type="button" data-spin disabled>Spin the lanes</button>
+        <button class="btn" id="unlock-all" type="button" data-unlock-all disabled>Unlock all &amp; spin</button>
+      </div>
+    </div>
+
+    <!-- One lane card per reel. The module fills [data-mount="window"] with the drum and drives the
+         [data-lock] button, whose [data-lock-text] span is its word to write. Every count in the lane head
+         is filled from the loaded data - never typed here - and the holds start disabled, because there is
+         nothing to hold until the lanes have landed once. -->
+    <div class="lanes" id="reels">
+      <section class="lane" data-reel="f">
+        <div class="lane-top">
+          <p class="lane-name" data-mount="label">Flavour / Brand</p>
+          <p class="lane-count"><b id="count-f">&mdash;</b> in the drum</p>
+        </div>
+        <div data-mount="window"></div>
+        <button class="hold" data-lock type="button" aria-pressed="false" disabled><span data-lock-text>Lock</span></button>
+      </section>
+
+      <section class="lane" data-reel="t">
+        <div class="lane-top">
+          <p class="lane-name" data-mount="label">Game Type</p>
+          <p class="lane-count"><b id="count-t">&mdash;</b> in the drum</p>
+        </div>
+        <div data-mount="window"></div>
+        <button class="hold" data-lock type="button" aria-pressed="false" disabled><span data-lock-text>Lock</span></button>
+      </section>
+
+      <section class="lane" data-reel="h">
+        <div class="lane-top">
+          <p class="lane-name" data-mount="label">Hook</p>
+          <p class="lane-count"><b id="count-h">&mdash;</b> in the drum</p>
+        </div>
+        <div data-mount="window"></div>
+        <button class="hold" data-lock type="button" aria-pressed="false" disabled><span data-lock-text>Lock</span></button>
+      </section>
+    </div>
+
+    <!-- The ticker: one clipped line of the page's own words. It says nothing the lanes and the standings
+         have not already said, because a number printed three times is furniture, not information. It is
+         decorative, so it is hidden from the accessible tree. -->
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="ticker-track">
+        <div class="ticker-group">
+          <span class="ticker-item">Three lanes &middot; one call</span>
+          <span class="ticker-item">A held lane keeps its value through the spin</span>
+          <span class="ticker-item">Every spin deals a combination you are not looking at</span>
+          <span class="ticker-item">The pitch goes out in two lines</span>
+          <span class="ticker-item">Lock what you like and roll the rest</span>
+        </div>
+        <div class="ticker-group">
+          <span class="ticker-item">Three lanes &middot; one call</span>
+          <span class="ticker-item">A held lane keeps its value through the spin</span>
+          <span class="ticker-item">Every spin deals a combination you are not looking at</span>
+          <span class="ticker-item">The pitch goes out in two lines</span>
+          <span class="ticker-item">Lock what you like and roll the rest</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="result wrap" id="result" data-result hidden aria-labelledby="result-h">
+    <div class="banner">
+      <div class="banner-bar">
+        <p class="banner-tag" id="result-h">Result</p>
+        <span class="hash" id="hash-out"></span>
+      </div>
+
+      <div class="banner-body">
+        <!-- The pitch is two lines, always. The module hands the lead and the hook over already split, so
+             nothing here rebuilds the sentence; the hook is block-level so it can never trail the lead, and
+             the lead keeps a trailing space so the two halves still read as one sentence if it is copied. -->
+        <h2 class="pitch" data-pitch aria-live="polite">
+          <span class="pitch-lead" id="pitch-lead"></span><span class="pitch-hook" id="pitch-hook"></span>
+        </h2>
+
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-k">Game type</span>
+            <p class="stat-v" id="fact-type"></p>
+            <span class="stat-sub" id="fact-type-desc"></span>
+          </div>
+          <div class="stat">
+            <span class="stat-k">Underneath</span>
+            <p class="stat-v" id="fact-under"></p>
+          </div>
+          <div class="stat">
+            <span class="stat-k">Hook</span>
+            <p class="stat-v" id="fact-hook"></p>
+            <span class="stat-sub" id="fact-hook-desc"></span>
+          </div>
+        </div>
+
+        <div class="banner-actions">
+          <button class="btn btn-lg" type="button" data-todo="Take this mode">Take this mode</button>
+          <button class="btn" type="button" data-todo="Save to my modes">Save to my modes</button>
+          <!-- The line the two actions above report into, so clicking one never looks like a dead page. -->
+          <p class="note" id="todo-note" data-todo aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="standings wrap" aria-label="What is in the machine">
+    <div class="standings-head">
+      <h2>Standings</h2>
+      <span>The three pools, as loaded</span>
+    </div>
+    <!-- Counted from the reels the module built, never written here: the numbers change with the data. -->
+    <div class="standings-row">
+      <div class="standing">
+        <b id="stand-f">&mdash;</b>
+        <span>Flavours &amp; brands</span>
+        <i>in the drum</i>
+      </div>
+      <div class="standing">
+        <b id="stand-t">&mdash;</b>
+        <span>Game types</span>
+        <i>in the drum</i>
+      </div>
+      <div class="standing">
+        <b id="stand-h">&mdash;</b>
+        <span>Hooks</span>
+        <i>in the drum</i>
+      </div>
+    </div>
+  </section>
+
+  <section class="commentary wrap" aria-labelledby="how-h">
+    <h2 id="how-h">Hold one, roll the rest.</h2>
+    <div class="steps">
+      <article class="step">
+        <p class="step-tag">The hold</p>
+        <h3>Lock a lane and it stays</h3>
+        <p>Happy with the flavour? Hold that lane. It keeps its value while the other two roll on, and the
+          hold survives every spin after it.</p>
+      </article>
+      <article class="step">
+        <p class="step-tag">The roll</p>
+        <h3>Spin for the rest</h3>
+        <p>Every spin lands on a combination you are not looking at, so the machine never deals the same call
+          twice in a row.</p>
+      </article>
+      <article class="step">
+        <p class="step-tag">The call</p>
+        <h3>Take the pitch</h3>
+        <p>The two lines are your starting point: the exact game type, the UEFN devices it needs and five
+          build steps.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="close wrap">
+    <h2>Your island starts with one call.</h2>
+    <p>Hold what you like, roll the rest, and take the mode it lands on. The link in the banner sends the
+      exact combination to anyone you are building with.</p>
+    <button class="btn btn-spin btn-lg" id="spin-again" type="button" data-spin disabled>Spin the lanes</button>
+  </section>
+</main>
+
+<div class="tag">Randomiser 3 - Broadcast</div>
+
+<script type="module">
+/* The machine is public/js/reel-machine.js: the same data, locks, URL hash and reduced-motion path every
+   randomiser runs on. This script is only the broadcast's clothing - one entry in a drum, the status line,
+   the results banner, and the page's reaction to the state the module reports. */
+import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+
+const $ = id => document.getElementById(id);
+const spinBtn = $('spin'), spinAgainBtn = $('spin-again'), unlockBtn = $('unlock-all');
+const statusEl = $('status');
+/* The banner is hidden until there is something to read, and dimmed - never emptied - while the lanes move,
+   so the last call stays legible until the next one lands. */
+let bannerShown = false;
+
+/** The data's descriptions are written without a full stop and sometimes with one; this page only decides
+ *  where the period goes. */
+function sentence(text) {
+  const t = String(text ?? '').trim().replace(/[.\s]+$/, '');
+  return t ? `${t}.` : '';
+}
+
+/* ---------- one entry in a drum ---------- */
+
+function renderEntry(entry) {
+  const item = document.createElement('div');
+  item.className = 'rm-item';
+  if (!entry) {
+    /* Before the first spin there is no value to show, and a dashed tile with a name in it would read as a
+       broken entry rather than as a lane waiting for its call. */
+    item.classList.add('is-empty');
+    const pic = document.createElement('div');
+    pic.className = 'rm-pic';
+    const nm = document.createElement('span');
+    nm.className = 'rm-name';
+    nm.textContent = 'Awaiting the call';
+    item.append(pic, nm);
+    return item;
+  }
+  /* entryImage() is the module's: the real picture, or the initials-and-"Image coming" placeholder every
+     randomiser shares while /concepts/_media/randomiser/ is still empty. */
+  item.append(entryImage(entry));
+  const text = document.createElement('div');
+  text.className = 'rm-text';
+  const nm = document.createElement('span');
+  nm.className = 'rm-name';
+  nm.textContent = entry.name;
+  text.append(nm);
+  /* The flavour lane carries brands as well as flavours, and a brand in the pitch changes how the whole
+     call reads - so the lane says which it is while it is spinning past. */
+  if (entry.kind === 'brand') {
+    const kind = document.createElement('span');
+    kind.className = 'rm-kind';
+    kind.textContent = 'Brand';
+    text.append(kind);
+  }
+  item.append(text);
+  /* A lane line is clipped rather than wrapped, so the full name goes where a clipped line puts it: the
+     title, on hover. */
+  item.title = entry.name;
+  return item;
+}
+
+/* ---------- the page's reaction to the machine's state ---------- */
+
+function onState(s) {
+  /* The status line is the page's own words, and the module writes its fetch failure into the same element:
+     "ready" and "rolling" are this page's, the failure is not. */
+  statusEl.textContent = s.spinning
+    ? 'Rolling the three lanes'
+    : s.allLocked ? 'Every lane is holding - unlock one to spin' : 'Ready for the call';
+  statusEl.classList.toggle('is-rolling', s.spinning);
+  /* A disabled slab should say why it is disabled rather than just going pale. */
+  spinBtn.textContent = s.spinning ? 'Rolling' : s.allLocked ? 'Unlock a lane' : 'Spin the lanes';
+  spinAgainBtn.textContent = s.spinning ? 'Rolling' : 'Spin the lanes';
+  $('result').classList.toggle('is-stale', s.spinning);
+  /* Both count readings come from the reels the module built, so they stay true when the owner adds an
+     entry. Each lane's head carries the size of its own drum; the standings row prints the three together.
+     Those two are the only places on the page where a count appears. */
+  for (const [key, count] of Object.entries(s.counts)) {
+    $(`count-${key}`).textContent = count;
+    $(`stand-${key}`).textContent = count;
+  }
+}
+
+function onResult(r) {
+  const result = $('result');
+  if (!r) {
+    /* Null while a spin is running, or before the first one: only hide it if it has never been shown. */
+    if (!bannerShown) result.hidden = true;
+    return;
+  }
+  bannerShown = true;
+  result.hidden = false;
+  /* The trailing space on the lead is deliberate: the two halves are one sentence, and they are read aloud
+     and copied as one. */
+  $('pitch-lead').textContent = r.lead ? `${r.lead} ` : '';
+  $('pitch-hook').textContent = r.hookPart;
+  /* The hash is the module's, printed rather than recomputed: this URL is the same combination. */
+  $('hash-out').textContent = r.hash || '';
+  $('fact-type').textContent = r.type.name;
+  $('fact-type-desc').textContent = sentence(r.type.desc);
+  $('fact-under').textContent = r.parts.length ? r.parts.join(' · ') : 'No fixed shape - it is what you make it.';
+  $('fact-hook').textContent = r.hook.name;
+  $('fact-hook-desc').textContent = sentence(r.hook.desc);
+}
+
+const machine = await createMachine({
+  root: $('reels'),
+  spinButtons: [spinBtn, spinAgainBtn],
+  unlockButton: unlockBtn,
+  status: statusEl,
+  renderEntry,
+  onState,
+  onResult
+});
+
+/* createMachine resolves to null once it has written its own "Couldn't load the reels" into the status line,
+   so a failed load needs nothing wired and no page of its own - and the holds, which start disabled, stay
+   that way rather than offering a control for lanes that never arrived. */
+if (machine) {
+  /* The holds carry the shared padlock mark; the module found the buttons and drives their state. */
+  document.querySelectorAll('[data-lock]').forEach(btn => btn.insertAdjacentHTML('afterbegin', PADLOCK));
+  spinBtn.addEventListener('click', machine.spin);
+  spinAgainBtn.addEventListener('click', () => {
+    /* A second door onto the same machine: bring the lanes back up the screen, then let them go. */
+    $('reels').scrollIntoView({ behavior: machine.reducedMotion.matches ? 'auto' : 'smooth', block: 'center' });
+    machine.spin();
+  });
+  unlockBtn.addEventListener('click', machine.unlockAllAndSpin);
+  /* Both banner actions are mock-ups. The wiring looks for buttons only, because the note below them carries
+     data-todo as well - a tool looking for that attribute should find the line the message is written into,
+     not be handed a button. */
+  document.querySelectorAll('button[data-todo]').forEach(btn => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.dataset.todo}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+}
+</script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its JSON, and a
+     browser blocks both on a file:// page. This still runs there, and hands the browser over to the server
+     address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

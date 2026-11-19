@@ -34,6 +34,34 @@
  * It sets aria-pressed / aria-label / disabled on the lock and the buttons; a page never has to.
  *
  * ---------------------------------------------------------------------------------------------
+ * TWO GEOMETRIES
+ * ---------------------------------------------------------------------------------------------
+ * `geometry: 'strip'` (the default) is the drum every page so far uses: entries stacked vertically in
+ * the window and the strip translated, so the last frame lands on the pixel the resting reel uses.
+ *
+ * `geometry: 'wheel'` is the same machine served on an arc - the reels as sections of a wheel of
+ * fortune. The module builds a wheel of `wheelSectors` entries with the chosen one in the MIDDLE
+ * sector, sets `--rm-angle` on each entry (`(index - middle) * wheelDegrees`, measured from the
+ * pointer, which is straight up), and spins by ROTATING the strip to zero. Nothing about the reels,
+ * locks, hash or the choice itself changes: a page only has to place the hub and the sectors.
+ *
+ * The page owns that placement, because it is the look. The shape the module expects, with the hub at
+ * the bottom-centre of the window:
+ *
+ *   [data-mount="window"] > .rm-window      { position: relative; overflow: hidden }
+ *     .rm-strip                             { position: absolute; left: 50%; top: 100%; width: 0; height: 0 }
+ *       .sector                             a child of the strip, one per entry:
+ *                                           { position: absolute; left: 0; top: 0;
+ *                                             width: var(--sector-w); height: var(--sector-h);
+ *                                             margin-left: calc(var(--sector-w) / -2);
+ *                                             margin-top: calc(var(--sector-h) / -2);
+ *                                             transform-origin: 50% 50%;
+ *                                             transform: rotate(var(--rm-angle)) translateY(calc(-1 * var(--hub-r))) }
+ *
+ * With the item's centre on the hub before the transform, `rotate(angle) translateY(-radius)` walks it
+ * out along its own ray, and the label turns with the sector the way a real wheel's does.
+ *
+ * ---------------------------------------------------------------------------------------------
  * USE
  * ---------------------------------------------------------------------------------------------
  *   import { createMachine } from '../../js/reel-machine.js';
@@ -43,7 +71,7 @@
  *     spinButtons: [spinBtn],                      // disabled while spinning / all locked
  *     unlockButton: unlockBtn,                     // disabled while spinning
  *     status: statusEl,                            // "Couldn't load the reels (...)" goes here
- *     renderEntry,                                 // (entry, key) => Element
+ *     renderEntry,                                 // (entry, key, index) => Element
  *     onState,                                     // ({ spinning, allLocked, locked, values })
  *     onResult                                     // ({ flavour, type, hook, pitch, lead, hookPart, parts })
  *   });
@@ -135,6 +163,12 @@ export async function createMachine(options) {
     dataUrl = '../../data/randomiser.json',
     spinMs = { f: 1300, t: 1750, h: 2200 },   // the reels stop left to right
     stripBase = 14,                            // entries scrolled through on the first reel
+    /* 'strip' stacks the entries and translates them; 'wheel' builds a wheel and rotates it. See the
+       header: in wheel mode each entry gets --rm-angle and the page places the hub and the sectors. */
+    geometry = 'strip',
+    wheelSectors = 8,                          // sectors a wheel draws, the chosen one in the middle
+    wheelDegrees = 360 / wheelSectors,         // the angle between two sector centres
+    wheelTurns = 3,                            // full turns before a wheel settles
     renderEntry = entry => entryImage(entry),
     onState = () => {},
     onResult = () => {},
@@ -142,6 +176,9 @@ export async function createMachine(options) {
     unlockButton = null,
     reducedMotion = matchMedia('(prefers-reduced-motion: reduce)')
   } = options;
+
+  const isWheel = geometry === 'wheel';
+  const wheelMiddle = Math.floor(wheelSectors / 2);
 
   const say = (text, kind = '') => {
     if (options.status) {
@@ -206,14 +243,48 @@ export async function createMachine(options) {
 
   /* ---------- rendering ---------- */
 
-  /** One entry in a reel, in the page's own clothes. */
-  const paintEntry = (key, entry) => renderEntry(entry, key);
+  /** One entry in a reel, in the page's own clothes. `index` is where it sits in the run the reel is
+   *  playing (a drum's item, or a wheel's sector); a page that does not care can ignore it. */
+  const paintEntry = (key, entry, index = null) => {
+    const node = renderEntry(entry, key, index);
+    if (isWheel && index !== null) {
+      node.style.setProperty('--rm-angle', `${(index - wheelMiddle) * wheelDegrees}deg`);
+    }
+    return node;
+  };
 
-  /** Show a single resting entry in a reel. */
+  /** The entries a wheel draws: the chosen one in the middle sector, distinct others either side of it.
+   *  `index` of null is the undealt wheel a page shows before the first spin, and every sector is empty. */
+  function wheelEntries(list, index) {
+    if (index === null || index === undefined) return new Array(wheelSectors).fill(null);
+    const picks = new Array(wheelSectors).fill(null);
+    picks[wheelMiddle] = list[index];
+    const used = new Set([index]);
+    for (let offset = 1; offset <= wheelMiddle; offset += 1) {
+      for (const i of [wheelMiddle - offset, wheelMiddle + offset]) {
+        if (i < 0 || i >= wheelSectors) continue;
+        /* pickDifferent keeps a wheel from showing the same entry in two sectors, and from showing the
+           value the reel was already sitting on. */
+        let pick = pickDifferent(list.length, index);
+        while (used.has(pick)) pick = pickDifferent(list.length, pick);
+        used.add(pick);
+        picks[i] = list[pick];
+      }
+    }
+    return picks;
+  }
+
+  /** Come to rest: a drum shows one entry, a wheel shows its whole arc with the chosen entry at the
+   *  pointer (angle zero is straight up, which is where the page puts the marker). */
   function showStill(key) {
     const { strip } = ui[key];
     strip.classList.remove('is-moving');
     strip.style.transition = 'none';
+    if (isWheel) {
+      strip.replaceChildren(...wheelEntries(reels[key], state[key]).map((entry, i) => paintEntry(key, entry, i)));
+      strip.style.transform = 'rotate(0deg)';
+      return;
+    }
     strip.style.transform = 'translateY(0)';
     strip.replaceChildren(paintEntry(key, reels[key][state[key]] ?? null));
   }
@@ -285,7 +356,49 @@ export async function createMachine(options) {
     paint();
   }
 
+  /** A wheel coming to rest: fresh sectors with the chosen entry in the middle one, turned from a few
+   *  full turns back to zero. No measurement is needed - the geometry is known - and zero is the angle
+   *  the resting wheel sits at, so the last frame of the animation is the still frame. */
+  function animateWheel(key, to, duration) {
+    return new Promise(resolve => {
+      const { reel, strip } = ui[key];
+      if (reducedMotion.matches) {
+        showStill(key);
+        return resolve();
+      }
+      const items = wheelEntries(reels[key], to).map((entry, i) => paintEntry(key, entry, i));
+      strip.replaceChildren(...items);
+
+      reel.classList.add('is-spinning');
+      strip.classList.add('is-moving');
+      strip.style.transition = 'none';
+      strip.style.transform = `rotate(${-360 * wheelTurns}deg)`;
+      // A wheel decelerates and stops: heavy at the start, long and slow at the end.
+      const anim = strip.animate([
+        { transform: `rotate(${-360 * wheelTurns}deg)`, easing: 'cubic-bezier(.12, .66, .16, 1)' },
+        { transform: 'rotate(0deg)' }
+      ], { duration, fill: 'forwards' });
+
+      const unblur = setTimeout(() => strip.classList.remove('is-moving'), duration * 0.55);
+
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(unblur);
+        reel.classList.remove('is-spinning');
+        strip.classList.remove('is-moving');
+        anim.cancel();
+        strip.style.transform = 'rotate(0deg)';
+        resolve();
+      };
+      anim.finished.then(finish, finish);
+      setTimeout(finish, duration + 300);   // a hidden tab may never finish the animation
+    });
+  }
+
   function animateReel(key, from, to, duration, extra) {
+    if (isWheel) return animateWheel(key, to, duration);
     return new Promise(resolve => {
       const { reel, window: win, strip } = ui[key];
       if (reducedMotion.matches) {
@@ -303,7 +416,7 @@ export async function createMachine(options) {
       }
       if (entries[entries.length - 1] === list[to]) entries.pop();
       entries.push(list[to]);
-      const items = entries.map(entry => paintEntry(key, entry));
+      const items = entries.map((entry, i) => paintEntry(key, entry, i));
       strip.replaceChildren(...items);
       const last = items[items.length - 1];
 

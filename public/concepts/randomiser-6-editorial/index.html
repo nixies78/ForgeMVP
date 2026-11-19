@@ -22,7 +22,6 @@
   :root {
     --white: #FFFFFF;
     --paper: #FAF8F4;
-    --paper-2: #F3F0EA;
     --ink: #000000;
     --ink-2: #303034;
     --ink-3: #5E5C5E;
@@ -36,7 +35,6 @@
     --error: #9E2B1E;
     --display: "Inter Tight", "Inter", system-ui, sans-serif;
     --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-    --item-h: 12.5rem;              /* one entry in a drum; the module measures whatever it finds here */
   }
 
   *, *::before, *::after { box-sizing: border-box; }
@@ -89,7 +87,6 @@
   /* The row only: the column itself - its 1136px, its centring and its gutter below 1280px - is the
      shared .wrap's and is not restated here. */
   .bar > .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
-  .bar-title { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.01em; }
   .bar-note {
     margin-left: auto;
     font-weight: 700;
@@ -141,15 +138,24 @@
   .machine-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; margin-bottom: 18px; }
   .machine-note { font-size: 14px; color: var(--ink-3); }
 
-  /* Three plain panels in a row on paper, divided by vertical hairlines and framed by one. No cards, no
-     shadows, no radius: the drum is the only thing in here that is allowed an edge of its own. */
+  /* Three panels in a row on paper, divided by vertical hairlines and framed by one. No cards and no
+     shadows: each reel is a section of a wheel, and the wheel is the only object here with an edge. */
   .reels {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     background: var(--paper);
     border: 1px solid var(--rule);
   }
-  .reel { display: flex; flex-direction: column; gap: 14px; padding: 22px 24px 26px; }
+  /* The wheel's geometry is written in cqw - percentages of the window's own width (see .rm-window, which
+     is the container) - so one set of numbers draws the same wheel at every page width. Sixteen sectors to
+     a wheel, so three of them are in view at once: a real wheel of fortune's sectors are far too narrow to
+     carry a name. */
+  .reel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px 24px 18px;
+  }
   .reel + .reel { border-left: 1px solid var(--rule); }
   .reel-label {
     display: flex;
@@ -171,65 +177,104 @@
   .held svg { width: 15px; height: 15px; }
   .held .rm-shackle { transform-origin: 17px 11px; }
 
-  /* The drum: white ground and a 1px rule, with the module's strip inside it. The height is the entry
-     height plus the border, so a resting entry measures exactly one item and the strip's last frame
-     lands on the pixel the still reel uses. */
+  /* The window is a slice of the wheel: deep enough for one name and the wedges beneath it, and it clips
+     everything the hub and the far side of the wheel would otherwise show. 2.092:1 is 47.8% as deep as it
+     is wide, which is what carries the rim's arc across the top of it; the max-width keeps a stacked wheel
+     from growing into a fairground ride once one panel has the column to itself. */
+  [data-mount="window"] { position: relative; }
   .rm-window {
     position: relative;
-    height: calc(var(--item-h) + 2px);
+    /* The wheel's own ruler: everything inside is a percentage of this box. */
+    container-type: inline-size;
+    max-width: 520px;
+    margin-inline: auto;
+    aspect-ratio: 2.092 / 1;
     overflow: hidden;
     background: var(--white);
     border: 1px solid var(--rule);
+
+    --sector-deg: 22.5deg;
+    --rim-r: 136.8cqw;      /* hub to rim: the arc crosses the top of the window at its centre */
+    --hub-drop: 89cqw;      /* how far below the window the hub sits, out of sight */
+    --sector-r: 112.8cqw;   /* hub to the middle of a name */
+    --sector-w: 44cqw;
+    --sector-h: 15cqw;
   }
-  .rm-strip { will-change: transform; }
-  /* The lips of the drum, shown only while it is moving: on paper a permanent gradient would read as a
-     shadow, and this page has none. */
-  .rm-window::after {
+  /* The hub: a zero-sized element below the bottom edge of the window, at the distance the geometry
+     above assumes. The module rotates this, so the names and the wheel hung off it turn together. */
+  .rm-strip {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + var(--hub-drop));
+    width: 0;
+    height: 0;
+    will-change: transform;
+  }
+  /* The wheel, drawn as one circle centred on the hub: alternating wedges, and the pale amber wedge the
+     chosen sector arrives on. Amber at zero degrees is the pointer's own angle, so the wedge and the
+     name that lands there are always the same sector. A pseudo-element, so the module's replaceChildren
+     on every spin cannot take it with them. */
+  .rm-strip::before {
     content: "";
     position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .25s ease;
-    background: linear-gradient(var(--paper), rgba(250, 248, 244, 0) 22%, rgba(250, 248, 244, 0) 78%, var(--paper));
+    left: 0;
+    top: 0;
+    width: calc(2 * var(--rim-r));
+    height: calc(2 * var(--rim-r));
+    margin-left: calc(-1 * var(--rim-r));
+    margin-top: calc(-1 * var(--rim-r));
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    background:
+      conic-gradient(from calc(-0.5 * var(--sector-deg)), rgba(249, 169, 31, 0.17) 0 var(--sector-deg), rgba(0, 0, 0, 0) var(--sector-deg)),
+      repeating-conic-gradient(from calc(0.5 * var(--sector-deg)), rgba(0, 0, 0, 0.035) 0 var(--sector-deg), rgba(0, 0, 0, 0) var(--sector-deg) calc(2 * var(--sector-deg)));
   }
-  .reel.is-spinning .rm-window::after { opacity: 1; }
-  .reel.is-spinning .rm-window { border-color: var(--rule-strong); }
-  /* Motion blur only while the reel is genuinely fast; the module drops the class before it stops, so the
-     last frames are sharp. */
-  .rm-strip.is-moving .ed-item { filter: blur(0.6px); }
-
-  .ed-item {
-    height: var(--item-h);
+  /* One name per sector, placed by --rm-angle: turn the box about the hub, then walk it out along its
+     own ray, so it leans with its sector the way a name on a real wheel does. */
+  .sector {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--sector-w);
+    height: var(--sector-h);
+    margin-left: calc(var(--sector-w) / -2);
+    margin-top: calc(var(--sector-h) / -2);
+    transform-origin: 50% 50%;
+    transform: rotate(var(--rm-angle, 0deg)) translateY(calc(-1 * var(--sector-r)));
     display: flex;
-    flex-direction: column;
-    gap: 11px;
-    padding: 13px;
-    transition: filter .35s ease-out;
-  }
-  .ed-item .rm-pic {
-    position: relative;
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow: hidden;
-    display: grid;
-    place-items: center;
-    background: var(--paper-2);
-  }
-  .ed-item .rm-pic img { width: 100%; height: 100%; object-fit: cover; }
-  /* The placeholder the module hands every page while /concepts/_media/randomiser/ is still empty, on a
-     light ground: the initials in ink, the note in the secondary grey - both comfortably AA on paper. */
-  .ed-item .rm-ph {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-family: var(--display);
+    font-weight: 700;
+    /* The wheel is drawn in cqw, so its names have to be too: at three across a name is 14px, and on the
+       phone-width page, where one wheel has the full column to itself, the same name reads at 26px. */
+    font-size: clamp(13px, 4.4cqw, 26px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     color: var(--ink-3);
+    overflow-wrap: break-word;
   }
-  .ed-item .rm-initials { font-family: var(--display); font-weight: 700; font-size: 32px; line-height: 1; letter-spacing: -0.03em; color: var(--ink); }
-  .ed-item .rm-coming { font-weight: 700; font-size: 10px; line-height: 1; letter-spacing: 0.14em; text-transform: uppercase; }
-  .ed-item .nm { font-family: var(--display); font-weight: 700; font-size: 17px; line-height: 1.3; letter-spacing: -0.01em; overflow-wrap: break-word; }
-  .ed-item .kind { font-weight: 700; font-size: 10.5px; line-height: 1; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber-deep); }
-  .ed-item.is-empty .rm-pic { background: none; border: 1px dashed rgba(0, 0, 0, 0.18); }
-  .ed-item.is-empty .nm { color: var(--ink-3); font-weight: 600; }
+  /* The sector the wheel is about to settle on is ink where its neighbours are grey: the reel says
+     which name it is bringing round before it gets there. */
+  .sector.is-chosen { color: var(--ink); }
+  .sector.is-empty { font-weight: 600; }
+  /* A breath of blur while the wheel is genuinely fast; the module drops the class before it stops, so the
+     last frames and the name that lands are sharp. On paper anything heavier than this reads as a smudge. */
+  .rm-strip.is-moving .sector { filter: blur(0.4px); }
+  /* The pointer sits on the window's top edge, which is exactly where the arc's apex is. */
+  .pointer {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    z-index: 2;
+    width: 0;
+    height: 0;
+    transform: translate(-50%, -1px);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 8px solid var(--amber);
+  }
 
   /* The lock is a text button, not a control panel: underlined ink that turns the deep amber while it is
      holding. The module owns aria-pressed and the disabled state. */
@@ -369,11 +414,9 @@
     .result-actions .btn-roll { width: 100%; }
   }
   @media (max-width: 460px) {
-    :root { --item-h: 11rem; }
-    .bar-title { display: none; }
-    .ed-item .nm { font-size: 16px; }
-    .ed-item .rm-initials { font-size: 28px; }
-    .reel { padding: 18px 18px 22px; }
+    /* The wheel is drawn in cqw, so it shrinks with its own window on its own; only the room around it
+       needs tightening. */
+    .reel { padding: 18px 18px 16px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -414,17 +457,17 @@
     <div class="reels" id="reels">
       <article class="reel" data-reel="f">
         <p class="reel-label">Flavour or brand<span class="held" aria-hidden="true"></span></p>
-        <div data-mount="window"></div>
+        <div data-mount="window"><span class="pointer" aria-hidden="true"></span></div>
         <button class="hold" data-lock type="button"><span data-lock-text>Hold this</span></button>
       </article>
       <article class="reel" data-reel="t">
         <p class="reel-label">Game type<span class="held" aria-hidden="true"></span></p>
-        <div data-mount="window"></div>
+        <div data-mount="window"><span class="pointer" aria-hidden="true"></span></div>
         <button class="hold" data-lock type="button"><span data-lock-text>Hold this</span></button>
       </article>
       <article class="reel" data-reel="h">
         <p class="reel-label">Hook<span class="held" aria-hidden="true"></span></p>
-        <div data-mount="window"></div>
+        <div data-mount="window"><span class="pointer" aria-hidden="true"></span></div>
         <button class="hold" data-lock type="button"><span data-lock-text>Hold this</span></button>
       </article>
     </div>
@@ -511,7 +554,7 @@
 /* The machine is public/js/reel-machine.js: the same data, the same reels, the same locks, the same URL
    hash and the same end-of-spin frame as Randomisers 1 to 5, so this design is only its looks, its words
    and where the result goes. Nothing below re-implements a spin, a lock or a hash. */
-import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+import { createMachine, PADLOCK } from '../../js/reel-machine.js';
 
 const $ = id => document.getElementById(id);
 const rollBtn = $('roll'), rollAgainBtn = $('roll-again'), unlockBtn = $('unlock-all');
@@ -531,33 +574,29 @@ const STATUS = {
    screen while the module keeps ownership of aria-pressed, the aria-label and the disabled state. */
 const holdWords = locked => (locked ? 'Release' : 'Hold this');
 
-/* ---------- one entry in a drum ---------- */
-function renderEntry(entry) {
-  const item = document.createElement('div');
-  item.className = 'ed-item';
+/* ---------- one sector of a wheel ---------- */
+/* How the wheel is cut. The CSS draws its wedges at the same spacing, so these two have to agree with
+   --sector-deg: change one and the names stop landing in the middle of their own wedges. */
+const WHEEL_SECTORS = 8;
+const WHEEL_DEGREES = 22.5;
+const CHOSEN = WHEEL_SECTORS / 2;   // the middle sector: the one the wheel settles on, at the pointer
+
+/* A wheel has no room for a picture - a thumbnail in a wedge this size would be a smudge - so a sector
+   is its name and nothing else, and the panel's own label says which reel it came from. `index` is where
+   the sector sits in the wheel the module is turning. */
+function renderEntry(entry, key, index) {
+  const sector = document.createElement('span');
+  sector.className = 'sector';
+  if (index === CHOSEN) sector.classList.add('is-chosen');
   if (!entry) {
-    /* Nothing rolled yet: a quiet plate rather than an invented entry. */
-    item.classList.add('is-empty');
-    const pic = document.createElement('div');
-    pic.className = 'rm-pic';
-    const nm = document.createElement('span');
-    nm.className = 'nm';
-    nm.textContent = 'Roll to start';
-    item.append(pic, nm);
-    return item;
+    /* Nothing rolled yet: only the sector under the pointer says anything, and the rest of the wheel is
+       bare rather than filled with repeated instructions. */
+    sector.classList.add('is-empty');
+    if (index === CHOSEN) sector.textContent = 'Roll to start';
+    return sector;
   }
-  const nm = document.createElement('span');
-  nm.className = 'nm';
-  nm.textContent = entry.name;
-  item.append(entryImage(entry));   // the module's picture, or its placeholder while the art is missing
-  if (entry.kind === 'brand') {
-    const kind = document.createElement('span');
-    kind.className = 'kind';
-    kind.textContent = 'Brand';
-    item.append(kind);
-  }
-  item.append(nm);
-  return item;
+  sector.textContent = entry.name;
+  return sector;
 }
 
 /* ---------- the page's reaction to the machine's state ---------- */
@@ -599,6 +638,14 @@ function onResult(r) {
 
 const machine = await createMachine({
   root: $('reels'),
+  /* The reels are sections of a wheel, not drums: the module builds a wheel, gives each sector its
+     --rm-angle and turns the whole thing back to the pointer, so no part of this page measures or
+     animates anything itself. Eight sectors 22.5 degrees apart put the chosen name under the pointer
+     with its two neighbours either side of it - the wheel's geometry lives in the CSS. */
+  geometry: 'wheel',
+  wheelSectors: WHEEL_SECTORS,
+  wheelDegrees: WHEEL_DEGREES,
+  wheelTurns: 3,
   spinButtons: [rollBtn, rollAgainBtn],
   unlockButton: unlockBtn,
   status: statusEl,
