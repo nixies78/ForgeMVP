@@ -16,12 +16,13 @@
   }
   /* Randomiser 2b - Compact widget.
      Randomiser 2's colours, effects and page, with one thing changed: the three reels are no longer three
-     tiles with a drum each. They sit inside ONE panel - a head, one row of three columns with their own
-     count and their own hold button, and a single control bar - so the machine is one object you read at
-     a glance instead of three columns you scan across. The structure is Randomiser 5's, which is the
-     tightest page in the set; the arrangement is all it borrows, because a terminal's rules and a fruit
-     machine's cabinet are not this page's clothes. The question this page asks is whether one widget
-     reads better than three tiles; everything else is deliberately Randomiser 2. */
+     tiles with a drum each. They sit inside ONE panel - a head, one row of three reels divided by
+     hairlines, a count and a hold button in each, and a single control bar - so the machine is one object
+     you read at a glance instead of three cards you scan across. The arrangement of the row is Randomiser
+     5's, which is the tightest page in the set; the rules are this page's own, because a line is what makes
+     three reels read as three reels. The one line the page does without is the one between the machine and
+     the pitch: the pitch is what the machine just produced. The question this page asks is whether one
+     widget reads better than three tiles; everything else is deliberately Randomiser 2. */
   :root {
     --bg: #101014;
     --tile: #18181C;
@@ -136,24 +137,25 @@
   .panel-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
   .rig-hint { margin: 0; color: var(--dim); font-size: 13px; }
 
-  /* The window: three columns in one row, separated by space rather than by rules. This is the whole idea
-     of the page - the three reels as one window rather than three cards - and the page has exactly one
-     line in it, the panel's own frame. Everything inside is told apart by its inset, its label and its
-     spacing. */
-  .drum {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 18px;
-    padding: 0 20px 16px;
-  }
+  /* The window: three reels in one row, divided by hairlines. This is the whole idea of the page - the
+     three reels as one window rather than three cards - and the hairlines are what make the row readable
+     as three reels instead of one long strip of names. */
+  .drum { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); }
   .col {
     position: relative;
     display: flex; flex-direction: column; gap: 10px;
+    /* The same 20px inset the panel's head and foot use, so the reel labels line up with "The reels". */
+    padding: 12px 20px 14px;
     transition: background .4s var(--ease);
   }
-  /* A reel that is holding: indigo wash on its own well and an indigo HOLD button. The state is visible on
+  .col + .col { border-left: 1px solid var(--line); }
+  /* A reel that is holding: indigo wash, indigo edge along the top of its column. The state is visible on
      the reel itself rather than only on the button that set it. */
-  .col.is-locked .rm-window { background: rgba(134, 138, 253, .10); }
+  .col.is-locked { background: rgba(134, 138, 253, .05); }
+  .col.is-locked::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 1px; z-index: 2;
+    background: linear-gradient(90deg, transparent, var(--accent-2), transparent);
+  }
   /* The column's head carries the reel's name and its size, like the terminal page's: the count belongs
      with the drum it counts. */
   .col-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
@@ -161,15 +163,18 @@
   .col-count { margin: 0; font-size: 11px; letter-spacing: .04em; color: var(--dim); white-space: nowrap; }
   .col-count b { font-weight: 700; color: #fff; }
 
-  /* The well: a darker inset with no border, because the panel already has the only frame on the page. */
+  /* --item-h plus the window's own border, so a resting entry is exactly one item tall and the strip's
+     last frame lands on the pixel the resting reel uses. */
   .rm-window {
     position: relative;
-    height: var(--item-h);
+    height: calc(var(--item-h) + 2px);
     overflow: hidden;
     border-radius: 12px;
     background: var(--bg);
-    transition: background .3s;
+    border: 1px solid rgba(255, 255, 255, .10);
+    transition: border-color .3s, box-shadow .3s;
   }
+  .col.is-locked .rm-window { border-color: rgba(134, 138, 253, .5); box-shadow: inset 0 0 0 1px rgba(134, 138, 253, .18); }
   /* Shading at the top and bottom of the drum while it is moving, so the strip reads as a reel. */
   .rm-window::after {
     content: "";
@@ -249,20 +254,20 @@
   .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
   .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
 
-  /* One control bar for the whole machine - the other half of "one widget". No rule above it: the bar is
-     told apart by the space around it and by its own button. */
+  /* One control bar for the whole machine - the other half of "one widget". */
   .rig-foot {
     display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
-    padding: 6px 20px 18px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--line);
   }
   .rig-foot .btn-primary { padding: 15px 28px; font-size: 15.5px; }
   .status { margin: 0 0 0 auto; color: var(--muted); font-size: 13px; text-align: right; min-height: 1.4em; }
   .status.is-error { color: #FE8989; }
 
   /* ---------- The result ---------- */
-  /* No rule between the reels and the pitch: the pitch is what the machine just produced, and a line
-     across the page only pushed the two apart. */
-  .result { padding-block: 26px 30px; text-align: center; transition: opacity .2s; }
+  /* The one rule the page does without: the pitch is what the machine just produced, and a line across the
+     page only pushed the two apart. */
+  .result { padding-block: 30px 34px; text-align: center; transition: opacity .2s; }
   .result.stale { opacity: .45; }
   .eyebrow { font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
   /* Randomiser 1's strapline at Randomiser 1's size - 36px at the top of its range, under the page's own
@@ -278,34 +283,33 @@
   }
   /* The hook is a line of its own, never the tail of the sentence above it. */
   .hook-line { display: block; }
-  /* The three facts. Three columns and no rules at all: the labels line up across the row, which is what
-     the hairlines were doing the work of. */
-  .details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 34px; text-align: left; }
-  .detail { padding: 0; }
+  /* The three facts, in the quiet strip concept 8 uses for its numbers: a rule above and below, and a
+     hairline between the columns. Without them three columns of prose read as one paragraph. */
+  .details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); text-align: left; }
+  .detail { padding: 14px 22px; }
+  .detail + .detail { border-left: 1px solid var(--line); }
   .detail h3 { font-family: var(--title); font-weight: 700; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 6px; }
   .detail p { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0; }
-  .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; margin-top: 24px; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; margin-top: 20px; }
   .note { flex-basis: 100%; color: var(--muted); font-size: 13px; margin: 0; min-height: 1.4em; }
 
   /* ---------- How this works ---------- */
-  .guide { padding-block: 40px 0; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; }
+  .guide { padding-block: 44px 0; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; }
   .guide h2 { font-family: var(--title); font-weight: 700; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.025em; margin: 14px 0 0; }
-  .steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
-  .steps li { position: relative; padding-left: 30px; }
-  /* A dot per step, sitting on the first line of its heading. The dots used to be joined by a vertical
-     rule, which was one more line on a page that is trying to have none. */
-  .steps li::after {
-    content: "";
-    position: absolute; left: 0; top: 5px;
-    width: 11px; height: 11px; border-radius: 50%;
-    background: var(--accent);
-  }
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li { position: relative; padding: 0 0 18px 40px; }
+  .steps li:last-child { padding-bottom: 0; }
+  /* The line through the dots is what makes the three steps read as one sequence rather than three notes
+     that happen to be near each other. */
+  .steps li::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: -6px; width: 1px; background: var(--line); }
+  .steps li:last-child::before { display: none; }
+  .steps li::after { content: ""; position: absolute; left: 0; top: 8px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--bg); }
   .steps li:last-child::after { background: var(--accent-2); }
   .steps h3 { font-weight: 700; font-size: 18px; margin: 0 0 2px; letter-spacing: -0.01em; }
   .steps p { color: var(--muted); margin: 0; }
 
   /* ---------- Close ---------- */
-  .close { padding-block: 40px 60px; text-align: center; margin-top: 48px; }
+  .close { padding-block: 44px 60px; text-align: center; border-top: 1px solid var(--line); margin-top: 44px; }
   .close h2 { font-family: var(--title); font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 18px; }
 
   .tag {
@@ -314,16 +318,19 @@
     background: rgba(24, 24, 28, .9); border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px;
   }
 
-  /* On a phone three 100px-wide wells cannot hold a name, so the one panel keeps its frame and stacks its
-     three reels - with the same gaps doing the separating, so nothing new has to be drawn. */
+  /* On a phone three 100px-wide drums cannot hold a name, so the one window keeps its frame and stacks its
+     three reels: the hairline becomes a horizontal one, and it is still one widget read top to bottom. */
   @media (max-width: 620px) {
-    .drum { grid-template-columns: 1fr; gap: 20px; }
+    .drum { grid-template-columns: 1fr; }
+    .col + .col { border-left: 0; border-top: 1px solid var(--line); }
     .rig-foot .btn { width: 100%; }
     .status { margin-inline: 0; text-align: left; }
-    .details { grid-template-columns: 1fr; gap: 22px; }
+    .details { grid-template-columns: 1fr; }
+    .detail { padding: 12px 0; }
+    .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
     .actions .btn { width: 100%; }
-    .guide { grid-template-columns: 1fr; gap: 28px; padding-block: 32px 0; }
-    .close { padding-block: 32px 48px; margin-top: 36px; }
+    .guide { grid-template-columns: 1fr; gap: 28px; padding-block: 34px 0; }
+    .close { padding-block: 34px 48px; margin-top: 34px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
