@@ -42,8 +42,10 @@
  * `geometry: 'wheel'` is the same machine served on an arc - the reels as sections of a wheel of
  * fortune. The module builds a wheel of `wheelSectors` entries with the chosen one in the MIDDLE
  * sector, sets `--rm-angle` on each entry (`(index - middle) * wheelDegrees`, measured from the
- * pointer, which is straight up), and spins by ROTATING the strip to zero. Nothing about the reels,
- * locks, hash or the choice itself changes: a page only has to place the hub and the sectors.
+ * pointer), and spins by ROTATING the strip to zero. It does not glide to a stop: the last
+ * `wheelTicks` sectors are turned one at a time, each easing in and out, so the wheel ticks its way
+ * round its final steps the way the one on television does. Nothing about the reels, locks, hash or
+ * the choice itself changes: a page only has to place the hub and the sectors.
  *
  * The page owns that placement, because it is the look. The shape the module expects, with the hub at
  * the bottom-centre of the window:
@@ -169,6 +171,7 @@ export async function createMachine(options) {
     wheelSectors = 8,                          // sectors a wheel draws, the chosen one in the middle
     wheelDegrees = 360 / wheelSectors,         // the angle between two sector centres
     wheelTurns = 3,                            // full turns before a wheel settles
+    wheelTicks = 3,                            // of those turns, the last sectors it ticks round one at a time
     renderEntry = entry => entryImage(entry),
     onState = () => {},
     onResult = () => {},
@@ -356,6 +359,33 @@ export async function createMachine(options) {
     paint();
   }
 
+  /** The keyframes a wheel turns on: a sweep that gives up its speed, then one segment per sector over the
+   *  last few sectors, each easing in and out. That pause at the end of every segment is the tick - the
+   *  wheel moves a sector, stops, moves a sector, stops - which is how a wheel of fortune lets you count
+   *  the last two or three steps instead of gliding into the answer. The final tick swings a hair past its
+   *  sector and settles back, the way a pointer does. */
+  function wheelFrames(turns, degrees, ticks) {
+    const spin = -360 * turns;
+    const handOver = -ticks * degrees;         // where the sweep gives up and the ticks take over
+    const sweep = 0.58;                        // of the whole duration: the fast part, then the counting
+    const frames = [
+      { transform: `rotate(${spin}deg)`, easing: 'cubic-bezier(.17, .6, .4, 1)' },
+      { transform: `rotate(${handOver}deg)`, offset: sweep, easing: 'cubic-bezier(.3, .02, .4, 1)' }
+    ];
+    for (let tick = 1; tick <= ticks; tick += 1) {
+      const angle = handOver + tick * degrees;
+      const offset = sweep + ((1 - sweep) * tick) / ticks;
+      if (tick === ticks) {
+        // The last sector: past it by a degree and back, landing on exactly zero.
+        frames.push({ transform: `rotate(${angle + 1}deg)`, offset: Math.max(sweep, offset - 0.03), easing: 'cubic-bezier(.4, 0, .6, 1)' });
+        frames.push({ transform: 'rotate(0deg)', offset: 1 });
+      } else {
+        frames.push({ transform: `rotate(${angle}deg)`, offset, easing: 'cubic-bezier(.3, .02, .4, 1)' });
+      }
+    }
+    return frames;
+  }
+
   /** A wheel coming to rest: fresh sectors with the chosen entry in the middle one, turned from a few
    *  full turns back to zero. No measurement is needed - the geometry is known - and zero is the angle
    *  the resting wheel sits at, so the last frame of the animation is the still frame. */
@@ -373,11 +403,7 @@ export async function createMachine(options) {
       strip.classList.add('is-moving');
       strip.style.transition = 'none';
       strip.style.transform = `rotate(${-360 * wheelTurns}deg)`;
-      // A wheel decelerates and stops: heavy at the start, long and slow at the end.
-      const anim = strip.animate([
-        { transform: `rotate(${-360 * wheelTurns}deg)`, easing: 'cubic-bezier(.12, .66, .16, 1)' },
-        { transform: 'rotate(0deg)' }
-      ], { duration, fill: 'forwards' });
+      const anim = strip.animate(wheelFrames(wheelTurns, wheelDegrees, wheelTicks), { duration, fill: 'forwards' });
 
       const unblur = setTimeout(() => strip.classList.remove('is-moving'), duration * 0.55);
 
