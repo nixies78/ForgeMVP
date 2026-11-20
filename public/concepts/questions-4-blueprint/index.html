@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 4 - Blueprint · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<style>
+  /* Questions 4 - Blueprint.
+   *
+   * The material is a technical drawing, and the page is drawn rather than filled: a graph-grid sheet, blue
+   * ink, dimension lines with an arrowhead at each end, an item schedule with spec numbers, drafting
+   * lettering in caps for every label, and a title block in the bottom-right corner.
+   *
+   * The recorded direction for a blueprint page was "deep blue graph paper with white and cyan ink". That
+   * is still a dark page, and this slot in the set exists to move away from dark, so the sheet is drawn on
+   * white drafting stock instead and the deep blue is quoted once - in the title block, where a real
+   * drawing puts its heaviest ink. Same material, the sheet turned over.
+   *
+   * Frame, as on every page here: a 72px bar, the 44px Epic mark in black because the stock is light, the
+   * 1136px column, chrome.css last. No footer: this is a screen of the app. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: light;
+    --desk: #E4EAF0;        /* the desk the sheet lies on */
+    --sheet: #FAFCFE;       /* drawing stock */
+    --grid-1: rgba(37, 140, 187, .13);
+    --grid-2: rgba(37, 140, 187, .24);
+    --ink: #123A6E;         /* blueprint blue: 11.5:1 on the sheet */
+    --ink-2: #3B6389;       /* 6.4:1 - dimension text */
+    --accent: #33BFFF;      /* blue-400: lines and fills, never small text */
+    --accent-text: #185977; /* blue-200: the same idea, dark enough to read */
+    --stamp: #BA4545;       /* red-300: the draft stamp */
+    --deep: #123A6E;        /* the one deep-blue surface: the title block */
+    --rule: rgba(18, 58, 110, .45);
+    --tech: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--desk); }
+  body {
+    margin: 0;
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding-block: 0 72px;
+  }
+  a { color: inherit; }
+
+  /* ---------- the 72px bar ---------- */
+  header {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* ---------- drafting lettering: every label on this page ---------- */
+  .tech {
+    font-family: var(--tech);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin: 0;
+  }
+
+  /* ---------- the sheet ---------- */
+  .sheet {
+    margin: 30px 0 0;
+    padding: clamp(18px, 2.4vw, 34px);
+    background-color: var(--sheet);
+    background-image:
+      repeating-linear-gradient(0deg, var(--grid-1) 0 1px, transparent 1px 8px),
+      repeating-linear-gradient(90deg, var(--grid-1) 0 1px, transparent 1px 8px),
+      repeating-linear-gradient(0deg, var(--grid-2) 0 1px, transparent 1px 40px),
+      repeating-linear-gradient(90deg, var(--grid-2) 0 1px, transparent 1px 40px);
+    border: 1.5px solid var(--ink);
+    box-shadow: 6px 8px 0 rgba(18, 58, 110, .10);
+    display: grid;
+    gap: clamp(16px, 2vw, 26px);
+  }
+  .sheet-head {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+  }
+  .sheet-head .drawing { font-family: var(--title); font-weight: 700; font-size: 15px; letter-spacing: -.01em; margin: 0; }
+
+  /* ---------- a dimension line: a rule with an arrowhead at each end ---------- */
+  .dim { display: flex; align-items: center; gap: 10px; height: 20px; color: var(--ink-2); }
+  .dim .lbl {
+    font-family: var(--tech); font-size: 10px; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; color: var(--ink-2);
+  }
+  .dim .rule { position: relative; flex: 1 1 auto; height: 1px; background: var(--ink-2); }
+  .dim .rule::before, .dim .rule::after {
+    content: ""; position: absolute; top: -4px;
+    border-block: 4px solid transparent;
+  }
+  .dim .rule.l::before { left: 0; border-right: 7px solid var(--ink-2); }
+  .dim .rule.r::after { right: 0; border-left: 7px solid var(--ink-2); }
+
+  /* ---------- the question, as item 1 of the drawing ---------- */
+  .qblock h1 {
+    font-family: var(--title);
+    font-weight: 700;
+    font-size: clamp(25px, 2.6vw, 40px);
+    line-height: 1.06;
+    letter-spacing: -.028em;
+    margin: 10px 0 0;
+    max-width: 24em;
+  }
+  .qblock h1:focus { outline: none; }
+  .sub { color: var(--ink-2); font-size: clamp(15px, 1.1vw, 17px); margin: 10px 0 0; max-width: 48em; }
+
+  /* ---------- the scale bar: progress, drawn the way a scale is drawn ---------- */
+  .scalerow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+  .scale {
+    position: relative; flex: 1 1 320px; min-width: 200px; height: 26px;
+    background: #fff;
+    border: 1px solid var(--ink);
+    overflow: hidden;
+  }
+  .scale .ticks {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(90deg, rgba(18, 58, 110, .5) 0 1px, transparent 1px 5%);
+  }
+  /* A section cut is hatched, so the filled part of a scale is hatched too. */
+  .scale .fill {
+    position: absolute; inset: 0 auto 0 0; width: 4%;
+    background: repeating-linear-gradient(45deg, rgba(51, 191, 255, .75) 0 3px, rgba(51, 191, 255, .3) 3px 6px);
+    border-right: 1px solid var(--accent-text);
+    transition: width .4s var(--ease);
+  }
+  .scale .scale-label {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-family: var(--tech); font-size: 10px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--ink);
+  }
+
+  /* ---------- the item schedule ---------- */
+  .items {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .item {
+    position: relative;
+    width: 100%; height: 100%; min-height: 142px;
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: rgba(255, 255, 255, .72);
+    border: 1px solid var(--ink);
+    border-radius: 0; /* a drawing has no rounded corners */
+    padding: 14px 14px 12px;
+    display: flex; flex-direction: column;
+    transition: background .15s, box-shadow .15s;
+  }
+  .item:hover { background: #fff; box-shadow: 3px 3px 0 rgba(18, 58, 110, .16); }
+  /* The chosen item is picked out the way a drawing picks one out: a second rule inside the first, a
+     cyan corner tick and the word SELECTED against a leader line. No fill change, because there are no
+     fills on this page. */
+  .item[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--accent), 3px 3px 0 rgba(51, 191, 255, .35); }
+  .item[aria-pressed="true"]::before {
+    content: ""; position: absolute; top: 0; right: 0; width: 0; height: 0;
+    border-top: 14px solid var(--accent); border-left: 14px solid transparent;
+  }
+  .item .no {
+    font-family: var(--tech); font-size: 10.5px; font-weight: 700; letter-spacing: .12em;
+    color: var(--ink-2);
+  }
+  .item[aria-pressed="true"] .no { color: var(--accent-text); }
+  .item .t {
+    font-family: var(--title); font-weight: 700; font-size: clamp(16px, 1.3vw, 20px);
+    line-height: 1.16; letter-spacing: -.02em; margin-top: 8px;
+  }
+  /* the leader line, drawn from the title down to the measurement */
+  .item .d { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 8px 0 0; }
+  .item .sel {
+    display: none; align-items: center; gap: 8px; margin-top: auto; padding-top: 12px;
+    font-family: var(--tech); font-size: 10px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent-text);
+  }
+  .item .sel::before { content: ""; width: 14px; height: 1px; background: var(--accent-text); }
+  .item[aria-pressed="true"] .sel { display: flex; }
+  .item .stamp {
+    position: absolute; top: 24px; right: 12px;
+    font-family: var(--tech); font-size: 9.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--stamp); border: 1px solid var(--stamp); border-radius: 2px; padding: 2px 5px;
+    transform: rotate(-4deg); opacity: .9;
+  }
+
+  /* ---------- the annotation, where a drawing would put a note ---------- */
+  .note {
+    display: flex; align-items: flex-start; gap: 12px;
+    margin: 0; padding: 12px 14px;
+    border: 1px dashed var(--rule);
+    background: rgba(255, 255, 255, .6);
+    color: var(--ink); font-size: 13.5px;
+  }
+  /* An author rule beats the UA stylesheet's [hidden] { display: none }, so a flex display here would
+     leave an empty NOTES box on the sheet at Step 1, where there is nothing to say yet. */
+  .note[hidden] { display: none; }
+  .note::before {
+    content: "Note";
+    font-family: var(--tech); font-size: 9.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent-text); border-right: 1px solid var(--rule); padding-right: 12px; flex: none;
+  }
+  .note.error { color: #7E2A2A; border-color: rgba(186, 68, 68, .6); }
+  .note.error::before { color: #7E2A2A; }
+
+  /* ---------- the foot of the sheet: the controls, and the title block ---------- */
+  .sheet-foot {
+    display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 18px 24px;
+    border-top: 1px solid var(--rule); padding-top: 18px;
+  }
+  .plates { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .plate {
+    display: inline-flex; align-items: center; gap: 10px;
+    text-decoration: none; cursor: pointer;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    border-radius: 0;
+    padding: 10px 14px;
+    box-shadow: 3px 3px 0 rgba(18, 58, 110, .14);
+    transition: box-shadow .15s, transform .12s, background .15s;
+  }
+  .plate:hover { background: #fff; box-shadow: 4px 4px 0 rgba(18, 58, 110, .22); }
+  .plate:active { transform: translate(2px, 2px); box-shadow: none; }
+  .plate .lbl { display: flex; flex-direction: column; }
+  .plate .lbl b {
+    font-family: var(--tech); font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  }
+  .plate .lbl span { font-size: 11px; color: var(--ink-2); }
+  /* the revision box: a ticked box is how a drawing says yes */
+  .revbox {
+    display: inline-flex; align-items: center; gap: 10px;
+    font: inherit; cursor: pointer;
+    background: #fff; border: 1.5px solid var(--ink); border-radius: 0;
+    padding: 10px 14px;
+    box-shadow: 3px 3px 0 rgba(18, 58, 110, .14);
+    transition: box-shadow .15s, transform .12s;
+  }
+  .revbox:active { transform: translate(2px, 2px); box-shadow: none; }
+  .revbox .box {
+    width: 15px; height: 15px; flex: none;
+    border: 1.5px solid var(--ink);
+    display: grid; place-items: center;
+    font-size: 11px; line-height: 1; color: transparent;
+  }
+  .revbox[aria-pressed="true"] .box { color: var(--accent-text); background: rgba(51, 191, 255, .18); }
+  .revbox .lbl {
+    font-family: var(--tech); font-size: 11px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase;
+  }
+
+  .titleblock {
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+    background: var(--deep); color: #fff;
+    border: 1.5px solid var(--ink);
+    min-width: 300px;
+  }
+  .titleblock .cell { padding: 8px 12px; border-right: 1px solid rgba(255, 255, 255, .35); border-bottom: 1px solid rgba(255, 255, 255, .35); }
+  .titleblock .cell:nth-child(2n) { border-right: 0; }
+  .titleblock .cell:nth-child(n + 3) { border-bottom: 0; }
+  .titleblock .k {
+    display: block; font-family: var(--tech); font-size: 9px; font-weight: 600; letter-spacing: .18em;
+    text-transform: uppercase; color: rgba(255, 255, 255, .72);
+  }
+  .titleblock .v { display: block; font-family: var(--tech); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+
+  .item:focus-visible, .plate:focus-visible, .revbox:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  /* ---------- the tag every mock-up carries: a pencil note in the margin ---------- */
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-family: var(--tech); font-size: 10.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink); background: rgba(255, 255, 255, .94);
+    border: 1px solid var(--ink); padding: 7px 10px; pointer-events: none;
+  }
+
+  @media (max-width: 1020px) {
+    .items { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 700px) {
+    .sheet { margin-top: 22px; }
+    .items { grid-template-columns: 1fr; gap: 12px; }
+    .item { min-height: 0; }
+    .titleblock { min-width: 0; width: 100%; }
+    .plates { width: 100%; }
+    .plate, .revbox { flex: 1 1 auto; }
+    .sub { font-size: 15px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+  <section class="sheet">
+
+    <div class="sheet-head">
+      <p class="tech">Forge &middot; UEFN game guide</p>
+      <p class="drawing">Drawing Q-2 &mdash; programme selector</p>
+      <p class="tech">Sheet <span id="sheetNo">1</span> of 2 &middot; scale 1:1 &middot; units px</p>
+    </div>
+
+    <div class="dim" aria-hidden="true">
+      <span class="rule l"></span>
+      <span class="lbl">Grid &mdash; 3 columns &middot; 16 gutter</span>
+      <span class="rule r"></span>
+    </div>
+
+    <div class="qblock" aria-live="polite">
+      <p class="tech" id="itemLabel">Item 1.0 &middot; choose a category</p>
+      <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+      <p class="sub" id="sub">Pick the broad category first &mdash; you'll choose the exact game type next.</p>
+    </div>
+
+    <div class="scalerow">
+      <div class="scale" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Sheet 1 of 2">
+        <div class="ticks" aria-hidden="true"></div>
+        <div class="fill" id="progressFill"></div>
+        <span class="scale-label" id="scaleLabel">Sheet 1 of 2 &middot; 4%</span>
+      </div>
+      <p class="tech" id="countLabel">10 items</p>
+      <p class="tech">Design your game, then follow a step-by-step walkthrough &mdash; with video &mdash; to actually build it.</p>
+    </div>
+
+    <div class="dim" aria-hidden="true">
+      <span class="rule l"></span>
+      <span class="lbl">Item schedule</span>
+      <span class="rule r"></span>
+    </div>
+
+    <ul class="items" id="grid"></ul>
+
+    <p class="note" id="note" hidden></p>
+
+    <div class="sheet-foot">
+      <div class="plates">
+        <a class="plate" id="back" href="../../index.html#/home">
+          <span aria-hidden="true">&#9668;</span>
+          <span class="lbl"><b>Previous sheet</b><span id="backSub">Back to my games</span></span>
+        </a>
+        <button class="revbox" id="devMode" type="button" aria-pressed="false" title="Show draft game types too">
+          <span class="box" aria-hidden="true">&#10003;</span>
+          <span class="lbl">Show draft items</span>
+        </button>
+      </div>
+
+      <div class="titleblock">
+        <div class="cell"><span class="k">Drawn by</span><span class="v">Forge</span></div>
+        <div class="cell"><span class="k">Sheet</span><span class="v" id="titleSheet">1 of 2</span></div>
+        <div class="cell"><span class="k">Scale</span><span class="v">1:1</span></div>
+        <div class="cell"><span class="k">Status</span><span class="v">Issued for build</span></div>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<div class="tag">Questions 4 - Blueprint</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the schedule does load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

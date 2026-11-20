@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 3 - Cassette Deck · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<style>
+  /* Questions 3 - Cassette Deck.
+   *
+   * The first step away from the dark styling, and a change of material rather than of palette: the page
+   * is a 90s hi-fi unit, warm grey plastic with chunky bevels, a printed face plate, a serial number, a
+   * dark LCD window with amber numerals and a row of keys that latch when pressed. The screen a creator
+   * answers questions on is the deck; the deck is the interface.
+   *
+   * That is why the ground is light: this is a physical object sitting on a desk, not a dark UI. The one
+   * dark thing on the page is the LCD window, which is dark because a real one is - and it is where the
+   * progress lives.
+   *
+   * Only the frame is fixed and it is the app's own: a 72px bar, the 44px Epic mark (recoloured black,
+   * because the plastic is light), a 1136px column, chrome.css linked last. No footer: app screen. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  @font-face {
+    font-family: "Archivo Black";
+    src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2");
+    font-weight: 400; font-display: swap;
+  }
+  :root {
+    color-scheme: light;
+    --unit: #C9C4B8;        /* the side of the machine */
+    --face: #DED9CE;        /* the front face, raised */
+    --face-2: #E9E5DC;      /* a key, lighter than the face */
+    --recess: #C2BCAF;      /* the wells the display sits in */
+    --ink: #24221F;         /* printed text */
+    --ink-2: #4A463F;       /* printed secondary: 4.9:1 on the recess, 6.8:1 on the face. It was #55514A,
+                               which measured 3.9:1 on the display well - the lamps' own labels are 10px
+                               type and live there. */
+    --rule: rgba(0, 0, 0, .20);
+    --lit: #F9A91F;         /* amber-400: every lit thing on the deck */
+    --lcd: #17190F;         /* the window itself */
+    --seg: #FFC15A;         /* amber on the window - 9:1 */
+    --rec: #FD5E5E;         /* red-400: the record indicator */
+    --plate: "Archivo Black", "Arial Black", sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--unit); }
+  body {
+    margin: 0;
+    background: var(--unit);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding-block: 0 72px;
+  }
+  a { color: inherit; }
+
+  /* ---------- the 72px bar: the top face of the unit ---------- */
+  header {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--rule);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset;
+  }
+
+  /* ---------- printed type, the vocabulary the whole page uses ---------- */
+  .printed {
+    font-family: var(--plate);
+    text-transform: uppercase;
+    letter-spacing: .14em;
+    font-size: 10px;
+    color: var(--ink-2);
+    margin: 0;
+  }
+
+  /* ---------- the face of the machine ---------- */
+  .deck {
+    margin: 34px 0 0;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--face), #D5CFC3);
+    border: 1px solid var(--rule);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, .85) inset,
+      0 -2px 0 rgba(0, 0, 0, .08) inset,
+      0 20px 34px -26px rgba(0, 0, 0, .55);
+    padding: 20px;
+    display: grid;
+    gap: 18px;
+  }
+
+  /* the model plate, with the grille beside it */
+  .plate {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+    padding: 0 2px;
+  }
+  .plate .brandline { display: flex; align-items: baseline; gap: 10px; margin-right: auto; }
+  .model { font-family: var(--plate); text-transform: uppercase; letter-spacing: .1em; font-size: 14px; color: var(--ink); margin: 0; }
+  .grille {
+    height: 14px; flex: 1 1 120px; max-width: 320px; min-width: 90px;
+    border-radius: 3px;
+    background-image: repeating-linear-gradient(90deg, rgba(0, 0, 0, .32) 0 1px, rgba(255, 255, 255, .5) 1px 5px);
+    border: 1px solid var(--rule);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .7);
+  }
+
+  /* ---------- the display well: the only dark thing on the page ---------- */
+  .well {
+    background: var(--recess);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, .22);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .22), 0 1px 0 rgba(255, 255, 255, .7);
+    padding: 14px;
+    display: flex; flex-wrap: wrap; align-items: stretch; gap: 12px;
+  }
+  .lcd {
+    background: var(--lcd);
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, .55);
+    box-shadow: inset 0 2px 7px rgba(0, 0, 0, .85), 0 1px 0 rgba(255, 255, 255, .55);
+    padding: 9px 14px;
+    display: flex; flex-direction: column; justify-content: center; gap: 3px;
+    min-width: 132px;
+  }
+  .lcd .seg {
+    font-family: var(--plate); text-transform: uppercase;
+    letter-spacing: .1em; font-size: 12px; line-height: 1; color: var(--seg);
+  }
+  .lcd .big { font-family: var(--plate); letter-spacing: .06em; font-size: 30px; line-height: 1; color: var(--seg); }
+  .lcd .cap { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(255, 193, 90, .62); }
+  .lcd.wide { flex: 1 1 220px; }
+
+  /* the level meter: one segment per 2%, the counter's number is the same value. It runs the width of
+     the window because a real one does, and it is the only thing on the page that shows how far in you
+     are without reading a number. */
+  .meter { display: flex; align-items: flex-end; gap: 3px; margin-top: 9px; }
+  .meter i {
+    display: block; width: 100%; height: 12px; border-radius: 1px;
+    background: rgba(255, 193, 90, .16);
+    box-shadow: inset 0 0 0 1px rgba(255, 193, 90, .12);
+  }
+  .meter i.on { background: var(--seg); box-shadow: 0 0 7px rgba(255, 193, 90, .7); }
+  .meterwrap { display: flex; flex-direction: column; justify-content: center; }
+
+  /* transport indicators: power on, tape moving, and the record lamp */
+  .lamps { display: flex; align-items: center; gap: 14px; padding-inline: 4px; }
+  .lamp { display: flex; align-items: center; gap: 6px; }
+  .lamp .bulb {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: #A9A395;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .5);
+  }
+  .lamp.on .bulb { background: var(--lit); box-shadow: 0 0 8px rgba(249, 169, 31, .95), inset 0 0 0 1px rgba(0, 0, 0, .3); }
+  .lamp.rec .bulb { background: #B9A6A2; }
+  .lamp.rec.on .bulb { background: var(--rec); box-shadow: 0 0 8px rgba(253, 94, 94, .95), inset 0 0 0 1px rgba(0, 0, 0, .3); }
+
+  /* ---------- the question, printed on the face ---------- */
+  .qblock { padding: 6px 4px 0; }
+  .qblock h1 {
+    font-family: var(--plate);
+    font-size: clamp(24px, 2.4vw, 38px);
+    line-height: 1.06;
+    letter-spacing: -.01em;
+    text-transform: uppercase;
+    margin: 10px 0 0;
+    max-width: 22em;
+  }
+  .qblock h1:focus { outline: none; }
+  .sub { color: var(--ink-2); font-size: clamp(15px, 1.1vw, 17px); margin: 10px 0 0; max-width: 46em; }
+
+  /* ---------- the keys ---------- */
+  .keys {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .key {
+    position: relative;
+    width: 100%; height: 100%; min-height: 132px;
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: linear-gradient(180deg, var(--face-2), #D8D2C6);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 16px 16px 14px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 3px 0 #B6B0A2, 0 1px 0 rgba(255, 255, 255, .95) inset, 0 12px 20px -16px rgba(0, 0, 0, .5);
+    transition: background .15s, box-shadow .15s, transform .12s, border-color .15s;
+  }
+  .key:hover { background: linear-gradient(180deg, #F2EEE7, #E1DBD0); border-color: rgba(0, 0, 0, .3); }
+  /* A key that has been pressed stays down: that is what "this is my answer" looks like on a machine. */
+  .key[aria-pressed="true"] {
+    background: #CFC9BD;
+    transform: translateY(2px);
+    border-color: rgba(0, 0, 0, .35);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .3), inset 0 -1px 0 rgba(255, 255, 255, .5);
+  }
+  .key .top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .key .t { font-weight: 700; font-size: clamp(16px, 1.3vw, 20px); line-height: 1.2; letter-spacing: -.01em; }
+  .key .d { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 6px 0 0; }
+  /* the key's own lamp: dark when it is off, amber when it is latched */
+  .key .led {
+    flex: none; width: 8px; height: 8px; margin-top: 5px; border-radius: 50%;
+    background: #B0AA9C; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .45);
+  }
+  .key[aria-pressed="true"] .led { background: var(--lit); box-shadow: 0 0 8px rgba(249, 169, 31, .95), inset 0 0 0 1px rgba(0, 0, 0, .3); }
+  .key .badge {
+    align-self: flex-start; margin-top: auto; padding-top: 12px;
+    font-family: var(--plate); text-transform: uppercase; letter-spacing: .14em;
+    font-size: 9px; color: var(--ink);
+    border: 1px solid rgba(0, 0, 0, .35); border-radius: 3px; padding: 3px 6px;
+    background: rgba(255, 255, 255, .4);
+  }
+
+  /* ---------- the printed note ---------- */
+  .note {
+    margin: 0; padding: 10px 12px;
+    border: 1px dashed rgba(0, 0, 0, .3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .3);
+    color: var(--ink-2); font-size: 13px;
+  }
+  .note.error { color: #8E2626; border-color: rgba(142, 38, 38, .5); }
+
+  /* ---------- the transport row ---------- */
+  .transport {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px;
+    border-top: 1px solid var(--rule);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .6) inset;
+    padding: 16px 4px 2px;
+  }
+  .tkey {
+    display: inline-flex; align-items: center; gap: 12px;
+    text-decoration: none; cursor: pointer;
+    background: linear-gradient(180deg, var(--face-2), #D6D0C4);
+    border: 1px solid var(--rule); border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 3px 0 #B6B0A2, 0 1px 0 rgba(255, 255, 255, .95) inset, 0 12px 18px -14px rgba(0, 0, 0, .5);
+    transition: background .15s, transform .12s, box-shadow .15s;
+  }
+  .tkey:hover { background: linear-gradient(180deg, #F2EEE7, #DFD9CE); }
+  .tkey:active { transform: translateY(2px); box-shadow: inset 0 2px 6px rgba(0, 0, 0, .3); }
+  .tkey .glyph { font-size: 15px; letter-spacing: .1em; color: var(--ink); }
+  .tkey .lbl { display: flex; flex-direction: column; }
+  .tkey .lbl b { font-family: var(--plate); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; }
+  .tkey .lbl span { font-size: 11px; color: var(--ink-2); }
+
+  /* the dev-mode rocker: off to the left, on to the right, and the labels say which */
+  .switch { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .rocker {
+    display: inline-flex; align-items: center; gap: 0;
+    background: var(--recess);
+    border: 1px solid var(--rule); border-radius: 7px;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, .25);
+    padding: 3px;
+    font: inherit; cursor: pointer;
+  }
+  .rocker .stop { font-family: var(--plate); text-transform: uppercase; letter-spacing: .12em; font-size: 10px; color: var(--ink-2); padding: 0 10px; }
+  .rocker .knob {
+    width: 26px; height: 22px; border-radius: 5px;
+    background: linear-gradient(180deg, #F5F2EC, #CFC9BD);
+    border: 1px solid rgba(0, 0, 0, .3);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .9) inset, 0 2px 4px rgba(0, 0, 0, .3);
+  }
+  .rocker[aria-pressed="true"] .knob { background: linear-gradient(180deg, #FFD37A, var(--lit)); }
+  .rocker[aria-pressed="true"] { border-color: rgba(0, 0, 0, .45); }
+  .rocker[aria-pressed="true"] .stop.on { color: var(--ink); }
+
+  .key:focus-visible, .tkey:focus-visible, .rocker:focus-visible { outline: 2px solid #101014; outline-offset: 3px; }
+
+  /* ---------- the tag every mock-up carries: a QC sticker on the case ---------- */
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-family: var(--body); font-size: 11px; font-weight: 600; letter-spacing: .04em;
+    color: var(--ink); background: #F4F2ED;
+    border: 1px solid rgba(0, 0, 0, .3); border-radius: 3px;
+    padding: 7px 10px; pointer-events: none;
+    transform: rotate(-1.2deg);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+  }
+
+  @media (max-width: 1020px) {
+    .keys { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 700px) {
+    .deck { padding: 14px; gap: 14px; }
+    .keys { grid-template-columns: 1fr; gap: 10px; }
+    .key { min-height: 0; }
+    .switch { margin-left: 0; }
+    .switch .printed { display: none; }
+    .tkey { flex: 1 1 auto; }
+    .grille { flex-basis: 100%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+  <section class="deck">
+
+    <div class="plate">
+      <div class="brandline">
+        <p class="model">Forge Q-2</p>
+        <p class="printed">Programme selector</p>
+      </div>
+      <div class="grille" aria-hidden="true"></div>
+      <p class="printed">Ser. no. 013&ndash;059&ndash;Q2</p>
+    </div>
+
+    <div class="well">
+      <div class="lcd">
+        <span class="cap">Programme</span>
+        <span class="big" id="stepSeg">1&#8211;2</span>
+        <span class="seg" id="stepWord">Step 1</span>
+      </div>
+      <div class="lcd wide">
+        <span class="cap" id="countCap">Categories</span>
+        <div class="meterwrap">
+          <span class="big" id="count">10</span>
+          <div class="meter" id="meter" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Step 1 of 2"></div>
+        </div>
+      </div>
+      <div class="lcd">
+        <span class="cap">Counter</span>
+        <span class="big" id="counter">004</span>
+        <span class="seg">Per cent</span>
+      </div>
+      <div class="lamps" aria-hidden="true">
+        <span class="lamp on"><span class="bulb"></span><span class="printed">Power</span></span>
+        <span class="lamp rec" id="devLamp"><span class="bulb"></span><span class="printed">Dev</span></span>
+      </div>
+    </div>
+
+    <div class="qblock" aria-live="polite">
+      <p class="printed" id="qLabel">Q.01 &middot; Choose a category</p>
+      <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+      <p class="sub" id="sub">Pick the broad category first &mdash; you'll choose the exact game type next.</p>
+      <p class="printed" style="margin-top:14px">Design your game, then follow a step-by-step walkthrough &mdash; with video &mdash; to actually build it.</p>
+    </div>
+
+    <ul class="keys" id="grid"></ul>
+
+    <p class="note" id="note" hidden></p>
+
+    <div class="transport">
+      <a class="tkey" id="back" href="../../index.html#/home">
+        <span class="glyph" aria-hidden="true">&#9668;&#9668;</span>
+        <span class="lbl"><b>Rewind</b><span id="backSub">Back to my games</span></span>
+      </a>
+      <div class="switch">
+        <span class="printed">Dev / test &mdash; show drafts</span>
+        <button class="rocker" id="devMode" type="button" aria-pressed="false" title="Show draft game types too">
+          <span class="stop">Off</span>
+          <span class="knob" aria-hidden="true"></span>
+          <span class="stop on">On</span>
+        </button>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<div class="tag">Questions 3 - Cassette Deck</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the keys do load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

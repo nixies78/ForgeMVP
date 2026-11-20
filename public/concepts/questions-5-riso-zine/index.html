@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 5 - Riso Zine · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<style>
+  /* Questions 5 - Riso Zine.
+   *
+   * The furthest from the dark styling in this set, and the only page here that is not a screen: it is a
+   * sheet of paper printed by hand. Off-white stock with a visible grain, two inks - riso pink and riso
+   * blue - that overprint into a third colour where they cross, everything misregistered by a millimetre
+   * the way a real two-pass print is, cut-paper strips for the answers with a piece of tape holding each
+   * one down, and a hand-numbered edition line at the foot.
+   *
+   * The discipline the material needs: pink and blue are inks, not text colours. Every word on this page
+   * is printed in ink (#1E1B18), because a riso pink heading looks wonderful and cannot be read; the inks
+   * carry the rules, the tape, the overprints and the ink bar.
+   *
+   * Frame, as on every page here: a 72px bar, the 44px Epic mark in black because the stock is light, the
+   * 1136px column, chrome.css last. No footer: this is a screen of the app. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: light;
+    --paper: #F6F2E9;       /* off-white stock */
+    --paper-2: #EFEADE;     /* the second sheet, for strips that were pasted on */
+    --ink: #1E1B18;         /* photocopied black - 15:1 on the stock */
+    --ink-2: #5A544C;       /* 5.6:1 - the note in the margin */
+    --pink: #E166B6;        /* riso pass one: pink-400 */
+    --blue: #258CBB;        /* riso pass two: blue-300, inkier than #33BFFF */
+    --over: #8E5C9E;        /* what the two passes make where they cross */
+    --edge: rgba(30, 27, 24, .28);
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  /* The stock carries the grain: two dot screens at different pitches, which is what makes a flat colour
+     read as paper rather than as a fill. */
+  html {
+    background-color: var(--paper);
+    background-image:
+      radial-gradient(rgba(30, 27, 24, .07) 0.5px, transparent 0.6px),
+      radial-gradient(rgba(37, 140, 187, .07) 0.5px, transparent 0.6px);
+    background-size: 3px 3px, 5px 5px;
+    background-position: 0 0, 2px 1px;
+  }
+  body {
+    margin: 0;
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    padding-block: 0 72px;
+  }
+  a { color: inherit; }
+
+  /* ---------- the 72px bar, with the press's two-pass rule under it ---------- */
+  header {
+    height: 72px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  /* Two rules, one pass each, one pixel apart: the pink pass and the blue pass did not line up, which is
+     the most recognisable thing about a print that went through the machine twice. */
+  header::before,
+  header::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; }
+  header::before { bottom: 1px; background: var(--blue); opacity: .45; }
+  header::after { bottom: 0; background: var(--pink); opacity: .5; }
+
+  /* ---------- the strapline, taped on ---------- */
+  .taped {
+    position: relative;
+    display: inline-block;
+    background: var(--paper-2);
+    border: 1px solid var(--edge);
+    padding: 10px 16px;
+    transform: rotate(-.5deg);
+    box-shadow: 0 6px 12px -10px rgba(30, 27, 24, .5);
+  }
+  .standfirst { margin: 34px 0 0; }
+  .standfirst .taped { font-size: clamp(14px, 1.1vw, 16px); color: var(--ink-2); }
+  /* a piece of tape: torn edges, one pass of pink at 35% */
+  .tape {
+    position: absolute; width: 62px; height: 17px;
+    background: rgba(225, 102, 182, .38);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45);
+    clip-path: polygon(0 14%, 7% 0, 93% 3%, 100% 20%, 96% 90%, 88% 100%, 9% 96%, 3% 78%);
+  }
+  .taped > .tape { top: -9px; left: 20px; transform: rotate(-2.5deg); }
+
+  /* ---------- the run bar: how far through the print run you are ---------- */
+  .runrow {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px;
+    margin: 40px 0 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--edge);
+  }
+  .runbar {
+    display: flex; gap: 4px; flex: 1 1 300px; min-width: 180px;
+    height: 22px;
+  }
+  .runbar i {
+    display: block; width: 100%; height: 100%;
+    background: rgba(30, 27, 24, .10);
+    border: 1px solid rgba(30, 27, 24, .12);
+  }
+  /* the first pass is pink, the second is blue: the bar is printed in two inks, like everything else */
+  .runbar i.on { background: var(--pink); border-color: rgba(30, 27, 24, .2); mix-blend-mode: multiply; }
+  .runbar i.on.alt { background: var(--blue); }
+  .runrow .hand {
+    font-family: var(--title); font-weight: 800; font-size: 15px; letter-spacing: .02em;
+    margin: 0; transform: rotate(-1deg);
+  }
+  .runrow .hand em { font-style: normal; background: rgba(225, 102, 182, .35); padding: 0 4px; }
+
+  /* ---------- the question ---------- */
+  .qblock { padding: 34px 0 0; }
+  .folio { display: flex; align-items: center; gap: 10px; margin: 0; }
+  .folio .num {
+    display: grid; place-items: center; width: 30px; height: 30px; flex: none;
+    background: var(--ink); color: var(--paper);
+    font-family: var(--title); font-weight: 800; font-size: 14px;
+    transform: rotate(-3deg);
+  }
+  .folio .label {
+    font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2);
+  }
+  /* The misregistration, which is the whole point of the material: the ink is down, and the two colour
+     passes missed it by a millimetre in opposite directions. */
+  .qblock h1 {
+    font-family: var(--title);
+    font-weight: 800;
+    font-size: clamp(27px, 3.1vw, 46px);
+    line-height: 1.02;
+    letter-spacing: -.03em;
+    margin: 14px 0 0;
+    max-width: 22em;
+    text-shadow: 2px 2px 0 rgba(225, 102, 182, .5), -1px -1px 0 rgba(37, 140, 187, .38);
+  }
+  .qblock h1:focus { outline: none; }
+  .sub { color: var(--ink-2); font-size: clamp(15px, 1.1vw, 17px); margin: 12px 0 0; max-width: 46em; }
+
+  /* ---------- the answers: cut-paper strips, taped down, slightly out of true ---------- */
+  .strips {
+    list-style: none; margin: 30px 0 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+  /* Every strip is pasted on by hand, so no two sit at exactly the same angle. */
+  .strips > li:nth-child(3n + 1) { transform: rotate(-.45deg); }
+  .strips > li:nth-child(3n + 2) { transform: rotate(.35deg); }
+  .strips > li:nth-child(3n) { transform: rotate(-.15deg); }
+  .strip {
+    position: relative;
+    width: 100%; height: 100%; min-height: 148px;
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--paper-2);
+    border: 1px solid var(--edge);
+    border-radius: 0;
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 8px 14px -12px rgba(30, 27, 24, .55);
+    transition: background .15s, box-shadow .2s var(--ease), transform .2s var(--ease);
+  }
+  .strip > .tape { top: -9px; right: 16px; transform: rotate(3deg); width: 52px; height: 15px; }
+  /* Nothing was pasted on by a machine, so the tape is not in the same place on every strip. */
+  .strips > li:nth-child(3n) .strip > .tape { right: auto; left: 14px; transform: rotate(-3deg); }
+  .strips > li:nth-child(4n) .strip > .tape { right: 30px; transform: rotate(1.5deg); width: 44px; }
+  .strips > li:nth-child(5n) .strip > .tape { right: auto; left: 40%; transform: rotate(2.5deg); }
+  .strip:hover { background: #F7F3EA; box-shadow: 0 12px 18px -12px rgba(30, 27, 24, .6); }
+  /* The chosen strip is overprinted: one more pass of pink straight over the ink. */
+  .strip[aria-pressed="true"] {
+    background-color: rgba(225, 102, 182, .85);
+    background-image: radial-gradient(rgba(255, 255, 255, .5) 0.9px, transparent 1.2px);
+    background-size: 5px 5px;
+    border-color: rgba(30, 27, 24, .5);
+    box-shadow: 0 10px 16px -12px rgba(30, 27, 24, .6);
+  }
+  .strip .no {
+    font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .08em; color: var(--ink-2);
+  }
+  .strip[aria-pressed="true"] .no { color: var(--ink); }
+  .strip .t { font-family: var(--title); font-weight: 800; font-size: clamp(17px, 1.4vw, 21px); line-height: 1.12; letter-spacing: -.02em; margin-top: 6px; }
+  .strip .d { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 8px 0 0; }
+  .strip[aria-pressed="true"] .d { color: #2B2622; }
+  .strip .picked {
+    display: none; align-items: center; gap: 8px;
+    margin: 14px 0 0; padding-top: 0;
+    font-family: var(--title); font-weight: 800; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink);
+  }
+  .strip .picked::before {
+    content: ""; width: 16px; height: 16px; flex: none;
+    border: 1.5px solid var(--ink); border-radius: 50%;
+    background: radial-gradient(circle, var(--ink) 0 3px, transparent 3.5px);
+  }
+  .strip[aria-pressed="true"] .picked { display: flex; }
+  /* The stamp is words, so it takes the inkier blue: the riso blue reads at 3.2:1 at this size, and a
+     stamp impression nobody can read is a decoration rather than a label. */
+  .strip .stamp {
+    position: absolute; top: -8px; left: -6px;
+    font-family: var(--title); font-weight: 800; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    color: #185977;
+    border: 1.5px solid #185977; border-radius: 2px;
+    padding: 2px 6px; transform: rotate(-6deg);
+    background: rgba(246, 242, 233, .82);
+  }
+
+  /* ---------- the note in the margin ---------- */
+  .note {
+    margin: 26px 0 0; padding: 12px 16px;
+    background: rgba(37, 140, 187, .10);
+    border-left: 3px solid var(--blue);
+    color: var(--ink); font-size: 14px;
+    max-width: 62em;
+  }
+  .note::before {
+    content: "N.B.";
+    font-family: var(--title); font-weight: 800; font-size: 11px; letter-spacing: .16em;
+    margin-right: 10px;
+  }
+  .note.error { background: rgba(225, 102, 182, .16); border-left-color: #B3372F; }
+
+  /* ---------- the foot: the controls, printed as strips ---------- */
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin: 40px 0 0; }
+  .stripbtn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 12px;
+    text-decoration: none; cursor: pointer;
+    font: inherit; color: var(--ink);
+    background: var(--paper-2);
+    border: 1px solid var(--edge); border-radius: 0;
+    padding: 13px 18px;
+    box-shadow: 0 8px 14px -12px rgba(30, 27, 24, .55);
+    transform: rotate(-.4deg);
+    transition: background .15s, box-shadow .2s var(--ease);
+  }
+  .stripbtn:hover { background: #F7F3EA; }
+  .stripbtn .lbl { display: flex; flex-direction: column; align-items: flex-start; }
+  .stripbtn .lbl b { font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+  .stripbtn .lbl span { font-size: 11px; color: var(--ink-2); }
+  /* the draft switch is a rubber stamp: the impression lands when it is on */
+  .stampbtn {
+    position: relative; margin-left: auto;
+    display: inline-flex; align-items: center; gap: 12px;
+    font: inherit; cursor: pointer; color: var(--ink);
+    background: transparent; border: 0; padding: 6px 4px;
+  }
+  .stampbtn .box {
+    position: relative; width: 30px; height: 30px; flex: none;
+    border: 1.5px dashed var(--edge);
+    display: grid; place-items: center;
+  }
+  .stampbtn .box span {
+    font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .04em;
+    color: var(--pink); opacity: 0; transform: rotate(-8deg) scale(.6);
+    transition: opacity .15s, transform .2s var(--ease);
+  }
+  .stampbtn[aria-pressed="true"] .box span { opacity: 1; transform: rotate(-8deg) scale(1); }
+  .stampbtn[aria-pressed="true"] .box { border-style: solid; border-color: rgba(225, 102, 182, .6); }
+  .stampbtn .lbl { display: flex; flex-direction: column; align-items: flex-start; }
+  .stampbtn .lbl b { font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
+  .stampbtn .lbl span { font-size: 11px; color: var(--ink-2); }
+
+  /* ---------- the edition line ---------- */
+  .edition {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px;
+    margin: 46px 0 0; padding-top: 14px;
+    border-top: 3px double var(--edge);
+    font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2);
+  }
+  .edition .overprint { background: rgba(37, 140, 187, .18); padding: 2px 6px; color: var(--ink); }
+
+  .strip:focus-visible, .stripbtn:focus-visible, .stampbtn:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+
+  /* ---------- the tag every mock-up carries: a printed label in the corner ---------- */
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-family: var(--title); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink); background: var(--paper-2);
+    border: 1px solid var(--edge); padding: 7px 10px; pointer-events: none;
+    transform: rotate(-1deg);
+    box-shadow: 2px 2px 0 rgba(37, 140, 187, .5);
+  }
+
+  @media (max-width: 1020px) {
+    .strips { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 700px) {
+    .standfirst { margin-top: 22px; }
+    .runrow { margin-top: 28px; }
+    .strips { grid-template-columns: 1fr; gap: 14px; }
+    .strip { min-height: 0; }
+    .stampbtn { margin-left: 0; }
+    .edition { margin-top: 32px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+
+  <p class="standfirst">
+    <span class="taped"><span class="tape" aria-hidden="true"></span>Design your game, then follow a step-by-step walkthrough &mdash; with video &mdash; to actually build it.</span>
+  </p>
+
+  <div class="runrow">
+    <div class="runbar" id="runbar" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Page 1 of 2"></div>
+    <p class="hand" id="runLabel">Page <em>1</em> of 2 &middot; run 004/100</p>
+  </div>
+
+  <div class="qblock" aria-live="polite">
+    <p class="folio"><span class="num" id="folio">01</span><span class="label" id="folioLabel">Choose a category</span></p>
+    <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+    <p class="sub" id="sub">Pick the broad category first &mdash; you'll choose the exact game type next.</p>
+  </div>
+
+  <ul class="strips" id="grid"></ul>
+
+  <p class="note" id="note" hidden></p>
+
+  <div class="controls">
+    <a class="stripbtn" id="back" href="../../index.html#/home">
+      <span aria-hidden="true">&#9668;</span>
+      <span class="lbl"><b>Back</b><span id="backSub">Back to my games</span></span>
+    </a>
+    <button class="stampbtn" id="devMode" type="button" aria-pressed="false" title="Show draft game types too">
+      <span class="box" aria-hidden="true"><span>ON</span></span>
+      <span class="lbl"><b>Show drafts</b><span>Types still being written</span></span>
+    </button>
+  </div>
+
+  <p class="edition">
+    <span>Forge zine &middot; issue Q-2 &middot; hand-numbered <span class="overprint" id="editionNo">1 of 2</span></span>
+    <span id="countLabel">10 strips</span>
+  </p>
+
+</main>
+
+<div class="tag">Questions 5 - Riso Zine</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the strips do load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>
