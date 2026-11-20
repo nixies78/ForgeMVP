@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 7 - Store · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Questions 7 - Store.
+   *
+   * The same question, laid out the way store.epicgames.com lays out a listing: a store's page opens with
+   * a title, not a hero, so the heading here is 32px where the launcher page's is 52px. Below it sits a
+   * toolbar shaped like a store filter row - the count on the left, the draft filter on the right - and
+   * then a two-up product grid whose cards carry a real metadata row, the way a store card carries a price
+   * and a platform line.
+   *
+   * The tokens are the store's own published semantics: --color-background-elevated-low-default (#18181C)
+   * for a card, --color-background-elevated-high-hover (#404044) for its hover, --color-border-subtle
+   * (#ffffff26), --color-text-secondary (#ffffffA6), --color-text-select-default (#26BBFF) for the selected
+   * marking, and Epic's status colours --color-text-success (#45C761) and --color-text-warning (#FFC229)
+   * on the metadata row. Each card's key-art edge is one of Epic's three published 225deg card gradients
+   * (--gradient-blue, --gradient-indigo, --gradient-purple), used as placeholder art because a category in
+   * this data has no artwork of its own.
+   *
+   * The marking control is the small ring on the card's bottom-right: a hairline circle until it is chosen,
+   * then filled with the select colour and a tick. That is the cassette deck's latched-state idea, said in
+   * Epic's vocabulary, and it costs no layout: the ring is there whether or not the card is selected. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: dark;
+    --canvas: #101014;                 /* --color-background-default */
+    --card: #18181C;                   /* --color-background-elevated-low-default */
+    --card-hover: #202024;             /* --color-background-elevated-high-default */
+    --card-select: #28282C;            /* --color-background-elevated-high-select */
+    --text-primary: #FFFFFF;
+    --text-secondary: #FFFFFFA6;       /* --color-text-secondary */
+    --border-subtle: #FFFFFF26;        /* --color-border-subtle */
+    --border-hover: #FFFFFFA6;         /* --color-border-hover */
+    --border-focus: #FFFFFF;           /* --color-border-focus */
+    --select: #26BBFF;                 /* --color-text-select-default */
+    --select-ink: #0A2633;
+    --link: #26BBFF;                   /* --color-text-link-primary-default */
+    --success: #45C761;                /* --color-text-success */
+    --warning: #FFC229;                /* --color-text-warning */
+    --grad-blue: linear-gradient(225deg, #DFBAF8 0%, #33BFFF 100%);   /* --gradient-blue */
+    --grad-indigo: linear-gradient(225deg, #F1B8DD 0%, #868AFD 100%); /* --gradient-indigo */
+    --grad-purple: linear-gradient(225deg, #FEB4B4 0%, #BB6BF0 100%); /* --gradient-purple */
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.25, 1, .5, 1); /* --eds3 easeOutQuart */
+    --radius-card: 8px;
+    --radius-pill: 999px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body {
+    margin: 0; background: var(--canvas); color: var(--text-primary);
+    font-family: var(--body); font-size: 16px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    padding-block: 0 80px;
+  }
+  a { color: inherit; }
+  header { height: 72px; display: flex; align-items: center; }
+
+  /* ---------- title block: a listing, so no hero ---------- */
+  .head { padding-block: 48px 0; }
+  h1 {
+    font-family: var(--title); font-weight: 700;
+    font-size: clamp(26px, 2.4vw, 32px); line-height: 1.15;
+    letter-spacing: -.025em;                 /* --eds3-typography-heading-letterSpacing-lg */
+    margin: 0; max-width: 24em;
+  }
+  h1:focus { outline: none; }
+  .sub { color: var(--text-secondary); font-size: 16px; line-height: 1.65; margin: 12px 0 0; max-width: 44em; }
+
+  /* ---------- toolbar: count on the left, the filter on the right ---------- */
+  .toolbar {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+    margin: 32px 0 0; padding: 14px 0;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .toolbar .count { font-size: 14px; letter-spacing: .02em; color: var(--text-secondary); }
+  .toolbar .count b { color: var(--text-primary); font-weight: 500; }
+  .toolbar .step { font-size: 14px; letter-spacing: .02em; font-weight: 500; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+  .fchip {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 40px; padding: 0 16px;
+    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: .02em;
+    color: var(--text-secondary); cursor: pointer;
+    background: #FFFFFF0D; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+    transition: background .125s var(--ease), border-color .125s var(--ease), color .125s var(--ease);
+  }
+  .fchip:hover { background: #FFFFFF1A; color: var(--text-primary); border-color: var(--border-hover); }
+  .fchip .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+  .fchip[aria-pressed="true"] { color: #A6A9FE; background: rgba(134, 138, 253, .16); border-color: rgba(134, 138, 253, .45); }
+  .fchip[aria-pressed="true"] .dot { background: #868AFD; }
+
+  .bar { height: 4px; margin: 0 0 4px; background: rgba(255, 255, 255, .1); border-radius: var(--radius-pill); overflow: hidden; }
+  .bar > span { display: block; height: 100%; width: 4%; border-radius: var(--radius-pill); background: linear-gradient(90deg, #33BFFF, #868AFD); transition: width .3s var(--ease); }
+
+  /* ---------- the listing ---------- */
+  .grid {
+    list-style: none; margin: 24px 0 0; padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+  }
+  .pcard {
+    position: relative; display: flex; flex-direction: column;
+    /* height:100% resolves against the <li>, which the grid stretches to the row */
+    width: 100%; height: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--card); border: 1px solid var(--border-subtle); border-radius: var(--radius-card);
+    overflow: hidden; padding: 0;
+    transition: background .125s var(--ease), border-color .125s var(--ease);
+  }
+  .pcard:hover { background: var(--card-hover); border-color: var(--border-hover); }
+  .pcard[aria-pressed="true"] { background: var(--card-select); border-color: var(--select); }
+  /* placeholder key art, one of Epic's three card gradients per category, chosen by position so a card
+     always wears the same colour */
+  .pcard .art { display: block; height: 4px; background: var(--art, var(--grad-blue)); }
+  .pcard .body { display: flex; flex-direction: column; flex: 1; padding: 20px 20px 18px; }
+  .pcard .t { font-family: var(--title); font-weight: 700; font-size: 18px; line-height: 1.25; letter-spacing: -.01em; }
+  .pcard .d { color: var(--text-secondary); font-size: 14px; line-height: 1.5; letter-spacing: .02em; margin-top: 8px; }
+  .pcard .metarow { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 18px; }
+  .pcard .meta {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 500; letter-spacing: .03em;
+    color: var(--text-secondary);
+  }
+  .pcard .meta .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .pcard .meta.live { color: var(--success); }
+  .pcard .meta.draft { color: var(--warning); }
+  /* the marking control: a ring at rest, filled and ticked when the card is chosen */
+  .pcard .mark {
+    margin-left: auto; flex: none;
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, .35);
+    display: grid; place-items: center;
+    transition: background .125s var(--ease), border-color .125s var(--ease);
+  }
+  .pcard .mark svg { width: 12px; height: 10px; opacity: 0; color: var(--select-ink); transition: opacity .125s var(--ease); }
+  .pcard[aria-pressed="true"] .mark { background: var(--select); border-color: var(--select); }
+  .pcard[aria-pressed="true"] .mark svg { opacity: 1; }
+  .pcard .sel {
+    position: absolute; top: 14px; right: 14px;
+    font-size: 11px; font-weight: 500; letter-spacing: .03em;
+    color: var(--select); background: rgba(38, 187, 255, .16);
+    border: 1px solid rgba(38, 187, 255, .35); border-radius: var(--radius-pill); padding: 3px 9px;
+    opacity: 0; transition: opacity .125s var(--ease);
+  }
+  .pcard[aria-pressed="true"] .sel { opacity: 1; }
+
+  .note { margin: 20px 0 0; font-size: 14px; letter-spacing: .02em; color: var(--text-secondary); display: flex; gap: 10px; align-items: flex-start; }
+  .note[hidden] { display: none; }
+  .note::before { content: ""; flex: none; width: 3px; align-self: stretch; min-height: 18px; border-radius: 2px; background: #868AFD; }
+  .note.error { color: #FF8291; }
+  .note.error::before { background: #FF3F56; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 40px 0 0; }
+  /* the store's primary control is a flat white pill with a black label and no border at all */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 44px; padding: 0 22px;
+    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: .02em;
+    text-decoration: none; cursor: pointer; border: 0; border-radius: var(--radius-card);
+    background: #FFFFFF; color: #000000;
+    transition: background .125s var(--ease);
+  }
+  .btn:hover { background: #A6A6A6; }
+
+  .pcard:focus-visible, .btn:focus-visible, .fchip:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-size: 11px; font-weight: 500; letter-spacing: .03em;
+    color: var(--text-secondary); background: rgba(16, 16, 20, .9);
+    border: 1px solid var(--border-subtle); border-radius: var(--radius-pill);
+    padding: 6px 12px; pointer-events: none;
+  }
+
+  @media (max-width: 780px) {
+    .head { padding-block: 30px 0; }
+    .grid { grid-template-columns: 1fr; gap: 12px; }
+    .toolbar .step { margin-left: 0; }
+    .btn { flex: 1 1 auto; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+  <div class="head">
+    <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+    <p class="sub" id="sub">Pick the broad category first — you'll choose the exact game type next.</p>
+  </div>
+
+  <div class="toolbar">
+    <p class="count" id="count"><b>10</b> categories</p>
+    <div class="filters">
+      <button class="fchip" id="devMode" type="button" aria-pressed="false" title="Show draft game types too">
+        <span class="dot" aria-hidden="true"></span>Dev mode
+      </button>
+    </div>
+    <p class="step" id="stepLabel">Step 1 of 2</p>
+  </div>
+  <div class="bar" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Step 1 of 2">
+    <span id="progressFill"></span>
+  </div>
+
+  <ul class="grid" id="grid" aria-live="polite"></ul>
+
+  <p class="note" id="note" hidden></p>
+
+  <div class="actions">
+    <a class="btn" id="back" href="../../index.html#/home">Back to my games</a>
+  </div>
+</main>
+
+<div class="tag">Questions 7 - Store</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the cards do load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

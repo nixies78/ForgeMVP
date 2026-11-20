@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 9 - Console · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Questions 9 - Console.
+   *
+   * The question as a tool rather than a page: unrealengine.com's canvas (#0B0B0B, its measured
+   * background), a breadcrumb where a hero would be, and the answers as rows of a table with a monospace
+   * index down the left and a status chip on the right.
+   *
+   * The chip is the point of this version. Epic's design system carries real status semantics - a success
+   * fill (#45C761), a warning fill (#FFC229) and the text colours that match them - so an option's state
+   * can be stated rather than implied, in the app's own words: Researched, Draft, Basics only. The chosen
+   * row is marked the way a table marks a selected line: the fill lifts, a 2px select-coloured edge appears
+   * down its left, and the tick at the end of the row fills. Nothing moves.
+   *
+   * Surfaces follow the engine site's own rule, where a card's fill and its border are the same 5% white
+   * (--color-background-elevated-low-transparent, --color-border-faint), and the primary control is the
+   * engine site's pair: #26BBFF fill with a #101014 label. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: dark;
+    --canvas: #0B0B0B;
+    --surface: #FFFFFF0D;              /* --color-background-elevated-low-transparent */
+    --surface-line: #FFFFFF0D;         /* --color-border-faint: the engine site uses the same 5% for both */
+    --surface-hover: #FFFFFF1A;
+    --surface-select: #FFFFFF26;
+    --text-primary: #FFFFFF;
+    --text-secondary: #FFFFFFA6;       /* --color-text-secondary */
+    --text-muted: #767676;             /* --derived-ue-muted */
+    --border-subtle: #FFFFFF26;
+    --border-hover: #FFFFFFA6;
+    --border-focus: #FFFFFF;
+    --accent: #26BBFF;                 /* --color-fill-primary-default */
+    --accent-ink: #101014;
+    --success: #45C761;                /* --color-text-success */
+    --warning: #FFC229;                /* --color-text-warning */
+    --code: "Recursive Mono", "DM Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.25, 1, .5, 1);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body {
+    margin: 0; background: var(--canvas); color: var(--text-primary);
+    font-family: var(--body); font-size: 16px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+    padding-block: 0 72px;
+  }
+  a { color: inherit; }
+  header { height: 72px; display: flex; align-items: center; }
+
+  /* ---------- breadcrumb + read-out, where a hero would be ---------- */
+  .crumbs {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+    margin: 0; padding: 20px 0 0;
+    font-size: 12px; font-weight: 500; letter-spacing: .03em; color: var(--text-secondary);
+  }
+  .crumbs a { text-decoration: none; }
+  .crumbs a:hover { color: var(--text-primary); }
+  .crumbs .sep { color: var(--text-muted); }
+  .crumbs .here { color: var(--text-primary); }
+  .readout { margin-left: auto; display: flex; align-items: center; gap: 10px; font-family: var(--code); font-size: 11px; letter-spacing: .04em; color: var(--text-secondary); }
+  .readout .mini { width: 72px; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+  .readout .mini > span { display: block; height: 100%; width: 4%; border-radius: 999px; background: var(--accent); transition: width .3s var(--ease); }
+
+  h1 {
+    font-family: var(--title); font-weight: 700;
+    font-size: clamp(22px, 2vw, 26px); line-height: 1.2;
+    letter-spacing: -.02em; margin: 26px 0 0; max-width: 26em;
+  }
+  h1:focus { outline: none; }
+  .sub { color: var(--text-secondary); font-size: 14px; line-height: 1.6; letter-spacing: .02em; margin: 10px 0 0; max-width: 60em; }
+
+  /* ---------- the table ---------- */
+  .tblwrap { margin: 26px 0 0; border: 1px solid var(--border-subtle); border-radius: var(--radius); overflow: hidden; }
+  .thead, .trow {
+    display: grid; grid-template-columns: 56px minmax(0, 1fr) 176px;
+    gap: 16px; align-items: center;
+  }
+  .thead {
+    padding: 10px 18px;
+    font-family: var(--code); font-size: 11px; letter-spacing: .04em; text-transform: uppercase;
+    color: var(--text-secondary);
+    background: var(--surface); border-bottom: 1px solid var(--border-subtle);
+  }
+  .thead span:last-child { text-align: right; }
+  .tbl { list-style: none; margin: 0; padding: 0; }
+  .tbl li + li .trow { border-top: 1px solid var(--border-subtle); }
+  .trow {
+    width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: transparent; border: 0; padding: 16px 18px;
+    transition: background .125s var(--ease), box-shadow .125s var(--ease);
+  }
+  .trow:hover { background: var(--surface-hover); }
+  .trow[aria-pressed="true"] { background: var(--surface-select); box-shadow: inset 2px 0 0 var(--accent); }
+  .trow .idx { font-family: var(--code); font-size: 12px; letter-spacing: .04em; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .trow[aria-pressed="true"] .idx { color: var(--accent); }
+  .trow .t { display: block; font-family: var(--title); font-weight: 700; font-size: 17px; line-height: 1.25; letter-spacing: -.01em; }
+  .trow .d { display: block; color: var(--text-secondary); font-size: 14px; line-height: 1.5; letter-spacing: .02em; margin-top: 5px; }
+  .trow .rt { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    font-size: 11px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase;
+    border-radius: 999px; padding: 4px 10px;
+    color: var(--text-secondary); background: rgba(255, 255, 255, .08); border: 1px solid var(--border-subtle);
+  }
+  .chip.live { color: var(--success); background: rgba(69, 199, 97, .14); border-color: rgba(69, 199, 97, .4); }
+  .chip.draft { color: var(--warning); background: rgba(255, 194, 41, .14); border-color: rgba(255, 194, 41, .4); }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  /* the tick is always in the row, so choosing one cannot change a row's height */
+  .trow .tick {
+    flex: none; width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, .3);
+    display: grid; place-items: center;
+    transition: background .125s var(--ease), border-color .125s var(--ease);
+  }
+  .trow .tick svg { width: 11px; height: 9px; opacity: 0; color: var(--accent-ink); transition: opacity .125s var(--ease); }
+  .trow[aria-pressed="true"] .tick { background: var(--accent); border-color: var(--accent); }
+  .trow[aria-pressed="true"] .tick svg { opacity: 1; }
+
+  .note { display: flex; gap: 10px; margin: 16px 0 0; font-size: 13px; letter-spacing: .02em; color: var(--text-secondary); font-family: var(--code); }
+  .note[hidden] { display: none; }
+  .note::before { content: "note"; color: var(--warning); }
+  .note.error { color: #FF8291; }
+  .note.error::before { content: "error"; color: #FF3F56; }
+
+  /* ---------- action bar ---------- */
+  .actionbar { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; margin: 28px 0 0; padding-top: 20px; border-top: 1px solid var(--border-subtle); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 40px; padding: 0 18px;
+    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: .02em;
+    text-decoration: none; cursor: pointer; border: 0; border-radius: var(--radius);
+    background: var(--accent); color: var(--accent-ink);   /* the engine site's own button pair */
+    transition: background .125s var(--ease);
+  }
+  .btn:hover { background: #72D3FF; }                      /* --color-fill-primary-hover */
+
+  .cblabel { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; letter-spacing: .02em; color: var(--text-secondary); }
+  .cblabel:hover { color: var(--text-primary); }
+  .cb { appearance: none; -webkit-appearance: none; margin: 0; flex: none;
+        width: 18px; height: 18px; border-radius: 3px;      /* --eds3 control-radius-object-sm */
+        border: 1px solid rgba(255, 255, 255, .35); background: #FFFFFF0D; position: relative; cursor: pointer;
+        transition: background .125s var(--ease), border-color .125s var(--ease); }
+  .cb:hover { border-color: var(--border-hover); }
+  .cb:checked { background: var(--accent); border-color: var(--accent); }
+  .cb:checked::after {
+    content: ""; position: absolute; left: 5px; top: 1px; width: 4px; height: 9px;
+    border-right: 2px solid var(--accent-ink); border-bottom: 2px solid var(--accent-ink);
+    transform: rotate(40deg);
+  }
+  .cb:focus-visible, .trow:focus-visible, .btn:focus-visible, .crumbs a:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+  .actionbar .cblabel { margin-left: auto; }
+
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-size: 11px; font-weight: 500; letter-spacing: .03em;
+    color: var(--text-secondary); background: rgba(11, 11, 11, .9);
+    border: 1px solid var(--border-subtle); border-radius: 999px;
+    padding: 6px 12px; pointer-events: none;
+  }
+
+  @media (max-width: 760px) {
+    .thead { display: none; }
+    .trow { grid-template-columns: 34px minmax(0, 1fr); gap: 12px; }
+    .trow .rt { grid-column: 2; justify-content: flex-start; margin-top: 10px; }
+    .readout { margin-left: 0; width: 100%; }
+    .actionbar .cblabel { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+  <p class="crumbs">
+    <a href="../../index.html#/home">Forge</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <a href="../../index.html#/home">My games</a>
+    <span class="sep" aria-hidden="true">/</span>
+    <span class="here" id="crumb">New game</span>
+    <span class="readout">
+      <span id="stepText">step 1/2</span>
+      <span class="mini" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Step 1 of 2"><span id="progressFill"></span></span>
+      <span id="percentText">4%</span>
+    </span>
+  </p>
+
+  <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+  <p class="sub" id="sub">Pick the broad category first — you'll choose the exact game type next.</p>
+
+  <div class="tblwrap">
+    <div class="thead" aria-hidden="true">
+      <span id="thId">#</span><span id="thName">Category</span><span id="thState">Status</span>
+    </div>
+    <ol class="tbl" id="grid" aria-live="polite"></ol>
+  </div>
+
+  <p class="note" id="note" hidden></p>
+
+  <div class="actionbar">
+    <a class="btn" id="back" href="../../index.html#/home">Back to my games</a>
+    <label class="cblabel" for="devMode">
+      <input class="cb" type="checkbox" id="devMode">
+      Show draft options
+    </label>
+  </div>
+</main>
+
+<div class="tag">Questions 9 - Console</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the rows do load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>

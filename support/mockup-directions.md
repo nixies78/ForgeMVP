@@ -1,11 +1,39 @@
 # Directions we have not used yet
 
 A place to keep the design directions that were proposed and deferred, so the next mockup session does
-not have to invent a slate from scratch. Each one is a style *and* a subject: the subject matters as
-much as the palette, because a mockup only earns its keep when the styling does something for the page
-rather than sitting on top of it.
+not have to invent a slate from scratch. Each one is a style *and* a subject: the subject matters as much
+as the palette, because a mockup only earns its keep when the styling does something for the page rather
+than sitting on top of it.
 
-## Proposed, and since built (2026-11-19)
+## The question page, in two groups
+
+**Group one - material studies (Q3, Q4, Q5).** These change what the page appears to be made of: hardware,
+drafting paper, printed paper. They are the furthest from Epic's own styling, and were read as off-brand
+for a screen that has to ship; they are kept because the material is the point of a comparison, and because
+two of them contributed ideas the on-brand set then used - the latched answer with its own lamp, and a state
+written on the option itself rather than implied.
+
+**Group two - on-brand options (Q6 to Q9).** Four *structures* inside Epic's own system, all dark, all drawn
+from measured values rather than from a reading of the brand:
+
+- **Q6 Launcher** - hero and card grid, in the language of launcher.epicgames.com.
+- **Q7 Store** - filter row, then a two-up product grid whose cards carry a real metadata row.
+- **Q8 Guide** - a step rail carrying the progress, answers as radio rows. The most app-like.
+- **Q9 Console** - a spec table with monospace indices and state chips. The most tool-like.
+
+Their evidence is `support/library-data/launcher-epicgames-com.json` - scraped the same way as the other
+three sites, and now listed in `support/library-data/index.json` - together with the values already curated
+in `support/library.html`: what Epic's pages publish as `--color-background-elevated-high-select: #28282c`,
+`--color-text-select-default: #26bbff`, `--color-border-focus: #fff`,
+`--color-fill-secondary-default/-hover: #ffffff26/#ffffff59`, `--color-fill-primary-default: #26bbff`, and
+the status colours `--color-text-success: #45c761` and `--color-text-warning: #ffc229`.
+
+One rule from the library that group two follows on purpose: **nothing moves on hover or on selection.**
+Epic changes a fill and lightens a border; it does not lift, scale or translate an element. Selection is
+carried by the fill, a select-coloured border and a marked control - which is also what keeps a chosen card
+from resizing the grid row it sits in.
+
+## Proposed, and since built (2026-11-20)
 
 The three below were proposed here and have now been built, as the three lighter designs on the question
 page (see `public/concepts/questions-3-cassette-deck/`, `-4-blueprint/`, `-5-riso-zine/`). They are kept
@@ -48,8 +76,9 @@ Landing pages: 1 Cinematic Launch, 2 Sticker Pop, 3 Choose Your Mode (game lobby
 (editorial), 5 Creator Bento, 6 One Question, 7 Three Steps, 8 Quiet Power (lime, and its blue +
 indigo sibling), 9 Spotlight.
 
-Question pages: Q1 Default (the app's current screen, the baseline), Q2 Quiet Power (blue + indigo),
-Q3 Cassette Deck, Q4 Blueprint, Q5 Riso Zine.
+Question pages: Q1 Default (the app's current screen, the baseline), Q2 Quiet Power (blue + indigo, the dark
+reference), Q3 Cassette Deck, Q4 Blueprint, Q5 Riso Zine (the three material studies), Q6 Launcher, Q7 Store,
+Q8 Guide, Q9 Console (the four on-brand options).
 
 Randomiser: R1 Fruit Machine (amber), R2 Quiet Power (blue + indigo), R2b Quiet Power as one widget,
 R3 Broadcast scoreboard, R4 Neon Arcade, R5 Terminal (tool only), R6 Editorial (light, wheel reels),

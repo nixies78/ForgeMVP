@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Questions 6 - Launcher · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Questions 6 - Launcher.
+   *
+   * The question screen in the language of launcher.epicgames.com, the page Epic shipped for the new
+   * launcher. Measured there, not guessed: the canvas is the launcher's own html background #0E0B21, the
+   * hero carries one large ambient bloom (purple-400 at 22%, which the page publishes as --bloom-opacity:
+   * .7), the display type is Inter Tight 700 at -0.035em, the standfirst is 20px/400 at 65% white, the
+   * primary action is #33BFFF with a #0A2633 label in a 48px, 10px-radius pill, and the answers are cards
+   * on Epic's elevated-low-transparent surface (#ffffff0d) with the same 5% white as their border.
+   *
+   * The selected state is the part worth pointing at, because the launcher publishes the tokens for it:
+   * --color-background-elevated-high-select (#28282C) for the fill, --color-text-select-default (#26BBFF)
+   * for the mark, and a status chip in the manner of the launcher's green "You're here" pill. Selection is
+   * shown by fill and border and a chip; nothing moves, because Epic's own hover rule is a fill change,
+   * never a transform.
+   *
+   * Frame: the app's 72px bar, the 44px mark, the 1136px column, chrome.css last, no footer. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: dark;
+    /* launcher.epicgames.com, measured */
+    --canvas: #0E0B21;
+    --text-primary: #FFFFFF;
+    --text-secondary: #FFFFFFA6;      /* --color-text-secondary */
+    --fill-secondary: #FFFFFF26;      /* --color-fill-secondary-default */
+    --fill-secondary-hover: #FFFFFF59;/* --color-fill-secondary-hover */
+    --elevated-low: #FFFFFF0D;        /* --color-background-elevated-low-transparent */
+    --elevated-high-select: #28282C;  /* --color-background-elevated-high-select */
+    --border-faint: #FFFFFF0D;        /* --color-border-faint */
+    --border-subtle: #FFFFFF26;       /* --color-border-subtle */
+    --border-hover: #FFFFFFA6;        /* --color-border-hover */
+    --border-focus: #FFFFFF;          /* --color-border-focus */
+    --accent: #33BFFF;                /* blue-400: the launcher's CTA fill */
+    --accent-ink: #0A2633;            /* blue-100: the label on it */
+    --accent-link: #A0E1FF;           /* blue-500: the launcher's link colour */
+    --select: #26BBFF;                /* --color-text-select-default */
+    --indigo: #868AFD;                /* indigo-400 */
+    --purple: #BB6BF0;                /* purple-400: the hero bloom */
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --bloom-opacity: .7;              /* the launcher publishes exactly this */
+    --ease: cubic-bezier(.25, 1, .5, 1); /* --eds3 animation easeOutQuart */
+    --radius-card: 8px;               /* the launcher's tile radius */
+    --radius-action: 10px;            /* the launcher's CTA radius */
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--text-primary);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    position: relative;
+    padding-block: 0 80px;
+  }
+  a { color: inherit; }
+
+  /* The hero bloom. One layer, behind everything, at the opacity the launcher names for it. */
+  .bloom {
+    position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+    width: min(1100px, 100vw); height: 560px;
+    opacity: var(--bloom-opacity);
+    pointer-events: none;
+    background:
+      radial-gradient(closest-side, rgba(187, 107, 240, .30), rgba(134, 138, 253, .10) 55%, transparent 78%);
+    filter: blur(2px);
+  }
+  header, main { position: relative; }
+
+  /* the app's 72px bar */
+  header { height: 72px; display: flex; align-items: center; }
+
+  /* ---------- the hero: eyebrow, display heading, standfirst ---------- */
+  .hero { padding-block: 56px 0; }
+  .eyebrow {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0;
+    font-size: 12px; letter-spacing: .03em; text-transform: uppercase; font-weight: 500;
+    color: var(--text-primary);
+  }
+  .eyebrow .no { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  h1 {
+    font-family: var(--title);
+    font-weight: 700;
+    font-size: clamp(32px, 3.7vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -.035em;         /* --eds3-typography-heading-letterSpacing-2xl */
+    margin: 18px 0 0;
+    max-width: 20em;
+  }
+  h1:focus { outline: none; }
+  .standfirst {
+    color: var(--text-secondary);
+    font-size: clamp(17px, 1.4vw, 20px);
+    line-height: 1.65;
+    margin: 20px 0 0;
+    max-width: 40em;
+  }
+
+  /* ---------- where you are ---------- */
+  .meta {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+    margin: 44px 0 10px;
+  }
+  .meta p { margin: 0; font-size: 14px; letter-spacing: .02em; }
+  .meta .count { color: var(--text-secondary); }
+  .meta .step { color: var(--text-primary); font-weight: 500; }
+  .bar {
+    height: 4px; border-radius: 999px;
+    background: rgba(255, 255, 255, .12);
+    overflow: hidden;
+  }
+  .bar > span {
+    display: block; height: 100%; width: 4%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), var(--indigo));
+    transition: width .3s var(--ease);
+  }
+
+  /* ---------- the answers ---------- */
+  .cards {
+    list-style: none; margin: 24px 0 0; padding: 0;
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .card {
+    position: relative;
+    /* height:100% resolves against the <li>, which the grid stretches to the row - that is what keeps the
+       metric lines aligned across a row without the card inventing height of its own. */
+    width: 100%; height: 100%; min-height: 148px;
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--elevated-low);
+    border: 1px solid var(--border-faint);
+    border-radius: var(--radius-card);
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column;
+    /* Epic's own rule: the fill strengthens and the border lightens; the element does not move. */
+    transition: background .125s var(--ease), border-color .125s var(--ease);
+  }
+  .card:hover { background: var(--fill-secondary); border-color: var(--border-subtle); }
+  .card[aria-pressed="true"] {
+    background: var(--elevated-high-select);
+    border-color: var(--select);
+  }
+  .card .t {
+    font-family: var(--title); font-weight: 700;
+    font-size: 18px; line-height: 1.25; letter-spacing: -.015em; /* --eds3-typography-heading-md */
+  }
+  .card .d { color: var(--text-secondary); font-size: 14px; line-height: 1.5; letter-spacing: .02em; margin-top: 8px; }
+  /* One bottom row, always present: the card's own metric on the left - how many game types a category
+     holds, or what an option's status is - and the selected chip on the right when it is chosen. Both
+     children are pinned to the same 22px line, so the chip appearing cannot make the row - or the grid
+     row it sits in - any taller. A min-height alone was not enough: the row already stands 16px of
+     padding above its content, so the taller child still won. */
+  .card .metarow { display: flex; align-items: center; gap: 10px; margin-top: auto; padding-top: 16px; }
+  .card .metric { font-size: 12px; letter-spacing: .03em; line-height: 22px; color: var(--text-secondary); }
+  .card .chip { display: none; margin-left: auto; }
+  .card[aria-pressed="true"] .chip { display: inline-flex; }
+  .card[aria-pressed="true"] .metric { color: var(--text-primary); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 22px; padding: 0 10px;                 /* same 22px line as .metric, so nothing shifts */
+    font-size: 12px; font-weight: 500; letter-spacing: .03em;
+    border-radius: 999px;
+    color: var(--select);
+    background: rgba(38, 187, 255, .16);
+    border: 1px solid rgba(38, 187, 255, .35);
+  }
+
+  .note {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin: 22px 0 0; font-size: 14px; letter-spacing: .02em; color: var(--text-secondary);
+  }
+  /* An author rule for .note outranks the user agent's [hidden] rule, so hidden has to be said out loud. */
+  .note[hidden] { display: none; }
+  .note::before { content: ""; width: 3px; align-self: stretch; min-height: 18px; border-radius: 2px; background: var(--indigo); flex: none; }
+  .note.error { color: #FF8291; }
+  .note.error::before { background: #FF3F56; }
+
+  /* ---------- the actions ---------- */
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 44px 0 0; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    min-height: 48px; padding: 0 20px;
+    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: .02em;
+    text-decoration: none; cursor: pointer;
+    border: 0; border-radius: var(--radius-action);
+    background: var(--fill-secondary);
+    color: var(--text-primary);
+    transition: background .125s var(--ease), color .125s var(--ease);
+  }
+  .btn:hover { background: var(--fill-secondary-hover); }
+  /* Dev mode is a filter, so it is a chip: indigo-400 at 16% when it is on, the way the launcher chips it. */
+  .chipbtn {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 40px; padding: 0 16px;
+    font-family: var(--body); font-size: 14px; font-weight: 500; letter-spacing: .02em;
+    cursor: pointer;
+    border-radius: 999px;
+    background: var(--elevated-low);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    transition: background .125s var(--ease), border-color .125s var(--ease), color .125s var(--ease);
+  }
+  .chipbtn:hover { background: var(--fill-secondary); color: var(--text-primary); }
+  .chipbtn .dot { width: 7px; height: 7px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+  .chipbtn[aria-pressed="true"] {
+    background: rgba(134, 138, 253, .16);
+    border-color: rgba(134, 138, 253, .45);
+    color: #A6A9FE;
+  }
+  .chipbtn[aria-pressed="true"] .dot { background: var(--indigo); }
+  .actions .chipbtn { margin-left: auto; }
+
+  .card:focus-visible, .btn:focus-visible, .chipbtn:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+
+  /* ---------- the tag every mock-up carries ---------- */
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 20;
+    font-size: 11px; font-weight: 500; letter-spacing: .03em;
+    color: var(--text-secondary); background: rgba(16, 16, 20, .9);
+    border: 1px solid var(--border-subtle); border-radius: 999px;
+    padding: 6px 12px; pointer-events: none;
+  }
+
+  @media (max-width: 1020px) {
+    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 700px) {
+    .hero { padding-block: 30px 0; }
+    .meta { margin-top: 30px; }
+    .cards { grid-template-columns: 1fr; gap: 12px; }
+    .card { min-height: 0; }
+    .actions .chipbtn { margin-left: 0; }
+    .btn, .actions .chipbtn { flex: 1 1 auto; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<div class="bloom" aria-hidden="true"></div>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <p class="eyebrow"><span class="no" id="stepNo">[01]</span><span id="stepName">Category</span></p>
+    <h1 id="question" tabindex="-1">What type of game do you want to make?</h1>
+    <p class="standfirst" id="sub">Pick the broad category first — you'll choose the exact game type next.</p>
+  </section>
+
+  <div class="meta">
+    <p class="count" id="count">10 categories</p>
+    <p class="step" id="stepLabel">Step 1 of 2</p>
+  </div>
+  <div class="bar" role="progressbar" aria-label="Question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4" aria-valuetext="Step 1 of 2">
+    <span id="progressFill"></span>
+  </div>
+
+  <ul class="cards" id="grid" aria-live="polite"></ul>
+
+  <p class="note" id="note" hidden></p>
+
+  <div class="actions">
+    <a class="btn" id="back" href="../../index.html#/home">Back to my games</a>
+    <button class="chipbtn" id="devMode" type="button" aria-pressed="false" title="Show draft game types too">
+      <span class="dot" aria-hidden="true"></span>Dev mode
+    </button>
+  </div>
+</main>
+
+<div class="tag">Questions 6 - Launcher</div>
+
+<script src="questions.js"></script>
+<!-- Plain script, not a module: a browser blocks this page's data fetch on a file:// page, so this one
+     hands the browser over to the server address where the cards do load. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>
