@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Concept 13 - Patch Bay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  /* ------------------------------------------------------------------------------------------------
+   * Concept 13 - Patch Bay.
+   *
+   * Forge's actual substance - the part the other twelve pages talk around - is that an idea comes out
+   * the other side as a list of UEFN devices and five build steps. So this page is the machine that
+   * does it: a studio patch bay. Three input sockets (the three ways in), a run of cable, a device
+   * rack carrying real device names out of the guide's own data, and one output socket that is a plan.
+   *
+   * The material is hardware, and it is the opposite of flat: panels have a lit top edge and a dark
+   * bottom edge so they read as milled metal, recessed wells are darker than the panel around them,
+   * every label is engraved (mono, wide tracking, a hairline of shadow under it) and the only colour
+   * on the page belongs to the signal - teal #44D5BF where current is flowing, amber #F9A91F where
+   * the plan comes out, and grey where a socket is not patched yet. Devices are named and described
+   * from public/data/uefn_device_logic.json; nothing on the rack is invented.
+   * ------------------------------------------------------------------------------------------------ */
+  :root {
+    --bg: #0D0E11;
+    --rack: #17181C;        /* the panel face */
+    --rack-2: #1F2126;      /* a raised sub-panel */
+    --well: #0A0B0E;        /* anything recessed: sockets, meters, the rack interior */
+    --edge-hi: rgba(255, 255, 255, .07);
+    --edge-lo: rgba(0, 0, 0, .55);
+    --line: rgba(255, 255, 255, .09);
+    --engrave: #8A8C93;     /* engraved label grey - 5.7:1 on the rack face */
+    --engrave-hi: #E6E7EA;
+    --ink: #FFFFFF;
+    --ink-2: rgba(255, 255, 255, .72);
+    --signal: #44D5BF;      /* the live colour: cyan-400 out of the store's palette */
+    --signal-ink: #0B1917;
+    --signal-dim: rgba(68, 213, 191, .22);
+    --out: #F9A91F;         /* the plan, coming out of the bay */
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+    --display: "Inter Tight", "Inter", system-ui, sans-serif;
+    --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; }
+  p, h1, h2, h3, ul, li, figure { margin: 0; }
+  ul { padding: 0; list-style: none; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.02em; line-height: 1.04; }
+  .engrave {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--engrave);
+    /* the 1px of light under a cut letter, which is the whole trick of an engraved label */
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+  }
+  .lede { color: var(--ink-2); font-size: 16.5px; line-height: 1.65; max-width: 34em; }
+
+  /* ------------------------------------------------------------------------------- the 72px bar
+   * The bar is the top of the rack: the same face colour, a hairline under it, and a lit top edge.
+   * Sticky rather than fixed, so it pays for its own height in the layout. */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 72px;
+    background: linear-gradient(180deg, #1A1B20, #141519);
+    border-bottom: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+  }
+  .bar-row { display: flex; align-items: center; gap: 16px; height: 72px; }
+  .bar-read { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+  .bar-read .engrave { font-size: 10.5px; }
+  .led {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #3A3C42;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .6);
+    flex: none;
+  }
+  .led.live { background: var(--signal); box-shadow: 0 0 0 2px var(--signal-dim), 0 0 10px rgba(68, 213, 191, .55); animation: breathe 3.2s var(--ease) infinite; }
+  .led.out { background: var(--out); box-shadow: 0 0 0 2px rgba(249, 169, 31, .2), 0 0 10px rgba(249, 169, 31, .5); }
+  @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+
+  /* ---------------------------------------------------------------------------------- buttons
+   * The live action wears the live colour: teal with a near-black label, flat, 8px radius, with the
+   * face's own top-lit edge. The unpatched action is a dead socket - present, obviously not live. */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    height: 46px; padding: 0 22px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: var(--text);
+    font-size: 15px; font-weight: 700; line-height: 1;
+    text-decoration: none; white-space: nowrap;
+    transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-live {
+    background: var(--signal);
+    color: var(--signal-ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35), inset 0 -1px 0 rgba(0, 0, 0, .25), 0 10px 30px -12px rgba(68, 213, 191, .6);
+  }
+  .btn-live:hover { background: #5FE3CE; transform: translateY(-1px); }
+  .btn-ghost { border-color: var(--line); color: var(--ink); }
+  .btn-ghost:hover { border-color: rgba(255, 255, 255, .28); background: rgba(255, 255, 255, .04); }
+  .btn-dead {
+    background: var(--well);
+    color: var(--engrave);
+    border-color: var(--line);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, .6);
+    cursor: default;
+  }
+
+  .bleed { width: 100%; }
+
+  /* =================================================================================== the hero */
+  .hero { padding-block: 64px 88px; }
+  .hero-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr); gap: 56px; align-items: center; }
+  .hero h1 { font-size: clamp(38px, 4.3vw, 56px); font-weight: 800; margin: 16px 0 20px; text-wrap: balance; }
+  .hero h1 span { display: block; }
+  .hero h1 .dim { color: rgba(255, 255, 255, .34); }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 30px; }
+  .readout {
+    margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px 26px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background: var(--well);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6);
+  }
+  .readout div { display: flex; align-items: baseline; gap: 8px; }
+  .readout b { font-family: var(--mono); font-size: 16px; font-weight: 400; color: var(--signal); }
+  .readout .engrave { font-size: 10.5px; }
+
+  /* ------------------------------------------------------------------- the patch panel itself
+   * Three input sockets on the left, one output on the right, cable between them. The ports sit in a
+   * three-row grid so their centres are always at 16.67%, 50% and 83.33% of the panel: the cables are
+   * drawn in one SVG stretched over the panel with preserveAspectRatio="none" and per-path
+   * non-scaling strokes, so they follow the sockets exactly at any panel width without thickening. */
+  .bay {
+    position: relative;
+    border-radius: 12px;
+    padding: 14px;
+    background: linear-gradient(180deg, var(--rack-2), var(--rack));
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi), 0 40px 80px -40px rgba(0, 0, 0, .9);
+  }
+  .bay-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 4px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+  .bay-head .engrave:last-child { margin-left: auto; }
+  .bay-body { position: relative; height: 396px; }
+  .bay-ports { position: relative; z-index: 2; display: grid; grid-template-rows: repeat(3, 1fr); height: 100%; }
+  .port { display: flex; align-items: center; gap: 14px; }
+  .port-text { display: grid; gap: 2px; }
+  .port-text b { font-family: var(--display); font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
+  .port-text .engrave { font-size: 10px; }
+  /* a socket: a milled well with a ring in it, lit from its own centre when the channel is patched */
+  .socket {
+    position: relative; flex: none;
+    display: grid; place-items: center;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 34%, #25272D, #101114 70%);
+    box-shadow: inset 0 3px 10px rgba(0, 0, 0, .85), inset 0 -1px 0 rgba(255, 255, 255, .06), 0 1px 0 rgba(255, 255, 255, .05);
+  }
+  .socket::before {
+    content: ""; width: 30px; height: 30px; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .14);
+    background: radial-gradient(circle at 50% 40%, #1A1C21, #0A0B0E);
+  }
+  .socket i {
+    position: absolute; width: 9px; height: 9px; border-radius: 50%;
+    background: #34363C;
+  }
+  .port-live .socket i { background: var(--signal); box-shadow: 0 0 12px rgba(68, 213, 191, .9); }
+  .port-live .socket::before { border-color: var(--signal-dim); }
+  /* the output is the payoff, so its socket is amber and one size up */
+  .socket-out { width: 66px; height: 66px; }
+  .socket-out::before { width: 40px; height: 40px; border-color: rgba(249, 169, 31, .3); }
+  .socket-out i { width: 11px; height: 11px; background: var(--out); box-shadow: 0 0 16px rgba(249, 169, 31, .9); }
+  .port-out {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    z-index: 2;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: linear-gradient(180deg, #202227, #17181C);
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+  }
+  .port-out b { font-family: var(--display); font-size: 20px; font-weight: 700; }
+  .cables { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+  .cable { fill: none; stroke: rgba(68, 213, 191, .5); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+  .cable-dark { stroke: rgba(255, 255, 255, .13); }
+  .cable-out { stroke: rgba(249, 169, 31, .55); }
+  /* the pulse: a short bright dash travelling the length of the cable, which is what makes the
+     drawing read as a signal rather than as an illustration. Dash lengths are in user units, which
+     the non-uniform scale stretches - harmless here, because it is a moving highlight either way. */
+  .pulse {
+    fill: none; stroke: #EAFFFB; stroke-width: 2.5;
+    stroke-dasharray: 26 900; stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    animation: flow 3.6s linear infinite;
+  }
+  .pulse-out { stroke: #FFE7B8; stroke-dasharray: 30 900; animation-delay: 1.2s; }
+  .pulse-2 { animation-delay: .8s; stroke-dasharray: 22 900; }
+  .pulse-3 { animation-delay: 1.6s; stroke-dasharray: 22 900; }
+  @keyframes flow { from { stroke-dashoffset: 240; } to { stroke-dashoffset: -700; } }
+
+  /* ============================================================================== the three inputs
+   * The three ways in as channel strips. A channel that is patched has a lit meter, a lit ring and a
+   * live action; a channel that is not has a dark meter, a dark socket and a dead action. The meter
+   * is five segments because five is the number of build steps a plan ends in. */
+  .channels { padding-bottom: 96px; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 28px; margin-bottom: 24px; }
+  .section-head h2 { font-size: clamp(26px, 3vw, 36px); margin-top: 12px; }
+  .section-note { color: var(--ink-2); font-size: 15px; max-width: 32ch; }
+  .strips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .strip {
+    display: flex; flex-direction: column;
+    border-radius: 12px;
+    background: linear-gradient(180deg, var(--rack-2), var(--rack));
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+    overflow: hidden;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .strip:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 var(--edge-hi), 0 24px 50px -30px rgba(0, 0, 0, .95); }
+  .strip-live { box-shadow: inset 0 1px 0 var(--edge-hi), inset 0 0 0 1px rgba(68, 213, 191, .35); }
+  .strip-top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .strip-num { font-family: var(--mono); font-size: 12px; color: var(--signal); }
+  .strip:not(.strip-live) .strip-num { color: var(--engrave); }
+  .strip-top .engrave:last-child { margin-left: auto; }
+  .strip-main { padding: 18px 16px 0; }
+  .strip-main h3 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .strip-main p { color: var(--ink-2); font-size: 14.5px; }
+  /* the meter and the fader are one object: a recessed well with five cells and a bright cap that
+     sits at the number of steps the channel produces. */
+  .meter { display: flex; align-items: center; gap: 12px; padding: 16px; margin-top: auto; }
+  .cells { display: flex; gap: 3px; flex: 1; }
+  .cells i { height: 10px; flex: 1; border-radius: 2px; background: #23252A; box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6); }
+  .strip-live .cells i { background: var(--signal); box-shadow: 0 0 8px rgba(68, 213, 191, .35); }
+  .strip-live .cells i:nth-child(5) { background: var(--out); box-shadow: 0 0 8px rgba(249, 169, 31, .4); }
+  .strip .btn { margin: 0 16px 18px; }
+  .strip-live .btn { align-self: flex-start; }
+  .strip:not(.strip-live) .btn { align-self: flex-start; }
+
+  /* ================================================================================ the rack
+   * Real devices, real purposes, grouped by the guide's own category words. The group headers are
+   * engraved and the rows carry a socket dot so the rack reads as the middle of the chain. */
+  .chain { padding-bottom: 96px; }
+  .chain-rail {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: var(--well);
+    border: 1px solid var(--line);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, .6);
+    margin-bottom: 18px;
+  }
+  .chain-rail .engrave { font-size: 10.5px; }
+  .chain-rail .led { margin-left: auto; }
+  .rack {
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-radius: 12px;
+    background: var(--rack);
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+    overflow: hidden;
+  }
+  .rack-col { padding: 16px; border-right: 1px solid var(--line); }
+  .rack-col:last-child { border-right: 0; }
+  .rack-col h3 { font-family: var(--mono); font-size: 10.5px; font-weight: 400; letter-spacing: .16em; text-transform: uppercase; color: var(--signal); margin-bottom: 14px; }
+  .dev { display: flex; gap: 10px; padding: 9px 0; border-top: 1px solid rgba(255, 255, 255, .05); }
+  .dev:first-of-type { border-top: 0; }
+  .dev b { display: block; font-size: 14px; font-weight: 600; letter-spacing: -.005em; }
+  .dev span { display: block; color: var(--engrave); font-size: 12.5px; line-height: 1.5; }
+  .dev i {
+    flex: none; width: 7px; height: 7px; margin-top: 6px; border-radius: 50%;
+    background: var(--signal); box-shadow: 0 0 8px rgba(68, 213, 191, .5);
+  }
+  .rack-foot {
+    display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center;
+    padding: 12px 16px;
+    border-top: 1px solid var(--line);
+    border-radius: 0 0 12px 12px;
+    background: var(--rack-2);
+  }
+
+  /* ================================================================================= the output */
+  .output { padding-bottom: 96px; }
+  .out-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 18px; align-items: stretch; }
+  .out-panel {
+    border-radius: 12px;
+    background: linear-gradient(180deg, var(--rack-2), var(--rack));
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+    overflow: hidden;
+  }
+  .out-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .out-head .engrave:last-child { margin-left: auto; }
+  .out-rows { padding: 6px 0; }
+  .out-row { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; }
+  .out-row + .out-row { border-top: 1px solid rgba(255, 255, 255, .05); }
+  .out-row .socket { width: 34px; height: 34px; }
+  .out-row .socket::before { width: 18px; height: 18px; }
+  .out-row .socket i { width: 6px; height: 6px; background: var(--out); box-shadow: 0 0 8px rgba(249, 169, 31, .7); }
+  .out-row b { display: block; font-family: var(--display); font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+  .out-row span { display: block; color: var(--ink-2); font-size: 14px; }
+  .out-side { display: grid; gap: 18px; align-content: start; }
+  .out-art { border-radius: 12px; overflow: hidden; border: 1px solid var(--edge-lo); box-shadow: inset 0 1px 0 var(--edge-hi); }
+  .out-art img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+  .out-art figcaption { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: var(--rack); border-top: 1px solid var(--line); }
+  .steps-panel { padding: 16px; border-radius: 12px; background: var(--rack); border: 1px solid var(--edge-lo); box-shadow: inset 0 1px 0 var(--edge-hi); }
+  .steps-cells { display: flex; gap: 5px; margin: 14px 0 12px; }
+  .steps-cells i { flex: 1; height: 34px; border-radius: 4px; background: linear-gradient(180deg, #2A2C32, #1B1D22); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .6); position: relative; }
+  .steps-cells i.done { background: linear-gradient(180deg, rgba(68, 213, 191, .9), rgba(68, 213, 191, .55)); box-shadow: 0 0 14px rgba(68, 213, 191, .3); }
+  .steps-cells i.done:last-child { background: linear-gradient(180deg, var(--out), rgba(249, 169, 31, .6)); box-shadow: 0 0 14px rgba(249, 169, 31, .35); }
+  .steps-cells i::after { content: attr(data-n); position: absolute; inset: auto 0 5px; text-align: center; font-family: var(--mono); font-size: 10px; color: rgba(255, 255, 255, .75); }
+
+  /* ================================================================================== the close */
+  .close { border-top: 1px solid var(--line); padding-block: 88px 0; }
+  .close-inner {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 28px;
+    padding: 28px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--rack-2), var(--rack));
+    border: 1px solid var(--edge-lo);
+    box-shadow: inset 0 1px 0 var(--edge-hi);
+  }
+  .close h2 { font-size: clamp(28px, 3.6vw, 44px); font-weight: 800; flex: 1 1 380px; }
+  .close-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .bay-foot {
+    margin-top: 40px; display: flex; flex-wrap: wrap; gap: 8px 24px;
+    padding: 12px 0;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--engrave);
+  }
+  .bay-foot b { font-weight: 400; color: var(--ink-2); }
+
+  /* -------------------------------------------------------------------------------- corner tag */
+  .tag {
+    position: fixed; right: 14px; bottom: 14px; z-index: 30;
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 8px 13px;
+    border-radius: 8px;
+    background: rgba(23, 24, 28, .94);
+    border: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em;
+    color: var(--ink-2);
+  }
+  .tag .led { width: 7px; height: 7px; }
+
+  /* ---------------------------------------------------------------------------- small screens
+   * The 72px bar, the 44px mark and the 1136px column are the desktop contract. Below it the bay
+   * stacks: the cables go, the sockets stay, and every panel becomes one column. */
+  @media (max-width: 1080px) {
+    .hero { padding-block: 48px 72px; }
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .out-grid { grid-template-columns: minmax(0, 1fr); }
+    .strip-live .btn, .strip:not(.strip-live) .btn { align-self: stretch; }
+  }
+  @media (max-width: 900px) {
+    .strips { grid-template-columns: minmax(0, 1fr); }
+    .rack { grid-template-columns: minmax(0, 1fr); }
+    .rack-col { border-right: 0; border-bottom: 1px solid var(--line); }
+    .rack-col:last-child { border-bottom: 0; }
+    .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
+  @media (max-width: 760px) {
+    .channels, .chain, .output { padding-bottom: 64px; }
+    .close { padding-block: 64px 0; }
+    .close-inner { padding: 20px; }
+    .bay-body { height: 340px; }
+    .socket { width: 44px; height: 44px; }
+    .socket::before { width: 24px; height: 24px; }
+    .socket-out { width: 54px; height: 54px; }
+    .socket-out::before { width: 32px; height: 32px; }
+    .port-text b { font-size: 17px; }
+    .port-out { padding: 11px 14px; }
+    .port-out b { font-size: 17px; }
+    /* the cables are the one thing worth losing on a phone: at 400px the sockets are close enough
+       together that a curve between them is noise, and the lit wells already say what is patched. */
+    .cables { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="bar bleed">
+  <div class="wrap bar-row">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="bar-read">
+      <span class="engrave">Patch bay</span>
+      <span class="led live" aria-hidden="true"></span>
+      <span class="engrave">Signal live</span>
+    </span>
+  </div>
+</header>
+
+<main>
+  <!-- ------------------------------------------------ the hero, and the patch panel that is the page -->
+  <section class="hero bleed">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="engrave">Forge &middot; idea to device list</p>
+        <h1><span>Your idea goes in.</span><span class="dim">A device list comes out.</span></h1>
+        <p class="lede">Forge is the patch bay between a Fortnite island idea and Unreal Editor for
+          Fortnite. Answer a few questions and it hands you the exact game type, the UEFN devices that
+          game type needs, and the five build steps that put them on the island.</p>
+        <div class="hero-actions">
+          <a class="btn btn-live" href="#channels">Start questions
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#chain">See the signal path</a>
+        </div>
+        <div class="readout">
+          <div><b>13</b><span class="engrave">game types</span></div>
+          <div><b>59</b><span class="engrave">UEFN devices</span></div>
+          <div><b>5</b><span class="engrave">build steps</span></div>
+        </div>
+      </div>
+
+      <!-- The bay. Decorative as a drawing - every word of the pitch is in the copy beside it. -->
+      <div class="bay">
+        <div class="bay-head">
+          <span class="engrave">Input patch</span>
+          <span class="led live" aria-hidden="true"></span>
+          <span class="engrave">Ch 01 patched</span>
+        </div>
+        <div class="bay-body">
+          <svg class="cables" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+            <!-- three inputs converging on the output socket at the panel's right edge (x 340->640) -->
+            <path class="cable" d="M120 167 C 420 167, 400 500, 620 500" vector-effect="non-scaling-stroke"/>
+            <path class="cable cable-dark" d="M120 500 C 400 500, 420 500, 620 500" vector-effect="non-scaling-stroke"/>
+            <path class="cable cable-dark" d="M120 833 C 420 833, 400 500, 620 500" vector-effect="non-scaling-stroke"/>
+            <path class="cable cable-out" d="M660 500 L 1000 500" vector-effect="non-scaling-stroke"/>
+            <path class="pulse" d="M120 167 C 420 167, 400 500, 620 500" vector-effect="non-scaling-stroke"/>
+            <path class="pulse pulse-out" d="M660 500 L 1000 500" vector-effect="non-scaling-stroke"/>
+          </svg>
+
+          <div class="bay-ports">
+            <div class="port port-live">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span class="port-text"><b>Answer Questions</b><span class="engrave">Ch 01 &middot; patched</span></span>
+            </div>
+            <div class="port">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span class="port-text"><b>Randomise</b><span class="engrave">Ch 02 &middot; unpatched</span></span>
+            </div>
+            <div class="port">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span class="port-text"><b>Chat with AI</b><span class="engrave">Ch 03 &middot; unpatched</span></span>
+            </div>
+          </div>
+
+          <div class="port-out">
+            <span class="socket socket-out" aria-hidden="true"><i></i></span>
+            <span class="port-text"><b>Your plan</b><span class="engrave">Out &middot; game type, devices, steps</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- the three ways in, as channel strips -->
+  <section class="channels bleed" id="channels">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="engrave">Channels 01 - 03</p>
+          <h2>Three ways to patch an idea in.</h2>
+        </div>
+        <p class="section-note">One channel is live today. The other two are wired and waiting.</p>
+      </div>
+
+      <div class="strips">
+        <article class="strip strip-live">
+          <div class="strip-top">
+            <span class="strip-num">01</span>
+            <span class="engrave">Questions</span>
+            <span class="engrave">Ready</span>
+          </div>
+          <div class="strip-main">
+            <h3>Answer Questions</h3>
+            <p>A short set of questions about the game you want. Forge narrows it to one exact game type
+              and builds the plan around that answer.</p>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span class="engrave">Steps</span>
+            <span class="cells"><i></i><i></i><i></i><i></i><i></i></span>
+          </div>
+          <a class="btn btn-live" href="../../index.html#/home">Start questions
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+        </article>
+
+        <article class="strip">
+          <div class="strip-top">
+            <span class="strip-num">02</span>
+            <span class="engrave">Randomise</span>
+            <span class="led" aria-hidden="true"></span>
+            <span class="engrave">Coming soon</span>
+          </div>
+          <div class="strip-main">
+            <h3>Randomise</h3>
+            <p>Not sure what to make? It picks a game type, a twist and a brand to build around, so you
+              can start from something you would not have thought of.</p>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span class="engrave">Steps</span>
+            <span class="cells"><i></i><i></i><i></i><i></i><i></i></span>
+          </div>
+          <span class="btn btn-dead">Channel not patched</span>
+        </article>
+
+        <article class="strip">
+          <div class="strip-top">
+            <span class="strip-num">03</span>
+            <span class="engrave">Chat</span>
+            <span class="led" aria-hidden="true"></span>
+            <span class="engrave">Coming soon</span>
+          </div>
+          <div class="strip-main">
+            <h3>Chat with AI</h3>
+            <p>Describe the idea in your own words and answer the follow-ups. The conversation becomes
+              the same plan, in your own language.</p>
+          </div>
+          <div class="meter" aria-hidden="true">
+            <span class="engrave">Steps</span>
+            <span class="cells"><i></i><i></i><i></i><i></i><i></i></span>
+          </div>
+          <span class="btn btn-dead">Channel not patched</span>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------------------- the rack, and the chain -->
+  <section class="chain bleed" id="chain">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="engrave">Signal path &middot; idea to island</p>
+          <h2>How an answer becomes a device list.</h2>
+        </div>
+        <p class="section-note">Your answers select from the guide's 59 devices. Nothing is guessed at
+          build time.</p>
+      </div>
+
+      <div class="chain-rail">
+        <span class="engrave">In &middot; your answers</span>
+        <span class="engrave">&rarr;</span>
+        <span class="engrave">Rack &middot; devices</span>
+        <span class="engrave">&rarr;</span>
+        <span class="engrave">Out &middot; five steps</span>
+        <span class="led live" aria-hidden="true"></span>
+      </div>
+
+      <div class="rack">
+        <div class="rack-col">
+          <h3>Player setup</h3>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Player Spawner</b><span>Spawns agents into the island. Every experience needs at least one per team or role.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Class Designer</b><span>Defines a custom class with a preset inventory loadout.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Player Movement Settings</b><span>Adjusts movement speed and jump for a faster or slower game.</span></span></div>
+        </div>
+        <div class="rack-col">
+          <h3>Game loop</h3>
+          <div class="dev"><i aria-hidden="true"></i><span><b>End Game</b><span>Configures how the round ends and who is declared the winner.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Round Settings</b><span>Per-round inventory reset, and the classic elimination-style rules.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Score Manager</b><span>Tracks eliminations and points per player or team.</span></span></div>
+        </div>
+        <div class="rack-col">
+          <h3>Structures</h3>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Item Spawner</b><span>Spawns pickup weapons and resources around the map.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Item Granter</b><span>Grants a specific weapon or item when it is triggered.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Vending Machine</b><span>Sells up to three items for a currency cost.</span></span></div>
+        </div>
+        <div class="rack-col">
+          <h3>Atmosphere &amp; HUD</h3>
+          <div class="dev"><i aria-hidden="true"></i><span><b>Sky Dome</b><span>Controls sky, lighting mood, fog and atmosphere.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span class=""><b>Customizable Light</b><span>Adds and colours light sources to set the mood of an area.</span></span></div>
+          <div class="dev"><i aria-hidden="true"></i><span><b>HUD Message</b><span>Displays round instructions and status to players.</span></span></div>
+        </div>
+      </div>
+      <div class="rack-foot">
+        <span class="engrave">12 shown of 59 in the guide</span>
+        <span class="engrave">&middot;</span>
+        <span class="engrave">Names and purposes read from the guide's own device data</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------------------------------- the output -->
+  <section class="output bleed" id="out">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="engrave">Output</p>
+          <h2>What lands on your desk.</h2>
+        </div>
+      </div>
+
+      <div class="out-grid">
+        <div class="out-panel">
+          <div class="out-head">
+            <span class="led out" aria-hidden="true"></span>
+            <span class="engrave">Plan out &middot; ready to build</span>
+            <span class="engrave">3 signals</span>
+          </div>
+          <div class="out-rows">
+            <div class="out-row">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span><b>Your exact game type</b><span>Not a vague genre: one of 13 researched game types, with what makes it play the way it does.</span></span>
+            </div>
+            <div class="out-row">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span><b>The devices it needs</b><span>The UEFN devices that make your game work, and the settings that matter on each one.</span></span>
+            </div>
+            <div class="out-row">
+              <span class="socket" aria-hidden="true"><i></i></span>
+              <span><b>Five build steps</b><span>Open Unreal Editor for Fortnite and follow them in order, from an empty island to a playable one.</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="out-side">
+          <figure class="out-art">
+            <img src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" loading="lazy">
+            <figcaption>
+              <span class="led live" aria-hidden="true"></span>
+              <span class="engrave">Island out &middot; built in UEFN</span>
+            </figcaption>
+          </figure>
+
+          <div class="steps-panel">
+            <span class="engrave">Build steps</span>
+            <div class="steps-cells" aria-hidden="true">
+              <i class="done" data-n="1"></i><i class="done" data-n="2"></i><i class="done" data-n="3"></i><i class="done" data-n="4"></i><i class="done" data-n="5"></i>
+            </div>
+            <span class="engrave">Five steps, in order, each with its settings</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------------------------------- the close -->
+  <section class="close bleed">
+    <div class="wrap">
+      <div class="close-inner">
+        <h2>Patch your first idea into the bay.</h2>
+        <div class="close-actions">
+          <a class="btn btn-live" href="../../index.html#/home">Start questions
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <span class="btn btn-dead">Randomise &middot; coming soon</span>
+        </div>
+      </div>
+      <div class="bay-foot" aria-hidden="true">
+        <span>Status <b>signal live</b></span>
+        <span>Channel <b>01 questions</b></span>
+        <span>Rack <b>59 devices</b></span>
+        <span>Output <b>5 build steps</b></span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
+
+<div class="tag"><span class="led live" aria-hidden="true"></span>Concept 13 - Patch Bay</div>
+</body>
+</html>

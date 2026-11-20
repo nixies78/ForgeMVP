@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Concept 12 - Launcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  /* Concept 12 - Launcher. This is one of four landing pages, each wearing the visual language of a
+     different part of the Epic family; this one wears the Epic Games Launcher and the Epic Games Store.
+     So it is a storefront rather than a brochure: a 100px nav strip, a hero carousel whose three tabs are
+     Forge's three ways in, rails of #14181E tiles with the store's own 1px white-15% hairline, and exactly
+     one bright blue download-style action.
+
+     Two of the launcher's own devices are worth naming because they are what makes it recognisably Epic
+     rather than generic dark SaaS, and both are here:
+       - the ground is #0E0B21, a violet-black, not a neutral one. It is the launcher's <html> background
+         and its theme-color, and it is the single biggest tell;
+       - backgrounds that sit on it wear a coloured corner spotlight - a radial gradient at 0% 100% of the
+         step's own palette colour mixed 18% into transparent, over #FFFFFF0E, behind blur(25px). On the
+         launcher each numbered step gets its own colour from that recipe; here the three ways in do.
+     Everything else measured off store.epicgames.com and unrealengine.com rather than invented: the tile,
+     the primary button, the badge, the rail and the radii are the properties' own numbers. */
+  :root {
+    --ground:  #0E0B21;                    /* the launcher's own violet-black ground */
+    --ground-rgb: 14, 11, 33;              /* the same colour, for the scrims that need it at an alpha */
+    --tile:    #14181E;                    /* card and library tile - the store's "Discover" tile */
+    --raised:  #18181C;
+    --raised-2:#202024;
+    --rule:    #28282C;
+    --rail:    #404044;                    /* an unfilled progress rail */
+    --blue:    #26BBFF;                    /* the single action colour: .cta-button-primary's own value */
+    --on-accent:#0A2633;                   /* --eds3-color-foreground-onAccent-primary, the launcher's */
+    --badge:   #33BFFF;                    /* the store's sale badge */
+    --badge-ink:#0A2633;
+    --hair:    rgba(255,255,255,.15);      /* the store's tile hairline, and the most recognisable thing here */
+    --white:   #FFFFFF;
+    --text-2:  rgba(255,255,255,.75);
+    --text-3:  rgba(255,255,255,.55);
+    /* The launcher's two semantic gradients, which it does not mix up: purple->blue marks the thing being
+       replaced, cyan->green marks the thing that works now. The page uses the second for anything that
+       measures progress, and never for decoration. */
+    --after:   linear-gradient(194.98deg, #A0E1FF 0%, #5FE367 100%);
+    --before:  linear-gradient(123.64deg, #C67BDC 0%, #6086D6 100%);
+    --pin:     rgba(134, 138, 253, .10);   /* the pinstripe hairlines: indigo-400 at 10% */
+    --display: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono:    ui-monospace, "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+    --ease:    cubic-bezier(.45,0,.55,1);  /* the store's own easing, used for colour changes only */
+    --ease-out:cubic-bezier(.16,1,.3,1);   /* the launcher's: its reveals and its hero fan-in */
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    /* The store is dark to the edges, so the ground is on <body> and every full-bleed band simply paints
+       nothing - the only bands with their own ground are the nav strip and the key-art ones. */
+    background: var(--ground);
+    color: var(--white);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+  p, h1, h2, h3, ol, ul, li, figure { margin: 0; }
+  ol, ul { padding: 0; list-style: none; }
+  /* One focus treatment for the whole page, in the page's one accent: an outline that survives on a dark
+     ground without a second colour being introduced to carry it. */
+  :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+
+  /* Anchors land under the sticky 72px bar rather than underneath it. The three way-in cards are anchor
+     targets too - that is what the hero's carousel chips point at - and the rail scrolls itself to bring
+     the named card across on a phone. */
+  #start, #ways-in, #library, #plan { scroll-margin-top: 88px; }
+  #way-questions, #way-randomise, #way-chat { scroll-margin-top: 92px; }
+
+  /* ---------- Type ---------- */
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; }
+  /* 40px is the store's storefront headline size, not a billboard's: the tiles and the art carry this page,
+     so the type stays at the size a product front end would use. Tracking is the launcher's -.035em on the
+     display sizes and the store's -.015em below them. */
+  h1 { font-size: clamp(30px, 3.4vw, 40px); line-height: 1.06; letter-spacing: -0.035em; text-wrap: balance; }
+  h2 { font-size: clamp(24px, 2.6vw, 32px); line-height: 1.1; letter-spacing: -0.02em; }
+  /* The launcher's eyebrows are monospace, uppercase, weight 500: the type system does the "engineered"
+     signalling on that page, and no heading there is uppercase. Same division here - every heading is
+     sentence case, and uppercase belongs to the mono label alone. */
+  .eyebrow {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .lede { color: var(--text-2); }
+  /* The strikethrough as an argument, which the launcher does in its own hero: the old claim is crossed out
+     in the "before" gradient rather than deleted, so you can still read what is being replaced. */
+  s {
+    text-decoration-line: line-through;
+    text-decoration-color: #A080DA;
+    text-decoration-thickness: 2px;
+  }
+
+  /* ---------- Buttons: the store's own three ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;                      /* the store's button height, and the reason the header is 72px */
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: var(--body);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.28px;            /* .cta-button-primary / .cosmos-button.primary, verbatim */
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--blue);
+    /* The launcher's own label colour on its accent, rather than the page ground: onAccent is a dark navy
+       at 9.4:1 against #26BBFF, and it is the value the real button sets. */
+    color: var(--on-accent);
+    transition: background-color .1s cubic-bezier(0,0,1,1);
+  }
+  .btn-primary:hover { background: #4CC4FF; }
+  .btn-secondary {
+    background: rgba(255,255,255,.15);
+    color: var(--white);
+    transition: background-color .1s cubic-bezier(0,0,1,1);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.24); }
+  .btn-outline {
+    background: transparent;
+    border-color: rgba(255,255,255,.35);
+    color: var(--white);
+    transition: border-color .2s var(--ease), background-color .2s var(--ease);
+  }
+  .btn-outline:hover:not(:disabled) { border-color: rgba(255,255,255,.8); background: rgba(255,255,255,.06); }
+  /* A ghost link is type only. It is the store's text action, used once on this page so the blue fill on
+     the primary button stays the only blue object you can press. */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    height: auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--blue);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.4;
+    letter-spacing: 0.28px;
+    text-decoration: none;
+    transition: color .2s cubic-bezier(.45,0,.55,1);
+  }
+  .btn-ghost:hover { color: #7AD4FF; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ---------- Badges and pills ---------- */
+  /* The store's sale badge, word for word: bright blue, dark ink, fully round, small bold caps. */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border-radius: 9999px;
+    background: var(--badge);
+    color: var(--badge-ink);
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* A state that is not a sale: the same pill shape in glass, so "Coming soon" never borrows the blue that
+     means "go". */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 10px;
+    border: 1px solid var(--hair);
+    border-radius: 9999px;
+    background: rgba(255,255,255,.05);
+    color: var(--text-2);
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ---------- 1. The header: the launcher's own top bar ---------- */
+  /* 72px including the 40px action inside it. Sticky rather than fixed, so it holds its place in the
+     layout and the 100px nav strip below it starts where the bar ends. The .wrap is the shared column -
+     its width, its centring and its gutter belong to chrome.css and are not restated here - and the lockup
+     is the first thing in it, so the mark lands on the same x as on every other mockup. */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    height: 72px;
+    background: rgba(var(--ground-rgb),.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .bar > .wrap { display: flex; align-items: center; gap: 12px; height: 100%; }
+  .bar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+  /* The header's one label swap: below 620px the badge and the button together no longer fit the column,
+     and FREE is the word that says the product costs nothing, so the button's label shortens instead. */
+  .btn-short { display: none; }
+
+  /* ---------- 2. The nav strip: the store's 100px top nav ---------- */
+  /* Full-bleed, its own ground, one hairline under it - the band is the page's own class and the content
+     inside it sits in a .wrap. The three links are real anchors into the three sections that follow. */
+  .topnav {
+    height: 100px;
+    background: var(--ground);
+    border-bottom: 1px solid var(--rule);
+  }
+  .topnav > .wrap { display: flex; align-items: center; gap: 24px; height: 100%; }
+  .topnav-links { display: flex; align-items: center; gap: 28px; }
+  .topnav-links a {
+    color: var(--text-2);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    transition: color .2s var(--ease);
+  }
+  .topnav-links a:hover { color: var(--white); }
+  .topnav-status {
+    margin-left: auto;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+
+  /* ---------- 3. The hero ---------- */
+  /* The stage is full-bleed and it is also the answer to the store's ambient glow: a blurred, oversized
+     copy of the hero art sits behind everything and is clipped by this box, so the key art appears to
+     bleed light into the page instead of being pasted onto it. */
+  .hero-stage {
+    position: relative;
+    overflow: hidden;
+    padding-block: 26px 56px;
+  }
+  .hero-glow {
+    position: absolute;
+    inset: -12%;                       /* oversized, so the blur has art to spread rather than an edge */
+    width: auto;
+    height: auto;
+    /* The base img rule caps every image at its box; this one exists to be larger than its box, so it is
+       the one image on the page that opts out. */
+    max-width: none;
+    object-fit: cover;
+    filter: blur(60px);
+    opacity: .5;
+  }
+  /* The glow is faded out where the hero meets the page, which is what keeps a blurred rectangle from
+     reading as a blurred rectangle. */
+  .hero-stage::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 140px;
+    background: linear-gradient(rgba(var(--ground-rgb),0), var(--ground));
+  }
+  .hero-inner { position: relative; z-index: 1; }
+
+  /* The store's carousel row: dark chips, the live one on #28282C, a thumbnail in every chip. Here the
+     three chips are the page's three ways in, which is the whole mapping of this concept - the store's
+     hero carousel is Forge's three doors. They are anchors, not buttons: each one really goes to the card
+     it names, so the row works with scripting off. */
+  .hero-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 44px;
+    padding: 0 14px 0 6px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: var(--ground);
+    color: var(--text-3);
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    transition: background-color .2s var(--ease), color .2s var(--ease);
+  }
+  .tab:hover { color: var(--text-2); }
+  .tab.is-active { background: var(--raised-2); color: var(--white); }
+  .tab-thumb {
+    width: 40px;
+    height: 26px;
+    flex: none;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  /* The key art itself. Text sits on the art over a left-to-right scrim, which is the store's hero
+     treatment: the picture is legible on the right, the words are legible on the left, and neither
+     fights the other. */
+  .hero-panel {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--hair);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--tile);
+  }
+  .hero-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(var(--ground-rgb),.94) 0%, rgba(var(--ground-rgb),.72) 46%, rgba(var(--ground-rgb),.16) 100%),
+      linear-gradient(0deg, rgba(var(--ground-rgb),.55) 0%, rgba(var(--ground-rgb),0) 55%);
+  }
+  .hero-copy {
+    position: relative;
+    padding: 40px 44px 44px;
+    max-width: 620px;
+  }
+  .hero-copy h1 { margin-top: 16px; }
+  .hero-copy .lede {
+    margin-top: 16px;
+    font-size: clamp(16px, 1.3vw, 18px);
+    line-height: 1.6;
+    max-width: 44ch;
+  }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 26px; }
+
+  /* The launcher's signature flourish: a conic "light ring" with a hard white stop at 72deg, masked down to
+     a rounded-rect stroke so only the border carries it, sweeping in a slow loop. @property is what lets the
+     gradient's own angle animate while the ring itself stays put - rotating the element would rotate the
+     rounded rectangle, which is not the effect. Where @property is unsupported the ring simply holds still. */
+  @property --beam {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 210deg;
+  }
+  .beam {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 2px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(from var(--beam),
+      transparent 0deg,
+      rgba(160,225,255,.30) 34deg,
+      rgba(134,138,253,.75) 56deg,
+      #FFFFFF 72deg,
+      rgba(187,107,240,.70) 88deg,
+      rgba(230,102,182,.22) 104deg,
+      transparent 128deg,
+      transparent 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    animation: beam-sweep 14s linear infinite;
+  }
+  @keyframes beam-sweep { from { --beam: 0deg; } to { --beam: 360deg; } }
+
+  /* The launcher's pinstripe grid: 1px hairlines at 10% indigo, aligned to the content column rather than to
+     the viewport, running the whole height of the page. It is fixed and non-interactive, and it sits behind
+     everything - a hairline that crosses the copy is a hairline over the copy. */
+  .pinstripes { position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+  .pin-row { display: grid; grid-template-columns: repeat(6, 1fr); height: 100%; }
+  .pin-row i { border-left: 1px solid var(--pin); }
+  .pin-row i:last-child { border-right: 1px solid var(--pin); }
+
+  /* Big numbers get the launcher's "after" gradient as a text fill: the same cyan->green it uses for the
+     things that work. -text-fill-color rather than color, so the number still has a real colour to fall
+     back on if background-clip:text is not supported. */
+  .metric {
+    font-size: 1.3em;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    font-variant-numeric: tabular-nums;
+    background: var(--after);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* ---------- 4. The three ways in ---------- */
+  .ways { padding-block: 72px 12px; }
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 14px 40px;
+    margin-bottom: 22px;
+  }
+  .section-head h2 { margin-top: 12px; }
+  .section-note { max-width: 46ch; font-size: 14px; line-height: 1.6; color: var(--text-3); }
+  /* A real horizontal scroller: the rail scrolls itself, snaps, and can be swiped on a phone without the
+     page ever scrolling sideways, because its own width is the column's and never more. */
+  .rail {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 4px;
+  }
+  /* Three fit the column exactly at a desktop width; below that the floor keeps a card wide enough to read
+     and the rail takes over. */
+  .card {
+    display: flex;
+    flex-direction: column;
+    /* A hair under a third of the column rather than exactly a third: three exact thirds can round to a
+       pixel over and give the rail a scrollbar on a desktop width where nothing is meant to scroll. */
+    flex: 0 0 calc((100% - 34px) / 3);
+    min-width: 268px;
+    scroll-snap-align: start;
+    /* The launcher's step-panel recipe, which is the nicest reusable thing on that page: a coloured
+       spotlight in the bottom-left corner - its own palette colour mixed into transparent - over a 5.5%
+       white fill, behind a 25px blur, inside a 1px white-10% hairline. Each way in gets its own colour
+       from that recipe, and the colour is the only thing that differs between the three.
+       26% rather than the launcher's 18%: its panels are full-width bands and these are third-of-column
+       cards, and the tint has to survive being that much smaller to still name its colour at a glance. */
+    background:
+      radial-gradient(170% 130% at 0% 100%, color-mix(in srgb, var(--step) 26%, transparent) 0%, transparent 78%),
+      rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.10);
+    backdrop-filter: blur(25px);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color .2s var(--ease), transform .3s var(--ease-out);
+  }
+  .card:hover { border-color: rgba(255,255,255,.28); transform: translateY(-4px); }
+  /* blue-400, indigo-400 and pink-400 out of the published palette scale - the same three the launcher
+     gives its three numbered steps. */
+  #way-questions { --step: #33BFFF; }
+  #way-randomise { --step: #868AFD; }
+  #way-chat { --step: #E166B6; }
+  .card-art { position: relative; aspect-ratio: 16 / 9; background: var(--raised); border-bottom: 1px solid var(--hair); }
+  .card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .card-body { padding: 18px 18px 0; }
+  .card-name { font-size: 20px; line-height: 1.2; letter-spacing: -0.01em; }
+  .card-desc { margin-top: 9px; font-size: 14px; line-height: 1.6; color: var(--text-2); }
+  /* The status and the action share the last row, which is pushed to the bottom so the three cards' feet
+     line up however long their descriptions run. */
+  .card-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: auto;
+    padding: 18px;
+  }
+  .card-foot .btn { margin-left: auto; }
+
+  /* ---------- 5. The library ---------- */
+  /* The store's split tile - art left, text right, a meta line - carrying the real numbers as installed
+     entries. There is no button on these: they are already yours, so the right-hand side shows a state. */
+  .library-wrap { padding-block: 56px 12px; }
+  .library { display: grid; gap: 12px; }
+  .lib-item {
+    display: grid;
+    grid-template-columns: 208px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 22px;
+    padding: 12px;
+    background: var(--tile);
+    border: 1px solid var(--hair);
+    border-radius: 12px;
+  }
+  .lib-art { position: relative; aspect-ratio: 16 / 9; border-radius: 8px; overflow: hidden; background: var(--raised); }
+  .lib-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .lib-name { font-size: 20px; line-height: 1.2; letter-spacing: -0.01em; }
+  .lib-meta { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--text-3); }
+  .lib-state {
+    padding-right: 10px;
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .library-foot { margin-top: 16px; font-size: 13px; color: var(--text-3); }
+
+  /* ---------- 6. What you walk away with ---------- */
+  /* A launcher's install sequence: one continuous rail, filled end to end, with the stage boundaries cut
+     out of it as ticks. It is drawn as already complete - this is the state after Install, not a spinner. */
+  .plan { padding-block: 56px 96px; }
+  .track {
+    position: relative;
+    height: 6px;
+    border-radius: 9999px;
+    background: var(--rail);
+  }
+  .track-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 100%;
+    border-radius: inherit;
+    /* cyan to green: the launcher version of a thing that works, on the rail that measures progress */
+    background: var(--after);
+  }
+  /* Ticks are the page ground punched through the blue fill, so a stage boundary reads as a notch in a
+     finished download rather than as a second colour on the page. */
+  .tick {
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ground);
+    transform: translate(-50%, -50%);
+  }
+  .tick-1 { left: 0; }
+  .tick-2 { left: 33.333%; }
+  .tick-3 { left: 66.666%; }
+  .tick-4 { left: 100%; }
+  .stages {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 26px;
+  }
+  .stage-n {
+    display: block;
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .stage h3 { margin-top: 12px; font-size: 19px; line-height: 1.2; }
+  .stage p { margin-top: 8px; font-size: 14px; line-height: 1.6; color: var(--text-2); }
+
+  /* ---------- 7. The closing band ---------- */
+  /* Full-bleed key art with the same ambient treatment as the hero: a blurred oversized copy underneath,
+     the art over it, then a scrim strong enough to carry a headline. */
+  .band {
+    position: relative;
+    overflow: hidden;
+    min-height: 360px;
+    border-top: 1px solid var(--rule);
+    background: var(--ground);
+  }
+  .band-glow, .band-art {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .band-glow { inset: -14%; width: auto; height: auto; max-width: none; filter: blur(60px); opacity: .5; }
+  .band-art { opacity: .85; }
+  .band-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(var(--ground-rgb),.96) 0%, rgba(var(--ground-rgb),.8) 48%, rgba(var(--ground-rgb),.42) 100%);
+  }
+  /* Only stacking is set on the column here; the band's own height and its breathing room belong to the
+     box inside it, because .wrap's box is the shared file's and this page does not pad it. */
+  .band > .wrap { position: relative; z-index: 1; }
+  .band-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 22px;
+    min-height: 360px;
+    padding-block: 64px;
+  }
+  .band h2 { max-width: 18em; }
+  .band-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+
+  /* ---------- Footer ---------- */
+  /* The shared footer, at the same colour as the ground, so its separation is the 1px rule and not a
+     second background. */
+  .foot { background: var(--ground); border-top: 1px solid var(--rule); }
+  .foot-slogan { color: var(--text-3); }
+
+  /* ---------- Corner tag ---------- */
+  .tag {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    z-index: 40;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 13px;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    border-radius: 9999px;
+    color: var(--text-2);
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+  .tag::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
+
+  /* ---------- Small screens ---------- */
+  @media (max-width: 900px) {
+    .lib-item { grid-template-columns: 168px minmax(0, 1fr) auto; gap: 18px; }
+    .stages { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  }
+  @media (max-width: 760px) {
+    /* The nav keeps its 100px and loses its status line, the way the store's own nav sheds items; three
+       links and a state word do not fit one phone-width row. */
+    .topnav-status { display: none; }
+    .topnav-links { gap: 20px; }
+    .section-note { font-size: 13px; }
+    /* The hero stops being 16:9 here: at 400px a 16:9 panel is 200px tall and the copy needs more than
+       that, so the art becomes a cover layer behind copy that sets the height. */
+    .hero-panel { aspect-ratio: auto; min-height: 0; }
+    .hero-copy { padding: 28px 22px 30px; }
+    .hero-actions .btn { width: 100%; }
+    /* The library stops being a split tile and stacks: a 168px art column on a phone is a postage stamp. */
+    .lib-item { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .lib-state { padding: 0 2px 4px; }
+    .band-inner, .band { min-height: 300px; }
+    .band-actions .btn { width: 100%; }
+  }
+  @media (max-width: 620px) {
+    .btn-full { display: none; }
+    .btn-short { display: inline; }
+    .bar .btn { padding: 0 14px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<!-- The pinstripe grid sits behind the whole page, in the shared column. Six columns of 1px indigo-400 at
+     10%, which is the launcher's own count at a desktop width. -->
+<div class="pinstripes" aria-hidden="true"><div class="wrap pin-row"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+
+<!-- 1. The header. 72px, sticky, the shared column, and the lockup first in it with nothing of the page's
+     own before it. On the right: the store's FREE badge beside the one blue action. -->
+<header class="bar">
+  <div class="wrap">
+    <a class="logo-lockup" href="#" aria-label="Forge home"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><span class="logo-word">Forge</span></a>
+    <div class="bar-actions">
+      <span class="badge">FREE</span>
+      <a class="btn btn-primary" href="#ways-in"><span class="btn-full">Design a game</span><span class="btn-short">Design</span></a>
+    </div>
+  </div>
+</header>
+
+<!-- 2. The store's 100px top nav. Full-bleed band, content in the shared column, three real anchors. -->
+<nav class="topnav" aria-label="Sections">
+  <div class="wrap">
+    <ul class="topnav-links">
+      <li><a href="#ways-in">Ways in</a></li>
+      <li><a href="#library">Library</a></li>
+      <li><a href="#plan">Your plan</a></li>
+    </ul>
+    <p class="topnav-status">Ready to design</p>
+  </div>
+</nav>
+
+<main>
+  <!-- 3. The hero. The carousel row above the art is the point of the page: the store's three hero tabs are
+       Forge's three ways in, and the active one is the one that works today. -->
+  <section class="hero" id="start">
+    <div class="hero-stage">
+      <img class="hero-glow" src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" aria-hidden="true" width="1920" height="1080">
+      <div class="wrap hero-inner">
+
+        <nav class="hero-tabs" aria-label="Three ways into Forge">
+          <a class="tab is-active" href="#way-questions" aria-current="true">
+            <img class="tab-thumb" src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" width="40" height="26">
+            <span>Answer Questions</span>
+          </a>
+          <a class="tab" href="#way-randomise">
+            <img class="tab-thumb" src="../_media/art-30fne-blog-header-1900-600-blue-inflate-a-bull.webp" alt="" width="40" height="26">
+            <span>Randomise</span>
+          </a>
+          <a class="tab" href="#way-chat">
+            <img class="tab-thumb" src="../_media/art-23br-evergreen-purple-motd-1920x1080.webp" alt="" width="40" height="26">
+            <span>Chat with AI</span>
+          </a>
+        </nav>
+
+        <div class="hero-panel">
+          <img class="hero-art" src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" width="1920" height="1080">
+          <div class="hero-scrim" aria-hidden="true"></div>
+          <div class="beam" aria-hidden="true"></div>
+          <div class="hero-copy">
+            <p class="eyebrow">Forge &middot; free to use</p>
+            <h1><s>Start from nothing.</s> Start from a plan.</h1>
+            <p class="lede">Answer a few questions about your idea and Forge names the exact game type, the
+              UEFN devices it needs, and the five build steps that get it built.</p>
+            <div class="hero-actions">
+              <a class="btn btn-primary" href="#ways-in">Start designing</a>
+              <a class="btn btn-outline" href="#plan">See what you get</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. The three ways in, as a storefront rail. Three #14181E tiles with the store's white-15% hairline,
+       one ready and two honest about their state. -->
+  <section class="ways wrap" id="ways-in" aria-labelledby="ways-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Ways in</p>
+        <h2 id="ways-h">Three ways in. One plan out.</h2>
+      </div>
+      <p class="section-note">However you start, you leave with the same thing: a game type, the devices it
+        needs, and five build steps in order.</p>
+    </div>
+
+    <div class="rail">
+      <article class="card" id="way-questions">
+        <div class="card-art">
+          <img class="card-img" src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="" width="1920" height="1080" loading="lazy">
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Answer Questions</h3>
+          <p class="card-desc">A short question set narrows your idea to one exact game type, then lays out
+            the plan underneath it.</p>
+        </div>
+        <div class="card-foot">
+          <span class="badge">Ready today</span>
+          <a class="btn btn-primary" href="#plan">Answer questions</a>
+        </div>
+      </article>
+
+      <article class="card" id="way-randomise">
+        <div class="card-art">
+          <img class="card-img" src="../_media/art-30fne-blog-header-1900-600-blue-inflate-a-bull.webp" alt="" width="1900" height="600" loading="lazy">
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Randomise</h3>
+          <p class="card-desc">Spin the wheel for a game type, a twist and a brand to build around - then
+            keep the parts you like and roll again.</p>
+        </div>
+        <div class="card-foot">
+          <span class="pill">Coming soon</span>
+          <button class="btn btn-outline" type="button" disabled>Spin the wheel</button>
+        </div>
+      </article>
+
+      <article class="card" id="way-chat">
+        <div class="card-art">
+          <img class="card-img" src="../_media/art-23br-evergreen-purple-motd-1920x1080.webp" alt="" width="1920" height="1080" loading="lazy">
+        </div>
+        <div class="card-body">
+          <h3 class="card-name">Chat with AI</h3>
+          <p class="card-desc">Describe the idea in your own words. The AI asks the follow-ups and turns the
+            conversation into the same plan.</p>
+        </div>
+        <div class="card-foot">
+          <span class="pill">Coming soon</span>
+          <button class="btn btn-outline" type="button" disabled>Start a chat</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 5. The library. Installed entries rather than features: art left, the number and its meta line, and a
+       muted state on the right instead of a button, because these are already in hand. -->
+  <section class="library-wrap wrap" id="library" aria-labelledby="library-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Library</p>
+        <h2 id="library-h">Already installed.</h2>
+      </div>
+      <a class="btn-ghost" href="#plan">See how a plan is built</a>
+    </div>
+
+    <ul class="library">
+      <li class="lib-item">
+        <div class="lib-art">
+          <img class="lib-img" src="../_media/art-23br-evergreen-green-creatorportal-1024x576.webp" alt="" width="1024" height="576" loading="lazy">
+        </div>
+        <div>
+          <h3 class="lib-name"><b class="metric">13</b> researched game types</h3>
+          <p class="lib-meta">What the island is, how a round is won, and what it takes to hold together.</p>
+        </div>
+        <span class="lib-state">Ready</span>
+      </li>
+      <li class="lib-item">
+        <div class="lib-art">
+          <img class="lib-img" src="../_media/art-30fne-blogheader-1900-600-dark-creatorportal.webp" alt="" width="1900" height="600" loading="lazy">
+        </div>
+        <div>
+          <h3 class="lib-name"><b class="metric">59</b> UEFN devices</h3>
+          <p class="lib-meta">Vetted devices, matched to the game type that needs them and no further.</p>
+        </div>
+        <span class="lib-state">Ready</span>
+      </li>
+      <li class="lib-item">
+        <div class="lib-art">
+          <img class="lib-img" src="../_media/art-28fne-blog-shareimage-1200x630-cyan.webp" alt="" width="1200" height="630" loading="lazy">
+        </div>
+        <div>
+          <h3 class="lib-name"><b class="metric">5</b> build steps per plan</h3>
+          <p class="lib-meta">An order to build in, step by step, with the devices each step needs.</p>
+        </div>
+        <span class="lib-state">Ready</span>
+      </li>
+    </ul>
+    <p class="library-foot">Sourced from 74 drafts across 10 category basics.</p>
+  </section>
+
+  <!-- 6. The install sequence. One rail, filled end to end, stage boundaries notched out of it: this is what
+       a finished download looks like, not a progress indicator. -->
+  <section class="plan wrap" id="plan" aria-labelledby="plan-h">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">What you walk away with</p>
+        <h2 id="plan-h">A plan, already finished.</h2>
+      </div>
+      <p class="section-note">Complete &middot; 3 of 3 stages</p>
+    </div>
+
+    <div class="track" aria-hidden="true">
+      <span class="track-fill"></span>
+      <span class="tick tick-1"></span>
+      <span class="tick tick-2"></span>
+      <span class="tick tick-3"></span>
+      <span class="tick tick-4"></span>
+    </div>
+
+    <ol class="stages">
+      <li class="stage">
+        <span class="stage-n">01</span>
+        <h3>Your exact game type</h3>
+        <p>Not a genre label - the game type your idea actually is, with how a round is won.</p>
+      </li>
+      <li class="stage">
+        <span class="stage-n">02</span>
+        <h3>The devices it needs</h3>
+        <p>Named UEFN devices from the researched set, and what each one is doing in your island.</p>
+      </li>
+      <li class="stage">
+        <span class="stage-n">03</span>
+        <h3>Five build steps</h3>
+        <p>The build order, five steps long, so the first thing you open in UEFN is obvious.</p>
+      </li>
+    </ol>
+  </section>
+
+  <!-- 7. Close. The store's key-art band with the same blur behind it, one line and the one blue action. -->
+  <section class="band" aria-labelledby="band-h">
+    <img class="band-glow" src="../_media/art-30fne-blog-header-1900-600-purple-flyingsaucer.webp" alt="" aria-hidden="true" width="1900" height="600" loading="lazy">
+    <img class="band-art" src="../_media/art-30fne-blog-header-1900-600-purple-flyingsaucer.webp" alt="" width="1900" height="600" loading="lazy">
+    <div class="band-scrim" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="band-inner">
+        <h2 id="band-h">One idea in. A build order out.</h2>
+        <div class="band-actions">
+          <a class="btn btn-primary" href="../../index.html#/home">Start designing</a>
+          <a class="btn btn-secondary" href="#library">Browse the library</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
+
+<div class="tag">Concept 12 - Launcher</div>
+
+<script>
+/* The carousel row is real navigation - every chip is an anchor to the way-in card it names - so the page
+   is complete and correct with this switched off. All it does is move the active chip, so the row agrees
+   with where you just landed. */
+document.querySelectorAll('.hero-tabs .tab').forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('.hero-tabs .tab').forEach(function (other) {
+      var on = other === tab;
+      other.classList.toggle('is-active', on);
+      if (on) { other.setAttribute('aria-current', 'true'); } else { other.removeAttribute('aria-current'); }
+    });
+  });
+});
+</script>
+</body>
+</html>

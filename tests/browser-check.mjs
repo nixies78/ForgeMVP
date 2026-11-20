@@ -737,7 +737,7 @@ async function checkMockupHeaders(send, results) {
   pages.push('mockups/index.html');
   pages.sort();
 
-  /* The footer is shared chrome like the bar and the column, so it is asserted the same way. Eleven pages
+  /* The footer is shared chrome like the bar and the column, so it is asserted the same way. Fifteen pages
    * carry it. The four app prototypes do not, on the owner's instruction - they are screens of the app, not
    * pitch pages - and that decision is checked from both sides, so neither a missing footer nor a stray one
    * goes unnoticed. The slogan is the owner's wording, quoted rather than paraphrased. */
@@ -753,6 +753,10 @@ async function checkMockupHeaders(send, results) {
     'concepts/8-quiet-dark/index.html',
     'concepts/8-quiet-dark-blue-indigo/index.html',
     'concepts/9-spotlight/index.html',
+    'concepts/10-uefn-editor/index.html',
+    'concepts/11-item-shop/index.html',
+    'concepts/12-launcher/index.html',
+    'concepts/13-patch-bay/index.html',
     'mockups/index.html'
   ]);
   /* Links the pages already had, which the owner asked to keep: 4-editorial's four, the index's one. */

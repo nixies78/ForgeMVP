@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Concept 10 - The Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  /* ------------------------------------------------------------------------------------------------
+   * Concept 10 - The Editor.
+   *
+   * The bet: Forge's destination is Unreal Editor for Fortnite, so the pitch page is drawn as the
+   * editor itself - a viewport with a selected island in it, a content drawer holding the three ways
+   * in as assets, a Details panel carrying the numbers, and an Outliner carrying what you walk away
+   * with. You are not being sold a website; you are being shown the room you will be standing in.
+   *
+   * The room's language is unrealengine.com's own, and every value below was read out of the library
+   * rather than invented:
+   *   - .cosmos-button.primary      #26BBFF fill, #101014 label, 8px radius, 40px tall, Inter 500 at
+   *                                 14px with .28px of tracking, background-color .1s linear.
+   *   - the cosmos card             rgba(255,255,255,.05) fill with a border of the SAME colour, 24px
+   *                                 radius, no shadow anywhere, background .2s easeInOutQuad.
+   *   - div.blurred-image           a blurred copy of the hero art bleeding behind the hero, which is
+   *                                 the one atmospheric flourish Unreal Engine allows itself.
+   *   - the gradient statement      linear-gradient(225deg, #DFBAF8 0%, #33BFFF 100%) as text fill -
+   *                                 the device UE uses for "Join the Epic Developer Community."
+   *   - type                        Inter Tight 700 for display, Inter 400/500 for everything else,
+   *                                 and a system monospace for the editor's own furniture.
+   * The editor chrome around those - viewport tabs, tool strip, outliner, details rows, content
+   * drawer - is UEFN's vocabulary, because that is the tool the visitor is being walked towards.
+   * ------------------------------------------------------------------------------------------------ */
+  :root {
+    --bg: #101014;          /* UE bodyBg, and the family canvas on all three properties */
+    --panel: #18181C;       /* a raised surface: UE's own left panel grey */
+    --raised: #202024;
+    --line: #28282C;        /* the store's --color-neutral-250 */
+    --line-2: rgba(255, 255, 255, .15);
+    --ink: #FFFFFF;
+    --ink-2: rgba(255, 255, 255, .75);
+    --ink-3: rgba(255, 255, 255, .65);
+    --accent: #26BBFF;      /* UE's accent, and the fill of its primary button */
+    --on-accent: #101014;
+    --grad: linear-gradient(225deg, #DFBAF8 0%, #33BFFF 100%);
+    --ease: cubic-bezier(.65, 0, .35, 1);      /* the family's colour/background curve */
+    --ease-2: cubic-bezier(.45, 0, .55, 1);    /* easeInOutQuad: card backgrounds */
+    --ease-3: cubic-bezier(.25, 1, .5, 1);     /* easeOutQuart: anything that lifts */
+    --mono: ui-monospace, "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+    --display: "Inter Tight", "Inter", system-ui, sans-serif;
+    --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--text);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; }
+  p, h1, h2, h3, ul, li { margin: 0; }
+  ul { padding: 0; list-style: none; }
+  a { color: inherit; }
+  /* The family's focus ring is a 2px white outline at 2px offset. The radius is deliberately NOT set
+     here: a global rule that sets it would flatten the corner of every pill and card it lands on. */
+  :focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+  /* Display: UE runs Inter Tight 700 at 40/48 with normal tracking, and only the h1 moves on a phone
+     (40 -> 32). This page's headline is a little larger than UE's, because it is a hero and UE's is a
+     section head, but it keeps the same face, weight and tight leading. */
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.01em; line-height: 1.06; }
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: .36px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .lede { color: var(--ink-2); font-size: 16px; line-height: 1.65; max-width: 34em; }
+  .mono { font-family: var(--mono); }
+
+  /* -------------------------------------------------------------------------- the 72px bar
+   * UE's own header is a 72px band of rgba(16,16,20,.7) with blur(50px) under it - div.bg-filter -
+   * so the bar here is that, and it is sticky rather than fixed so it pays for its own height in the
+   * layout. The column, the lockup and the wordmark are the shared chrome's and are not restated. */
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 72px;
+    background: rgba(16, 16, 20, .7);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar-row { display: flex; align-items: center; gap: 16px; height: 72px; }
+  .bar-meta {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .bar-meta b { font-weight: 400; color: var(--ink); }
+  .bar-dot { width: 6px; height: 6px; border-radius: 50%; background: #5FE367; box-shadow: 0 0 0 3px rgba(95, 227, 103, .18); }
+
+  /* ----------------------------------------------------------------------------------- buttons
+   * Straight from UE: #26BBFF on a #101014 label, 8px radius, 40px tall, Inter 500 at 14px with
+   * .28px of tracking. Secondary is the 15% white wash with the same geometry, the outline is the
+   * 1px 35% white rule, and the ghost is accent-coloured text with no box at all. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 40px;
+    padding: 8px 16px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-family: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: .28px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color .1s cubic-bezier(0, 0, 1, 1), border-color .1s cubic-bezier(0, 0, 1, 1), color .1s cubic-bezier(0, 0, 1, 1);
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-primary { background: var(--accent); color: var(--on-accent); }
+  .btn-primary:hover { background: #69D0FF; }
+  .btn-ghost { color: var(--accent); padding-inline: 6px; }
+  .btn-ghost:hover { color: #69D0FF; }
+  /* An action that is not available yet is a span, not an anchor: there is nothing to click, and a
+     link that leads nowhere is a lie the keyboard can find. */
+  .btn-off { background: rgba(255, 255, 255, .07); color: var(--ink-3); cursor: default; }
+
+  /* --------------------------------------------------------------------------------- full bleed
+   * .wrap belongs to the shared stylesheet and holds the 1136px column; anything that has to reach
+   * the window edge gets .bleed, and puts a .wrap inside it for its content. */
+  .bleed { width: 100%; }
+
+  /* =================================================================================== the hero
+   * The viewport is the hero. Behind it sits the blurred copy of the same art that UE paints into a
+   * canvas behind its own hero (div.blurred-image, inset -2x the blur radius): the page's only
+   * atmospheric device, and the reason the island appears to be lighting the room. */
+  .hero { position: relative; padding-block: 64px 88px; overflow: hidden; }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -8%;
+    right: -12%;
+    width: 62%;
+    height: 96%;
+    background: url("../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp") center / cover no-repeat;
+    filter: blur(80px) saturate(1.2);
+    opacity: .38;
+    pointer-events: none;
+  }
+  .hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+  .hero h1 { font-size: clamp(38px, 4.4vw, 58px); font-weight: 800; margin: 14px 0 20px; }
+  .hero h1 span { display: block; }
+  .hero h1 .dim { color: rgba(255, 255, 255, .38); }
+  .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 28px; }
+  .hero-meta {
+    margin-top: 26px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .hero-meta span { display: inline-flex; align-items: center; gap: 7px; }
+  .hero-meta i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+  /* the viewport panel: a 24px cosmos card holding the island, with the editor's furniture drawn
+     over the art. It is decorative as a whole - the pitch is the copy beside it. */
+  .vp {
+    position: relative;
+    border-radius: 24px;
+    padding: 12px;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .05);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  .vp-tabs { display: flex; align-items: center; gap: 6px; padding: 2px 4px 10px; }
+  .vp-tab {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--ink-3);
+    background: rgba(255, 255, 255, .05);
+  }
+  .vp-tab.on { color: #fff; background: rgba(255, 255, 255, .12); }
+  .vp-tab-arrow { color: var(--ink-3); font-size: 9px; }
+  .vp-name { margin-left: auto; font-family: var(--mono); font-size: 11px; color: var(--ink-2); }
+  .vp-stage { position: relative; border-radius: 16px; overflow: hidden; background: #0B0F14; }
+  /* The panel is 16:10 against a 16:9 artwork, so cover takes 10% off the width. Anchored to the left, that
+     ten per cent comes off the right: centred, it came off both sides and cut the F off the key art's own
+     "FORTNITE x FALLGUYS" wordmark, which read as a broken image rather than as a crop. */
+  .vp-stage img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; object-position: left center; }
+  /* the selection box: every actor you have ever clicked in a viewport has one, and its dashes say
+     "this is a thing, not a picture". It sits below the art's wordmark, so the label above it is never
+     read as part of the artwork. */
+  .vp-select {
+    position: absolute; inset: 25% 11% 26% 5%;
+    border: 1px solid var(--accent);
+    box-shadow: 0 0 0 1px rgba(38, 187, 255, .25), inset 0 0 40px rgba(38, 187, 255, .07);
+    pointer-events: none;
+  }
+  .vp-select b, .vp-select i { position: absolute; width: 7px; height: 7px; background: var(--accent); }
+  .vp-select b { left: -4px; top: -4px; }
+  .vp-select i { right: -4px; bottom: -4px; }
+  .vp-label {
+    position: absolute; left: -1px; top: -22px;
+    padding: 3px 7px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .06em;
+  }
+  .vp-axis { position: absolute; left: 14px; bottom: 46px; width: 34px; height: 34px; }
+  .vp-axis b { position: absolute; left: 50%; top: 50%; width: 1px; height: 15px; transform-origin: 0 0; }
+  .vp-axis b:nth-child(1) { background: #5FE367; transform: rotate(-90deg); }
+  .vp-axis b:nth-child(2) { background: #FD5E5E; transform: rotate(180deg); }
+  .vp-axis b:nth-child(3) { background: #33BFFF; transform: rotate(30deg); }
+  .vp-axis::after {
+    content: "XYZ"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    font-family: var(--mono); font-size: 7px; color: var(--ink-3);
+  }
+  .vp-status {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; gap: 18px; padding: 9px 14px;
+    background: rgba(16, 16, 20, .82);
+    border-top: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .vp-status b { font-weight: 400; color: #fff; }
+  .vp-tools {
+    position: absolute; right: -18px; top: 64px;
+    display: grid; gap: 3px; padding: 6px;
+    border-radius: 12px;
+    background: rgba(16, 16, 20, .92);
+    border: 1px solid var(--line-2);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  .vp-tools span {
+    display: grid; place-items: center;
+    width: 30px; height: 30px; border-radius: 7px;
+    color: var(--ink-3); background: rgba(255, 255, 255, .04);
+  }
+  .vp-tools span.on { color: var(--on-accent); background: var(--accent); }
+  .vp-tools svg { width: 15px; height: 15px; }
+
+  /* ============================================================================ the content drawer
+   * UEFN's Content Drawer, holding the three ways in as three assets. Each one is drawn as an asset
+   * tile - a thumbnail with a type badge, a name, its own action - because that is how the tool
+   * presents everything, and "Answer Questions" is the asset that is already installed. */
+  .ways { padding-bottom: 96px; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 22px; }
+  .section-head h2 { font-size: clamp(26px, 3vw, 34px); font-weight: 700; margin-top: 12px; }
+  .section-note { color: var(--ink-2); font-size: 15px; max-width: 30ch; }
+  .drawer {
+    border-radius: 24px;
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid rgba(255, 255, 255, .05);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    overflow: hidden;
+  }
+  .drawer-head {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: rgba(255, 255, 255, .03);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    color: var(--ink-3);
+  }
+  .crumb { padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, .06); }
+  .crumb-on { background: rgba(255, 255, 255, .14); color: #fff; }
+  .drawer-search { margin-left: 4px; padding: 4px 10px; border-radius: 9999px; background: rgba(255, 255, 255, .05); border: 1px solid var(--line-2); }
+  .drawer-count { margin-left: auto; }
+
+  .assets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); }
+  .asset {
+    position: relative;
+    display: flex; flex-direction: column;
+    padding: 16px;
+    background: #131316;
+    transition: background .2s var(--ease-2);
+  }
+  .asset:hover { background: #191A1E; }
+  .asset-thumb { position: relative; border-radius: 12px; overflow: hidden; background: #0B0F14; }
+  .asset-thumb img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; filter: saturate(.4) brightness(.7); transition: transform .6s var(--ease-3), filter .3s var(--ease-2); }
+  .asset:hover .asset-thumb img { transform: scale(1.04); filter: saturate(1) brightness(.85); }
+  .asset-badge {
+    position: absolute; left: 8px; top: 8px;
+    padding: 3px 7px; border-radius: 4px;
+    background: rgba(16, 16, 20, .82);
+    font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-2);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  .asset-ready .asset-badge { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+  .asset-name { font-family: var(--display); font-size: 20px; font-weight: 700; letter-spacing: -.01em; margin: 16px 0 8px; }
+  .asset p { color: var(--ink-2); font-size: 14.5px; line-height: 1.6; }
+  .asset-meta { margin: 16px 0 20px; display: grid; gap: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: var(--ink-3); }
+  .asset-meta li { display: flex; gap: 8px; }
+  .asset-meta li::before { content: "\2022"; color: var(--accent); }
+  .asset .btn { margin-top: auto; align-self: flex-start; }
+  /* the ready asset gets UE's own rim: the accent at 40%, which reads as "selected" without a glow */
+  .asset-ready { box-shadow: inset 0 0 0 1px rgba(38, 187, 255, .4); background: #14181F; }
+  .asset-ready:hover { background: #17202A; }
+
+  /* ============================================================ the Details panel and the Outliner
+   * The two panels a UEFN session always has open: the numbers as read-only property rows, and what
+   * you walk away with as a hierarchy you can already recognise. */
+  .panels { padding-bottom: 96px; }
+  .panels-grid { display: grid; grid-template-columns: minmax(0, .82fr) minmax(0, 1.18fr); gap: 18px; }
+  .panel {
+    border-radius: 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--raised);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .panel-head b { font-weight: 400; color: #fff; }
+  .panel-head em { margin-left: auto; font-style: normal; color: var(--ink-3); }
+  .rows { padding: 6px 0; }
+  .row { display: flex; align-items: baseline; gap: 12px; padding: 8px 14px; font-size: 13.5px; }
+  .row + .row { border-top: 1px solid rgba(255, 255, 255, .05); }
+  .row span { color: var(--ink-3); }
+  .row b { margin-left: auto; font-family: var(--mono); font-size: 14px; font-weight: 400; color: #fff; }
+  .panel-note { padding: 10px 14px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+  .tree { padding: 12px 8px 16px; }
+  .tree li { position: relative; }
+  .tree-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 9px 8px; border-radius: 8px;
+    transition: background .2s var(--ease-2);
+  }
+  .tree-row:hover { background: rgba(255, 255, 255, .05); }
+  /* the disclosure triangle is a CSS triangle rather than a character: no font may set the shape of
+     the tool's own furniture. */
+  .tri { flex: none; width: 0; height: 0; margin-top: 6px; border: 4px solid transparent; border-left-color: var(--ink-3); }
+  .tri-open { margin-top: 8px; border-left-color: transparent; border-top-color: var(--ink-3); border-width: 5px 4px 0; }
+  .tree-icon { flex: none; width: 15px; height: 15px; margin-top: 3px; color: var(--accent); }
+  .tree-text { min-width: 0; }
+  .tree-text b { display: block; font-weight: 700; font-size: 14.5px; letter-spacing: -.005em; }
+  .tree-text span { display: block; color: var(--ink-3); font-size: 13.5px; }
+  .tree-child { margin-left: 26px; border-left: 1px solid var(--line); padding-left: 6px; }
+  .tree-root .tree-text b { font-family: var(--mono); font-size: 13px; letter-spacing: .02em; }
+
+  /* ================================================================================== the close
+   * UE's gradient statement - the 225deg #DFBAF8 -> #33BFFF ramp it fills display text with - is the
+   * page's last and loudest line, and the band under it is the editor's own status bar: READY on the
+   * left, the build path in the middle, nothing to fix on the right. */
+  .close { border-top: 1px solid var(--line); padding-block: 88px 0; }
+  .close h2 {
+    font-size: clamp(32px, 4.6vw, 56px);
+    font-weight: 800;
+    letter-spacing: -.02em;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    max-width: 22ch;
+  }
+  .close-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 28px; }
+  .statusbar {
+    margin-top: 64px;
+    display: flex; flex-wrap: wrap; gap: 8px 22px;
+    padding: 12px 0;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .statusbar b { font-weight: 400; color: #fff; }
+  .statusbar .ok { color: #5FE367; }
+  /* The footer is the page's own colour, so it needs the rule rather than a different ground - once,
+     and on the footer, not on the status bar above it as well. */
+  .foot { border-top: 1px solid var(--line); }
+
+  /* ------------------------------------------------------------------------------- corner tag */
+  .tag {
+    position: fixed; right: 14px; bottom: 14px; z-index: 30;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(16, 16, 20, .9);
+    border: 1px solid var(--line-2);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+    color: var(--ink-2);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+  }
+  .tag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+
+  /* --------------------------------------------------------------------------------- small screens
+   * The 72px bar, the 44px mark and the 1136px column are the desktop contract; below that the page
+   * is the page's own to lay out. The viewport keeps its shape and its furniture but loses the
+   * toolbar that hangs off its right edge, and the panels stack. */
+  @media (max-width: 1080px) {
+    .hero { padding-block: 48px 72px; }
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+    .hero::before { width: 120%; right: -30%; top: -4%; opacity: .3; }
+    .panels { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 900px) {
+    .assets { grid-template-columns: minmax(0, 1fr); }
+    .asset + .asset { border-top: 1px solid var(--line); }
+  }
+  @media (max-width: 760px) {
+    .bar-meta { display: none; }
+    .hero h1 { font-size: 34px; }
+    .vp-tools { position: static; grid-auto-flow: column; margin-top: 10px; justify-content: start; }
+    .vp-select { inset: 28% 10% 30% 5%; }
+    .ways, .panels { padding-bottom: 64px; }
+    .close { padding-block: 64px 0; }
+    .statusbar { margin-top: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="bar bleed">
+  <div class="wrap bar-row">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="bar-meta">
+      <span class="bar-dot" aria-hidden="true"></span>
+      <span>Guide <b>1.2</b></span>
+      <span>UEFN <b>34.10</b></span>
+      <span>Ready</span>
+    </span>
+  </div>
+</header>
+
+<main>
+  <!-- ---------------------------------------------------------------- hero: the viewport -->
+  <section class="hero bleed">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Unreal Editor for Fortnite</p>
+        <h1><span>Plan it here.</span><span class="dim">Build it Unreal.</span></h1>
+        <p class="lede">Forge answers the design questions UEFN leaves open: the exact game type you are
+          making, the devices that game type needs, and the five steps that put them on the island.
+          You open the editor with a plan instead of a blank level.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#ways">Start a design
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="btn btn-ghost" href="#plan">What you walk away with</a>
+        </div>
+        <p class="hero-meta">
+          <span><i aria-hidden="true"></i>13 researched game types</span>
+          <span><i aria-hidden="true"></i>59 UEFN devices</span>
+          <span><i aria-hidden="true"></i>5 build steps</span>
+        </p>
+      </div>
+
+      <!-- the island, selected in a viewport. Decorative: every word that matters is in the copy. -->
+      <div class="vp">
+        <div class="vp-tabs" aria-hidden="true">
+          <span class="vp-tab on">Perspective</span>
+          <span class="vp-tab">Lit <span class="vp-tab-arrow">&#9660;</span></span>
+          <span class="vp-tab">Show <span class="vp-tab-arrow">&#9660;</span></span>
+          <span class="vp-name">Island_A &middot; 1 asset</span>
+        </div>
+        <div class="vp-stage">
+          <img src="../_media/art-uefn-30-10-beanstalk-keyart-social-1920x1080.webp" alt="">
+          <div class="vp-select" aria-hidden="true"><b></b><i></i><span class="vp-label">Island_A</span></div>
+          <div class="vp-axis" aria-hidden="true"><b></b><b></b><b></b></div>
+          <div class="vp-status" aria-hidden="true">
+            <span>Grid <b>100</b></span>
+            <span>Snap <b>10</b></span>
+            <span>Plan <b>13 types / 59 devices</b></span>
+          </div>
+        </div>
+        <div class="vp-tools" aria-hidden="true">
+          <span class="on"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 2l10 6-4 1.2L7.5 13z"/></svg></span>
+          <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M8 2v12M2 8h12"/></svg></span>
+          <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg></span>
+          <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11"/></svg></span>
+          <span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 13l4-8 4 5 4-6"/></svg></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------- the three ways in, as the content drawer -->
+  <section class="ways bleed" id="ways">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Content drawer &middot; Forge / Starters</p>
+          <h2>Three ways to open a project.</h2>
+        </div>
+        <p class="section-note">One of them is installed already. The other two are on the way.</p>
+      </div>
+
+      <div class="drawer">
+        <div class="drawer-head" aria-hidden="true">
+          <span class="crumb">Content</span>
+          <span class="crumb">Forge</span>
+          <span class="crumb crumb-on">Starters</span>
+          <span class="drawer-search">Search assets</span>
+          <span class="drawer-count">3 assets &middot; 1 ready</span>
+        </div>
+
+        <div class="assets">
+          <article class="asset asset-ready">
+            <div class="asset-thumb">
+              <img src="../_media/art-cltm-evergreen-boxfights-2k.webp" alt="" loading="lazy">
+              <span class="asset-badge">Ready</span>
+            </div>
+            <h3 class="asset-name">Answer Questions</h3>
+            <p>A short set of questions about the game you want. Forge narrows it to one exact game type
+              and builds the plan around it.</p>
+            <ul class="asset-meta">
+              <li>Blueprint &middot; 4 questions</li>
+              <li>Outputs: game type, devices, 5 steps</li>
+            </ul>
+            <a class="btn btn-primary" href="../../index.html#/home">Start questions
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </article>
+
+          <article class="asset">
+            <div class="asset-thumb">
+              <img src="../_media/art-cltm-evergreen-prophunt-2k.webp" alt="" loading="lazy">
+              <span class="asset-badge">Coming soon</span>
+            </div>
+            <h3 class="asset-name">Randomise</h3>
+            <p>Not sure what to make? Spin the wheel and let it pick a game type, a twist and a brand to
+              build around.</p>
+            <ul class="asset-meta">
+              <li>Level &middot; 3 reels</li>
+              <li>Outputs: game type, twist, brand</li>
+            </ul>
+            <span class="btn btn-off">Not yet</span>
+          </article>
+
+          <article class="asset">
+            <div class="asset-thumb">
+              <img src="../_media/art-cltm-evergreen-tycoon-2k.webp" alt="" loading="lazy">
+              <span class="asset-badge">Coming soon</span>
+            </div>
+            <h3 class="asset-name">Chat with AI</h3>
+            <p>Describe the idea in your own words and talk it through. The AI asks the follow-ups and
+              turns the conversation into a plan.</p>
+            <ul class="asset-meta">
+              <li>Widget &middot; conversation</li>
+              <li>Outputs: the same plan, in your words</li>
+            </ul>
+            <span class="btn btn-off">Not yet</span>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------------------------------------- the Details panel and Outliner -->
+  <section class="panels bleed" id="plan">
+    <div class="wrap panels-grid">
+      <div class="panel">
+        <div class="panel-head"><b>Plan</b> &middot; Details <em>read only</em></div>
+        <div class="rows">
+          <div class="row"><span>Researched game types</span><b>13</b></div>
+          <div class="row"><span>UEFN devices in the guide</span><b>59</b></div>
+          <div class="row"><span>Build steps per plan</span><b>5</b></div>
+          <div class="row"><span>Game categories</span><b>10</b></div>
+          <div class="row"><span>Drafts in progress</span><b>74</b></div>
+        </div>
+        <p class="panel-note">Every number here comes from the guide the app already ships.</p>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><b>Outliner</b> &middot; your island <em>4 items</em></div>
+        <ul class="tree">
+          <li class="tree-root">
+            <div class="tree-row">
+              <span class="tri tri-open" aria-hidden="true"></span>
+              <svg class="tree-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M2 12l4.5-5 3 2.5L14 4"/><path d="M2 14h12"/></svg>
+              <span class="tree-text"><b>Your island</b><span>Named, typed and ready to open.</span></span>
+            </div>
+            <ul class="tree-child">
+              <li>
+                <div class="tree-row">
+                  <span class="tri tri-open" aria-hidden="true"></span>
+                  <svg class="tree-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="2"/><path d="M5.5 8h5"/></svg>
+                  <span class="tree-text"><b>Your exact game type</b><span>Not a vague genre: one of 13 researched types.</span></span>
+                </div>
+                <ul class="tree-child">
+                  <li>
+                    <div class="tree-row">
+                      <span class="tri" aria-hidden="true"></span>
+                      <svg class="tree-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 3h10v10H3z"/><path d="M3 6.5h10M6.5 6.5V13"/></svg>
+                      <span class="tree-text"><b>The devices it needs</b><span>The UEFN devices that make your game work, out of 59.</span></span>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="tree-row">
+                      <span class="tri" aria-hidden="true"></span>
+                      <svg class="tree-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 4h10M3 8h10M3 12h6"/></svg>
+                      <span class="tree-text"><b>Five build steps</b><span>In order, each with the settings to change.</span></span>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ------------------------------------------------------------------------------ the close -->
+  <section class="close bleed">
+    <div class="wrap">
+      <h2>Your island starts with one question.</h2>
+      <div class="close-actions">
+        <a class="btn btn-primary" href="../../index.html#/home">Start questions
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <span class="btn btn-off">Randomise - coming soon</span>
+      </div>
+      <div class="statusbar" aria-hidden="true">
+        <span class="ok">Ready</span>
+        <span>Path <b>Forge / Starters / Your island</b></span>
+        <span>Guide <b>1.2</b></span>
+        <span>Target <b>UEFN 34.10</b></span>
+        <span>0 errors</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
+
+<div class="tag">Concept 10 - The Editor</div>
+</body>
+</html>

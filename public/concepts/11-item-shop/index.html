@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Forge - Concept 11 - Item Shop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Concept 11 - Item Shop.
+   *
+   * One of four landing-page directions, each wearing the visual language of a different corner of the
+   * Epic family. This one wears Fortnite's: the storefront, not the developer docs. Loud, chunky, made to
+   * be clicked - and instantly recognisable as that world rather than as generic dark SaaS.
+   *
+   * The colours are not invented, they are measured off fortnite.com/developer and store.epicgames.com.
+   * #F7FF19 is the real .cta-button-primary - acid yellow with black text - and it is the only thing on
+   * this page allowed to be an action. Everything else is either furniture (rarity colours, rims, the
+   * ticker) or type (white). That split is the whole discipline of the direction: colour the shop, not
+   * the buttons, or the page has four primary actions and therefore none.
+   *
+   * The five signature devices, all Fortnite rather than generic dark, and all of them here:
+   *   1. the corner cut - 10-14px sliced off two opposite corners of every panel, via clip-path;
+   *   2. thick 2px rims, never hairlines - and on the shop tiles the rim is a gradient in that tile's
+   *      rarity colour, which is what a Fortnite rarity border actually is;
+   *   3. art that breaks its own frame - the character in the hero hangs out of the bottom of the panel;
+   *   4. an outline-only headline word, instead of filling a word with the action colour;
+   *   5. one diagonal colour block, and one diagonally cut closing band.
+   *
+   * Frame, as on every page here: 72px bar, the 44px Epic mark in the .wrap column, the 1136px column,
+   * chrome.css linked last. Footer at the foot, which is right for a landing page rather than a screen. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900; font-display: swap;
+  }
+  :root {
+    color-scheme: dark;
+    --ground: #101014;              /* fortnite.com's page ground */
+    --tile: #14181E;                /* raised tile */
+    --tile-2: #18181C;              /* raised twice: the shop's inner surfaces */
+    --rule: rgba(255, 255, 255, .15);
+    --acid: #F7FF19;                /* Fortnite's real .cta-button-primary - action only */
+    --vb: #2742A5;                  /* the V-Bucks blue: currency furniture, never next to a number */
+    --epic: #BB6BF0;
+    --rare: #33BFFF;
+    --uncommon: #5FE367;
+    --legendary: #F9A91F;
+    --t1: #FFF;
+    --t2: rgba(255, 255, 255, .75);  /* 10.8:1 on the ground - all body copy lives here or above */
+    --t3: rgba(255, 255, 255, .55);  /* 6.5:1 - micro-labels only, never a paragraph */
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    /* The corner cut, written once. Two opposite corners, because cutting all four reads as a rounded
+       rectangle at this size; a 12px slice off top-left and bottom-right reads as a shop card. */
+    --cut: 12px;
+    --cut-poly: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  }
+  * { box-sizing: border-box; }
+  /* Hidden on the ROOT, where it propagates to the viewport, and deliberately not on body: overflow-x on
+     body would make body a scroll container, and a sticky header inside a scroll container stops sticking
+     and scrolls away with the page instead. Nothing here is meant to overflow sideways; this is the belt
+     for the character art, which is allowed to hang a few pixels past the column's right edge. */
+  html { overflow-x: hidden; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--t1);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  h1, h2, h3 { margin: 0; font-family: var(--title); font-weight: 800; letter-spacing: -.02em; }
+  p { margin: 0; }
+
+  /* ---------- the micro-label: the shop's shelf-edge type, wide-tracked and uppercase ---------- */
+  .eyebrow {
+    font-family: var(--title); font-weight: 800;
+    font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--t3);
+  }
+
+  /* ---------- the 72px bar ---------- */
+  header {
+    height: 72px;                   /* a constant: the nav and the badge share this row and nothing wraps */
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+  }
+  /* The wash behind the bar is a fixed pseudo-element rather than a background on the header, because the
+     header is itself the 1136px .wrap column: a background on it would blur only the middle 1136px of a
+     1440px window and leave the two ends sharp. Fixed + inset 0 spans the window, and since the bar is
+     stuck at top 0 with a height of exactly 72px the two line up to the pixel. It paints at z-index -1,
+     i.e. behind the lockup but still inside the header's own stacking context, so it stays above the page. */
+  header::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 72px;
+    background: rgba(16, 16, 20, .72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: -1;
+    pointer-events: none;         /* it spans the window; nothing should be clickable through it */
+  }
+  .hdr-right { margin-left: auto; display: flex; align-items: center; gap: 24px; }
+  .hdr-nav { display: flex; align-items: center; gap: 22px; }
+  .hdr-nav a {
+    font-family: var(--title); font-weight: 700; font-size: 12px;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--t2); text-decoration: none;
+    transition: color .15s var(--ease);
+  }
+  .hdr-nav a:hover { color: var(--t1); }
+  /* Acid yellow, but a badge and not a button: 11px micro-label, pill-round, no shadow, no hover state and
+     no pointer cursor. The hero's CTA is three times its height and square-shouldered, which is what stops
+     this reading as a second call to action. */
+  .free-pill {
+    display: inline-flex; align-items: center;
+    background: var(--acid); color: #000;
+    font-family: var(--title); font-weight: 800;
+    font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    padding: 7px 12px; border-radius: 999px;
+    white-space: nowrap; cursor: default;
+  }
+
+  /* ---------- buttons: one acid (action), one glass (secondary), one honestly disabled ---------- */
+  .btn-acid, .btn-glass {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    font-family: var(--title); font-weight: 800; font-size: 16px; line-height: 1;
+    padding: 16px 30px; border-radius: 6px; border: 0;
+    text-decoration: none; cursor: pointer;
+    transition: background .15s var(--ease), border-color .15s var(--ease), transform .15s var(--ease);
+  }
+  .btn-acid {
+    background: var(--acid); color: #000;
+    /* The only glow on the page, and it belongs to the primary action. */
+    box-shadow: 0 12px 28px -14px rgba(247, 255, 25, .7);
+  }
+  .btn-acid:hover { background: #E4EC00; }
+  /* 2px less padding on the vertical than the acid button, because the glass one carries a 2px border and
+     the acid one carries none: without that, the two buttons in the hero stand 4px apart in height. */
+  .btn-glass {
+    background: rgba(255, 255, 255, .15); color: var(--t1);
+    border: 2px solid var(--rule);          /* 2px, because a 1px hairline is not this material */
+    padding-block: 14px;
+  }
+  .btn-glass:hover:not([disabled]) { background: rgba(255, 255, 255, .24); }
+  /* A really disabled button: same glass shape so the row of three still reads as one shop shelf, but a
+     flat fill, muted label, no lift and a not-allowed cursor. Deliberately not acid: a yellow "coming soon"
+     would be the page's loudest lie. */
+  .btn-glass[disabled] {
+    background: rgba(255, 255, 255, .08);
+    border-color: rgba(255, 255, 255, .12);
+    color: rgba(255, 255, 255, .72);        /* still 7:1 on the tile, so it is readable, just inert */
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .btn-wide { width: 100%; }
+  .btn-lg { padding: 19px 34px; font-size: 18px; }
+  .btn-glass.btn-lg { padding-block: 17px; }   /* same parity, at the large size */
+
+  /* ---------- the hero: a panel with art escaping it ---------- */
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 600px;              /* the band the brief asks for, ~560-640px */
+    padding-block: 34px 78px;
+    overflow: visible;
+  }
+  /* A soft cool glow at the top of the page, so the ground is not flat black behind a translucent bar. */
+  .hero::before {
+    content: "";
+    position: absolute; inset: -72px 0 auto 0; height: 520px;
+    background: radial-gradient(58% 100% at 68% 0%, rgba(187, 107, 240, .20), transparent 70%);
+    pointer-events: none;
+  }
+  /* The one diagonal colour block. Skewed, so the page has a slash of colour under it rather than another
+     rectangle - and it runs from the epic purple into the V-Bucks blue by way of the two real tokens, at
+     28% so the blue stays a wash. This is the only place that blue appears on the page: it is currency
+     furniture, so it never sits beside a number and there is no number to sit beside it. */
+  .hero-slab {
+    position: absolute; left: -6%; right: -6%; top: 40%; height: 210px;
+    transform: skewY(-4.5deg);
+    background: linear-gradient(90deg, var(--epic), var(--vb) 58%, rgba(39, 66, 165, 0));
+    opacity: .28;
+    pointer-events: none;
+  }
+  /* A .wrap inside a flex container shrinks to its content unless it is told to grow - the same note
+     chrome.css writes about .foot-inner. Growing it keeps the hero's left edge on the header's left edge. */
+  .hero-grid {
+    position: relative;
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1.06fr) minmax(0, .94fr);
+    align-items: center;
+    gap: 48px;
+  }
+  .hero-copy { max-width: 34em; }
+  .hero h1 {
+    font-size: clamp(38px, 5.4vw, 74px);
+    line-height: .96;
+    letter-spacing: -.035em;
+    margin: 16px 0 0;
+  }
+  /* The outline word: transparent fill plus a stroke keeps the headline type white - the action colour is
+     reserved - while giving the page the one piece of type you would put on a poster. */
+  .stroke {
+    color: transparent;
+    -webkit-text-stroke: 2px rgba(255, 255, 255, .94);
+  }
+  .hero-lede {
+    margin: 20px 0 0;
+    max-width: 40em;
+    font-size: clamp(16px, 1.15vw, 18px);
+    color: var(--t2);
+  }
+  .hero-cta { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 30px; }
+  .hero-note {
+    margin-top: 18px;
+    font-family: var(--title); font-weight: 700;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--t3);
+  }
+  /* The art column carries 46px of bottom padding, and that padding is the escapement: the panel stops at
+     the padding, the character is anchored to the bottom of the padded box, so its legs hang below the
+     panel's frame. The 12px negative right is absorbed by the column gutter (16px at its narrowest), and
+     breaks the panel's right edge as well - one piece of art leaving its box on two sides. */
+  .hero-art { position: relative; padding: 0 0 46px; }
+  .hero-rim {
+    --cut: 14px;
+    padding: 2px;
+    clip-path: var(--cut-poly);
+    background: linear-gradient(150deg, rgba(255, 255, 255, .40), rgba(255, 255, 255, .10) 42%, rgba(187, 107, 240, .55));
+  }
+  .hero-frame {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    clip-path: var(--cut-poly);
+    background:
+      radial-gradient(90% 80% at 76% 88%, rgba(187, 107, 240, .30), transparent 68%),
+      linear-gradient(160deg, var(--tile-2), #0C0C11);
+  }
+  /* The key art sits at 55% over the panel's own gradient, so it reads as shop lighting rather than as a
+     screenshot with UI on it - the brief's "keep the composition clean over the art". cover rather than
+     contain, because the art is 16:9 and the panel is 16:10: cover crops 5% off each side of a transparent
+     cut-out and fills the frame, where contain would leave a letterbox inside it. */
+  .hero-frame img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center bottom;
+    opacity: .55;
+  }
+  /* A wash from the left, so the panel darkens where it meets the copy column and stays bright at its far
+     corner. Decorative art carries no information the copy does not, so alt="" throughout this page. */
+  .hero-frame::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(100deg, rgba(16, 16, 20, .92) 0%, rgba(16, 16, 20, .40) 48%, rgba(16, 16, 20, 0) 80%);
+  }
+  .hero-char {
+    position: absolute; right: -12px; bottom: 0;
+    height: 100%; width: auto; max-width: 58%;
+    object-fit: contain; object-position: bottom right;
+    filter: drop-shadow(0 20px 26px rgba(0, 0, 0, .62));
+    pointer-events: none;
+  }
+
+  /* ---------- the three ways in: three shop tiles ---------- */
+  .ways-band { padding: 26px 0 90px; }
+  .sec-head { max-width: 46em; }
+  .sec-head h2 { font-size: clamp(30px, 3.4vw, 46px); line-height: 1.02; margin-top: 14px; }
+  .lede { margin-top: 14px; color: var(--t2); font-size: clamp(15px, 1.1vw, 17px); max-width: 42em; }
+  /* auto-fit rather than three explicit columns: 3 across in the 1136px column, 2 at tablet, 1 on a phone,
+     with no breakpoints to keep in step with the column width. */
+  .tiles {
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+    gap: 26px;
+  }
+  /* The tile is the unclipped box that carries the hover, because clip-path would slice off the glow: a
+     filter's drop-shadow follows the clipped silhouette instead, so the rim lights up and the shadow is
+     the card's real shape. One transition, on transform and filter only. */
+  .tile {
+    filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .55));
+    transition: transform .28s var(--ease), filter .28s var(--ease);
+  }
+  .tile:hover { transform: translateY(-7px) rotate(-.6deg); }
+  /* The rarity rim: a 2px gradient border, done as a 2px-padded wrapper rather than with border-image -
+     border-image does not follow a clip-path, and the gradient is the point. Same cut on both boxes, so
+     the rim runs around the sliced corners too. */
+  .rim {
+    --cut: 14px;
+    height: 100%;
+    padding: 2px;
+    clip-path: var(--cut-poly);
+    background: linear-gradient(155deg, var(--rarity), var(--rarity-faint) 46%, rgba(255, 255, 255, .14));
+  }
+  .card {
+    --cut: 14px;
+    height: 100%;
+    display: flex; flex-direction: column;
+    clip-path: var(--cut-poly);
+    background: var(--tile);
+  }
+  .card-art {
+    position: relative;
+    aspect-ratio: 1 / 1;            /* the square art window a shop tile has */
+    overflow: hidden;
+    background:
+      radial-gradient(96% 78% at 50% 104%, var(--rarity-glow), transparent 70%),
+      linear-gradient(180deg, var(--tile-2), #0C0C11);
+  }
+  .card-art img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    transition: transform .34s var(--ease);
+  }
+  .tile:hover .card-art img { transform: scale(1.06); }
+  /* The READY TODAY plate is outlined, not filled: the only solid acid in this tile is its button, and two
+     yellow masses in one card would leave you unsure which one to press. The outline is a 2px acid rim
+     behind a dark inner rather than a `border`, because a border is not clipped by a clip-path and would be
+     cut open at the plate's sliced corner - the same reason the tiles use a padded rim. */
+  .plate {
+    position: absolute; top: 12px; left: 12px;
+    --cut: 8px;
+    padding: 2px;
+    background: var(--acid);
+    clip-path: var(--cut-poly);
+  }
+  .plate > span {
+    --cut: 8px;
+    display: block;
+    padding: 5px 7px;
+    clip-path: var(--cut-poly);
+    background: #101014; color: var(--acid);
+    font-family: var(--title); font-weight: 800;
+    font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .card-body { display: flex; flex-direction: column; flex: 1 1 auto; padding: 18px 18px 20px; }
+  .rarity {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--title); font-weight: 800;
+    font-size: 11px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--rarity);            /* 5.5:1 at worst (epic purple) - a rarity label must be readable */
+  }
+  .rarity::before {
+    content: "";
+    width: 9px; height: 9px; flex: none;
+    background: linear-gradient(150deg, var(--rarity), var(--rarity-faint));
+  }
+  .card h3 { font-size: clamp(21px, 1.7vw, 25px); line-height: 1.08; margin-top: 10px; }
+  .card-desc { margin-top: 10px; color: var(--t2); font-size: 15px; line-height: 1.5; }
+  /* margin-top:auto parks every button on the same line across the three tiles, whatever the copy above
+     it runs to. */
+  .card-cta { margin-top: auto; padding-top: 20px; }
+  /* Rarity per tile. Answer Questions is the legendary one - it is the only way in that exists today - and
+     Randomise is rare, Chat with AI epic. */
+  .t-legendary { --rarity: var(--legendary); --rarity-faint: rgba(249, 169, 31, .35); --rarity-glow: rgba(249, 169, 31, .30); }
+  .t-rare      { --rarity: var(--rare);      --rarity-faint: rgba(51, 191, 255, .35); --rarity-glow: rgba(51, 191, 255, .30); }
+  .t-epic      { --rarity: var(--epic);      --rarity-faint: rgba(187, 107, 240, .35); --rarity-glow: rgba(187, 107, 240, .30); }
+  .tile:hover.t-legendary { filter: drop-shadow(0 0 16px rgba(249, 169, 31, .45)) drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); }
+  .tile:hover.t-rare      { filter: drop-shadow(0 0 16px rgba(51, 191, 255, .45)) drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); }
+  .tile:hover.t-epic      { filter: drop-shadow(0 0 16px rgba(187, 107, 240, .45)) drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); }
+
+  /* ---------- the ticker: full window, not the column ---------- */
+  /* Its own class rather than a .wrap, and no .wrap inside it either: the brief specifically wants the
+     ticker to span the window, and a 1136px column would stop the drift at the column's edge and show
+     bare ground either side of it. */
+  .ticker {
+    overflow: hidden;
+    background: var(--tile-2);
+    border-block: 2px solid var(--rule);
+    padding-block: 17px;
+  }
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    animation: drift 44s linear infinite;
+  }
+  /* Two identical sets, translated by exactly half the track: the classic seamless loop. The second set is
+     aria-hidden, so a screen reader hears the numbers once rather than twice. */
+  .ticker:hover .ticker-track { animation-play-state: paused; }
+  .ticker-set { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
+  .ticker-set li {
+    display: flex; align-items: center;
+    font-family: var(--title); font-weight: 800;
+    font-size: 15px; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--t1); white-space: nowrap;
+  }
+  /* The separator is a drawn square turned 45 degrees rather than a glyph, so the ticker does not depend on
+     a character being in the font. Acid, because this is the shop shouting - it is type, not a button. */
+  .ticker-set li::after {
+    content: "";
+    width: 6px; height: 6px; margin-inline: 22px;
+    background: var(--acid); transform: rotate(45deg);
+  }
+  .ticker-set li.on { color: var(--acid); }
+  @keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ---------- what you walk away with: the reward track ---------- */
+  .reward-band { padding: 88px 0 92px; }
+  .track-panel {
+    --cut: 14px;
+    padding: 2px;
+    clip-path: var(--cut-poly);
+    background: linear-gradient(150deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, .08) 46%, rgba(249, 169, 31, .40));
+  }
+  .track-in { --cut: 14px; clip-path: var(--cut-poly); background: var(--tile); padding: 34px 32px 36px; }
+  .track-in h2 { font-size: clamp(28px, 3vw, 40px); line-height: 1.04; margin-top: 14px; }
+  /* The track itself: five pips escalating through the rarity colours, then the reward at the end of the
+     line. The pips are the five build steps; the plate is the plan they add up to. */
+  .pips {
+    position: relative;
+    display: flex; flex-wrap: nowrap; align-items: center; gap: 16px;
+    margin: 38px 0 0; padding: 0; list-style: none;
+  }
+  /* The line behind the pips is a gradient from uncommon green to legendary gold - the battle-pass read:
+     the track is worth walking. It is drawn at the row's own centre, so it needs no measurement. */
+  .pips::before {
+    content: "";
+    position: absolute; left: 16px; right: 16px; top: calc(50% - 1px); height: 2px;
+    background: linear-gradient(90deg, var(--uncommon), var(--rare) 33%, var(--epic) 66%, var(--legendary));
+    opacity: .85;
+  }
+  .pip { position: relative; }
+  .pip-rim {
+    --cut: 9px;
+    display: block;
+    padding: 2px;
+    clip-path: var(--cut-poly);
+    background: linear-gradient(150deg, var(--rarity), var(--rarity-faint));
+  }
+  .pip-num {
+    --cut: 9px;
+    display: grid; place-items: center;
+    width: 44px; height: 44px;
+    clip-path: var(--cut-poly);
+    background: var(--tile-2); color: var(--rarity);
+    font-family: var(--title); font-weight: 800; font-size: 14px; letter-spacing: .04em;
+  }
+  .pip-1 { --rarity: var(--uncommon);   --rarity-faint: rgba(95, 227, 103, .40); }
+  .pip-2 { --rarity: var(--rare);       --rarity-faint: rgba(51, 191, 255, .40); }
+  .pip-3 { --rarity: var(--epic);       --rarity-faint: rgba(187, 107, 240, .40); }
+  .pip-4 { --rarity: var(--legendary);  --rarity-faint: rgba(249, 169, 31, .40); }
+  .pip-5 { --rarity: var(--legendary);  --rarity-faint: rgba(249, 169, 31, .40); }
+  /* The end of the track, and the only acid here: an outlined plate rather than a filled one, because acid
+     is for actions. As with the tiles, the outline is a 2px rim behind an inner box so it survives the
+     clipped corner, and both boxes are opaque so the gradient line stops behind them instead of showing
+     through the letter gaps. */
+  .plan-plate {
+    --cut: 10px;
+    display: block;
+    padding: 2px;
+    clip-path: var(--cut-poly);
+    background: var(--acid);
+  }
+  .plan-plate > span {
+    --cut: 10px;
+    display: grid; place-items: center;
+    padding: 12px 18px;
+    clip-path: var(--cut-poly);
+    background: var(--tile); color: var(--acid);
+    font-family: var(--title); font-weight: 800;
+    font-size: 14px; letter-spacing: .16em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .track-cap { margin-top: 22px; color: var(--t2); font-size: 15px; max-width: 44em; }
+  .rewards {
+    margin: 34px 0 0; padding: 26px 0 0; list-style: none;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 26px;
+    border-top: 2px solid var(--rule);
+  }
+  .rw-tag {
+    font-family: var(--title); font-weight: 800;
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--t3);
+  }
+  .rewards h3 { font-size: clamp(19px, 1.5vw, 22px); line-height: 1.1; margin-top: 8px; }
+  .rewards p:last-child { margin-top: 8px; color: var(--t2); font-size: 15px; }
+
+  /* ---------- the close: the band with the diagonal edge ---------- */
+  /* Cut on the top edge only, from 64px down at the left to 0 at the right; the accent line is the same
+     polygon three pixels lower, so the cut edge is lit rather than left as a bare seam. Both use pixels
+     rather than percentages, so the two edges stay parallel at every window width. */
+  .close-band {
+    position: relative;
+    background: linear-gradient(160deg, var(--tile), #0C0C11);
+    clip-path: polygon(0 64px, 100% 0, 100% 100%, 0 100%);
+    padding: 132px 0 88px;
+  }
+  .close-band::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, var(--epic), var(--legendary) 70%, var(--acid));
+    clip-path: polygon(0 64px, 100% 0, 100% 5px, 0 69px);
+    opacity: .9;
+  }
+  .close-in { position: relative; }
+  .close-in h2 { font-size: clamp(32px, 4.4vw, 60px); line-height: .98; letter-spacing: -.035em; max-width: 20em; }
+  .close-sub { margin-top: 16px; color: var(--t2); font-size: clamp(15px, 1.1vw, 17px); max-width: 40em; }
+  .close-cta { margin-top: 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+
+  /* ---------- the footer ---------- */
+  /* The page already separates the closing band from the footer by colour, so this rule does one job only:
+     it draws the 1px seam in the page's own rule colour. Not both a fresh background and a border. */
+  .foot { border-top: 1px solid var(--rule); color: var(--t2); }
+
+  /* ---------- the tag every mock-up carries ---------- */
+  /* The 2px rule and the 6px epic bar, and no clipped corner on this one: a border cannot follow a
+     clip-path, so a cut here would open the outline. Sharp, like a shop's own shelf label. */
+  .tag {
+    position: fixed; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 50;
+    padding: 8px 12px;
+    background: var(--tile-2);
+    border: 2px solid var(--rule); border-left: 6px solid var(--epic);
+    border-radius: 3px;
+    color: var(--t1);
+    font-family: var(--title); font-weight: 800; font-size: 11px;
+    letter-spacing: .12em; text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* Focus: acid so it is visible against every surface on the page, and offset so it never sits inside a
+     rim where it would be mistaken for part of the design. */
+  a:focus-visible, button:focus-visible { outline: 3px solid var(--acid); outline-offset: 3px; border-radius: 2px; }
+
+  /* ---------- narrower windows ---------- */
+  @media (max-width: 1040px) {
+    .hero { min-height: 0; padding-block: 26px 62px; }
+    .hero-grid { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+    .hero-copy { max-width: none; }
+    .hero-art { padding-bottom: 40px; }
+    .hero-char { max-width: 46%; }
+  }
+  @media (max-width: 860px) {
+    .hdr-nav { display: none; }     /* the bar stays 72px and the badge stays on the right */
+  }
+  @media (max-width: 700px) {
+    .stroke { -webkit-text-stroke-width: 1.4px; }
+    .hero-slab { height: 150px; }
+    .ways-band { padding-bottom: 62px; }
+    .reward-band { padding: 62px 0 66px; }
+    .track-in { padding: 24px 16px 26px; }
+    /* The track has to survive a 400px window inside the panel's own padding, so the pips and the plate
+       shrink rather than the row overflowing: five 30px pips, six 6px gaps and a 90px plate come to 276px,
+       which fits the 324px the panel has left at 400px wide. */
+    .pips { gap: 6px; margin-top: 30px; }
+    .pips::before { left: 6px; right: 6px; }
+    .pip-rim { --cut: 6px; }
+    .pip-num { --cut: 6px; width: 26px; height: 26px; font-size: 11px; }
+    .plan-plate, .plan-plate > span { --cut: 7px; }
+    .plan-plate > span { padding: 9px 11px; font-size: 10px; letter-spacing: .08em; }
+    .close-band { padding: 100px 0 62px; }
+    .ticker-set li { font-size: 13px; letter-spacing: .16em; }
+    .ticker-set li::after { margin-inline: 14px; }
+    .tag { font-size: 10px; padding: 6px 9px; }
+  }
+  /* Below 380px the row can no longer hold five pips plus the plate without squeezing both into slivers,
+     so the plate drops onto its own line and the connector goes with it: a line drawn through the middle
+     of a two-row box would point at nothing. */
+  @media (max-width: 380px) {
+    .pips { flex-wrap: wrap; }
+    .pips::before { display: none; }
+  }
+  /* Movement off, not merely slowed. The ticker holds its first frame, which still shows the numbers; the
+     lifts and the art scale are dropped so nothing moves under the pointer. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+    .tile:hover { transform: none; }
+    .tile:hover .card-art img { transform: none; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<!-- The bar: the shared lockup at the column's left edge, one badge on the right. Sticky, not fixed, so it
+     occupies its 72px of layout and the hero starts below it. -->
+<header class="wrap">
+  <a class="logo-lockup" href="#" aria-label="Forge home"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span><span class="logo-word">Forge</span></a>
+  <div class="hdr-right">
+    <nav class="hdr-nav" aria-label="On this page">
+      <a href="#ways">Three ways in</a>
+      <a href="#reward">What you get</a>
+    </nav>
+    <span class="free-pill">Free to use</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- Hero. Two columns: the pitch on the left, the panel on the right, with the character cut-out anchored
+       so its legs leave the panel's frame. The key art is a backdrop at 55%, so the panel reads as shop
+       lighting rather than as a picture with text over it. -->
+  <section class="hero">
+    <div class="hero-slab" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Fortnite island design</p>
+        <h1>Your island idea,<br><span class="stroke">ready to build</span></h1>
+        <p class="hero-lede">Forge turns an idea for a Fortnite island into an executable plan: the exact game type, the UEFN devices it needs, and five build steps that put them in order.</p>
+        <div class="hero-cta">
+          <a class="btn-acid btn-lg" href="../../index.html#/home">Start designing</a>
+          <a class="btn-glass btn-lg" href="#ways">See the three ways in</a>
+        </div>
+        <p class="hero-note">Free to use &middot; Answer Questions is ready today</p>
+      </div>
+      <div class="hero-art">
+        <div class="hero-rim">
+          <div class="hero-frame">
+            <img src="../_media/art-cltm-evergreen-boxfights-2k.webp" alt="" width="1920" height="1080">
+          </div>
+        </div>
+        <img class="hero-char" src="../_media/char-fn-15-outfit-iso-reactive.webp" alt="">
+      </div>
+    </div>
+  </section>
+
+  <!-- The three ways in, as the shop's three tiles. Each carries its own rarity colour on the rim, the
+       rarity word, and its own honest call to action: one acid button for the route that exists, two
+       disabled glass buttons for the two that do not. -->
+  <section class="ways-band" id="ways">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="eyebrow">Three ways in</p>
+        <h2>Pick your entrance.</h2>
+        <p class="lede">One of these works right now. The other two are on the way, and they will land in the same plan.</p>
+      </div>
+
+      <div class="tiles">
+        <article class="tile t-legendary">
+          <div class="rim">
+            <div class="card">
+              <div class="card-art">
+                <img src="../_media/char-fn-40-outfit-toon-bomber.webp" alt="" loading="lazy">
+                <span class="plate"><span>Ready today</span></span>
+              </div>
+              <div class="card-body">
+                <p class="rarity">Legendary</p>
+                <h3>Answer Questions</h3>
+                <p class="card-desc">A short question set narrows your idea to an exact game type, then lays out the plan to build it.</p>
+                <div class="card-cta">
+                  <a class="btn-acid btn-wide" href="../../index.html#/home">Start the questions</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="tile t-rare">
+          <div class="rim">
+            <div class="card">
+              <div class="card-art">
+                <img src="../_media/art-cltm-evergreen-tycoon-2k.webp" alt="" loading="lazy">
+              </div>
+              <div class="card-body">
+                <p class="rarity">Rare</p>
+                <h3>Randomise</h3>
+                <p class="card-desc">Spins a game type, a twist and a brand to build around, so the blank page is never the first problem.</p>
+                <div class="card-cta">
+                  <button class="btn-glass btn-wide" type="button" disabled>Coming soon</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="tile t-epic">
+          <div class="rim">
+            <div class="card">
+              <div class="card-art">
+                <img src="../_media/art-cltm-evergreen-prophunt-2k.webp" alt="" loading="lazy">
+              </div>
+              <div class="card-body">
+                <p class="rarity">Epic</p>
+                <h3>Chat with AI</h3>
+                <p class="card-desc">Describe the idea in your own words and Forge asks the follow-ups, then turns the thread into the plan.</p>
+                <div class="card-cta">
+                  <button class="btn-glass btn-wide" type="button" disabled>Coming soon</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- The ticker: the shop's shelf-edge strip, and the only place the researched numbers are stated in
+       passing. Full window, drifting slowly, stopped entirely under prefers-reduced-motion. -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <ul class="ticker-set">
+        <li>13 game types</li>
+        <li>74 drafts</li>
+        <li>10 category basics</li>
+        <li>59 UEFN devices</li>
+        <li>5 build steps</li>
+        <li class="on">Ready today</li>
+      </ul>
+      <ul class="ticker-set" aria-hidden="true">
+        <li>13 game types</li>
+        <li>74 drafts</li>
+        <li>10 category basics</li>
+        <li>59 UEFN devices</li>
+        <li>5 build steps</li>
+        <li class="on">Ready today</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- What you walk away with, as a reward track: five pips escalating through the rarity colours for the
+       five build steps, the plan at the end of the line, and the three deliverables named underneath. -->
+  <section class="reward-band" id="reward">
+    <div class="wrap">
+      <div class="track-panel">
+        <div class="track-in">
+          <p class="eyebrow">What you walk away with</p>
+          <h2>Three things, every time.</h2>
+          <p class="lede">However you got here, the plan lands the same way.</p>
+
+          <ol class="pips">
+            <li class="pip"><span class="pip-rim pip-1"><span class="pip-num">01</span></span></li>
+            <li class="pip"><span class="pip-rim pip-2"><span class="pip-num">02</span></span></li>
+            <li class="pip"><span class="pip-rim pip-3"><span class="pip-num">03</span></span></li>
+            <li class="pip"><span class="pip-rim pip-4"><span class="pip-num">04</span></span></li>
+            <li class="pip"><span class="pip-rim pip-5"><span class="pip-num">05</span></span></li>
+            <li class="pip"><span class="plan-plate"><span>Your plan</span></span></li>
+          </ol>
+
+          <p class="track-cap">Five build steps, numbered in the order you build them, ending in a plan you can follow in UEFN.</p>
+
+          <ul class="rewards">
+            <li>
+              <p class="rw-tag">From 13 researched game types</p>
+              <h3>Your exact game type</h3>
+              <p>Not a genre. The one you are building.</p>
+            </li>
+            <li>
+              <p class="rw-tag">Chosen from 59 UEFN devices</p>
+              <h3>The devices it needs</h3>
+              <p>What to place on the island, and why each one is there.</p>
+            </li>
+            <li>
+              <p class="rw-tag">Always 5 steps</p>
+              <h3>Your build order</h3>
+              <p>The same five steps for every plan, in the order you work.</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- The close: a full-width band cut on the diagonal, with the accent line sitting on the cut. One acid
+       action, which is the third and last on the page. -->
+  <section class="close-band">
+    <div class="wrap close-in">
+      <h2>Your island starts with one question.</h2>
+      <p class="close-sub">Free to use. Answer Questions is ready today &mdash; Randomise and Chat with AI are coming soon.</p>
+      <div class="close-cta">
+        <a class="btn-acid btn-lg" href="../../index.html#/home">Start designing</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <a class="logo-lockup" href="#" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+  </div>
+</footer>
+
+<div class="tag">Concept 11 - Item Shop</div>
+
+</body>
+</html>
