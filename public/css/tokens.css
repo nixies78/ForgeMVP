@@ -182,11 +182,24 @@
   --fn-radius-card: 16px;
 
   /* [derived] The artwork's zoom: how far a card's cover picture scales under the pointer, and over how long.
-   * 4% over 400ms is the "gentle" that was asked for - enough to read as a response, small enough that the
-   * crop never shifts far enough to be noticed. Both go to nothing under prefers-reduced-motion, below, so the
-   * picture simply stays still rather than snapping. */
+   * 4% is enough to read as a response and small enough that the crop is never noticeable. The curve is
+   * Concept 8b's own, which is what makes the zoom feel immediate the way 8b's buttons do rather than easing
+   * in after the pointer has already stopped. Both go to nothing under prefers-reduced-motion, below, so the
+   * picture stays still rather than snapping.
+   *
+   * The ease is a token of its own deliberately: --sh-ease in the shell is a whole transition ("160ms ease"),
+   * and dropping that into a duration slot is read as a DELAY - which is exactly why the first pass felt
+   * laggy. A duration and a curve have to stay two values. */
   --fn-zoom-scale: 1.04;
-  --fn-zoom-duration: 400ms;
+  --fn-zoom-duration: 180ms;
+  --fn-zoom-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* [derived] The faint light grey bloom a card wears at rest. Its counterpart, the coloured bloom it takes
+   * under the pointer, is NOT here: it reads --choice-accent, and a custom property is resolved where it is
+   * DECLARED, so one declared in :root would resolve --choice-accent on :root - where no such name exists -
+   * inherit as the guaranteed-invalid value, and drop box-shadow to none. It is declared on the card instead,
+   * in guide.css, where both names resolve. */
+  --fn-glow-idle: 0 0 22px color-mix(in srgb, var(--fn-text) 6%, transparent);
 
   /* [derived] 4 px base step: a spacing scale is 4 px based in every Epic surface measured. */
   --fn-space-1: 4px;

@@ -22,13 +22,6 @@
     document.documentElement.classList.add(
       location.protocol === 'file:' ? 'opened-from-disk' : 'served-over-http'
     );
-
-    /* TEMPORARY, and to be deleted with the losing rules in guide.css: the three ways in have two card shapes
-     * on show - an art band across the top (the default) and a full-bleed cover with the text set on the
-     * picture. `?art=bleed` hands over the second one so the two can be compared before one is kept. */
-    if (new URLSearchParams(location.search).get('art') === 'bleed') {
-      document.documentElement.classList.add('art-bleed');
-    }
   </script>
 </head>
 <body class="g-app">

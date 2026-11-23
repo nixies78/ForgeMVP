@@ -11,16 +11,42 @@ import { h, frag, plural } from '../dom.js';
 import { DESIGN_MODES, UI } from '../content.js';
 import { button, buttonRow, choice, eyebrow, pageTitle, paragraph, lead, badgeChip, panel } from '../render/ui.js';
 
-/* What each way in looks like: the guided question set, the wheel, and the conversation. The three files sit in
- * public/assets, which is where the page serves assets from - the repository's root assets/ folder is not
- * reachable over HTTP, so the copies there would render as broken images. They are local-only by the owner's
- * decision and are deliberately not committed, so a fresh clone shows this screen without its three pictures.
- * A mode with no entry here simply renders without one, so the map is safe to trim or extend. */
-const MODE_ART = {
-  guided: 'assets/guided_process.jpg',
-  randomise: 'assets/wheel_of_fortune.jpg',
-  ai_chat: 'assets/ai_chat.jpg'
+/* What each way in looks like. Two sets are wired up so the two can be compared on the page itself:
+ *
+ *   photos  - the three photographs the owner pointed at, copied into public/assets (where the server can
+ *             reach them; the repository's root assets/ folder is not served). They are local-only by the
+ *             owner's decision and deliberately not committed, so a fresh clone shows this screen without them.
+ *   lineart - the set another session committed in public/images/design_modes: white line art on the library
+ *             canvas with token accents, drawn to match the app's own visual language. See that folder's
+ *             README, which also supplies a `slots` alternate for the Randomise card.
+ *
+ * `?art=lineart` selects the second set; the photographs are the default. The switch exists only while the two
+ * are being judged and goes once one is chosen. A mode with no entry in a set simply renders without a picture,
+ * so either map is safe to trim. */
+const ART_SETS = {
+  photos: {
+    guided: 'assets/guided_process.jpg',
+    randomise: 'assets/wheel_of_fortune.jpg',
+    ai_chat: 'assets/ai_chat.jpg'
+  },
+  lineart: {
+    guided: 'images/design_modes/guided.jpg',
+    randomise: 'images/design_modes/randomise.jpg',
+    ai_chat: 'images/design_modes/ai_chat.jpg'
+  }
 };
+
+/** The chosen set, and this mode's picture in it, or null when the mode has none. */
+function artFor(modeId) {
+  let which = 'photos';
+  try {
+    if (new URLSearchParams(location.search).get('art') === 'lineart') which = 'lineart';
+  } catch {
+    /* No location (a test harness importing this module): the default set is the right answer. */
+  }
+  const src = ART_SETS[which][modeId];
+  return src ? { src } : null;
+}
 
 export function renderHome(ctx) {
   const { data, state, store, actions } = ctx;
@@ -43,7 +69,7 @@ export function renderHome(ctx) {
           choice({
             label: mode.label,
             description: mode.description,
-            art: MODE_ART[mode.id] ? { src: MODE_ART[mode.id] } : null,
+            art: artFor(mode.id),
             /* Concept 8b's semantics for the three tiles, which is what the palette is for: the mode you can
              * start now is lit in Blue, the two that are not built yet are Indigo. The badges say the same
              * thing in words, so the colour is never the only thing carrying the state. */
