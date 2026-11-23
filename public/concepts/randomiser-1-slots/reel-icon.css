@@ -1,0 +1,23 @@
+/* Recolourable randomiser reel icons.
+   Each icon is three stacked alpha masks, painted with three colours.
+   Set the colours on the icon or on any ancestor (a reel, a card, :root):
+     --icon-dark   outline and darkest areas (also fills the whole emblem underneath)
+     --icon-main   main fill colour
+     --icon-light  highlights, faces, light details
+   The fallbacks are the colours the icons were drawn in. */
+.reel-icon {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.reel-icon > span {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;  mask-size: contain;
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+}
+.reel-icon > .dark  { background: var(--icon-dark,  #3B1F5C); }
+.reel-icon > .main  { background: var(--icon-main,  #C8102E); }
+.reel-icon > .light { background: var(--icon-light, #F4EDE4); }

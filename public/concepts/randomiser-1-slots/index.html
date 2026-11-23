@@ -126,7 +126,9 @@
     display: grid;
     place-items: center;
   }
-  .pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* The reel icons are square logos on a transparent ground: drawn whole (the masks use contain), never
+     cropped, with a little room so they don't touch the window's edge. */
+  .pic.has-icon { padding: .25rem; }
   .name {
     font: 700 1rem/1.2 var(--title);
     min-height: 2.4em;
@@ -160,6 +162,11 @@
   .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
   .k-type    { --ph-dark: #0A2633; --ph-mid: #185977; --ph-light: #A0E1FF; }
   .k-hook    { --ph-dark: #2D1424; --ph-mid: #693055; --ph-light: #F1B8DD; }
+  /* Reel icon colours (reel-icon.css), one theme per reel, from the placeholder colours above. */
+  .k-flavour { --icon-dark: #573270; --icon-main: #B27CE0; --icon-light: #F3E4FF; }
+  .k-brand   { --icon-dark: #744F0E; --icon-main: #E6A73C; --icon-light: #FFF1D6; }
+  .k-type    { --icon-dark: #185977; --icon-main: #3FB2E6; --icon-light: #E3F6FF; }
+  .k-hook    { --icon-dark: #693055; --icon-main: #E07CB6; --icon-light: #FFE6F4; }
 
   .item.empty .pic { border: 2px dashed var(--line-3); }
   .item.empty .q { font: 800 3rem/1 var(--title); color: var(--line-3); }
@@ -326,6 +333,7 @@
     .lever .rod, .lock .shackle, .spin { transition: none; }
   }
 </style>
+<link rel="stylesheet" href="./reel-icon.css" />
 <link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
@@ -367,6 +375,7 @@ import {
   REEL_KEYS, buildReels, strapline, typeLine, underneathLine, hookLine,
   pickDifferent, encodeHash, decodeHash
 } from './randomiser.js';
+import { reelIconHTML, checkIcons, hasIcon } from './reel-icon.js';
 
 const LABELS = { f: 'Flavour', t: 'Game type', h: 'Hook' };
 const SPIN_MS = { f: 1300, t: 1750, h: 2200 };   // reels stop left to right
@@ -381,7 +390,6 @@ let reels = null;
 let state = { f: null, t: null, h: null, locked: { f: false, t: false, h: false } };
 let spinning = false;
 const ui = {};                       // per reel: { root, window, strip, lock }
-const missingImages = new Set();     // image paths known to 404, so spins don't keep asking
 
 /* ---------- Rendering one entry ---------- */
 
@@ -410,18 +418,12 @@ function itemEl(entry) {
   item.className = `item k-${entry.kind}`;
   const pic = document.createElement('div');
   pic.className = 'pic';
-  if (missingImages.has(entry.image)) {
-    pic.append(placeholder(entry));
+  /* The recolourable icon if checkIcons() found one when the reels were built, else the placeholder. */
+  if (hasIcon(entry.image)) {
+    pic.classList.add('has-icon');
+    pic.innerHTML = reelIconHTML(entry.image, entry.name);
   } else {
-    const img = new Image();
-    img.alt = '';
-    img.decoding = 'async';
-    img.addEventListener('error', () => {
-      missingImages.add(entry.image);
-      img.replaceWith(placeholder(entry));
-    }, { once: true });
-    img.src = entry.image;
-    pic.append(img);
+    pic.append(placeholder(entry));
   }
   const name = document.createElement('div');
   name.className = 'name';
@@ -634,6 +636,7 @@ async function init() {
     return;
   }
   reels = buildReels(data);
+  await checkIcons(REEL_KEYS.flatMap(k => reels[k]));
   $('reels').append(...REEL_KEYS.map(buildReel));
   statusEl.textContent = '';
   loadHash();

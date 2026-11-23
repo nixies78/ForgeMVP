@@ -92,15 +92,12 @@ import {
   REEL_KEYS, buildReels, strapline, endSentence, underneathParts,
   pickDifferent, encodeHash, decodeHash
 } from '../concepts/randomiser-1-slots/randomiser.js';
+import { reelIconHTML, checkIcons, hasIcon } from '../concepts/randomiser-1-slots/reel-icon.js';
 
 export { REEL_KEYS };
 
 /** The reel keys in words, for the lock buttons' accessible names. */
 const REEL_LABELS = { f: 'flavour', t: 'game type', h: 'hook' };
-
-/** Every image path known to 404, shared by every reel on the page: a missing entry image should be
- *  asked for once, not on every spin. */
-const missingImages = new Set();
 
 /** "K-Pop Demon Hunters" -> "KD", "Vampires" -> "VA". Used by the placeholder a page gets for a
  *  missing image. */
@@ -112,28 +109,25 @@ export function initials(name) {
 }
 
 /**
- * The picture for one entry: the real image, or - while /concepts/_media/randomiser/ is still empty -
- * a block carrying the entry's initials and "Image coming". A page composes this into its own entry
- * markup, so the reel pictures behave the same everywhere without every page re-implementing the
- * onerror dance.
+ * The picture for one entry: its recolourable reel icon (reel-icon.js, painted with --icon-dark /
+ * --icon-main / --icon-light), or - for an entry without one - a block carrying the entry's initials and
+ * "Image coming". A page composes this into its own entry markup, so the reel pictures behave the same
+ * everywhere. Whether an icon exists was checked once, when the reels were built (checkIcons below).
+ *
+ * The box carries `k-<kind>` (k-flavour, k-brand, k-type, k-hook) so a page can theme each reel's icons
+ * on that class, and `has-icon` once it holds an icon rather than the placeholder.
  */
 export function entryImage(entry, { className = 'rm-pic', placeholderClass = 'rm-ph' } = {}) {
   const box = document.createElement('div');
   box.className = className;
   if (!entry) return box;
-  if (missingImages.has(entry.image)) {
+  if (entry.kind) box.classList.add(`k-${entry.kind}`);
+  if (hasIcon(entry.image)) {
+    box.classList.add('has-icon');
+    box.innerHTML = reelIconHTML(entry.image, entry.name);
+  } else {
     box.append(entryPlaceholder(entry, placeholderClass));
-    return box;
   }
-  const img = new Image();
-  img.alt = '';
-  img.decoding = 'async';
-  img.addEventListener('error', () => {
-    missingImages.add(entry.image);
-    img.replaceWith(entryPlaceholder(entry, placeholderClass));
-  }, { once: true });
-  img.src = entry.image;
-  box.append(img);
   return box;
 }
 
@@ -201,6 +195,7 @@ export async function createMachine(options) {
   }
 
   const reels = buildReels(data);
+  await checkIcons(REEL_KEYS.flatMap(k => reels[k]));
   const state = { f: null, t: null, h: null, locked: { f: false, t: false, h: false } };
   const ui = {};                 // per reel: { reel, window, strip, lock }
   let spinning = false;

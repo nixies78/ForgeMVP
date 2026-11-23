@@ -154,7 +154,14 @@
     background: linear-gradient(150deg, var(--neon-deep), #1B1C33 70%, #0B0716);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), 0 0 26px -10px rgba(187, 107, 240, .9);
   }
-  .rm-pic img { width: 100%; height: 100%; object-fit: cover; }
+  /* Reel icons are square logos on a transparent ground: drawn whole (the masks use contain), never cropped. */
+  .rm-pic.has-icon { padding: 8px; }
+  /* Reel icon colours (reel-icon.css), one theme per reel, from Randomiser 1's placeholder colours.
+     entryImage() puts the kind class on the picture box. */
+  .k-flavour { --icon-dark: #573270; --icon-main: #B27CE0; --icon-light: #F3E4FF; }
+  .k-brand   { --icon-dark: #744F0E; --icon-main: #E6A73C; --icon-light: #FFF1D6; }
+  .k-type    { --icon-dark: #185977; --icon-main: #3FB2E6; --icon-light: #E3F6FF; }
+  .k-hook    { --icon-dark: #693055; --icon-main: #E07CB6; --icon-light: #FFE6F4; }
   /* The placeholder the module hands every page until /concepts/_media/randomiser/ has pictures in it. */
   .rm-ph {
     position: absolute; inset: 0; display: flex; flex-direction: column;
@@ -330,6 +337,7 @@
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
+<link rel="stylesheet" href="../randomiser-1-slots/reel-icon.css" />
 <link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>

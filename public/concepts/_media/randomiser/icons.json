@@ -1,0 +1,827 @@
+{
+ "generated": "2026-11-23T14:53:28.588Z",
+ "size": 512,
+ "roles": {
+  "dark": "#3B1F5C",
+  "main": "#C8102E",
+  "light": "#F4EDE4"
+ },
+ "items": [
+  {
+   "kind": "flavour",
+   "name": "Vampires",
+   "slug": "vampires",
+   "image": "/concepts/_media/randomiser/flavours/vampires.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/vampires.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/vampires.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/vampires.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Dinosaurs",
+   "slug": "dinosaurs",
+   "image": "/concepts/_media/randomiser/flavours/dinosaurs.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/dinosaurs.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/dinosaurs.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/dinosaurs.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Sci-fi future",
+   "slug": "sci-fi-future",
+   "image": "/concepts/_media/randomiser/flavours/sci-fi-future.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/sci-fi-future.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/sci-fi-future.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/sci-fi-future.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Medieval fantasy",
+   "slug": "medieval-fantasy",
+   "image": "/concepts/_media/randomiser/flavours/medieval-fantasy.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/medieval-fantasy.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/medieval-fantasy.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/medieval-fantasy.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Wild West",
+   "slug": "wild-west",
+   "image": "/concepts/_media/randomiser/flavours/wild-west.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/wild-west.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/wild-west.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/wild-west.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Underwater",
+   "slug": "underwater",
+   "image": "/concepts/_media/randomiser/flavours/underwater.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/underwater.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/underwater.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/underwater.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Space station",
+   "slug": "space-station",
+   "image": "/concepts/_media/randomiser/flavours/space-station.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/space-station.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/space-station.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/space-station.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "After the end",
+   "slug": "after-the-end",
+   "image": "/concepts/_media/randomiser/flavours/after-the-end.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/after-the-end.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/after-the-end.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/after-the-end.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Ancient Egypt",
+   "slug": "ancient-egypt",
+   "image": "/concepts/_media/randomiser/flavours/ancient-egypt.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/ancient-egypt.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/ancient-egypt.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/ancient-egypt.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Pirates",
+   "slug": "pirates",
+   "image": "/concepts/_media/randomiser/flavours/pirates.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/pirates.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/pirates.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/pirates.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Cyberpunk",
+   "slug": "cyberpunk",
+   "image": "/concepts/_media/randomiser/flavours/cyberpunk.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/cyberpunk.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/cyberpunk.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/cyberpunk.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Haunted house",
+   "slug": "haunted-house",
+   "image": "/concepts/_media/randomiser/flavours/haunted-house.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/haunted-house.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/haunted-house.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/haunted-house.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Jungle",
+   "slug": "jungle",
+   "image": "/concepts/_media/randomiser/flavours/jungle.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/jungle.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/jungle.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/jungle.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Arctic",
+   "slug": "arctic",
+   "image": "/concepts/_media/randomiser/flavours/arctic.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/arctic.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/arctic.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/arctic.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Neon city",
+   "slug": "neon-city",
+   "image": "/concepts/_media/randomiser/flavours/neon-city.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/neon-city.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/neon-city.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/neon-city.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Toy box",
+   "slug": "toy-box",
+   "image": "/concepts/_media/randomiser/flavours/toy-box.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/toy-box.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/toy-box.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/toy-box.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Kitchen",
+   "slug": "kitchen",
+   "image": "/concepts/_media/randomiser/flavours/kitchen.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/kitchen.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/kitchen.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/kitchen.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "School",
+   "slug": "school",
+   "image": "/concepts/_media/randomiser/flavours/school.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/school.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/school.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/school.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Prison",
+   "slug": "prison",
+   "image": "/concepts/_media/randomiser/flavours/prison.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/prison.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/prison.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/prison.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Circus",
+   "slug": "circus",
+   "image": "/concepts/_media/randomiser/flavours/circus.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/circus.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/circus.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/circus.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Superheroes",
+   "slug": "superheroes",
+   "image": "/concepts/_media/randomiser/flavours/superheroes.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/superheroes.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/superheroes.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/superheroes.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Ninjas",
+   "slug": "ninjas",
+   "image": "/concepts/_media/randomiser/flavours/ninjas.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/ninjas.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/ninjas.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/ninjas.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Zombies",
+   "slug": "zombies",
+   "image": "/concepts/_media/randomiser/flavours/zombies.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/zombies.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/zombies.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/zombies.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "flavour",
+   "name": "Fairy tale",
+   "slug": "fairy-tale",
+   "image": "/concepts/_media/randomiser/flavours/fairy-tale.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/flavours/fairy-tale.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/flavours/fairy-tale.mask-main.webp",
+    "light": "/concepts/_media/randomiser/flavours/fairy-tale.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "Star Wars",
+   "slug": "star-wars",
+   "image": "/concepts/_media/randomiser/brands/star-wars.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/star-wars.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/star-wars.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/star-wars.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "LEGO",
+   "slug": "lego",
+   "image": "/concepts/_media/randomiser/brands/lego.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/lego.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/lego.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/lego.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "TMNT",
+   "slug": "tmnt",
+   "image": "/concepts/_media/randomiser/brands/tmnt.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/tmnt.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/tmnt.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/tmnt.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "Fall Guys",
+   "slug": "fall-guys",
+   "image": "/concepts/_media/randomiser/brands/fall-guys.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/fall-guys.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/fall-guys.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/fall-guys.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "Squid Game",
+   "slug": "squid-game",
+   "image": "/concepts/_media/randomiser/brands/squid-game.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/squid-game.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/squid-game.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/squid-game.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "The Walking Dead",
+   "slug": "the-walking-dead",
+   "image": "/concepts/_media/randomiser/brands/the-walking-dead.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/the-walking-dead.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/the-walking-dead.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/the-walking-dead.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "brand",
+   "name": "K-Pop Demon Hunters",
+   "slug": "k-pop-demon-hunters",
+   "image": "/concepts/_media/randomiser/brands/k-pop-demon-hunters.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/brands/k-pop-demon-hunters.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/brands/k-pop-demon-hunters.mask-main.webp",
+    "light": "/concepts/_media/randomiser/brands/k-pop-demon-hunters.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Box Fight",
+   "slug": "box-fight",
+   "image": "/concepts/_media/randomiser/game-types/box-fight.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/box-fight.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/box-fight.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/box-fight.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Zone Wars",
+   "slug": "zone-wars",
+   "image": "/concepts/_media/randomiser/game-types/zone-wars.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/zone-wars.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/zone-wars.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/zone-wars.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Red vs Blue",
+   "slug": "red-vs-blue",
+   "image": "/concepts/_media/randomiser/game-types/red-vs-blue.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/red-vs-blue.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/red-vs-blue.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/red-vs-blue.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Gun Game",
+   "slug": "gun-game",
+   "image": "/concepts/_media/randomiser/game-types/gun-game.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/gun-game.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/gun-game.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/gun-game.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Deathrun",
+   "slug": "deathrun",
+   "image": "/concepts/_media/randomiser/game-types/deathrun.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/deathrun.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/deathrun.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/deathrun.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Parkour Obby",
+   "slug": "parkour-obby",
+   "image": "/concepts/_media/randomiser/game-types/parkour-obby.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/parkour-obby.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/parkour-obby.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/parkour-obby.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Racing",
+   "slug": "racing",
+   "image": "/concepts/_media/randomiser/game-types/racing.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/racing.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/racing.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/racing.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Prop Hunt",
+   "slug": "prop-hunt",
+   "image": "/concepts/_media/randomiser/game-types/prop-hunt.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/prop-hunt.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/prop-hunt.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/prop-hunt.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Hide and Seek",
+   "slug": "hide-and-seek",
+   "image": "/concepts/_media/randomiser/game-types/hide-and-seek.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/hide-and-seek.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/hide-and-seek.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/hide-and-seek.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Infection",
+   "slug": "infection",
+   "image": "/concepts/_media/randomiser/game-types/infection.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/infection.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/infection.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/infection.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Murder Mystery",
+   "slug": "murder-mystery",
+   "image": "/concepts/_media/randomiser/game-types/murder-mystery.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/murder-mystery.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/murder-mystery.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/murder-mystery.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Escape Room",
+   "slug": "escape-room",
+   "image": "/concepts/_media/randomiser/game-types/escape-room.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/escape-room.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/escape-room.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/escape-room.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Horror Map",
+   "slug": "horror-map",
+   "image": "/concepts/_media/randomiser/game-types/horror-map.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/horror-map.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/horror-map.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/horror-map.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Tycoon",
+   "slug": "tycoon",
+   "image": "/concepts/_media/randomiser/game-types/tycoon.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/tycoon.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/tycoon.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/tycoon.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Simulator",
+   "slug": "simulator",
+   "image": "/concepts/_media/randomiser/game-types/simulator.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/simulator.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/simulator.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/simulator.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Tower Defence",
+   "slug": "tower-defence",
+   "image": "/concepts/_media/randomiser/game-types/tower-defence.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/tower-defence.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/tower-defence.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/tower-defence.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Horde Survival",
+   "slug": "horde-survival",
+   "image": "/concepts/_media/randomiser/game-types/horde-survival.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/horde-survival.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/horde-survival.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/horde-survival.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Boss Fight",
+   "slug": "boss-fight",
+   "image": "/concepts/_media/randomiser/game-types/boss-fight.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/boss-fight.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/boss-fight.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/boss-fight.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Capture the Flag",
+   "slug": "capture-the-flag",
+   "image": "/concepts/_media/randomiser/game-types/capture-the-flag.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/capture-the-flag.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/capture-the-flag.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/capture-the-flag.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Sports Game",
+   "slug": "sports-game",
+   "image": "/concepts/_media/randomiser/game-types/sports-game.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/sports-game.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/sports-game.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/sports-game.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Metroidvania",
+   "slug": "metroidvania",
+   "image": "/concepts/_media/randomiser/game-types/metroidvania.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/metroidvania.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/metroidvania.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/metroidvania.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Open World Adventure",
+   "slug": "open-world-adventure",
+   "image": "/concepts/_media/randomiser/game-types/open-world-adventure.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/open-world-adventure.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/open-world-adventure.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/open-world-adventure.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Heist",
+   "slug": "heist",
+   "image": "/concepts/_media/randomiser/game-types/heist.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/heist.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/heist.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/heist.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "type",
+   "name": "Social Hub",
+   "slug": "social-hub",
+   "image": "/concepts/_media/randomiser/game-types/social-hub.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/game-types/social-hub.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/game-types/social-hub.mask-main.webp",
+    "light": "/concepts/_media/randomiser/game-types/social-hub.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Dry and deadpan",
+   "slug": "dry-and-deadpan",
+   "image": "/concepts/_media/randomiser/hooks/dry-and-deadpan.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/dry-and-deadpan.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/dry-and-deadpan.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/dry-and-deadpan.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Loud and stupid",
+   "slug": "loud-and-stupid",
+   "image": "/concepts/_media/randomiser/hooks/loud-and-stupid.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/loud-and-stupid.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/loud-and-stupid.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/loud-and-stupid.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Punishing, and proud of it",
+   "slug": "punishing-and-proud-of-it",
+   "image": "/concepts/_media/randomiser/hooks/punishing-and-proud-of-it.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/punishing-and-proud-of-it.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/punishing-and-proud-of-it.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/punishing-and-proud-of-it.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Brutal but fair",
+   "slug": "brutal-but-fair",
+   "image": "/concepts/_media/randomiser/hooks/brutal-but-fair.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/brutal-but-fair.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/brutal-but-fair.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/brutal-but-fair.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Cute on the surface",
+   "slug": "cute-on-the-surface",
+   "image": "/concepts/_media/randomiser/hooks/cute-on-the-surface.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/cute-on-the-surface.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/cute-on-the-surface.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/cute-on-the-surface.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Gentle — you can't really lose",
+   "slug": "gentle-you-can-t-really-lose",
+   "image": "/concepts/_media/randomiser/hooks/gentle-you-can-t-really-lose.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/gentle-you-can-t-really-lose.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/gentle-you-can-t-really-lose.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/gentle-you-can-t-really-lose.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Cosy and unhurried",
+   "slug": "cosy-and-unhurried",
+   "image": "/concepts/_media/randomiser/hooks/cosy-and-unhurried.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/cosy-and-unhurried.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/cosy-and-unhurried.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/cosy-and-unhurried.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Tense, then sudden",
+   "slug": "tense-then-sudden",
+   "image": "/concepts/_media/randomiser/hooks/tense-then-sudden.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/tense-then-sudden.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/tense-then-sudden.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/tense-then-sudden.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Slow and creeping",
+   "slug": "slow-and-creeping",
+   "image": "/concepts/_media/randomiser/hooks/slow-and-creeping.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/slow-and-creeping.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/slow-and-creeping.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/slow-and-creeping.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "So fast you barely think",
+   "slug": "so-fast-you-barely-think",
+   "image": "/concepts/_media/randomiser/hooks/so-fast-you-barely-think.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/so-fast-you-barely-think.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/so-fast-you-barely-think.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/so-fast-you-barely-think.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Chaotic — nobody's in control",
+   "slug": "chaotic-nobody-s-in-control",
+   "image": "/concepts/_media/randomiser/hooks/chaotic-nobody-s-in-control.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/chaotic-nobody-s-in-control.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/chaotic-nobody-s-in-control.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/chaotic-nobody-s-in-control.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Grand and serious",
+   "slug": "grand-and-serious",
+   "image": "/concepts/_media/randomiser/hooks/grand-and-serious.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/grand-and-serious.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/grand-and-serious.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/grand-and-serious.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  },
+  {
+   "kind": "hook",
+   "name": "Weird, played straight",
+   "slug": "weird-played-straight",
+   "image": "/concepts/_media/randomiser/hooks/weird-played-straight.webp",
+   "masks": {
+    "dark": "/concepts/_media/randomiser/hooks/weird-played-straight.mask-dark.webp",
+    "main": "/concepts/_media/randomiser/hooks/weird-played-straight.mask-main.webp",
+    "light": "/concepts/_media/randomiser/hooks/weird-played-straight.mask-light.webp"
+   },
+   "model": "gpt-image-2.6-flare"
+  }
+ ]
+}

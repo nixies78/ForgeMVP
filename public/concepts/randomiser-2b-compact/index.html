@@ -200,7 +200,8 @@
     border-radius: 8px; overflow: hidden;
     position: relative; display: grid; place-items: center;
   }
-  .item .rm-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Reel icons are square logos on a transparent ground: drawn whole (the masks use contain), never cropped. */
+  .item .rm-pic.has-icon { padding: 2px; }
   .item .cell { min-width: 0; }
   .item .name {
     font-family: var(--title); font-weight: 800; font-size: .9375rem; line-height: 1.2;
@@ -232,6 +233,12 @@
   .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
   .k-type    { --ph-dark: #0A2633; --ph-mid: #185977; --ph-light: #A0E1FF; }
   .k-hook    { --ph-dark: #2D1424; --ph-mid: #693055; --ph-light: #F1B8DD; }
+  /* Reel icon colours (reel-icon.css), one theme per reel, from Randomiser 1's placeholder colours.
+     entryImage() puts the kind class on the picture box. */
+  .k-flavour { --icon-dark: #573270; --icon-main: #B27CE0; --icon-light: #F3E4FF; }
+  .k-brand   { --icon-dark: #744F0E; --icon-main: #E6A73C; --icon-light: #FFF1D6; }
+  .k-type    { --icon-dark: #185977; --icon-main: #3FB2E6; --icon-light: #E3F6FF; }
+  .k-hook    { --icon-dark: #693055; --icon-main: #E07CB6; --icon-light: #FFE6F4; }
 
   /* HOLD: the button under the drum, exactly where a fruit machine keeps its hold buttons. */
   .lock {
@@ -336,6 +343,7 @@
     *, *::before, *::after { transition: none !important; animation: none !important; }
   }
 </style>
+<link rel="stylesheet" href="../randomiser-1-slots/reel-icon.css" />
 <link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
