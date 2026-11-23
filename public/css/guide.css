@@ -366,9 +366,8 @@ body.g-app {
 
 /* ============================== the home screen's cards ==============================
  * The three ways in each carry a picture of what they are: an art band across the top of the card, while the
- * card's own title, description, badge and action stay exactly where they were. Two sets of artwork are wired
- * up on the page for comparison (the photographs and the committed line art - see ART_SETS in home.js); the
- * shape of the card is the same either way.
+ * card's own title, description, badge and action stay exactly where they were. The pictures are the three
+ * photographs - see MODE_ART in home.js for where they come from and why they are local-only.
  *
  * The band needs the card to clip its own artwork, or the zoom below spills past the 16px corners. Note that
  * `overflow: hidden` clips descendants, not the element's own transform, so the 3px hover lift is unaffected.
@@ -406,40 +405,24 @@ body.g-app {
 .g-choice:hover .g-choice-art img,
 .g-choice:focus-visible .g-choice-art img { transform: scale(var(--fn-zoom-scale)); }
 
-/* ============================== the three ways in: blue and indigo ==============================
- * Concept 8b lights its ready tile in Blue and leaves the supporting tiles in Indigo, and that is exactly the
- * distinction this screen needs: one mode works today and two do not.
- *
- * The tone is the 1px edge and the bloom, and nothing else. An earlier pass also washed the panel fill and the
- * badge, which is a colour overlay on surfaces nobody measured - so the cards keep the library's own panel and
- * the library's own badge, and the blue or indigo shows only in the edge and in the glow under the pointer.
- * The words still say "Ready" or "Not built yet", so the state is never carried by hue alone.
+/* ============================== the three ways in ==============================
+ * The tone is the bloom, and nothing else. An earlier pass tinted the panel fill - a colour on a surface nobody
+ * had measured - and then kept a blue or indigo edge per card. The owner's review settled both: the two modes
+ * that are not built yet wear exactly the muted edge every other card wears, and all three answer the pointer in
+ * the palette's blue. So there is no per-card accent left to declare, no tone to pass in at all, and the
+ * distinction between ready and not-yet is carried where it started - by the badges, in words.
  */
-.g-choice.is-blue { --choice-accent: var(--ue-palette-blue-400); }
-.g-choice.is-indigo { --choice-accent: var(--ue-palette-indigo-400); }
-
-.g-choice.is-blue,
-.g-choice.is-indigo {
-  border-color: color-mix(in srgb, var(--choice-accent) 34%, var(--fn-border));
+[data-screen='home'] .g-choice {
   /* Idle: a faint light grey bloom, enough to read as a lit surface with no colour in it at all. */
   box-shadow: var(--fn-glow-idle);
-  /* The coloured bloom is derived here rather than in tokens.css on purpose. A custom property is computed
-   * where it is DECLARED, so a --fn-glow-hover sitting in :root that read --choice-accent would be resolved on
-   * :root, where --choice-accent does not exist: it would inherit as the guaranteed-invalid value and the
-   * box-shadow below would collapse to none - which is exactly what happened on the first attempt. Declared
-   * on the card, next to the --choice-accent it reads, both names resolve. */
-  --fn-glow-hover: 0 0 30px color-mix(in srgb, var(--choice-accent) 34%, transparent);
 }
 
-/* Hover: the library's documented fill step and its accessible edge, with the documented lift shadow kept
- * underneath and the card's own colour added as a bloom on top. A hover rule that paints a colour nobody
- * measured is exactly how a card once became light cyan with white text on it, which is what the test that
- * guards this is for - so the fill here is the token and only the glow is derived. */
-.g-choice.is-blue:hover,
-.g-choice.is-indigo:hover {
-  background: var(--fn-surface-panel-hover);
-  border-color: color-mix(in srgb, var(--choice-accent) 70%, transparent);
-  box-shadow: var(--fn-shadow-hover), var(--fn-glow-hover);
+[data-screen='home'] .g-choice:hover {
+  border-color: var(--ue-palette-blue-400);
+  /* Concept 8b's hover glow at its own numbers: a 1px ring plus one very large, soft drop. The lift's own
+   * shadow is dropped here rather than layered under it - a ring, a drop and a third shadow is a smear, and the
+   * bloom is meant to be the whole answer. The lift itself is untouched; it still comes from .g-choice:hover. */
+  box-shadow: var(--fn-glow-blue-ring), var(--fn-glow-blue-drop);
 }
 
 /* ============================== the home screen's type ==============================

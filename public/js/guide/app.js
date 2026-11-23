@@ -210,6 +210,16 @@ function wireShell(ctx) {
   }
 
   measureHeader(els.siteHeader);
+
+  /* The header is transparent over the top of the page and frosts only once the page has moved under it: on
+   * load the artwork and the glow read uninterrupted, and the bar turns into a surface only when it has
+   * something to sit over. One class, toggled by a passive listener: nothing is read on scroll except scrollY,
+   * and the class changes once per crossing rather than on every frame, so this cannot thrash the compositor. */
+  if (els.siteHeader) {
+    const syncHeader = () => els.siteHeader.classList.toggle('is-scrolled', window.scrollY > 8);
+    syncHeader();
+    window.addEventListener('scroll', syncHeader, { passive: true });
+  }
 }
 
 /* ------------------------------------ actions ------------------------------------ */

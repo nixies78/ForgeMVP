@@ -41,14 +41,12 @@
   --sh-progress-from: var(--ue-palette-blue-400);   /* 1.2.1: the ramp's published families */
   --sh-progress-to: var(--ue-palette-indigo-400);
 
-  /* The page's glow, built from the same three published families rather than from new colours: blue,
-   * indigo, and the store's yellow. Mixed here, once, so the three radial stops in body.g-app below read as
-   * one decision and can be re-tuned in a single place. The alphas are deliberately low - the glow is an
-   * atmosphere behind the panels, not a wash over them - and yellow sits lowest of the three because it is
-   * the warmest and therefore reads loudest at the same weight. */
-  --sh-glow-blue: color-mix(in srgb, var(--ue-palette-blue-400) 10%, transparent);
-  --sh-glow-indigo: color-mix(in srgb, var(--ue-palette-indigo-400) 8%, transparent);
-  --sh-glow-yellow: color-mix(in srgb, var(--ue-palette-yellow-400) 6%, transparent);
+  /* The page's glow: two of the published families, blue and indigo, and nothing else. The yellow that was
+   * here for one pass is gone - spread across a whole page it read as a warm wash over the canvas rather than
+   * light on it. The alphas went UP as it left, both because two families rather than three needs more of each
+   * to register at all, and because the glow was asked to be slightly brighter. */
+  --sh-glow-blue: color-mix(in srgb, var(--ue-palette-blue-400) 22%, transparent);
+  --sh-glow-indigo: color-mix(in srgb, var(--ue-palette-indigo-400) 18%, transparent);
 
   /* [derived] Frame geometry, which is the only thing this file still decides for itself. */
   --sh-header-base: 72px;        /* the header's own minimum height, at every width above 760px */
@@ -73,13 +71,22 @@
   left: 0;
   width: 100%;
   z-index: 50;
+  /* 1.2.2's tinted, frosted bar is what the header becomes - but only once the page has moved under it, which
+   * is what app.js's `is-scrolled` marks. On load the bar is fully transparent, so the artwork and the page's
+   * glow run to the top of the window uninterrupted, and it eases into the spec's surface at the moment it has
+   * something to sit over. The resting blur is `blur(0)` rather than `none` on purpose: `none` is not a value
+   * the browser can interpolate, so the frost would snap in while the tint faded behind it. */
+  background: transparent;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  border: 0; /* the spec is explicit: a clean edge, no border */
+  transition: background-color var(--sh-ease), backdrop-filter var(--sh-ease), -webkit-backdrop-filter var(--sh-ease);
+}
+
+.sh-header.is-scrolled {
   background: var(--sh-header-bg);
-  /* 1.2.2: the header now frosts like the app's sub-header, so content reads through it as it scrolls
-   * under. The tint eased from 95% to 90% at the same time - a blur behind an almost-opaque fill is an
-   * effect nobody can see. */
   backdrop-filter: var(--sh-blur);
   -webkit-backdrop-filter: var(--sh-blur);
-  border: 0; /* the spec is explicit: a clean edge, no border */
 }
 
 /* The header's own height must NOT be read from --sh-header-h. That variable is what the page offsets
@@ -221,26 +228,64 @@
  * fixed header is accounted for by the body's top padding. `body.g-app` is unlayered and styles.css is
  * not, so this beats the older page chrome no matter what it says. */
 body.g-app {
-  /* The three-stop gradient is still the page's ground; the glow is painted over it. The radials are listed
-   * first so they sit in front of the linear gradient, and every panel the app draws sits in front of both.
-   * Doing this with a fixed pseudo-element would have needed a z-index and a stacking context for no gain -
-   * and a background layer cannot catch the pointer, so nothing here can intercept a click.
-   *
-   * The radials are fixed to the window while the ground gradient stays on the document, which is the fix for
-   * a real fault in the first pass: those stops were percentages of the body box, and the body is as tall as
-   * the page - about 2400px here - so "at 18% 0%" put a bloom's brightest point exactly on the top edge of
-   * the document and "at 50% 102%" put another one exactly on the bottom edge, where the footer's opaque band
-   * then chopped it off dead. The result was two hot bands at the ends of the page and nothing in the middle.
-   * Anchored to the viewport the glow is even from top to bottom, it never has a page edge to stop at, and it
-   * holds still as the reader scrolls. The footer still excludes itself: its own band is opaque. */
-  background:
-    radial-gradient(120% 80% at 14% 12%, var(--sh-glow-blue) 0%, transparent 100%),
-    radial-gradient(110% 72% at 86% 26%, var(--sh-glow-indigo) 0%, transparent 100%),
-    radial-gradient(130% 84% at 50% 78%, var(--sh-glow-yellow) 0%, transparent 100%),
-    linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
-  background-attachment: fixed, fixed, fixed, scroll;
+  background: linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
   color: var(--sh-text);
   padding-top: var(--sh-header-h);
+}
+
+/* The page's glow lives on a layer of its own, fixed to the window and turning slowly, so the light drifts
+ * across the page instead of being painted onto the document.
+ *
+ * Three things went wrong before this, and each one is why a line below reads the way it does:
+ *
+ *  - the stops were once percentages of the body box, and the body is as tall as the page - about 2400px here -
+ *    so a bloom's brightest point landed exactly on the document's top edge and another exactly on its bottom
+ *    edge, where the footer's opaque band then cut it off dead. Two hot bands at the ends of the page and
+ *    nothing in the middle. This layer is fixed to the window, so there is no page edge to stop at.
+ *  - the arrangement was top-to-bottom, and one of the three blooms was yellow. The yellow is gone - spread
+ *    across a whole page it read as a warm wash over the canvas rather than light on it - and what is left is
+ *    two blooms of the palette's blue and indigo sitting near the middle of the layer and opening outward.
+ *  - the turning is what gives the light its drift, and it is why the layer is a square far larger than any
+ *    viewport: rotating it about its own centre swings the blooms around the middle of the screen and can never
+ *    bring an edge into view. The pulse is an opacity breath laid over that. Both are transform and opacity
+ *    only, so the browser can hand them to the compositor and neither costs a layout pass. It is a CSS
+ *    approximation of the reference on unrealengine.com, which is a Lottie animation - close in effect, not a
+ *    copy of its implementation.
+ *
+ * z-index -1 puts this above the body's own background - which the canvas paints first, underneath everything -
+ * and behind every panel the app draws. A background layer cannot catch the pointer, so nothing here can
+ * intercept a click. */
+body.g-app::before {
+  content: "";
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 170vmax;
+  height: 170vmax;
+  margin: -85vmax 0 0 -85vmax;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(30% 30% at 45% 43%, var(--sh-glow-blue) 0%, transparent 70%),
+    radial-gradient(34% 34% at 56% 58%, var(--sh-glow-indigo) 0%, transparent 72%),
+    radial-gradient(48% 48% at 50% 50%, var(--sh-glow-indigo) 0%, transparent 74%);
+  animation: sh-glow-turn 150s linear infinite, sh-glow-breathe 13s ease-in-out infinite;
+}
+
+/* A full turn every two and a half minutes: slow enough to be felt rather than watched. */
+@keyframes sh-glow-turn {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sh-glow-breathe {
+  0%, 100% { opacity: 0.78; }
+  50% { opacity: 1; }
+}
+
+/* No drift and no breathing for a reader who has asked for less motion. The glow stays, lit and still. */
+@media (prefers-reduced-motion: reduce) {
+  body.g-app::before { animation: none; }
 }
 
 /* The inset lives on the inner wrappers, not on the container: the app's text column and the header's

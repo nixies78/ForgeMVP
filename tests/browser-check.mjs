@@ -466,13 +466,58 @@ async function main() {
     if (state.shell.viewportWidth > 760 && state.shell.headerH !== 72) {
       problems.push(`the site header should be 72px tall at ${state.shell.viewportWidth}px, it is ${state.shell.headerH}px`);
     }
-    if (state.shell.headerBg !== 'rgba(16, 16, 20, 0.9)') {
-      problems.push(`the site header should be rgba(16, 16, 20, 0.9), it is ${state.shell.headerBg}`);
-    }
-    /* 1.2.2 frosts the header with the same blur as the sticky app bar above. Both are checked, because
-     * "the same effect in two places" is exactly what drifts. */
-    if (!/blur/.test(state.shell.headerBackdrop)) {
-      problems.push(`the site header should blur what scrolls under it (${state.shell.headerBackdrop})`);
+    /* v2 fixed a 72px header painted with the body colour at 95%, and 1.2.2 frosted it. The owner amended
+     * that: the bar is transparent over the top of the page, so the artwork and the page's glow run to the top
+     * of the window uninterrupted, and it takes the spec's tint and blur only once the page has scrolled under
+     * it. Both states are asserted here, and both are measured in one pass, because the risk with a rule like
+     * this is precisely that the second state is never reached - a header that never tints is as wrong as one
+     * that always does. The probe returns to the top when it is done, so the checks that follow see the page
+     * as they expect to. */
+    const headerProbe = await send('Runtime.evaluate', {
+      expression: `(async () => {
+        const el = document.querySelector('.sh-header');
+        if (!el) return null;
+        const read = () => {
+          const cs = getComputedStyle(el);
+          return { bg: cs.backgroundColor, blur: cs.backdropFilter, cls: el.className.trim() };
+        };
+        window.scrollTo(0, 0);
+        await new Promise((r) => setTimeout(r, 150));
+        const atRest = read();
+        /* A page with no room to scroll can never reach the scrolled state - and on such a page transparent is
+         * the right answer rather than a failure, because the bar has nothing to sit over. Those pages are
+         * reported as such and only their resting state is checked. */
+        const canScroll = document.documentElement.scrollHeight > innerHeight + 4;
+        if (!canScroll) return { canScroll, atRest, scrolled: null };
+        window.scrollTo(0, Math.min(600, document.documentElement.scrollHeight - innerHeight));
+        await new Promise((r) => setTimeout(r, 300));
+        const scrolled = read();
+        window.scrollTo(0, 0);
+        await new Promise((r) => setTimeout(r, 150));
+        return { canScroll, atRest, scrolled };
+      })()`,
+      awaitPromise: true,
+      returnByValue: true
+    });
+    const headerStates = headerProbe.result.value;
+    if (headerStates) {
+      if (headerStates.atRest.bg !== 'rgba(0, 0, 0, 0)') {
+        problems.push(`the site header should be transparent over the top of the page, it is ${headerStates.atRest.bg}`);
+      }
+      if (headerStates.scrolled) {
+        if (headerStates.scrolled.bg !== 'rgba(16, 16, 20, 0.9)') {
+          problems.push(`the site header should take the spec's rgba(16, 16, 20, 0.9) once the page has scrolled, it is ${headerStates.scrolled.bg}`);
+        }
+        /* A blur of 0px at rest is deliberate (a value the browser can interpolate, unlike `none`), so the
+         * scrolled state is checked for a real radius rather than for the word. */
+        if (!/blur\((?!0px)/.test(headerStates.scrolled.blur)) {
+          problems.push(`the site header should frost what scrolls under it once scrolled (${headerStates.scrolled.blur})`);
+        }
+      } else if (headerStates.canScroll) {
+        problems.push('the page can scroll but the header probe could not scroll it, so the scrolled state went unchecked');
+      }
+    } else {
+      problems.push('no .sh-header was found to check its resting and scrolled states');
     }
     if (state.shell.headerBorder !== '0px') {
       problems.push(`the site header should have no bottom border, it has ${state.shell.headerBorder}`);

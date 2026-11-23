@@ -101,15 +101,11 @@
   --ue-palette-blue-400: #33BFFF;
   --ue-palette-indigo-400: #868AFD;
 
-  /* The third published family the page itself reads: the store's yellow-400, which the launcher build
-   * carries under the same name and the store's ramp lists between #B59E20 and #F9E264. It is declared here
-   * because the home page's glow takes one warm stop out of the library rather than inventing a yellow, and
-   * the shell's warning indicator was already this exact value - so the alias below keeps one declaration
-   * feeding both, instead of two literals that could drift apart. */
-  --ue-palette-yellow-400: #F7D82B;
-
-  /* Status. The workspace states status in words rather than in hue; this is the shell's indicator. */
-  --ue-warning: var(--ue-palette-yellow-400);
+  /* Status. The workspace states status in words rather than in hue; this is the shell's indicator. The yellow
+   * had a palette alias for one pass, while the page glow took a warm stop out of the library - that stop is
+   * gone, because mixed across a whole page it washed the canvas out rather than lighting it, so the warning
+   * keeps the literal it always had instead of a second name for one value. */
+  --ue-warning: #F7D82B;
 
   /* ============================== 02 the workspace's roles ==============================
    * What the guide calls each surface and each step. Aliases only - no values. */
@@ -194,12 +190,16 @@
   --fn-zoom-duration: 180ms;
   --fn-zoom-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 
-  /* [derived] The faint light grey bloom a card wears at rest. Its counterpart, the coloured bloom it takes
-   * under the pointer, is NOT here: it reads --choice-accent, and a custom property is resolved where it is
-   * DECLARED, so one declared in :root would resolve --choice-accent on :root - where no such name exists -
-   * inherit as the guaranteed-invalid value, and drop box-shadow to none. It is declared on the card instead,
-   * in guide.css, where both names resolve. */
+  /* [derived] The faint light grey bloom a card wears at rest. */
   --fn-glow-idle: 0 0 22px color-mix(in srgb, var(--fn-text) 6%, transparent);
+
+  /* [derived] The hover bloom on a home-page card, taken at Concept 8b's own numbers rather than at a size of
+   * my own: a 1px ring of the palette's blue plus one very large, very soft drop of the same colour, which is
+   * what makes 8b's ready tile read as lit rather than merely outlined. Both names are safe in :root because
+   * they read --ue-palette-blue-400, which is declared here - unlike the first attempt at this glow, which read
+   * a card-scoped name from :root and therefore resolved to nothing. */
+  --fn-glow-blue-ring: 0 0 0 1px color-mix(in srgb, var(--ue-palette-blue-400) 30%, transparent);
+  --fn-glow-blue-drop: 0 34px 100px -30px color-mix(in srgb, var(--ue-palette-blue-400) 70%, transparent);
 
   /* [derived] 4 px base step: a spacing scale is 4 px based in every Epic surface measured. */
   --fn-space-1: 4px;
