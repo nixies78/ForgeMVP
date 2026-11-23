@@ -1122,12 +1122,15 @@ test('hover repaints an interactive surface by one library step, and controls do
   assert.match(tokens, /--fn-lift:\s*3px/, 'the hover lift is defined');
   assert.match(tokens, /--fn-shadow-hover/, 'and comes with a shadow to read as raised');
   /* And the hover fills are the library's published steps, aliased rather than invented. */
-  assert.match(tokens, /--fn-surface-panel-hover:\s*color-mix\(in srgb,\s*var\(--ue-surface-panel-hover\)\s*88%,\s*transparent\)/, 'the box hover is 1.2.1\'s panel step, at the alpha the surfaces carry');
+  /* The alpha itself is the owner's to set, and it has already moved once (88% to 55%), so it is not pinned to a
+   * number here: what is pinned is the shape - the role reads its palette step through a color-mix and names an
+   * alpha - and the browser guard measures that the result really is translucent. */
+  assert.match(tokens, /--fn-surface-panel-hover:\s*color-mix\(in srgb,\s*var\(--ue-surface-panel-hover\)\s*\d+%,\s*transparent\)/, 'the box hover is 1.2.1\'s panel step, at an alpha the surfaces carry');
   assert.match(tokens, /--ue-surface-panel:\s*#1C1C20/, 'and the box rests on 1.2.1\'s panel fill');
   /* None of that reaches the palette. The steps below stay the published, opaque values, and only the roles
    * mapped onto them carry an alpha - so "declared once, consumed by both layers" still means what it says. */
   assert.match(tokens, /--ue-surface-panel-hover:\s*#28282C/, 'the box hover step stays the published opaque value');
-  assert.match(tokens, /--fn-surface-subtle-hover:\s*color-mix\(in srgb,\s*var\(--ue-fill-subtle-hover\)\s*88%,\s*transparent\)/, 'and the control hover is the published subtle step, at the alpha the surfaces carry');
+  assert.match(tokens, /--fn-surface-subtle-hover:\s*color-mix\(in srgb,\s*var\(--ue-fill-subtle-hover\)\s*\d+%,\s*transparent\)/, 'and the control hover is the published subtle step, at an alpha the surfaces carry');
   assert.match(tokens, /--fn-action-hover:\s*var\(--ue-accent-hover\)/, 'and the accent hover is the library\'s own');
 });
 

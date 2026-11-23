@@ -623,23 +623,29 @@ async function main() {
     if (state.bodyCta && parseFloat(state.bodyCta.minHeight) < 40) {
       problems.push(`a body CTA declares min-height ${state.bodyCta.minHeight}: ${state.bodyCta.label}`);
     }
-    /* The panel trio: base, hover step and subtle edge, all three from the palette. The base is that fill at 88%
-     * now, because the owner asked for every surface to be slightly transparent so the page's glow is not cut off
-     * at a panel's edge. The step and the alpha are both asserted, so a panel that drifts to another colour, or
-     * quietly stops being translucent, is still caught.
+    /* The panel trio: base, hover step and subtle edge, all three from the palette. A panel is that step at an
+     * alpha now, because the owner asked for every surface to be translucent so the page's glow is not cut off at
+     * a panel's edge. The step is asserted exactly and the alpha only as "not opaque": the alpha is the owner's to
+     * set and it has already moved once (88% to 55%), so what must not drift is the colour the panel is made of,
+     * and the fact that it stays translucent at all.
      *
-     * Chrome serialises a color-mix() as color(srgb r g b / a) rather than rgb(), so the three channels and the
-     * alpha are read out of whichever form arrives. */
+     * Chrome serialises a color-mix() as color(srgb r g b / a) rather than rgb(), so the channels and the alpha are
+     * read out of whichever form arrives. */
+    const roleColour = (value) => {
+      const srgb = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\)$/.exec(value);
+      if (srgb) {
+        const [r, g, b, a] = srgb.slice(1).map(Number);
+        return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255), alpha: a };
+      }
+      const rgb = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(value);
+      if (!rgb) return null;
+      return { r: Number(rgb[1]), g: Number(rgb[2]), b: Number(rgb[3]), alpha: rgb[4] === undefined ? 1 : Number(rgb[4]) };
+    };
     const panelBg = state.shell.panel ? state.shell.panel.bg : '';
-    const srgbPanel = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\)$/.exec(panelBg);
-    const panelOnStep = srgbPanel
-      ? Math.round(Number(srgbPanel[1]) * 255) === 28 &&
-        Math.round(Number(srgbPanel[2]) * 255) === 28 &&
-        Math.round(Number(srgbPanel[3]) * 255) === 32 &&
-        Math.abs(Number(srgbPanel[4]) - 0.88) < 0.005
-      : isColour(panelBg, '16, 16, 20', 0.88);
-    if (state.shell.panel && !panelOnStep) {
-      problems.push(`a panel rests on ${panelBg}; 1.2.1's base panel is #1c1c20 at 88%`);
+    const panelRole = roleColour(panelBg);
+    const panelIsStep = panelRole && panelRole.r === 28 && panelRole.g === 28 && panelRole.b === 32;
+    if (state.shell.panel && !(panelIsStep && panelRole.alpha > 0 && panelRole.alpha < 1)) {
+      problems.push(`a panel rests on ${panelBg}; it should be the palette's #1c1c20 at an alpha between 0 and 1`);
     }
     if (state.shell.panel && state.shell.panel.border !== 'rgb(52, 52, 55)') {
       problems.push(`a panel's edge is ${state.shell.panel.border}; 1.2.1's subtle border is #343437`);

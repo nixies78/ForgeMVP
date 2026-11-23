@@ -113,16 +113,16 @@
   --fn-canvas: var(--ue-canvas);
   --fn-canvas-inset: var(--ue-scrim);
 
-  /* The roles below are translucent: 88% of the palette's step. That keeps every surface a shade of the canvas
+  /* The roles below are translucent: 55% of the palette's step. That keeps every surface a shade of the canvas
    * while letting the page's glow read through it, so a panel no longer cuts the light off at its own edge or
    * reads as a solid slab against it. The palette above stays exactly as published - only the roles it is mapped
    * onto gain the alpha - and print puts the opaque values back, at the foot of this file. */
-  --fn-surface-panel: color-mix(in srgb, var(--ue-surface-panel) 88%, transparent);         /* a panel, a card, a tracker row */
-  --fn-surface-panel-hover: color-mix(in srgb, var(--ue-surface-panel-hover) 88%, transparent);
-  --fn-surface-control: color-mix(in srgb, var(--ue-elevated-medium) 88%, transparent);     /* inputs, wells, image slots */
-  --fn-surface-subtle: color-mix(in srgb, var(--ue-fill-subtle) 88%, transparent);          /* a secondary control's fill */
-  --fn-surface-subtle-hover: color-mix(in srgb, var(--ue-fill-subtle-hover) 88%, transparent);
-  --fn-selected: color-mix(in srgb, var(--ue-selected) 88%, transparent);
+  --fn-surface-panel: color-mix(in srgb, var(--ue-surface-panel) 55%, transparent);         /* a panel, a card, a tracker row */
+  --fn-surface-panel-hover: color-mix(in srgb, var(--ue-surface-panel-hover) 55%, transparent);
+  --fn-surface-control: color-mix(in srgb, var(--ue-elevated-medium) 55%, transparent);     /* inputs, wells, image slots */
+  --fn-surface-subtle: color-mix(in srgb, var(--ue-fill-subtle) 55%, transparent);          /* a secondary control's fill */
+  --fn-surface-subtle-hover: color-mix(in srgb, var(--ue-fill-subtle-hover) 55%, transparent);
+  --fn-selected: color-mix(in srgb, var(--ue-selected) 55%, transparent);
 
   /* The one surface that is very transparent rather than slightly, at the reference page's own glass values:
    * "How it works" is a large box that is empty at rest, and at panel weight it read as an unstyled section. The
