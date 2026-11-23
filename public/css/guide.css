@@ -364,6 +364,142 @@ body.g-app {
 .g-choice-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--fn-space-2); margin-top: auto; }
 .g-choice-meta { font-size: var(--fn-meta-size); letter-spacing: 0.04em; color: var(--fn-text-muted); }
 
+/* ============================== the home screen's cards ==============================
+ * The three ways in each carry a picture of what they are. Two card shapes were asked for, to be compared
+ * before one is kept, and both are here:
+ *
+ *   - the art band (the rules below, which is the default) puts the picture across the top of the card and
+ *     leaves the card's own title, description, badge and action exactly where they were;
+ *   - the full-bleed cover (the `html.art-bleed` rules) fills the whole card and sets the text on the picture,
+ *     which then needs a scrim or a bright part of a photograph makes the description unreadable.
+ *
+ * The page adds `art-bleed` to <html> from a `?art=` query parameter while the choice is open. That switch is
+ * scaffolding: it goes the moment the owner picks, along with the losing variant's rules.
+ *
+ * Both shapes need the card to clip its own artwork, or the zoom below spills past the 16px corners. Note that
+ * `overflow: hidden` clips descendants, not the element's own transform, so the 3px hover lift is unaffected.
+ */
+.g-choice { overflow: hidden; }
+
+.g-choice-art {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  background: var(--fn-surface-control);
+}
+
+.g-choice-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--fn-zoom-duration) var(--sh-ease, ease);
+}
+
+/* The band. The card's own padding is --fn-space-5 (24px), so negative margins of the same size reach the
+ * card's edge while every word keeps its inset, and the top corners keep the card's radius. 16/10 is close to
+ * the source pictures' own 1264x848, so `cover` crops very little of them. */
+.g-choice-art {
+  margin: calc(var(--fn-space-5) * -1) calc(var(--fn-space-5) * -1) 0;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--fn-radius-card) var(--fn-radius-card) 0 0;
+}
+
+/* The zoom, on hover and on keyboard focus: :focus-visible is how the same card answers a keyboard, and the
+ * two should not differ. Both the distance and the duration are tokens, and both go to nothing for a reader
+ * who has asked for less motion. */
+.g-choice:hover .g-choice-art img,
+.g-choice:focus-visible .g-choice-art img { transform: scale(var(--fn-zoom-scale)); }
+
+/* ---------- the alternative shape: a full-bleed cover ---------- */
+html.art-bleed .g-choice { position: relative; isolation: isolate; min-height: 320px; justify-content: flex-end; }
+html.art-bleed .g-choice-art {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+/* The scrim, weighted to the bottom where the text sits. It is built from the palette's own canvas rather than
+ * from black, so it stays on the same neutral ramp as every other surface in the app. */
+html.art-bleed .g-choice-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ue-canvas) 28%, transparent) 0%,
+    color-mix(in srgb, var(--ue-canvas) 82%, transparent) 56%,
+    color-mix(in srgb, var(--ue-canvas) 95%, transparent) 100%
+  );
+}
+html.art-bleed .g-choice > *:not(.g-choice-art) { position: relative; z-index: 1; }
+
+/* ============================== the three ways in: blue and indigo ==============================
+ * Concept 8b lights its ready tile in Blue and leaves the supporting tiles in Indigo, and that is exactly the
+ * distinction this screen needs: one mode works today and two do not. The colour tints the panel, its edge and
+ * its badge, and it never replaces the words - the badges still say "Ready" or "Not built yet", so the state is
+ * never carried by hue alone. A card with neither class keeps the palette's single accent untouched.
+ */
+.g-choice.is-blue { --choice-accent: var(--ue-palette-blue-400); }
+.g-choice.is-indigo { --choice-accent: var(--ue-palette-indigo-400); }
+
+.g-choice.is-blue,
+.g-choice.is-indigo {
+  background: color-mix(in srgb, var(--choice-accent) 6%, var(--fn-surface-panel));
+  border-color: color-mix(in srgb, var(--choice-accent) 30%, var(--fn-border));
+}
+/* The tone lives at rest. Hover is the library's documented step and nothing else: a hover rule that paints a
+ * colour nobody measured is exactly how a card once became light cyan with white text on it, which is what the
+ * test that guards this rule is for. So a toned card hovers like every other card in the app, and the blue or
+ * indigo stays in the resting tint, the badge and the meta line. */
+.g-choice.is-blue:hover,
+.g-choice.is-indigo:hover {
+  background: var(--fn-surface-panel-hover);
+  border-color: var(--fn-border-strong);
+}
+.g-choice.is-blue .g-badge-accent,
+.g-choice.is-indigo .g-badge-accent { background: var(--choice-accent); border-color: var(--choice-accent); }
+.g-choice.is-blue .g-choice-meta,
+.g-choice.is-indigo .g-choice-meta { color: color-mix(in srgb, var(--choice-accent) 50%, var(--fn-text-secondary)); }
+
+/* ============================== the home screen's type ==============================
+ * Concept 8b's typography, on the home screen only - which is what the container's data-screen attribute is
+ * for, set by renderScreen() in app.js.
+ *
+ * What is taken from 8b is the *character* of its type: Inter left at 700 rather than pushed to 800, headings
+ * tracked tighter than the workspace's default - 8b sets its h1 at -0.035em and its section heads at -0.025 to
+ * -0.03em, against the -0.012em this app had - and labels and eyebrows at 11-13px, 700, with .12em of
+ * letter-spacing in caps.
+ *
+ * What is deliberately NOT taken is 8b's scale. Its h1 is a landing-page hero at clamp(42px, 6.8vw, 92px) and
+ * its lead is sized for a sales page; this is an app screen whose heading is already sized by the workspace's
+ * own scale, and lifting a hero's numbers onto it would redesign the screen rather than re-set its type. That
+ * is the line the brief drew: apply the typography, do not alter the page design. */
+[data-screen='home'] .g-eyebrow {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+[data-screen='home'] .g-title {
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+[data-screen='home'] .g-cardtitle {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+[data-screen='home'] .g-choice-meta,
+[data-screen='home'] .g-choice .g-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 /* ============================== badges ============================== */
 
 .g-badge {

@@ -473,7 +473,14 @@ function renderScreen(ctx) {
     node = errorPanel(error);
   }
 
-  if (els.screen) fill(els.screen, node);
+  if (els.screen) {
+    fill(els.screen, node);
+    /* Name the screen on the container it rendered into, so a screen's own typography and treatments can be
+     * scoped to it in CSS without a wrapper element and without touching a class every screen shares. The home
+     * screen is why this exists: its cards carry Concept 8b's type and its own blue/indigo status colours, and
+     * no other screen should inherit either. */
+    els.screen.dataset.screen = state.screen;
+  }
 
   renderTrail(ctx);
   syncDevMode(ctx);

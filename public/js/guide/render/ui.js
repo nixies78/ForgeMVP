@@ -107,13 +107,18 @@ export function buttonRow(children, options = {}) {
  * Selection is conveyed by `aria-pressed` plus a text marker, never by colour alone — the palette
  * has a single accent and status colour-coding is exactly what the accessibility pass is removing.
  */
-export function choice({ label, description, meta, badges = [], onSelect, selected = false, disabled = false, as = 'button', href = null }) {
+export function choice({ label, description, meta, badges = [], art = null, tone = null, onSelect, selected = false, disabled = false, as = 'button', href = null }) {
   /* Badges may arrive as descriptors or as ready-made chips, depending on whether the caller needed
    * to compute anything. Normalising here is what stops a chip being wrapped in a second, empty chip —
    * which renders as a blank pill and looks like a CSS bug. */
   const badgeNodes = badges.map((badge) => (badge instanceof Node ? badge : badgeChip(badge)));
 
   const children = [
+    /* An optional cover image, first in the card. The alt stays empty unless a caller supplies one: these
+     * pictures illustrate the thing the card already names in its own heading, so describing them again would
+     * only make a screen reader say it twice. They are lazy and async-decoded, so a three-card screen does not
+     * block on artwork. */
+    art ? h('span', { class: 'g-choice-art' }, h('img', { src: art.src, alt: art.alt || '', loading: 'lazy', decoding: 'async' })) : null,
     h('span', { class: 'g-choice-head' },
       cardTitle(label),
       selected ? h('span', { class: 'g-choice-marker' }, '✓ Selected') : null
@@ -122,8 +127,11 @@ export function choice({ label, description, meta, badges = [], onSelect, select
     badgeNodes.length || meta ? h('span', { class: 'g-choice-foot' }, ...badgeNodes, meta ? h('span', { class: 'g-choice-meta' }, meta) : null) : null
   ];
 
+  /* `tone` is a status colour rather than a decorative one: the home screen passes blue for the mode that
+   * works today and indigo for the two that do not, which is Concept 8b's own rule for its tiles. A card with
+   * no tone keeps the palette's single accent, so nothing else on any screen changes. */
   const props = {
-    class: `g-choice${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}`,
+    class: `g-choice${tone ? ` is-${tone}` : ''}${selected ? ' is-selected' : ''}${disabled ? ' is-disabled' : ''}`,
     type: 'button'
   };
   if (as === 'a' && href) {

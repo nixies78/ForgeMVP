@@ -11,6 +11,17 @@ import { h, frag, plural } from '../dom.js';
 import { DESIGN_MODES, UI } from '../content.js';
 import { button, buttonRow, choice, eyebrow, pageTitle, paragraph, lead, badgeChip, panel } from '../render/ui.js';
 
+/* What each way in looks like: the guided question set, the wheel, and the conversation. The three files sit in
+ * public/assets, which is where the page serves assets from - the repository's root assets/ folder is not
+ * reachable over HTTP, so the copies there would render as broken images. They are local-only by the owner's
+ * decision and are deliberately not committed, so a fresh clone shows this screen without its three pictures.
+ * A mode with no entry here simply renders without one, so the map is safe to trim or extend. */
+const MODE_ART = {
+  guided: 'assets/guided_process.jpg',
+  randomise: 'assets/wheel_of_fortune.jpg',
+  ai_chat: 'assets/ai_chat.jpg'
+};
+
 export function renderHome(ctx) {
   const { data, state, store, actions } = ctx;
   const saved = store.list();
@@ -32,6 +43,11 @@ export function renderHome(ctx) {
           choice({
             label: mode.label,
             description: mode.description,
+            art: MODE_ART[mode.id] ? { src: MODE_ART[mode.id] } : null,
+            /* Concept 8b's semantics for the three tiles, which is what the palette is for: the mode you can
+             * start now is lit in Blue, the two that are not built yet are Indigo. The badges say the same
+             * thing in words, so the colour is never the only thing carrying the state. */
+            tone: mode.status === 'live' ? 'blue' : 'indigo',
             badges:
               mode.status === 'live'
                 ? [badgeChip({ text: 'Ready', tone: 'accent' })]

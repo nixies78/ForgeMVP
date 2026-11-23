@@ -1096,23 +1096,51 @@ async function checkMockupHeaders(send, results) {
       });
       const at2 = spot.result.value;
       if (at2) {
-        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 4, y: 300, buttons: 0 });
-        await sleep(200);
-        await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at2.x, y: at2.y, buttons: 0 });
-        await sleep(300);
-        const hovered = await send('Runtime.evaluate', {
-          expression: `(() => {
-            const w = document.querySelector('footer .logo-word');
-            const m = document.querySelector('footer .logo-img');
-            return { word: getComputedStyle(w).opacity, mark: m ? getComputedStyle(m).opacity : null };
-          })()`,
-          returnByValue: true
-        });
-        const v = hovered.result.value || {};
+        /* Park the pointer and read the shade, retrying until the pointer is demonstrably on the wordmark.
+         * A single pass was not enough and produced false failures: the page can still be growing under the
+         * pointer as lazy images arrive, so the pointer ends up on whatever moved into that spot and reads a
+         * perfectly correct opacity of 1 on a page with nothing wrong with it. elementFromPoint is what makes
+         * the reading mean something - only when the wordmark is genuinely under the pointer does an opacity
+         * of 1 count as a real problem. */
+        let v = {};
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          await send('Runtime.evaluate', { expression: 'window.scrollTo(0, document.documentElement.scrollHeight); 1' });
+          await sleep(400);
+          const at = await send('Runtime.evaluate', {
+            expression: `(() => {
+              const w = document.querySelector('footer .logo-word');
+              if (!w) return null;
+              const r = w.getBoundingClientRect();
+              return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) };
+            })()`,
+            returnByValue: true
+          });
+          const point = at.result.value;
+          if (!point) break;
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 4, y: 300, buttons: 0 });
+          await sleep(150);
+          await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: point.x, y: point.y, buttons: 0 });
+          await sleep(350);
+          const read = await send('Runtime.evaluate', {
+            expression: `(() => {
+              const w = document.querySelector('footer .logo-word');
+              const m = document.querySelector('footer .logo-img');
+              const hit = document.elementFromPoint(${point.x}, ${point.y});
+              const onWord = Boolean(hit) && (hit === w || w.contains(hit) || hit.contains(w));
+              return { word: getComputedStyle(w).opacity, mark: m ? getComputedStyle(m).opacity : null, onWord };
+            })()`,
+            returnByValue: true
+          });
+          v = read.result.value || {};
+          if (v.onWord) break;
+        }
         wordShade = `word ${v.word}, mark ${v.mark}`;
-        if (!(Number(v.word) < 0.99)) problems.push(`${page}'s footer wordmark does not shade under the pointer (opacity ${v.word})`);
+        const reached = v.onWord ? '' : ' - the pointer never landed on the wordmark, so this reading is not evidence';
+        if (!(Number(v.word) < 0.99)) {
+          problems.push(`${page}'s footer wordmark does not shade under the pointer (opacity ${v.word}${reached})`);
+        }
         if (v.mark != null && !(Number(v.mark) < 0.99)) {
-          problems.push(`${page}'s footer mark does not shade when the wordmark beside it is pointed at (opacity ${v.mark})`);
+          problems.push(`${page}'s footer mark does not shade when the wordmark beside it is pointed at (opacity ${v.mark}${reached})`);
         }
       }
     }

@@ -41,6 +41,15 @@
   --sh-progress-from: var(--ue-palette-blue-400);   /* 1.2.1: the ramp's published families */
   --sh-progress-to: var(--ue-palette-indigo-400);
 
+  /* The page's glow, built from the same three published families rather than from new colours: blue,
+   * indigo, and the store's yellow. Mixed here, once, so the three radial stops in body.g-app below read as
+   * one decision and can be re-tuned in a single place. The alphas are deliberately low - the glow is an
+   * atmosphere behind the panels, not a wash over them - and yellow sits lowest of the three because it is
+   * the warmest and therefore reads loudest at the same weight. */
+  --sh-glow-blue: color-mix(in srgb, var(--ue-palette-blue-400) 10%, transparent);
+  --sh-glow-indigo: color-mix(in srgb, var(--ue-palette-indigo-400) 8%, transparent);
+  --sh-glow-yellow: color-mix(in srgb, var(--ue-palette-yellow-400) 6%, transparent);
+
   /* [derived] Frame geometry, which is the only thing this file still decides for itself. */
   --sh-header-base: 72px;        /* the header's own minimum height, at every width above 760px */
   --sh-header-h: var(--sh-header-base);  /* what the page offsets itself by; chrome.js re-measures it */
@@ -117,7 +126,28 @@
   transition: opacity var(--sh-ease);
 }
 
+/* The wordmark: the same lockup every landing page and mockup carries - the Epic mark, then FORGE in
+ * Archivo Black - so the app's own header says the product's name rather than only whose platform it sits
+ * on. The mark was already 44px here, so the lockup's proportions are the shared ones exactly: 44px mark,
+ * 20px word, 14px between them. The word takes the display face rather than --sh-font, because the lockup is
+ * a brand mark and the brand mark is Archivo Black everywhere else in the repo. */
+.sh-logo-word {
+  font-family: var(--fn-font-display, "Archivo Black", "Arial Black", system-ui, sans-serif);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sh-white);
+  margin-left: 14px;
+  transition: opacity var(--sh-ease);
+}
+
+/* The lockup answers the pointer as one object: both halves shade together, which is what the mockups'
+ * .logo-lockup does. The mark keeps its own single-selector rule, spelled exactly as the architecture spec's
+ * checks look for it; the word joins in from a second rule rather than by widening the first into a list. */
 .sh-logo:hover img { opacity: 0.8; }
+.sh-logo:hover .sh-logo-word { opacity: 0.8; }
 
 /* ---------- navigation: one item ---------- */
 
@@ -191,7 +221,16 @@
  * fixed header is accounted for by the body's top padding. `body.g-app` is unlayered and styles.css is
  * not, so this beats the older page chrome no matter what it says. */
 body.g-app {
-  background: linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
+  /* The three-stop gradient is still the page's ground; the glow is painted over it. Both live in this one
+   * background declaration on purpose: the radials are listed first so they sit in front of the linear
+   * gradient, and every panel the app draws sits in front of both. Doing the same thing with a fixed
+   * pseudo-element would have needed a z-index and a stacking context for no gain - and a background layer
+   * cannot catch the pointer, so nothing here can intercept a click. */
+  background:
+    radial-gradient(60% 45% at 18% 0%, var(--sh-glow-blue) 0%, transparent 70%),
+    radial-gradient(55% 40% at 84% 6%, var(--sh-glow-indigo) 0%, transparent 72%),
+    radial-gradient(75% 55% at 50% 102%, var(--sh-glow-yellow) 0%, transparent 76%),
+    linear-gradient(180deg, var(--sh-body-1) 0%, var(--sh-body-2) 50%, var(--sh-body-3) 100%);
   color: var(--sh-text);
   padding-top: var(--sh-header-h);
 }

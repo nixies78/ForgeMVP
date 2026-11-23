@@ -101,8 +101,15 @@
   --ue-palette-blue-400: #33BFFF;
   --ue-palette-indigo-400: #868AFD;
 
+  /* The third published family the page itself reads: the store's yellow-400, which the launcher build
+   * carries under the same name and the store's ramp lists between #B59E20 and #F9E264. It is declared here
+   * because the home page's glow takes one warm stop out of the library rather than inventing a yellow, and
+   * the shell's warning indicator was already this exact value - so the alias below keeps one declaration
+   * feeding both, instead of two literals that could drift apart. */
+  --ue-palette-yellow-400: #F7D82B;
+
   /* Status. The workspace states status in words rather than in hue; this is the shell's indicator. */
-  --ue-warning: #F7D82B;
+  --ue-warning: var(--ue-palette-yellow-400);
 
   /* ============================== 02 the workspace's roles ==============================
    * What the guide calls each surface and each step. Aliases only - no values. */
@@ -174,6 +181,13 @@
    * a pill. */
   --fn-radius-card: 16px;
 
+  /* [derived] The artwork's zoom: how far a card's cover picture scales under the pointer, and over how long.
+   * 4% over 400ms is the "gentle" that was asked for - enough to read as a response, small enough that the
+   * crop never shifts far enough to be noticed. Both go to nothing under prefers-reduced-motion, below, so the
+   * picture simply stays still rather than snapping. */
+  --fn-zoom-scale: 1.04;
+  --fn-zoom-duration: 400ms;
+
   /* [derived] 4 px base step: a spacing scale is 4 px based in every Epic surface measured. */
   --fn-space-1: 4px;
   --fn-space-2: 8px;
@@ -202,9 +216,11 @@
   --loop-font: var(--fn-font-ui);
 }
 
-/* [derived] Anyone who has asked their system for less motion gets none of the transitions. */
+/* [derived] Anyone who has asked their system for less motion gets none of the transitions. The zoom's own
+ * two tokens are zeroed here as well: with a 0s duration and a scale of 1 the picture does not move at all,
+ * which is what "no motion" has to mean for a transform that would otherwise still jump to its end state. */
 @media (prefers-reduced-motion: reduce) {
-  :root { --fn-motion: 0s; }
+  :root { --fn-motion: 0s; --fn-zoom-duration: 0s; --fn-zoom-scale: 1; }
 }
 :root { --fn-motion: 0.15s; }
 
