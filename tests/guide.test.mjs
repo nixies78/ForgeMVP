@@ -1006,7 +1006,10 @@ test('the palette is declared once, and both layers consume it', async () => {
   /* The shell consumes the palette instead of declaring it, and keeps only its own geometry. */
   assert.match(shell, /--sh-primary:\s*var\(--ue-accent\)/, 'the shell takes the accent from the palette');
   assert.match(shell, /--sh-ink-on-primary:\s*var\(--ue-on-accent\)/, 'and the accent label with it');
-  assert.match(shell, /--sh-footer:\s*var\(--ue-elevated-low\)/, 'the footer is the palette\'s quiet surface');
+  /* The footer's step is taken at 88% rather than whole, like every other surface, so the page's glow is not cut
+   * off by a solid strip across the bottom. It still reads the palette's own step and still adds no colour of its
+   * own, which is what this check is for - and the palette's step itself stays exactly as published. */
+  assert.match(shell, /--sh-footer:\s*color-mix\(in srgb,\s*var\(--ue-elevated-low\)\s*88%,\s*transparent\)/, 'the footer is the palette\'s quiet surface, at the alpha the surfaces carry');
   assert.match(shell, /--sh-header-bg:\s*var\(--ue-canvas-header\)/, 'the header tint is the palette\'s canvas at 95%');
   assert.match(shell, /--sh-header-base:\s*72px/, 'and its geometry - the 72px bar - is decided here');
 
@@ -1119,9 +1122,12 @@ test('hover repaints an interactive surface by one library step, and controls do
   assert.match(tokens, /--fn-lift:\s*3px/, 'the hover lift is defined');
   assert.match(tokens, /--fn-shadow-hover/, 'and comes with a shadow to read as raised');
   /* And the hover fills are the library's published steps, aliased rather than invented. */
-  assert.match(tokens, /--fn-surface-panel-hover:\s*var\(--ue-surface-panel-hover\)/, 'the box hover is 1.2.1\'s panel step');
+  assert.match(tokens, /--fn-surface-panel-hover:\s*color-mix\(in srgb,\s*var\(--ue-surface-panel-hover\)\s*88%,\s*transparent\)/, 'the box hover is 1.2.1\'s panel step, at the alpha the surfaces carry');
   assert.match(tokens, /--ue-surface-panel:\s*#1C1C20/, 'and the box rests on 1.2.1\'s panel fill');
-  assert.match(tokens, /--fn-surface-subtle-hover:\s*var\(--ue-fill-subtle-hover\)/, 'and the control hover is the published subtle step');
+  /* None of that reaches the palette. The steps below stay the published, opaque values, and only the roles
+   * mapped onto them carry an alpha - so "declared once, consumed by both layers" still means what it says. */
+  assert.match(tokens, /--ue-surface-panel-hover:\s*#28282C/, 'the box hover step stays the published opaque value');
+  assert.match(tokens, /--fn-surface-subtle-hover:\s*color-mix\(in srgb,\s*var\(--ue-fill-subtle-hover\)\s*88%,\s*transparent\)/, 'and the control hover is the published subtle step, at the alpha the surfaces carry');
   assert.match(tokens, /--fn-action-hover:\s*var\(--ue-accent-hover\)/, 'and the accent hover is the library\'s own');
 });
 
@@ -1237,7 +1243,17 @@ test('the page follows the architecture spec it was rebuilt from', async () => {
   const appHead = ruleBody(shell, '.sh-app-head');
   assert.match(appHead, /border:\s*0/, 'the app container\'s sticky header carries no border');
   assert.ok(!/\d+px solid/.test(appHead), 'and no rule above or below it in its place');
-  assert.match(appHead, /background:\s*var\(--sh-material\)/, 'and is painted with the canvas material, so content reads through it');
+  /* Its material is conditional now. The owner asked for the bar to be transparent over the top of the page, so
+   * the artwork and the page's glow run to the top of the window uninterrupted, and to take the canvas material
+   * only once the page has scrolled under it. Both halves are asserted - the resting rule and the state that
+   * switches it - because a bar that never takes its material is as wrong as one that never lets the page show
+   * through. The site header above it is the opposite case and stays tinted at all times. */
+  assert.match(appHead, /background:\s*transparent/, 'and is transparent over the top of the page');
+  assert.match(
+    ruleBody(shell, '.sh-app-head.is-scrolled'),
+    /background:\s*var\(--sh-material\)/,
+    'and is painted with the canvas material once the page has scrolled, so content reads through it'
+  );
 
   /* The footer is the utility bar, and only that: the status, and the two ways out. Dev mode moved
    * here from the header in 1.2.0. */

@@ -955,11 +955,17 @@ body.g-app {
 
 /* ============================== details / how it works ============================== */
 
+/* "How it works" carries the glass the reference page uses for its own panels rather than the panel fill: a
+ * very transparent layer of the canvas with a blur behind it, so the page's glow reads through the box and it
+ * stops looking like an unstyled section that someone forgot to finish. */
 .g-details {
   border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   padding: var(--fn-space-4) var(--fn-space-5);
   margin-top: var(--fn-space-6);
+  background: var(--fn-surface-glass);
+  backdrop-filter: var(--fn-blur-glass);
+  -webkit-backdrop-filter: var(--fn-blur-glass);
 }
 .g-details-summary { cursor: pointer; font-weight: 600; color: var(--fn-text); }
 .g-howit { margin: var(--fn-space-4) 0; padding-left: 1.15em; color: var(--fn-text-secondary); max-width: var(--fn-measure); }
@@ -974,6 +980,15 @@ body.g-app {
 /* A device plan is a checklist someone takes to another screen, so printing drops the chrome and
  * keeps the content. The shell drops its own furniture in css/shell.css. */
 @media print {
+  /* The surfaces are translucent on screen so the page's glow reads through them. Paper has no glow, and a
+   * translucent panel over it is a washed-out panel, so print puts the palette's opaque values back. */
+  :root {
+    --fn-surface-panel: var(--ue-surface-panel);
+    --fn-surface-panel-hover: var(--ue-surface-panel-hover);
+    --fn-surface-control: var(--ue-elevated-medium);
+    --fn-selected: var(--ue-selected);
+    --fn-surface-glass: var(--ue-canvas);
+  }
   .g-btnrow, .g-skip, .g-video { display: none !important; }
   body.g-app { background: var(--fn-print-paper); color: var(--fn-print-ink); }
   .g-panel, .g-device, .g-choice, .g-option { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }

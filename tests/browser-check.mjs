@@ -453,12 +453,10 @@ async function main() {
     if (state.shell.headBorder !== '0px/0px') {
       problems.push(`the app container header should be borderless, it has ${state.shell.headBorder} top/bottom`);
     }
-    if (!isColour(state.shell.headBg, '16, 16, 20', 0.85)) {
-      problems.push(`the app container header should be the canvas at 85%, it is ${state.shell.headBg}`);
-    }
-    if (!/blur/.test(state.shell.headBackdrop)) {
-      problems.push(`the app container header should blur what scrolls under it (${state.shell.headBackdrop})`);
-    }
+    /* The crumb bar's material is conditional now - the owner asked for it to be transparent over the top of the
+     * page and to take its material only once the page has scrolled under it - so both of its states are checked
+     * by the #appHead probe further down, which measures them in one pass rather than reading whichever scroll
+     * position this dump happened to be taken at. The borderless half above still holds at all times. */
     /* v2: a fixed header, 72px, painted with the body colour at 95%, with no bottom border. */
     if (state.shell.headerPosition !== 'fixed') problems.push(`the site header should be fixed, it is ${state.shell.headerPosition}`);
     /* 72px wherever the row fits; the check is on the measured height against the width this dump was
@@ -466,16 +464,21 @@ async function main() {
     if (state.shell.viewportWidth > 760 && state.shell.headerH !== 72) {
       problems.push(`the site header should be 72px tall at ${state.shell.viewportWidth}px, it is ${state.shell.headerH}px`);
     }
-    /* v2 fixed a 72px header painted with the body colour at 95%, and 1.2.2 frosted it. The owner amended
-     * that: the bar is transparent over the top of the page, so the artwork and the page's glow run to the top
-     * of the window uninterrupted, and it takes the spec's tint and blur only once the page has scrolled under
-     * it. Both states are asserted here, and both are measured in one pass, because the risk with a rule like
-     * this is precisely that the second state is never reached - a header that never tints is as wrong as one
-     * that always does. The probe returns to the top when it is done, so the checks that follow see the page
-     * as they expect to. */
-    const headerProbe = await send('Runtime.evaluate', {
+    /* v2 fixed a 72px header painted with the body colour at 95%, and 1.2.2 frosted it. The SITE header is that
+     * bar at all times: it is what the page scrolls under, and the owner asked for it to stay black and frosted
+     * rather than fading in. */
+    if (state.shell.headerBg !== 'rgba(16, 16, 20, 0.9)') {
+      problems.push(`the site header should be rgba(16, 16, 20, 0.9), it is ${state.shell.headerBg}`);
+    }
+
+    /* The element that DOES fade in is the crumb bar - the shell's #appHead. Both of its states are asserted
+     * here, in one pass, because the risk with a rule like this is precisely that the second state is never
+     * reached: a bar that never takes its material is as wrong as one that never lets the page show through. A
+     * page with no room to scroll cannot reach the scrolled state, and on such a page transparent is the right
+     * answer rather than a failure, so it reports that and only its resting state is checked. */
+    const appHeadProbe = await send('Runtime.evaluate', {
       expression: `(async () => {
-        const el = document.querySelector('.sh-header');
+        const el = document.getElementById('appHead');
         if (!el) return null;
         const read = () => {
           const cs = getComputedStyle(el);
@@ -484,9 +487,6 @@ async function main() {
         window.scrollTo(0, 0);
         await new Promise((r) => setTimeout(r, 150));
         const atRest = read();
-        /* A page with no room to scroll can never reach the scrolled state - and on such a page transparent is
-         * the right answer rather than a failure, because the bar has nothing to sit over. Those pages are
-         * reported as such and only their resting state is checked. */
         const canScroll = document.documentElement.scrollHeight > innerHeight + 4;
         if (!canScroll) return { canScroll, atRest, scrolled: null };
         window.scrollTo(0, Math.min(600, document.documentElement.scrollHeight - innerHeight));
@@ -499,25 +499,27 @@ async function main() {
       awaitPromise: true,
       returnByValue: true
     });
-    const headerStates = headerProbe.result.value;
-    if (headerStates) {
-      if (headerStates.atRest.bg !== 'rgba(0, 0, 0, 0)') {
-        problems.push(`the site header should be transparent over the top of the page, it is ${headerStates.atRest.bg}`);
-      }
-      if (headerStates.scrolled) {
-        if (headerStates.scrolled.bg !== 'rgba(16, 16, 20, 0.9)') {
-          problems.push(`the site header should take the spec's rgba(16, 16, 20, 0.9) once the page has scrolled, it is ${headerStates.scrolled.bg}`);
-        }
-        /* A blur of 0px at rest is deliberate (a value the browser can interpolate, unlike `none`), so the
-         * scrolled state is checked for a real radius rather than for the word. */
-        if (!/blur\((?!0px)/.test(headerStates.scrolled.blur)) {
-          problems.push(`the site header should frost what scrolls under it once scrolled (${headerStates.scrolled.blur})`);
-        }
-      } else if (headerStates.canScroll) {
-        problems.push('the page can scroll but the header probe could not scroll it, so the scrolled state went unchecked');
-      }
+    const appHead = appHeadProbe.result.value;
+    if (!appHead) {
+      problems.push('no #appHead was found to check its resting and scrolled states');
     } else {
-      problems.push('no .sh-header was found to check its resting and scrolled states');
+      if (appHead.atRest.bg !== 'rgba(0, 0, 0, 0)') {
+        problems.push(`the crumb bar should be transparent over the top of the page, it is ${appHead.atRest.bg}`);
+      }
+      if (appHead.scrolled) {
+        /* The canvas at 85% - what --sh-material has always been, now reached only once the page moves. */
+        if (appHead.scrolled.bg !== 'rgba(16, 16, 20, 0.85)') {
+          problems.push(`the crumb bar should take the canvas at 85% once the page has scrolled, it is ${appHead.scrolled.bg}`);
+        }
+        if (!/blur\((?!0px)/.test(appHead.scrolled.blur)) {
+          problems.push(`the crumb bar should frost what scrolls under it once scrolled (${appHead.scrolled.blur})`);
+        }
+        if (!appHead.scrolled.cls.split(' ').includes('is-scrolled')) {
+          problems.push(`the crumb bar should carry is-scrolled once the page has scrolled (${appHead.scrolled.cls})`);
+        }
+      } else if (appHead.canScroll) {
+        problems.push('the page can scroll but the crumb bar probe could not scroll it, so the scrolled state went unchecked');
+      }
     }
     if (state.shell.headerBorder !== '0px') {
       problems.push(`the site header should have no bottom border, it has ${state.shell.headerBorder}`);
@@ -621,9 +623,23 @@ async function main() {
     if (state.bodyCta && parseFloat(state.bodyCta.minHeight) < 40) {
       problems.push(`a body CTA declares min-height ${state.bodyCta.minHeight}: ${state.bodyCta.label}`);
     }
-    /* The panel trio: base, hover step and subtle edge, all three from the palette. */
-    if (state.shell.panel && state.shell.panel.bg !== 'rgb(28, 28, 32)') {
-      problems.push(`a panel rests on ${state.shell.panel.bg}; 1.2.1's base panel is #1c1c20`);
+    /* The panel trio: base, hover step and subtle edge, all three from the palette. The base is that fill at 88%
+     * now, because the owner asked for every surface to be slightly transparent so the page's glow is not cut off
+     * at a panel's edge. The step and the alpha are both asserted, so a panel that drifts to another colour, or
+     * quietly stops being translucent, is still caught.
+     *
+     * Chrome serialises a color-mix() as color(srgb r g b / a) rather than rgb(), so the three channels and the
+     * alpha are read out of whichever form arrives. */
+    const panelBg = state.shell.panel ? state.shell.panel.bg : '';
+    const srgbPanel = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\)$/.exec(panelBg);
+    const panelOnStep = srgbPanel
+      ? Math.round(Number(srgbPanel[1]) * 255) === 28 &&
+        Math.round(Number(srgbPanel[2]) * 255) === 28 &&
+        Math.round(Number(srgbPanel[3]) * 255) === 32 &&
+        Math.abs(Number(srgbPanel[4]) - 0.88) < 0.005
+      : isColour(panelBg, '16, 16, 20', 0.88);
+    if (state.shell.panel && !panelOnStep) {
+      problems.push(`a panel rests on ${panelBg}; 1.2.1's base panel is #1c1c20 at 88%`);
     }
     if (state.shell.panel && state.shell.panel.border !== 'rgb(52, 52, 55)') {
       problems.push(`a panel's edge is ${state.shell.panel.border}; 1.2.1's subtle border is #343437`);

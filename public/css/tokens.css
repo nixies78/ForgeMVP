@@ -113,12 +113,23 @@
   --fn-canvas: var(--ue-canvas);
   --fn-canvas-inset: var(--ue-scrim);
 
-  --fn-surface-panel: var(--ue-surface-panel);         /* a panel, a card, a tracker row */
-  --fn-surface-panel-hover: var(--ue-surface-panel-hover);
-  --fn-surface-control: var(--ue-elevated-medium);     /* inputs, wells, image slots */
-  --fn-surface-subtle: var(--ue-fill-subtle);          /* a secondary control's fill */
-  --fn-surface-subtle-hover: var(--ue-fill-subtle-hover);
-  --fn-selected: var(--ue-selected);
+  /* The roles below are translucent: 88% of the palette's step. That keeps every surface a shade of the canvas
+   * while letting the page's glow read through it, so a panel no longer cuts the light off at its own edge or
+   * reads as a solid slab against it. The palette above stays exactly as published - only the roles it is mapped
+   * onto gain the alpha - and print puts the opaque values back, at the foot of this file. */
+  --fn-surface-panel: color-mix(in srgb, var(--ue-surface-panel) 88%, transparent);         /* a panel, a card, a tracker row */
+  --fn-surface-panel-hover: color-mix(in srgb, var(--ue-surface-panel-hover) 88%, transparent);
+  --fn-surface-control: color-mix(in srgb, var(--ue-elevated-medium) 88%, transparent);     /* inputs, wells, image slots */
+  --fn-surface-subtle: color-mix(in srgb, var(--ue-fill-subtle) 88%, transparent);          /* a secondary control's fill */
+  --fn-surface-subtle-hover: color-mix(in srgb, var(--ue-fill-subtle-hover) 88%, transparent);
+  --fn-selected: color-mix(in srgb, var(--ue-selected) 88%, transparent);
+
+  /* The one surface that is very transparent rather than slightly, at the reference page's own glass values:
+   * "How it works" is a large box that is empty at rest, and at panel weight it read as an unstyled section. The
+   * blur is what makes it glass instead of a hole - without it the text would sit on whatever happens to pass
+   * behind the box. */
+  --fn-surface-glass: color-mix(in srgb, var(--ue-canvas) 55%, transparent);
+  --fn-blur-glass: blur(14px) saturate(1.2);
 
   --fn-action: var(--ue-accent);
   --fn-action-hover: var(--ue-accent-hover);

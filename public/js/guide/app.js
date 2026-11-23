@@ -211,14 +211,18 @@ function wireShell(ctx) {
 
   measureHeader(els.siteHeader);
 
-  /* The header is transparent over the top of the page and frosts only once the page has moved under it: on
-   * load the artwork and the glow read uninterrupted, and the bar turns into a surface only when it has
-   * something to sit over. One class, toggled by a passive listener: nothing is read on scroll except scrollY,
-   * and the class changes once per crossing rather than on every frame, so this cannot thrash the compositor. */
-  if (els.siteHeader) {
-    const syncHeader = () => els.siteHeader.classList.toggle('is-scrolled', window.scrollY > 8);
-    syncHeader();
-    window.addEventListener('scroll', syncHeader, { passive: true });
+  /* The crumb bar (the shell's #appHead) is transparent over the top of the page and takes its material only
+   * once the page has scrolled under it: on load the artwork and the page's glow run to the top of the window
+   * uninterrupted, and the bar becomes a surface at the moment it has something to sit over. One class, from one
+   * passive listener: nothing is read on scroll except scrollY, and the class changes once per crossing rather
+   * than on every frame.
+   *
+   * The site header above it does not do this. It is the spec's tinted, frosted bar at all times - that is what
+   * content scrolls under - and the owner asked for it to stay that way. */
+  if (els.appHead) {
+    const syncAppHead = () => els.appHead.classList.toggle('is-scrolled', window.scrollY > 8);
+    syncAppHead();
+    window.addEventListener('scroll', syncAppHead, { passive: true });
   }
 }
 
