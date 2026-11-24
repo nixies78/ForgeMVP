@@ -29,9 +29,13 @@
     --muted: #ACACAD;
     --dim: #787678;
     /* Main accent: --color-palette-blue-400. Secondary: --color-palette-indigo-400 - the same mapping
-       Randomiser 2 uses. Blue is the action and the focus; indigo is the state a reel holds. */
+       Randomiser 2 uses. Blue is the action and the focus; indigo is the state a reel holds. The hold keys
+       are the library's yellow-400, because a hold lamp on a machine is yellow, and its ramp is the only
+       hover this page takes from a colour of its own rather than from a shade of the two accents. */
     --accent: #33BFFF;
     --accent-2: #868AFD;
+    --hold: #F7D82B;          /* yellow-400: the hold keys at rest */
+    --hold-down: #736514;     /* yellow-200: and the same key under the pointer */
     --ease: cubic-bezier(.2, .7, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -332,9 +336,13 @@
   .k-type    { --icon-dark: #185977; --icon-main: #3FB2E6; --icon-light: #E3F6FF; }
   .k-hook    { --icon-dark: #693055; --icon-main: #E07CB6; --icon-light: #FFE6F4; }
 
-  /* HOLD: a key on the panel under its own reel, exactly where a fruit machine keeps its hold buttons.
-     Faux 3D - a lit top edge, a dark skirt below and a shadow it casts on the case - and it goes down into
-     the panel and lights up indigo when it is holding, so the key and the reel say the same thing. */
+  /* HOLD: a key on the panel under its own reel, exactly where a fruit machine keeps its hold buttons. It is
+     the library's yellow - yellow-400 #F7D82B, shaded with yellow-500 #F9E264 on its top edge and
+     yellow-300 #B59E20 along its bottom one - because a hold key on a real machine is a lamp, and a lamp is
+     yellow. Under the pointer the same yellow goes one step darker instead of dropping to a grey that reads
+     as black: yellow-200 #736514, which needs the label to come up light so it stays readable. While it is
+     holding, the key presses into the case, loses its skirt, and lights indigo - the colour the reel behind
+     the glass takes - so the key and the reel say the same thing. */
   .keys { padding: var(--lid) var(--lid) 0; }
   .lock {
     width: 100%;
@@ -343,20 +351,31 @@
     font: 700 12px/1 var(--body);
     letter-spacing: .1em;
     text-transform: uppercase;
-    color: #C9C9CE;
-    text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
-    background: linear-gradient(180deg, #33333A 0%, #26262C 52%, #202025 100%);
-    border: 1px solid #08080B;
+    color: #2A2203;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .4);
+    background: linear-gradient(180deg, #F9E264 0%, var(--hold) 52%, #B59E20 100%);
+    border: 1px solid #6E5B0C;
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     cursor: pointer;
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, .14),
-      inset 0 -2px 0 rgba(0, 0, 0, .55),
-      0 4px 0 #0A0A0D,
-      0 6px 10px -2px rgba(0, 0, 0, .75);
+      inset 0 1px 0 rgba(255, 255, 255, .55),
+      inset 0 -2px 0 rgba(0, 0, 0, .28),
+      0 4px 0 #4E430B,
+      0 6px 10px -2px rgba(247, 216, 43, .3);
     transition: transform .09s ease, box-shadow .09s ease, background .25s ease, color .25s ease, text-shadow .25s ease;
   }
-  .lock:hover:not(:disabled) { color: #fff; background: linear-gradient(180deg, #3B3B44 0%, #2B2B32 52%, #23232A 100%); }
+  /* One step darker on the ramp, so a hover is the same lamp turned down rather than a switch to black. */
+  .lock:hover:not(:disabled):not(.is-locked) {
+    color: #FFF3BE;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .5);
+    border-color: #3F360A;
+    background: linear-gradient(180deg, #8C7A18 0%, var(--hold-down) 52%, #5B500F 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .22),
+      inset 0 -2px 0 rgba(0, 0, 0, .45),
+      0 4px 0 #332C08,
+      0 6px 10px -2px rgba(115, 101, 20, .5);
+  }
   /* Pressed in: no skirt, no cast shadow, the face sunk below the case. */
   .lock:active:not(:disabled),
   .lock.is-locked {
@@ -378,7 +397,18 @@
       0 1px 0 #0A0A0D,
       0 0 18px rgba(134, 138, 253, .45);
   }
-  .lock svg { width: 1rem; height: 1rem; flex: none; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .6)); }
+  /* A held key under the pointer stays indigo and stays lit - brighter, never darker. */
+  .lock.is-locked:hover:not(:disabled) {
+    background: linear-gradient(180deg, #5257BE 0%, #454AA6 52%, #343883 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, .5),
+      inset 0 -1px 0 rgba(255, 255, 255, .14),
+      0 1px 0 #0A0A0D,
+      0 0 22px rgba(134, 138, 253, .6);
+  }
+  /* The padlock is cut into the yellow, so its shadow is light until the key lights up and the ink turns. */
+  .lock svg { width: 1rem; height: 1rem; flex: none; filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .45)); }
+  .lock.is-locked svg { filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .55)); }
   .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
   .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
 
