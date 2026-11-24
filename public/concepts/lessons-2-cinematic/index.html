@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lessons 2 - Cinematic Launch &middot; Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="../_media/art-23br-evergreen-purple-motd-1920x1080.webp">
+<style>
+/* Lessons 2 - Cinematic Launch -------------------------------------------------
+ * Design language taken from the landing page public/concepts/1-cinematic/index.html
+ * ("Cinematic Launch"). Lifted from it: the :root token set (ink-0..ink-3, line,
+ * mute, dim, blue #33BFFF, lilac #DFBAF8, --grad 100deg), the Archivo Black display
+ * face + Inter Tight title face + local Inter variable body face, the black
+ * full-bleed stage with a paused Ken Burns plate, the single blue-to-lilac gradient
+ * as the only accent, 18px plates with a rgba(255,255,255,.08) hairline, the 34px
+ * gradient dash before an eyebrow, uppercase display headings at line-height .9 and
+ * the cubic-bezier(.2,.7,.1,1) easing used for every transition.
+ * The walkthrough is staged as four chapters of a trailer: one big chapter title per
+ * step, the video on a letterboxed plate, the copy reading like a script page.
+ * ----------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Archivo Black";
+  src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+:root {
+  --ink-0: #101014;
+  --ink-1: #18181C;
+  --ink-2: #202024;
+  --ink-3: #28282C;
+  --line: #303034;
+  --mute: #ACACAD;
+  --faint: #9A9A9E;
+  --dim: #787678;
+  --white: #FFFFFF;
+  --blue: #33BFFF;
+  --lilac: #DFBAF8;
+  --grad: linear-gradient(100deg, #33BFFF 0%, #DFBAF8 100%);
+  --display: "Archivo Black", "Inter Tight", "Inter", system-ui, sans-serif;
+  --title: "Inter Tight", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "SFMono-Regular", monospace;
+  --ease: cubic-bezier(.2, .7, .1, 1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { overflow-x: clip; background: #000; }
+body {
+  margin: 0;
+  background: #000;
+  color: var(--white);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+/* ---------- utilities ---------- */
+.eyebrow {
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .28em;
+  text-transform: uppercase;
+  color: var(--mute);
+  margin: 0;
+}
+.grad-text {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* ---------- buttons ---------- */
+.btn {
+  --h: 48px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  height: var(--h); padding: 0 24px;
+  border-radius: 999px;
+  font-family: var(--body); font-weight: 700; font-size: 14.5px; letter-spacing: .02em;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease), background-color .3s, color .3s, border-color .3s;
+}
+.btn-primary {
+  color: #0A0A0E;
+  background: var(--grad);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12) inset, 0 10px 40px -8px rgba(51,191,255,.55), 0 0 80px -20px rgba(223,186,248,.6);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 0 1px rgba(255,255,255,.2) inset, 0 16px 60px -8px rgba(51,191,255,.75), 0 0 120px -20px rgba(223,186,248,.8); }
+.btn-ghost {
+  color: var(--white);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.22);
+}
+.btn-ghost:hover { background: rgba(255,255,255,.12); }
+.btn-quiet {
+  color: var(--mute);
+  background: transparent;
+  border-color: var(--line);
+  font-size: 14px;
+}
+.btn-quiet:hover { color: var(--white); border-color: rgba(51,191,255,.5); background: rgba(51,191,255,.08); }
+.btn[disabled] { opacity: .38; cursor: not-allowed; transform: none; }
+.btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+a:focus-visible, button:focus-visible, textarea:focus-visible, input:focus-visible, dialog:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+/* ---------- bar (chrome: 72px, shared lockup) ---------- */
+.bar {
+  position: sticky; top: 0; z-index: 60;
+  height: 72px;
+  /* Not a flex container: as a flex parent it shrink-wraps its `.wrap` child to the lockup and the two
+     controls, which pulls the mark off the shared 1136px column. The bar's own flex row is `.bar-inner`. */
+  padding-top: env(safe-area-inset-top, 0px);
+  background: rgba(16,16,20,.74);
+  backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.bar-inner { display: flex; align-items: center; justify-content: space-between; gap: 18px; height: 100%; }
+.bar-nav { display: flex; align-items: center; gap: 10px; }
+.bar .btn { --h: 40px; padding: 0 18px; font-size: 13.5px; }
+/* ---------- concept tag ---------- */
+.concept-tag {
+  position: fixed; z-index: 70;
+  left: 14px; bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  padding: 8px 12px; border-radius: 8px;
+  background: rgba(16,16,20,.82); color: #E6E6E8;
+  border: 1px solid rgba(51,191,255,.4);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+/* ---------- toast ---------- */
+.toast {
+  position: fixed; z-index: 80;
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; gap: 12px;
+  max-width: min(92vw, 520px);
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: rgba(24,24,28,.94);
+  border: 1px solid rgba(51,191,255,.35);
+  box-shadow: 0 24px 70px -20px rgba(0,0,0,.9), 0 0 60px -30px rgba(51,191,255,.7);
+  backdrop-filter: blur(10px);
+  color: #E6E6E8; font-size: 14.5px; font-weight: 600;
+}
+.toast[hidden] { display: none; }
+/* ---------- chapter band (the step as a trailer chapter) ---------- */
+.band { position: relative; overflow: hidden; isolation: isolate; padding-block: clamp(40px, 7vh, 76px) clamp(34px, 5vh, 58px); }
+.band-art {
+  position: absolute; inset: 0; z-index: -2;
+  background: url("../_media/art-23br-evergreen-purple-motd-1920x1080.webp") 50% 22% / cover no-repeat;
+  filter: saturate(1.05) contrast(1.05);
+  animation: kenburns 30s var(--ease) forwards;
+}
+@keyframes kenburns { from { transform: scale(1.08); } to { transform: scale(1); } }
+.band::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.86) 0%, rgba(0,0,0,.58) 46%, rgba(0,0,0,.22) 74%, rgba(0,0,0,.06) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.8) 0%, rgba(0,0,0,.42) 32%, rgba(0,0,0,.9) 82%, #000 100%);
+}
+.band .wrap { position: relative; z-index: 1; }
+.band .eyebrow { display: inline-flex; align-items: center; gap: 12px; color: #E6E6E8; }
+.band .eyebrow::before { content: ""; width: 34px; height: 2px; background: var(--grad); border-radius: 2px; }
+.tagline {
+  max-width: 620px;
+  margin: 18px 0 0;
+  font-size: clamp(16px, 1.35vw, 19px);
+  color: #D6D6D8;
+  text-shadow: 0 2px 26px rgba(0,0,0,.7);
+}
+/* ---------- progress rail ---------- */
+.rail {
+  position: relative; height: 4px; margin-top: 30px;
+  border-radius: 4px; background: rgba(255,255,255,.14);
+  overflow: hidden;
+}
+.rail > span {
+  display: block; height: 100%; width: 25%;
+  background: var(--grad);
+  box-shadow: 0 0 24px -2px rgba(51,191,255,.9);
+  transition: width .7s var(--ease);
+}
+/* ---------- crumbs ---------- */
+.crumbs {
+  margin: 18px 0 0;
+  font-size: 13.5px; font-weight: 500; color: var(--faint);
+  text-shadow: 0 2px 18px rgba(0,0,0,.75);
+}
+.crumbs .sep { color: var(--blue); padding: 0 8px; }
+.crumbs .dot { color: var(--dim); padding: 0 8px; }
+/* ---------- stepper ---------- */
+.stepper {
+  list-style: none; margin: 22px 0 0; padding: 0;
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px;
+}
+.stepper .step {
+  width: 100%; text-align: left; cursor: pointer;
+  display: grid; gap: 4px;
+  padding: 14px 16px 16px;
+  border-radius: 12px;
+  background: rgba(16,16,20,.86);
+  border: 1px solid var(--line);
+  color: var(--mute);
+  font-family: var(--body); font-size: 13.5px; font-weight: 600; line-height: 1.3;
+  backdrop-filter: blur(8px);
+  transition: background-color .3s, border-color .3s, color .3s, transform .4s var(--ease);
+}
+.stepper .step:hover { color: var(--white); border-color: rgba(255,255,255,.28); transform: translateY(-2px); }
+.stepper .step .n {
+  font-family: var(--title); font-weight: 800; font-size: 12px;
+  letter-spacing: .18em; color: var(--faint);
+}
+.stepper .step.done { color: #D6D6D8; border-color: rgba(51,191,255,.35); }
+.stepper .step.done .n { color: var(--blue); }
+.stepper .step[aria-current="step"] {
+  color: var(--white);
+  background: rgba(51,191,255,.1);
+  border-color: rgba(51,191,255,.55);
+  box-shadow: 0 0 0 1px rgba(51,191,255,.2) inset, 0 18px 50px -24px rgba(51,191,255,.75);
+}
+.stepper .step[aria-current="step"] .n { color: var(--lilac); }
+/* ---------- chapter title ---------- */
+.chapter { padding-block: clamp(38px, 6vh, 66px) clamp(18px, 3vh, 30px); }
+.chapter .kicker { display: flex; align-items: center; gap: 12px; margin: 0 0 16px; }
+.chapter .kicker .n { font-family: var(--title); font-weight: 800; font-size: 12px; letter-spacing: .24em; color: var(--faint); }
+.chapter h1 {
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(38px, 6.4vw, 104px);
+  line-height: .9; letter-spacing: -.02em; text-transform: uppercase;
+  margin: 0; max-width: 20ch;
+  text-shadow: 0 6px 60px rgba(0,0,0,.5);
+}
+.chapter h1:focus, .chapter h1:focus-visible { outline: none; }
+#stepTitle { scroll-margin-top: 96px; }
+/* ---------- stage: the plate + the script page ---------- */
+.stage { padding-block: clamp(10px, 2vh, 22px) clamp(56px, 9vh, 110px); }
+.stage-grid { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(0, 1fr); gap: clamp(20px, 2.6vw, 38px); align-items: start; }
+.plate {
+  position: relative; overflow: hidden;
+  padding: 10px;
+  border-radius: 18px;
+  background: var(--ink-1);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 40px 120px -50px rgba(51,191,255,.6);
+}
+.plate::before {
+  content: ""; position: absolute; top: 0; left: 0; width: 40%; height: 2px;
+  background: var(--grad);
+}
+.plate-media { position: relative; aspect-ratio: 16 / 9; border-radius: 12px; overflow: hidden; background: #000; }
+.plate-media iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.plate-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: baseline; padding: 14px 6px 4px; }
+.plate-meta .pill {
+  font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 999px;
+  background: var(--grad); color: #0A0A0E;
+}
+.plate-meta .yt { font-size: 14px; font-weight: 600; color: var(--mute); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,.25); }
+.plate-meta .yt:hover { color: var(--white); border-bottom-color: var(--blue); }
+/* ---------- the step's instructions (script page) ---------- */
+.script { max-width: 46ch; }
+.step-body { color: #D6D6D8; font-size: 17px; }
+.step-body > *:first-child { margin-top: 0; }
+.step-body > *:last-child { margin-bottom: 0; }
+.step-body p { margin: 0 0 18px; }
+.step-body strong { color: var(--white); font-weight: 700; }
+.step-body a { color: var(--blue); }
+.step-body ol, .step-body ul { list-style: none; margin: 0 0 20px; padding: 0; }
+.step-body ol { counter-reset: beat; }
+/* The beats are numbered by a hanging counter in the left margin rather than by a grid column: the step
+   text is inline content with <strong> inside it, and a grid container turns each of those into a grid item
+   of its own, which broke "Click New Project in the UEFN Project Browser" into three stacked fragments. */
+.step-body ol > li {
+  counter-increment: beat;
+  position: relative;
+  padding: 16px 0 16px 56px;
+  border-top: 1px solid var(--line);
+}
+.step-body ol > li:last-child { border-bottom: 1px solid var(--line); }
+.step-body ol > li::before {
+  content: "0" counter(beat);
+  position: absolute; left: 0; top: 18px;
+  width: 42px;
+  font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .1em;
+  color: var(--blue);
+}
+.step-body h2 {
+  font-family: var(--title); font-weight: 700;
+  font-size: clamp(21px, 2vw, 27px); line-height: 1.1; letter-spacing: -.02em;
+  margin: 30px 0 14px;
+}
+.step-body ul > li {
+  padding: 12px 0 12px 20px; position: relative;
+  border-top: 1px solid var(--line); color: var(--mute); font-size: 16px;
+}
+.step-body ul > li:last-child { border-bottom: 1px solid var(--line); }
+.step-body ul > li::before {
+  content: ""; position: absolute; left: 0; top: 20px;
+  width: 8px; height: 2px; border-radius: 2px; background: var(--grad);
+}
+.step-body .devname {
+  display: block; font-family: var(--title); font-weight: 700; font-size: 17px;
+  letter-spacing: -.01em; color: var(--white);
+}
+.step-body .tip {
+  margin: 26px 0;
+  padding: 18px 20px 18px 22px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--ink-1), #0D0D11 70%);
+  border: 1px solid rgba(51,191,255,.32);
+  border-left: 3px solid transparent;
+  background-clip: padding-box;
+  color: #D6D6D8; font-size: 16px;
+  position: relative;
+}
+.step-body .tip::before {
+  content: ""; position: absolute; left: -3px; top: -1px; bottom: -1px; width: 3px;
+  border-radius: 3px; background: var(--grad);
+}
+.step-body .tip strong { color: var(--white); }
+/* ---------- prompt for the UEFN MCP ---------- */
+.prompt-card {
+  position: sticky; top: 92px;
+  padding: 22px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--ink-1), var(--ink-0));
+  border: 1px solid rgba(255,255,255,.08);
+}
+.prompt-card .eyebrow { color: var(--faint); }
+.prompt-card h2 {
+  font-family: var(--title); font-weight: 700; font-size: 20px; letter-spacing: -.02em;
+  margin: 12px 0 6px;
+}
+.prompt-card .help { margin: 0 0 16px; font-size: 14px; color: var(--mute); }
+.prompt-card textarea {
+  width: 100%; min-height: 168px; resize: vertical;
+  padding: 14px;
+  border-radius: 12px;
+  background: #0B0B0F;
+  border: 1px solid var(--line);
+  color: #D6D6D8;
+  font-family: var(--mono); font-size: 13px; line-height: 1.6;
+}
+.prompt-card textarea:focus-visible { border-color: rgba(51,191,255,.6); outline: none; }
+.prompt-actions { display: flex; align-items: center; gap: 14px; margin-top: 14px; }
+.copy-status { font-size: 13.5px; font-weight: 600; color: var(--lilac); }
+/* ---------- report a problem ---------- */
+.feedback-bar {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+  margin: 26px 0 0; padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--ink-0);
+  border: 1px solid var(--line);
+}
+.feedback-bar p { margin: 0; font-size: 14.5px; color: var(--mute); }
+.fb {
+  width: min(560px, calc(100vw - 32px));
+  padding: 0; border: 1px solid rgba(255,255,255,.1); border-radius: 18px;
+  background: var(--ink-1); color: var(--white);
+  box-shadow: 0 50px 140px -50px #000;
+}
+.fb::backdrop { background: rgba(0,0,0,.72); backdrop-filter: blur(6px); }
+.fb-form { padding: 24px; display: grid; gap: 14px; }
+.fb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.fb-head h2 { font-family: var(--display); font-weight: 400; text-transform: uppercase; font-size: 24px; line-height: 1; letter-spacing: -.01em; margin: 0; }
+.fb-x {
+  flex: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.22);
+  color: var(--white); font-size: 17px; line-height: 1;
+}
+.fb-x:hover { background: rgba(255,255,255,.12); }
+.fb-sub { margin: 0; font-size: 13.5px; font-weight: 600; letter-spacing: .04em; color: var(--lilac); }
+.fb-chips { border: 0; margin: 4px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.fb-chips legend { padding: 0 0 10px; font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.chip span {
+  display: block; padding: 9px 14px; border-radius: 999px;
+  background: rgba(255,255,255,.05); border: 1px solid var(--line);
+  color: var(--mute); font-size: 13.5px; font-weight: 600;
+  transition: background-color .25s, border-color .25s, color .25s;
+}
+.chip:hover span { color: var(--white); border-color: rgba(255,255,255,.3); }
+.chip input:checked + span { background: var(--grad); border-color: transparent; color: #0A0A0E; }
+.chip input:focus-visible + span { outline: 2px solid var(--blue); outline-offset: 3px; }
+.fb-field { font-size: 13.5px; font-weight: 600; color: #D6D6D8; }
+.fb textarea, .fb input[type="email"] {
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  background: #0B0B0F; border: 1px solid var(--line); color: var(--white);
+  font-family: var(--body); font-size: 15px;
+}
+.fb textarea { min-height: 92px; resize: vertical; }
+.fb-error { margin: 0; min-height: 18px; font-size: 13.5px; font-weight: 600; color: #FF9AA8; }
+.fb-note { margin: 0; font-size: 13.5px; color: var(--mute); }
+.fb-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+/* ---------- actions ---------- */
+.actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--line);
+}
+.actions .edit-link {
+  font-size: 14.5px; font-weight: 600; color: var(--mute); text-decoration: none;
+  border-bottom: 1px solid rgba(255,255,255,.25); padding-bottom: 2px;
+}
+.actions .edit-link:hover { color: var(--white); border-bottom-color: var(--blue); }
+.actions .push { margin-left: auto; }
+.actions .btn-primary { --h: 56px; padding: 0 30px; font-size: 15px; }
+/* ---------- entrance (trailer pacing, no JS needed) ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+.band .rise { animation: rise 1.1s var(--ease) both; }
+.band .d1 { animation-delay: .12s; }
+.band .d2 { animation-delay: .24s; }
+.band .d3 { animation-delay: .36s; }
+@media (prefers-reduced-motion: reduce) {
+  .band-art { animation: none; transform: none; }
+  .band .rise { animation: none; }
+  .stepper .step:hover, .btn-primary:hover { transform: none; }
+}
+/* ---------- responsive ---------- */
+/* ---------- stage placement: the DOM keeps the brief's order (video, body, prompt,
+   report, actions) while the prompt card sits in the second column ---------- */
+.stage-grid > .plate { grid-column: 1; grid-row: 1; }
+.stage-grid > .script { grid-column: 1; grid-row: 2; }
+.stage-grid > .prompt-col { grid-column: 2; grid-row: 1 / span 3; }
+.stage-grid > .feedback-bar { grid-column: 1; grid-row: 3; }
+.stage-grid > .actions { grid-column: 1 / -1; grid-row: 4; }
+@media (max-width: 1100px) {
+  .stage-grid { grid-template-columns: minmax(0, 1fr); }
+  .stage-grid > .plate, .stage-grid > .script, .stage-grid > .prompt-col,
+  .stage-grid > .feedback-bar, .stage-grid > .actions { grid-column: 1; grid-row: auto; }
+  .prompt-card { position: static; }
+  .script { max-width: 100%; }
+}
+@media (max-width: 900px) {
+  .stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .bar { height: 72px; }
+  .bar .btn { --h: 38px; padding: 0 14px; font-size: 13px; }
+  .band { padding-block: 34px 34px; }
+  .band-art { background-position: 52% 16%; }
+  .band::before {
+    background:
+      linear-gradient(180deg, rgba(0,0,0,.74) 0%, rgba(0,0,0,.56) 30%, rgba(0,0,0,.9) 72%, #000 100%);
+  }
+  .eyebrow { letter-spacing: .2em; }
+  .rail { margin-top: 24px; }
+  .chapter { padding-block: 34px 16px; }
+  .chapter h1 { font-size: 12.4vw; }
+  .plate { padding: 7px; border-radius: 14px; }
+  .plate-media { border-radius: 9px; }
+  .stage { padding-bottom: 72px; }
+  .step-body ol > li { padding-left: 42px; }
+  .step-body ol > li::before { width: 34px; }
+  .prompt-card { padding: 18px; }
+  .feedback-bar { padding: 16px; }
+  .fb-form { padding: 20px; }
+  .actions { gap: 12px; }
+  .actions .btn, .actions .edit-link { width: 100%; justify-content: center; text-align: center; }
+  .actions .push { margin-left: 0; }
+  .concept-tag { font-size: 10px; letter-spacing: .1em; }
+}
+@media (max-width: 420px) {
+  .logo-word { font-size: 16px; }
+  .bar-nav { gap: 8px; }
+  .stepper { gap: 8px; }
+  .stepper .step { padding: 12px; font-size: 12.5px; }
+}
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+<header class="bar">
+  <div class="wrap bar-inner">
+    <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <nav class="bar-nav" aria-label="Main">
+      <a class="btn btn-ghost" href="../../index.html#/home">Home</a>
+      <button type="button" class="btn btn-quiet" id="devMode" aria-pressed="false">Dev mode</button>
+    </nav>
+  </div>
+</header>
+<main>
+<!-- CHAPTER BAND: tagline, progress rail, crumbs, stepper -->
+<section class="band" aria-label="Walkthrough">
+  <div class="band-art" role="img" aria-label="A Fortnite creator island under a purple sky"></div>
+  <div class="wrap">
+    <p class="eyebrow rise">Forge &middot; Walkthrough</p>
+    <p class="tagline rise d1">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+    <div class="rail rise d2" role="progressbar" aria-label="Build progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25"><span id="progressFill"></span></div>
+    <p class="crumbs rise d2">Simulation &amp; Tycoon <span class="sep">&rsaquo;</span> Just give me the basics <span class="dot">&middot;</span> Brand: KPop Demon Hunters</p>
+    <ol class="stepper rise d3" id="stepper"></ol>
+  </div>
+</section>
+<!-- CHAPTER TITLE: the step, staged as a title card -->
+<section class="chapter" aria-labelledby="stepTitle">
+  <div class="wrap">
+    <p class="kicker"><span class="n">Chapter</span></p>
+    <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+  </div>
+</section>
+<!-- THE STEP: video plate, script page, prompt, report, actions -->
+<section class="stage" aria-label="Step walkthrough">
+  <div class="wrap">
+    <div class="stage-grid">
+      <div class="plate">
+        <div class="plate-media">
+          <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Walkthrough video" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <div class="plate-meta">
+          <span class="pill">Now playing</span>
+          <a class="yt" href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Video not loading? Watch on YouTube &nearr;</a>
+        </div>
+      </div>
+      <div class="script">
+        <div class="step-body" id="stepBody"></div>
+      </div>
+      <div class="prompt-col">
+        <aside class="prompt-card" aria-labelledby="promptTitle">
+          <p class="eyebrow">For the UEFN MCP</p>
+          <h2 id="promptTitle">Prompt for this step</h2>
+          <p class="help">Paste it into the UEFN MCP chat and the editor does the step with you.</p>
+          <label class="sr" for="prompt">Prompt for this step</label>
+          <textarea id="prompt" readonly spellcheck="false"></textarea>
+          <div class="prompt-actions">
+            <button type="button" class="btn btn-primary" id="copy">Copy prompt</button>
+            <span class="copy-status" id="copyStatus" role="status"></span>
+          </div>
+        </aside>
+      </div>
+      <div class="feedback-bar">
+        <p>Out of date, not working, hard to follow? Tell us and we&rsquo;ll fix the step.</p>
+        <button type="button" class="btn btn-quiet" id="feedbackBtn">Report a problem</button>
+      </div>
+      <dialog class="fb" id="feedback" aria-labelledby="fbTitle">
+        <form class="fb-form" id="fbForm" method="dialog">
+          <div class="fb-head">
+            <h2 id="fbTitle">Report a problem</h2>
+            <button type="button" class="fb-x" id="fbClose" aria-label="Close">&times;</button>
+          </div>
+          <p class="fb-sub"><span class="fb-step" id="fbStep">Step 1 &middot; Create Your Project</span></p>
+          <fieldset class="fb-chips">
+            <legend>What&rsquo;s wrong?</legend>
+            <label class="chip"><input type="radio" name="reason" value="Out of date"><span>Out of date</span></label>
+            <label class="chip"><input type="radio" name="reason" value="Doesn't work"><span>Doesn&rsquo;t work</span></label>
+            <label class="chip"><input type="radio" name="reason" value="Hard to follow"><span>Hard to follow</span></label>
+            <label class="chip"><input type="radio" name="reason" value="Video problem"><span>Video problem</span></label>
+            <label class="chip"><input type="radio" name="reason" value="Something else"><span>Something else</span></label>
+          </fieldset>
+          <label class="fb-field" for="fbText">What happened? (optional)</label>
+          <textarea id="fbText" name="text"></textarea>
+          <label class="fb-field" for="fbEmail">Email (optional, if you&rsquo;d like a reply)</label>
+          <input id="fbEmail" name="email" type="email" autocomplete="email">
+          <p class="fb-error" id="fbError" role="alert"></p>
+          <p class="fb-note">For now this is saved on this device only.</p>
+          <div class="fb-actions">
+            <button type="button" class="btn btn-quiet" id="fbCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary">Send</button>
+          </div>
+        </form>
+      </dialog>
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" id="back">&larr; Back</button>
+        <a class="edit-link" href="../questions-1-default/index.html">Edit game type</a>
+        <button type="button" class="btn btn-primary push" id="next">Next &rarr;</button>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<div class="toast" id="toast" role="status" hidden></div>
+<div class="concept-tag">Lessons 2 - Cinematic Launch</div>
+<script src="lessons.js"></script>
+</body>
+</html>

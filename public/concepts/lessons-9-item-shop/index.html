@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Item Shop · Lesson walkthrough · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<style>
+/* ==========================================================================
+   Lessons 9 - Item Shop.  The design language is taken from the landing page
+   `public/concepts/11-item-shop/index.html`: its ground #101014, its raised
+   tile and tile-2 surfaces, the acid #F7FF19, the rarity colours, the corner
+   cut --cut-poly, the rarity rim, the card art + name plate, the ticker strip
+   and the pip track.  The walkthrough is a storefront listing: the four build
+   steps are items on a shelf, each with its own rim.
+   ========================================================================== */
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+  font-weight: 100 900; font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --ground: #101014;
+  --tile: #14181E;
+  --tile-2: #18181C;
+  --rule: rgba(255, 255, 255, .15);
+  --acid: #F7FF19;
+  --vb: #2742A5;
+  --epic: #BB6BF0;
+  --rare: #33BFFF;
+  --uncommon: #5FE367;
+  --legendary: #F9A91F;
+  --t1: #FFF;
+  --t2: rgba(255, 255, 255, .75);
+  --t3: rgba(255, 255, 255, .55);
+  --title: "Inter Tight", "Inter", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --cut: 12px;
+  --cut-poly: polygon(var(--cut) 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%, 0 var(--cut));
+  /* The rim colour the current step wears; the script's aria-current swap is what changes it. */
+  --rarity: var(--rare);
+  --rarity-faint: rgba(51, 191, 255, .35);
+  --rarity-glow: rgba(51, 191, 255, .30);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--t1);
+  font-family: var(--body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { margin: 0; font-family: var(--title); font-weight: 800; letter-spacing: -.02em; }
+p { margin: 0; }
+a { color: var(--acid); }
+:focus-visible { outline: 2px solid var(--acid); outline-offset: 3px; }
+
+/* ---------- the micro-label: the shop's shelf-edge type ---------- */
+.eyebrow {
+  font-family: var(--title); font-weight: 800;
+  font-size: 12px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--t3);
+}
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+/* ---------- header: 72px, the shared lockup on the shared column ---------- */
+header.wrap {
+  height: 72px;
+  display: flex; align-items: center; justify-content: space-between; gap: 18px;
+  border-bottom: 2px solid var(--rule);
+}
+.hdr-right { display: flex; align-items: center; gap: 12px; }
+.hdr-link {
+  font-family: var(--title); font-weight: 800; font-size: 14px; letter-spacing: .04em;
+  color: var(--t1); text-decoration: none; padding: 8px 4px;
+}
+.hdr-link:hover { color: var(--acid); }
+#devMode {
+  font-family: var(--title); font-weight: 800; font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+  background: rgba(255, 255, 255, .15); color: var(--t1);
+  border: 2px solid var(--rule); border-radius: 6px;
+  padding: 8px 13px; cursor: pointer; transition: background .15s var(--ease);
+}
+#devMode:hover { background: rgba(255, 255, 255, .24); }
+#devMode[aria-pressed="true"] { background: var(--acid); color: #000; border-color: var(--acid); }
+
+/* ---------- buttons: one acid (action), one glass (secondary) ---------- */
+.btn-acid, .btn-glass {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--title); font-weight: 800; font-size: 15px; line-height: 1;
+  padding: 15px 26px; border-radius: 6px; border: 0;
+  text-decoration: none; cursor: pointer;
+  transition: background .15s var(--ease), border-color .15s var(--ease), transform .15s var(--ease);
+}
+.btn-acid { background: var(--acid); color: #000; box-shadow: 0 12px 28px -14px rgba(247, 255, 25, .7); }
+.btn-acid:hover { background: #E4EC00; }
+.btn-glass { background: rgba(255, 255, 255, .15); color: var(--t1); border: 2px solid var(--rule); padding-block: 13px; }
+.btn-glass:hover:not([disabled]) { background: rgba(255, 255, 255, .24); }
+.btn-glass[disabled] { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .72); cursor: not-allowed; box-shadow: none; }
+.btn-sm { font-size: 13px; padding: 12px 20px; }
+.btn-wide { width: 100%; }
+
+/* ---------- the top strip: progress rail, crumbs, ticker ---------- */
+.rail { display: block; height: 4px; background: rgba(255, 255, 255, .12); }
+#progressFill {
+  display: block; height: 100%; width: 25%;
+  background: linear-gradient(90deg, var(--uncommon), var(--rare) 34%, var(--epic) 67%, var(--legendary));
+  transition: width .3s var(--ease);
+}
+.topsub { padding-block: 22px 0; }
+.crumbs {
+  margin: 0; font-size: 13px; color: var(--t2);
+  font-family: var(--title); font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.crumbs .sep { color: var(--t3); margin-inline: 8px; }
+.ticker { overflow: hidden; margin-top: 20px; background: var(--tile-2); border-block: 2px solid var(--rule); padding-block: 12px; }
+.ticker-track { display: flex; width: max-content; animation: drift 44s linear infinite; }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker-set { display: flex; align-items: center; margin: 0; padding: 0; list-style: none; }
+.ticker-set li {
+  display: flex; align-items: center;
+  font-family: var(--title); font-weight: 800; font-size: 13px;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--t1); white-space: nowrap;
+}
+.ticker-set li::after { content: ""; width: 6px; height: 6px; margin-inline: 20px; background: var(--acid); transform: rotate(45deg); }
+.ticker-set li.on { color: var(--acid); }
+@media (prefers-reduced-motion: reduce) { .ticker-track { animation: none; } }
+
+/* ---------- the shelf: four steps, each on its own rarity rim ---------- */
+.shelf { margin: 26px 0 0; padding: 0 0 24px; list-style: none; border-bottom: 2px solid var(--rule); }
+#stepper {
+  position: relative;
+  display: flex; align-items: stretch; gap: 14px;
+  margin: 0; padding: 0; list-style: none;
+}
+#stepper::before {
+  content: ""; position: absolute; left: 24px; right: 24px; top: 30px; height: 2px;
+  background: linear-gradient(90deg, var(--uncommon), var(--rare) 33%, var(--epic) 66%, var(--legendary));
+  opacity: .45;
+}
+#stepper > li { position: relative; flex: 1 1 0; min-width: 0; }
+#stepper > li:nth-child(1) { --rarity: var(--uncommon);  --rarity-faint: rgba(95, 227, 103, .40); }
+#stepper > li:nth-child(2) { --rarity: var(--rare);      --rarity-faint: rgba(51, 191, 255, .40); }
+#stepper > li:nth-child(3) { --rarity: var(--epic);      --rarity-faint: rgba(187, 107, 240, .40); }
+#stepper > li:nth-child(4) { --rarity: var(--legendary); --rarity-faint: rgba(249, 169, 31, .40); }
+.step {
+  width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer;
+  display: grid; grid-template-columns: 46px 1fr; align-items: center; gap: 12px;
+  --cut: 10px; padding: 2px; border: 0; clip-path: var(--cut-poly);
+  background: linear-gradient(150deg, var(--rarity), var(--rarity-faint) 52%, rgba(255, 255, 255, .10));
+  filter: grayscale(.75) brightness(.72); opacity: .8;
+  transition: filter .28s var(--ease), opacity .28s var(--ease), transform .28s var(--ease);
+}
+.step > * {
+  --cut: 10px; clip-path: var(--cut-poly); background: var(--tile-2); min-height: 58px;
+}
+.step .n {
+  display: grid; place-items: center;
+  font-family: var(--title); font-weight: 800; font-size: 15px; color: var(--rarity);
+  border-right: 1px solid var(--rule);
+}
+.step > span:last-child {
+  display: flex; align-items: center; padding: 10px 14px;
+  font-family: var(--title); font-weight: 800; font-size: 14px; line-height: 1.15; color: var(--t2);
+}
+.step:hover { filter: none; opacity: 1; transform: translateY(-3px); }
+.step.done { filter: none; opacity: 1; }
+.step.done > span:last-child { color: var(--t1); }
+.step.done .n::after { content: "\2713"; font-size: 11px; margin-left: 4px; color: var(--uncommon); }
+.step[aria-current="step"] {
+  filter: none; opacity: 1;
+  box-shadow: 0 0 0 2px rgba(247, 255, 25, .35), 0 18px 30px -18px var(--rarity);
+}
+.step[aria-current="step"] > span:last-child { background: var(--tile); color: var(--t1); }
+
+/* ---------- hero: the featured item (title) beside the shop card (video) ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; margin-top: 28px; align-items: start; }
+.hero-copy { display: flex; flex-direction: column; gap: 14px; padding-top: 6px; }
+.byline { color: var(--t2); font-size: 13px; font-family: var(--title); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+h1#stepTitle { font-size: clamp(30px, 3.6vw, 46px); line-height: 1.02; letter-spacing: -.03em; }
+h1#stepTitle:focus { outline: none; }
+.step-lede { color: var(--t2); font-size: 16px; max-width: 34em; }
+.hero-note {
+  margin-top: auto; padding-top: 10px;
+  color: var(--t2); font-size: 14px; font-family: var(--body); font-weight: 400;
+  letter-spacing: 0; text-transform: none; max-width: 34em;
+}
+
+.card { --cut: 14px; display: flex; flex-direction: column; clip-path: var(--cut-poly); background: var(--tile); }
+.rim { --cut: 14px; padding: 2px; clip-path: var(--cut-poly); background: linear-gradient(155deg, var(--rarity), var(--rarity-faint) 46%, rgba(255, 255, 255, .14)); filter: drop-shadow(0 22px 26px rgba(0, 0, 0, .55)); }
+.card-art {
+  position: relative; aspect-ratio: 16 / 9; overflow: hidden;
+  background:
+    radial-gradient(96% 78% at 50% 104%, var(--rarity-glow), transparent 70%),
+    linear-gradient(180deg, var(--tile-2), #0C0C11);
+}
+#video { display: block; width: 100%; height: 100%; border: 0; background: #000; }
+.plate { position: absolute; top: 12px; left: 12px; --cut: 8px; padding: 2px; background: var(--acid); clip-path: var(--cut-poly); }
+.plate > span {
+  --cut: 8px; display: block; padding: 5px 7px; clip-path: var(--cut-poly);
+  background: #101014; color: var(--acid);
+  font-family: var(--title); font-weight: 800; font-size: 10px; letter-spacing: .18em; text-transform: uppercase;
+}
+.card-body { display: flex; flex-direction: column; flex: 1 1 auto; padding: 16px 18px 18px; }
+.card-title { font-size: 19px; line-height: 1.15; }
+.card-desc { margin-top: 8px; color: var(--t2); font-size: 14px; line-height: 1.5; }
+.card-cta { margin-top: auto; padding-top: 14px; }
+.vid-hint { margin-top: 10px; color: var(--t2); font-size: 14px; }
+.vid-hint a { color: var(--acid); font-weight: 700; }
+
+/* ---------- the instructions the script renders into #stepBody ---------- */
+.prose-panel { --cut: 14px; margin-top: 26px; padding: 2px; clip-path: var(--cut-poly); background: linear-gradient(150deg, rgba(255, 255, 255, .24), rgba(255, 255, 255, .07) 46%, rgba(51, 191, 255, .30)); }
+.prose-in { --cut: 14px; clip-path: var(--cut-poly); background: var(--tile); padding: 26px 26px 28px; }
+.sec-head h2 { font-size: clamp(24px, 2.4vw, 32px); line-height: 1.06; }
+#stepBody { max-width: 44em; }
+#stepBody p { color: var(--t2); margin-top: 14px; font-size: 16px; }
+#stepBody strong, #stepBody b { color: var(--t1); }
+#stepBody h2 { margin-top: 30px; color: var(--t1); }
+/* The list items are inline content with <strong> inside them: the marker hangs in the margin from an
+   absolutely positioned pseudo-element, so the sentence can never split into columns. */
+#stepBody ol, #stepBody ul { margin: 16px 0 0; padding: 0; list-style: none; }
+#stepBody li { position: relative; padding-left: 34px; margin-top: 12px; color: var(--t2); }
+#stepBody ol { counter-reset: lic; }
+#stepBody ol > li { counter-increment: lic; }
+#stepBody ol > li::before {
+  content: counter(lic); position: absolute; left: 0; top: 1px;
+  display: grid; place-items: center; width: 24px; height: 24px;
+  --cut: 6px; clip-path: var(--cut-poly); background: var(--acid); color: #000;
+  font-family: var(--title); font-weight: 800; font-size: 12px; line-height: 1;
+}
+#stepBody ul > li::before {
+  content: ""; position: absolute; left: 6px; top: 11px;
+  width: 7px; height: 7px; transform: rotate(45deg); background: var(--acid);
+}
+.devname { color: var(--t1); font-family: var(--title); font-weight: 800; }
+.tip {
+  --cut: 10px; margin-top: 22px; padding: 14px 16px 15px 16px;
+  background: rgba(249, 169, 31, .12); border-left: 3px solid var(--legendary);
+  clip-path: var(--cut-poly); color: var(--t1); font-size: 15px;
+}
+.tip b { color: var(--legendary); }
+
+/* ---------- the prompt: the shop's plate ---------- */
+.prompt-panel { --cut: 14px; margin-top: 26px; padding: 2px; clip-path: var(--cut-poly); background: linear-gradient(150deg, var(--acid), rgba(247, 255, 25, .32) 46%, rgba(255, 255, 255, .14)); }
+.prompt-in { --cut: 14px; clip-path: var(--cut-poly); background: var(--tile-2); padding: 22px 24px 24px; }
+.plate-label {
+  display: inline-block; --cut: 8px; padding: 2px; background: var(--acid); clip-path: var(--cut-poly);
+}
+.plate-label > span {
+  --cut: 8px; display: block; padding: 5px 9px; clip-path: var(--cut-poly); background: #101014; color: var(--acid);
+  font-family: var(--title); font-weight: 800; font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+}
+.plate-help { margin-top: 12px; color: var(--t2); font-size: 14px; max-width: 46em; }
+.prompt-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start; margin-top: 14px; }
+#prompt {
+  flex: 1 1 320px; min-width: 0; min-height: 108px; resize: vertical;
+  background: var(--tile); color: var(--t1);
+  border: 2px solid var(--rule); border-radius: 6px;
+  padding: 12px 14px; font: inherit; font-size: 14px; line-height: 1.5;
+}
+#copyStatus { margin-top: 12px; color: var(--acid); font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .06em; min-height: 1.2em; }
+
+/* ---------- actions ---------- */
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 26px; }
+.actions .spacer { flex: 1 1 auto; }
+#next { min-width: 0; }
+
+/* ---------- concept tag: the shop's free pill, in the corner ---------- */
+.concept-tag {
+  position: fixed; right: 16px; bottom: 16px; z-index: 40;
+  display: inline-flex; align-items: center;
+  background: var(--acid); color: #000;
+  font-family: var(--title); font-weight: 800;
+  font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+  padding: 8px 13px; border-radius: 999px; white-space: nowrap; cursor: default;
+}
+
+/* ---------- the feedback dialog ---------- */
+#feedback {
+  border: 0; padding: 0; background: transparent; color: var(--t1);
+  width: min(94vw, 560px); max-width: none;
+}
+#feedback::backdrop { background: rgba(6, 6, 9, .8); }
+.dlg-card { --cut: 14px; padding: 2px; clip-path: var(--cut-poly); background: linear-gradient(150deg, var(--acid), rgba(247, 255, 25, .28) 50%, rgba(255, 255, 255, .14)); }
+.dlg-in { --cut: 14px; clip-path: var(--cut-poly); background: var(--tile); padding: 22px 22px 24px; }
+.dlg-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.dlg-top h2 { font-size: 24px; line-height: 1.05; }
+#fbStep { margin-top: 8px; color: var(--acid); font-family: var(--title); font-weight: 800; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; }
+#fbClose {
+  flex: none; width: 36px; height: 36px; border: 2px solid var(--rule); border-radius: 6px;
+  background: rgba(255, 255, 255, .12); color: var(--t1); font-size: 17px; line-height: 1; cursor: pointer;
+}
+#fbClose:hover { background: rgba(255, 255, 255, .24); }
+fieldset { border: 0; margin: 20px 0 0; padding: 0; }
+legend { padding: 0; color: var(--t2); font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.chip { position: relative; display: inline-flex; align-items: center; --cut: 8px; padding: 2px; background: var(--rule); clip-path: var(--cut-poly); cursor: pointer; }
+.chip > span {
+  --cut: 8px; display: block; padding: 9px 13px; clip-path: var(--cut-poly); background: var(--tile-2); color: var(--t1);
+  font-family: var(--title); font-weight: 800; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+}
+.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.chip:hover { background: rgba(255, 255, 255, .35); }
+.chip:has(input:checked) { background: var(--acid); }
+.chip:has(input:checked) > span { background: #101014; color: var(--acid); }
+.chip:has(input:focus-visible) { outline: 2px solid var(--acid); outline-offset: 3px; }
+.field { display: block; margin-top: 18px; color: var(--t2); font-size: 14px; }
+.field input, #fbText {
+  display: block; width: 100%; margin-top: 7px;
+  background: var(--tile-2); color: var(--t1);
+  border: 2px solid var(--rule); border-radius: 6px;
+  padding: 11px 13px; font: inherit; font-size: 15px; min-height: 44px;
+}
+#fbError { margin-top: 14px; color: #FFB4A8; font-size: 14px; font-weight: 600; min-height: 1.2em; }
+.dlg-note { margin-top: 16px; color: var(--t2); font-size: 13px; }
+.dlg-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+
+/* ---------- toast ---------- */
+#toast {
+  position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 60;
+  background: var(--acid); color: #000;
+  font-family: var(--title); font-weight: 800; font-size: 13px; letter-spacing: .06em;
+  padding: 12px 18px; border-radius: 6px; max-width: 90vw; text-align: center;
+}
+
+/* ---------- the dialog, finished: the shop's own card, rims and chips ---------- */
+#feedback:not([open]) { display: none; }
+#feedback[open] { animation: pop .18s var(--ease); }
+@keyframes pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.dlg-in::-webkit-scrollbar { width: 10px; }
+#fbText { resize: vertical; }
+#fbEmail:invalid:not(:placeholder-shown) { border-color: #FFB4A8; }
+#fbError:empty { margin-top: 0; min-height: 0; }
+#fbForm .btn-acid[type="submit"] { box-shadow: 0 12px 28px -16px rgba(247, 255, 25, .8); }
+#feedback #fbCancel { background: rgba(255, 255, 255, .10); }
+@media (max-width: 720px) {
+  #feedback { width: calc(100vw - 24px); }
+  .dlg-in { padding: 18px 16px 20px; }
+  .dlg-actions .btn-acid, .dlg-actions .btn-glass { flex: 1 1 auto; }
+}
+
+/* ---------- 400px and in between: the two columns stack ---------- */
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); }
+  .hero-note { margin-top: 0; padding-top: 0; }
+}
+@media (max-width: 720px) {
+  .topsub { padding-block: 18px 0; }
+  #stepper { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; margin-top: 5px; }
+  #stepper::before { display: none; }
+  .step { grid-template-columns: 38px minmax(0, 1fr); }
+  .step > * { min-height: 52px; }
+  header.wrap { gap: 10px; }
+  .hdr-link { font-size: 13px; }
+  #devMode { padding: 7px 10px; font-size: 11px; }
+  .prose-in { padding: 20px 18px 22px; }
+  .prompt-in { padding: 18px 18px 20px; }
+  .actions .btn-acid, .actions .btn-glass { flex: 1 1 140px; }
+  .actions .spacer { display: none; }
+  .concept-tag { right: 10px; bottom: 10px; font-size: 10px; padding: 7px 10px; }
+}
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <nav class="hdr-right" aria-label="Page">
+    <a class="hdr-link" href="../../index.html#/home">Home</a>
+    <button id="devMode" type="button" aria-pressed="false">Dev mode</button>
+  </nav>
+</header>
+
+<div class="rail" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25">
+  <span id="progressFill"></span>
+</div>
+
+<main class="wrap">
+  <div class="topsub">
+    <!-- The eyebrow names the shelf, the crumbs name the game being built: they must not both open with
+         the same two words, or the strip reads as a line printed twice. -->
+    <p class="eyebrow">Item Shop walkthrough · 4 build steps</p>
+    <p class="crumbs">Simulation &amp; Tycoon <span class="sep">›</span> Just give me the basics <span class="sep">·</span> Brand: KPop Demon Hunters</p>
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track">
+      <ul class="ticker-set">
+        <li class="on">Item Shop walkthrough</li>
+        <li>Step 1 of 4</li>
+        <li>UEFN MCP prompt ready</li>
+        <li>Video guide each step</li>
+      </ul>
+      <ul class="ticker-set">
+        <li class="on">Item Shop walkthrough</li>
+        <li>Step 1 of 4</li>
+        <li>UEFN MCP prompt ready</li>
+        <li>Video guide each step</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- The shelf. The brief's order is kept: tagline, progress, crumbs, stepper, title, video, body,
+       prompt, feedback, actions - only the dressing is 2-D. The script builds the four items. -->
+  <h2 class="sr">The four build steps</h2>
+  <nav class="shelf" aria-label="Build steps">
+    <ol id="stepper"></ol>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Now building</p>
+      <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+      <p class="step-lede">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+      <p class="hero-note">Copy the prompt, paste it into the UEFN MCP, and build the step.</p>
+    </div>
+
+    <div class="itemcard rim" style="--cut:14px">
+      <div class="card">
+        <div class="card-art">
+          <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Video walkthrough" loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+          <span class="plate"><span>Walkthrough</span></span>
+        </div>
+        <div class="card-body">
+          <p class="rarity">Legendary · included</p>
+          <h3 class="card-title">Video: this step, start to finish</h3>
+          <p class="card-desc">Watch the step once, then follow the instructions below and paste the prompt into the UEFN MCP.</p>
+          <p class="card-cta vid-hint">Video not loading? <a href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Watch on YouTube &nearr;</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="prose-panel" aria-label="Step instructions">
+    <div class="prose-in sec-head">
+      <p class="eyebrow">Instructions</p>
+      <h2>Follow along in UEFN</h2>
+      <div id="stepBody"></div>
+    </div>
+  </section>
+
+  <section class="prompt-panel" aria-label="UEFN MCP prompt">
+    <div class="prompt-in">
+      <p class="plate-label"><span>UEFN MCP prompt</span></p>
+      <p class="plate-help">Paste this into the UEFN MCP for the current step. Edit it first if your island differs.</p>
+      <div class="prompt-row">
+        <label class="sr" for="prompt">UEFN MCP prompt for this step</label>
+        <textarea id="prompt" rows="4" spellcheck="false"></textarea>
+        <button class="btn-acid btn-sm" id="copy" type="button">Copy prompt</button>
+      </div>
+      <p id="copyStatus" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <div class="actions">
+    <button class="btn-glass" id="back" type="button">← Back</button>
+    <a class="btn-glass" href="../questions-1-default/index.html">Edit game type</a>
+    <span class="spacer"></span>
+    <button class="btn-glass" id="feedbackBtn" type="button">Report a problem</button>
+    <button class="btn-acid" id="next" type="button">Next →</button>
+  </div>
+</main>
+
+<dialog id="feedback" aria-labelledby="fbTitle">
+  <form id="fbForm" class="dlg-card" method="dialog" novalidate>
+    <div class="dlg-in">
+      <div class="dlg-top">
+        <div>
+          <h2 id="fbTitle">Report a problem</h2>
+          <p id="fbStep">Step 1: Create Your Project</p>
+        </div>
+        <button id="fbClose" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <fieldset>
+        <legend>What's wrong?</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="reason" value="Out of date" /><span>Out of date</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Doesn't work" /><span>Doesn't work</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Hard to follow" /><span>Hard to follow</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Video problem" /><span>Video problem</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Something else" /><span>Something else</span></label>
+        </div>
+      </fieldset>
+
+      <label class="field" for="fbText">What happened? (optional)
+        <textarea id="fbText" rows="3"></textarea>
+      </label>
+
+      <label class="field" for="fbEmail">Email (optional, if you'd like a reply)
+        <input id="fbEmail" type="email" autocomplete="email" />
+      </label>
+
+      <p id="fbError" role="alert"></p>
+      <p class="dlg-note">For now this is saved on this device only.</p>
+
+      <div class="dlg-actions">
+        <button class="btn-glass" id="fbCancel" type="button">Cancel</button>
+        <button class="btn-acid" type="submit">Send</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<p id="toast" role="status" hidden></p>
+<p class="concept-tag">Lessons 9 - Item Shop</p>
+
+<script src="lessons.js" defer></script>
+</body>
+</html>

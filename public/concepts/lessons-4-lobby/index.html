@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Create Your Project · Lessons 4 - Choose Your Mode · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Design language from public/concepts/3-lobby/index.html - Concept 3, "Choose Your Mode".
+ * Taken straight from that landing page: the :root token set (purple / indigo ramp, --yellow, --green,
+ * --energy gradient, the three font stacks), the local @font-face loading of Inter and Archivo Black,
+ * the page-wide radial-plus-linear background, the sticky 72px .topbar with its tabs, pill and ghost
+ * button, the .mode tile with its 2px rim, corner .badges and gradient scrim, the Forge Pass
+ * .track/.tier journey track (numbered stations, `✓` on done, `▶ Now` on current, rarity colours),
+ * the .pass-panel plate and its .exp-bar rail, .plate / .eyebrow / .chip / .key details, and the same
+ * type scale (Archivo Black display, Inter Tight titles, Inter body). The lobby's sales copy, its three
+ * ways in and its footer do not come across: this screen is the build the creator is already on. */
+@font-face{font-family:"Inter";src:url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Archivo Black";src:url("../../assets/fonts/archivo-black-latin.woff2") format("woff2");font-weight:400;font-display:swap}
+:root{
+  --purple-0:#251530; --purple-1:#573270; --purple-2:#894EB0; --purple:#BB6BF0; --purple-3:#CD92F4; --purple-4:#DFBAF8;
+  --indigo-0:#1B1C33; --indigo-1:#3F4076; --indigo-2:#6265BA; --indigo:#868AFD; --indigo-3:#A6A9FE; --indigo-4:#C7C8FE;
+  --yellow:#F7D82B; --yellow-3:#F9E264; --green:#5FE367; --blue:#33BFFF; --orange:#FE8539; --pink:#E166B6; --teal:#44D5BF;
+  --n0:#101014; --n1:#18181C; --n7:#ACACAD;
+  --energy:linear-gradient(90deg,#BB6BF0,#FEB4B4);
+  --display:"Archivo Black","Inter Tight",Impact,system-ui,sans-serif;
+  --title:"Inter Tight","Inter",system-ui,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:var(--body);font-size:16px;line-height:1.55;color:#fff;
+  background:
+    radial-gradient(1200px 700px at 78% 4%, rgba(187,107,240,.26), transparent 60%),
+    radial-gradient(900px 600px at 2% 34%, rgba(134,138,253,.16), transparent 60%),
+    linear-gradient(180deg,var(--purple-0) 0%, #20183a 38%, var(--indigo-0) 72%, #131325 100%);
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block}
+a{color:inherit}
+h1,h2,h3{margin:0}
+.wrap{margin:0 auto}
+.eyebrow{font:800 12px/1 var(--body);letter-spacing:.18em;text-transform:uppercase;color:var(--purple-4)}
+.eyebrow .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:8px;vertical-align:1px;box-shadow:0 0 10px var(--green)}
+.energy-text{background:var(--energy);-webkit-background-clip:text;background-clip:text;color:transparent}
+/* ---------- Buttons: the lobby's plate buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:12px;text-decoration:none;cursor:pointer;
+  font:800 15px/1 var(--title);letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:15px 22px;
+  transition:transform .15s,box-shadow .15s,filter .15s,border-color .15s}
+.btn:hover{transform:translateY(-2px)}
+.btn-play{background:var(--yellow);color:#1a1300;box-shadow:0 6px 0 #B59E20,0 18px 40px rgba(247,216,43,.22);
+  clip-path:polygon(0 0,100% 0,100% 100%,14px 100%,0 calc(100% - 14px))}
+.btn-play:hover{box-shadow:0 8px 0 #B59E20,0 22px 46px rgba(247,216,43,.3);filter:brightness(1.05)}
+.btn-play:active{transform:translateY(4px);box-shadow:0 2px 0 #B59E20}
+.btn-ghost{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.22);color:#fff;backdrop-filter:blur(6px)}
+.btn-ghost:hover{border-color:var(--purple-3);background:rgba(187,107,240,.14)}
+.btn:disabled{opacity:.42;cursor:not-allowed;transform:none;box-shadow:none;filter:none;border-color:rgba(255,255,255,.16)}
+.key{display:inline-grid;place-items:center;min-width:30px;height:26px;padding:0 7px;border-radius:5px;
+  font:800 11px/1 var(--body);letter-spacing:.04em;border:2px solid currentColor;opacity:.75}
+/* ---------- Top bar (the lobby's own bar, our controls) ---------- */
+header.topbar{position:sticky;top:0;z-index:40;height:72px;display:flex;align-items:center;
+  background:rgba(22,14,34,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topbar .wrap{display:flex;align-items:center;gap:14px;width:100%;height:100%}
+.topbar .spacer{flex:1}
+.tabs{display:flex;gap:4px;margin-left:12px;height:100%}
+.tabs a{display:flex;align-items:center;padding:0 14px;text-decoration:none;font:800 13px/1 var(--body);
+  letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE;border-bottom:3px solid transparent}
+.tabs a:hover{color:#fff}
+.tabs a.on{color:#fff;border-bottom-color:var(--yellow)}
+.switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;border:2px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.07);color:#fff;border-radius:999px;padding:8px 12px;font:800 12px/1 var(--body);
+  letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.switch .knob{width:26px;height:15px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.25);position:relative;flex:none}
+.switch .knob::after{content:"";position:absolute;top:1px;left:1px;width:11px;height:11px;border-radius:50%;background:var(--n7);transition:transform .18s,background .18s}
+.switch[aria-pressed="true"]{border-color:var(--yellow);color:var(--yellow)}
+.switch[aria-pressed="true"] .knob::after{transform:translateX(11px);background:var(--yellow)}
+.pill{display:flex;align-items:center;gap:8px;font:800 12px/1 var(--body);letter-spacing:.08em;color:#fff;
+  background:rgba(255,255,255,.07);border-radius:999px;padding:9px 13px;white-space:nowrap}
+.pill i{width:14px;height:14px;border-radius:50%;background:var(--energy);display:inline-block;flex:none}
+/* ---------- Matchmaking strip: tagline, progress rail, crumbs ---------- */
+.strip{border-bottom:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(90deg,rgba(187,107,240,.18),rgba(134,138,253,.08) 50%,rgba(254,180,180,.12))}
+.strip .wrap{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(240px,.8fr);gap:14px 32px;align-items:center;padding-block:20px}
+.tagline{margin:0;font:600 clamp(16px,1.5vw,18px)/1.45 var(--title);color:#F3EEF9;max-width:62ch}
+.rail-side{min-width:0}
+.xp-bar{height:12px;border-radius:999px;background:rgba(0,0,0,.42);overflow:hidden;border:1px solid rgba(255,255,255,.12)}
+.xp-bar i{display:block;height:100%;width:25%;background:var(--energy);border-radius:inherit;
+  box-shadow:0 0 16px rgba(254,180,180,.6);transition:width .35s}
+.xp-lbl{display:flex;justify-content:space-between;gap:12px;font:700 11px/1 var(--body);letter-spacing:.12em;
+  text-transform:uppercase;color:#CFC7DE;margin-top:8px}
+.crumbs{grid-column:1 / -1;margin:0;font:800 12px/1.5 var(--body);letter-spacing:.1em;text-transform:uppercase;color:#CFC7DE}
+.crumbs b{color:var(--purple-4);font-weight:800}
+/* ---------- Journey track: numbered stations (the lobby's Forge Pass track) ---------- */
+.journey{margin-top:clamp(24px,3.4vw,40px)}
+.journey-head{display:flex;align-items:end;justify-content:space-between;gap:14px 24px;flex-wrap:wrap;margin-bottom:14px}
+.journey-head p{margin:0;color:#CFC7DE;font-size:14px;max-width:46ch}
+#stepper{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;list-style:none;margin:0;padding:0}
+#stepper li{display:flex;min-width:0}
+.step{--rc:var(--purple-2);position:relative;display:flex;align-items:center;gap:12px;width:100%;min-width:0;
+  text-align:left;cursor:pointer;color:#fff;padding:14px 14px;border-radius:9px;
+  background:#18142a;border:2px solid var(--rc);font-family:var(--body);
+  transition:transform .18s,border-color .18s,box-shadow .18s,background .18s}
+.step[data-i="0"]{--rc:#5FE367}
+.step[data-i="1"]{--rc:#33BFFF}
+.step[data-i="2"]{--rc:#BB6BF0}
+.step[data-i="3"]{--rc:#FE8539}
+.step:hover{transform:translateY(-3px);border-color:#fff}
+.step .n{display:grid;place-items:center;width:38px;height:38px;flex:none;border-radius:9px;
+  background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.16);color:var(--purple-4);
+  font:400 16px/1 var(--display)}
+.step > span:last-child{min-width:0;padding-right:56px;font:700 14.5px/1.25 var(--title);letter-spacing:-.01em}
+/* The badge on a station that has not been reached says "Ahead" rather than "Locked": the line above the
+   track invites the creator to pick any station and jump to it, and a station you can click is not locked.
+   "Locked" was the lobby's own word for content behind a pass, and it contradicted the page's own copy. */
+.step::after{content:"Ahead";position:absolute;top:9px;right:11px;font:800 10px/1 var(--body);
+  letter-spacing:.14em;text-transform:uppercase;color:#CFC7DE;opacity:.8}
+.step.done::after{content:"✓ Done";color:var(--green);opacity:1}
+.step.done .n{color:var(--green);border-color:rgba(95,227,103,.55)}
+.step[aria-current="step"]{background:linear-gradient(160deg,rgba(87,50,112,.75),rgba(27,28,51,.92) 65%);
+  border-color:var(--yellow);box-shadow:0 0 0 3px rgba(247,216,43,.24),0 20px 44px rgba(0,0,0,.4)}
+.step[aria-current="step"]::after{content:"▶ Now";color:var(--yellow);opacity:1}
+.step[aria-current="step"] .n{background:var(--energy);color:#2a1238;border-color:transparent}
+.track-hint{margin:12px 0 0;font:700 11px/1 var(--body);letter-spacing:.12em;text-transform:uppercase;color:#CFC7DE}
+/* ---------- Panels (plates and rims) ---------- */
+.section{padding-block:clamp(28px,4vw,48px) clamp(40px,6vw,72px)}
+.grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(0,1fr);gap:16px 22px;align-items:start}
+.panel{border-radius:14px;padding:clamp(18px,2.3vw,26px);border:1px solid rgba(255,255,255,.1);
+  background:linear-gradient(160deg,rgba(87,50,112,.5),rgba(27,28,51,.85) 62%)}
+.panel + .panel{margin-top:16px}
+.head{display:flex;align-items:end;justify-content:space-between;gap:12px 20px;flex-wrap:wrap;margin-bottom:14px}
+.head p{margin:8px 0 0;color:#D9D3E6;max-width:60ch;font-size:14px}
+h1{font:400 clamp(30px,4.2vw,54px)/.98 var(--display);text-transform:uppercase;letter-spacing:-.01em;margin:10px 0 0}
+h1:focus{outline:none}
+.lead-sub{margin:14px 0 0;color:#E4DDF0;max-width:58ch}
+/* ---------- Mode tile holding the video ---------- */
+.tile{position:relative;isolation:isolate;border-radius:12px;padding:14px;border:2px solid rgba(255,255,255,.14);
+  background:var(--indigo-0);box-shadow:0 22px 50px rgba(0,0,0,.35)}
+.tile::before{content:"";position:absolute;inset:-1px;z-index:-1;border-radius:inherit;
+  background:radial-gradient(420px 200px at 12% 0%,rgba(187,107,240,.4),transparent 70%)}
+.tile-head{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;margin-bottom:12px}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font:800 11px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;padding:7px 10px;border-radius:3px}
+.badge.ready{background:var(--green);color:#0b2a0e}
+.badge.meta{background:rgba(16,16,20,.75);color:#fff}
+.tile .num{font:800 11px/1 var(--body);letter-spacing:.16em;text-transform:uppercase;color:var(--purple-4)}
+.frame{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#0b0916;
+  border:1px solid rgba(255,255,255,.12)}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.watch{display:inline-flex;align-items:center;gap:8px;margin:12px 0 2px;text-decoration:none;
+  font:800 13px/1 var(--title);letter-spacing:.06em;text-transform:uppercase;color:var(--purple-4)}
+.watch:hover{color:var(--yellow)}
+/* ---------- Step instructions ---------- */
+#stepBody{color:#E4DDF0}
+#stepBody p{margin:0 0 14px}
+#stepBody p:last-child{margin-bottom:0}
+#stepBody strong{color:#fff;font-weight:800}
+#stepBody ol{list-style:none;counter-reset:bs;margin:0 0 16px;padding:0}
+#stepBody ol li{counter-increment:bs;position:relative;padding:11px 4px 11px 50px;border-bottom:1px solid rgba(255,255,255,.08)}
+#stepBody ol li:last-child{border-bottom:0;padding-bottom:2px}
+#stepBody ol li::before{content:counter(bs,decimal-leading-zero);position:absolute;left:0;top:9px;
+  display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:rgba(0,0,0,.4);
+  border:1px solid rgba(205,146,244,.45);color:var(--purple-4);font:400 13px/1 var(--display)}
+#stepBody h2{font:700 clamp(20px,2.4vw,27px)/1.1 var(--title);text-transform:uppercase;margin:22px 0 12px}
+#stepBody ul{margin:0;padding-left:20px}
+#stepBody ul li{margin:7px 0}
+.devname{display:inline-block;font:800 12px/1 var(--title);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--purple-4);background:rgba(16,16,20,.72);border:1px solid rgba(205,146,244,.5);
+  border-radius:3px;padding:5px 8px;margin:0 2px}
+.tip{position:relative;margin:18px 0 0;padding:16px 18px 16px 20px;border-radius:0 9px 9px 0;
+  border-left:4px solid var(--yellow);background:rgba(247,216,43,.12);color:#FBF3CE;font-size:15px}
+.tip::before{content:"Tip";display:block;font:800 11px/1 var(--body);letter-spacing:.16em;
+  text-transform:uppercase;color:var(--yellow);margin-bottom:8px}
+/* ---------- MCP prompt plate ---------- */
+.plate{display:flex;align-items:center;gap:10px;font:800 11px/1 var(--body);letter-spacing:.12em;
+  text-transform:uppercase;background:rgba(16,16,20,.85);border:1px solid rgba(255,255,255,.14);
+  border-radius:4px;padding:7px 10px;white-space:nowrap}
+.plate .ok{color:var(--green)}
+label.flabel{display:block;font:800 12px/1 var(--body);letter-spacing:.14em;text-transform:uppercase;color:var(--purple-4)}
+.help{margin:8px 0 14px;color:#CFC7DE;font-size:14px}
+#prompt{width:100%;min-height:138px;resize:vertical;border-radius:10px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(0,0,0,.45);color:#EDE7F5;padding:14px;
+  font:500 13.5px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.prompt-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+#copyStatus{font:800 12px/1.3 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--green)}
+.footrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:16px}
+/* ---------- Step actions ---------- */
+.actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:22px}
+.actions .grow{flex:1;min-width:0}
+.actions .btn-play{font-size:clamp(15px,1.6vw,17px);padding:18px 26px 18px 30px}
+/* ---------- Feedback dialog ---------- */
+#feedback{border:0;padding:0;background:transparent;color:#fff;width:min(560px,92vw);max-width:min(560px,92vw)}
+#feedback::backdrop{background:rgba(10,6,18,.74);backdrop-filter:blur(3px)}
+.sheet{border-radius:16px;padding:clamp(20px,3vw,28px);border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(160deg,#3A2450,#181228 62%);box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.sheet-top{display:flex;align-items:start;justify-content:space-between;gap:14px}
+.sheet h2{font:400 clamp(22px,3vw,30px)/1 var(--display);text-transform:uppercase}
+.fb-step{margin:10px 0 0;font:700 14px/1.3 var(--title);color:var(--purple-4)}
+.x{flex:none;width:38px;height:38px;border-radius:8px;cursor:pointer;color:#fff;font:800 18px/1 var(--body);
+  border:2px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07)}
+.x:hover{border-color:var(--yellow);color:var(--yellow)}
+.chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px}
+.chip-r{position:relative;display:flex;align-items:center;gap:10px;cursor:pointer;padding:12px 13px;
+  border-radius:8px;border:2px solid rgba(255,255,255,.18);background:rgba(0,0,0,.3);
+  font:700 13px/1.25 var(--body);letter-spacing:.02em}
+.chip-r:hover{border-color:var(--purple-3)}
+.chip-r input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.chip-r .rd{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.5);flex:none}
+.chip-r:has(input:checked){border-color:var(--yellow);background:rgba(247,216,43,.14);color:#FBF3CE}
+.chip-r:has(input:checked) .rd{background:var(--yellow);border-color:var(--yellow)}
+.chip-r:has(input:focus-visible){outline:3px solid var(--yellow);outline-offset:2px}
+.fb-field{margin-top:16px}
+.fb-eyebrow{margin-bottom:9px}
+.fld{width:100%;border-radius:9px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.42);
+  color:#fff;padding:11px 13px;font:500 15px/1.5 var(--body)}
+#fbError{margin:12px 0 0;font:700 13.5px/1.35 var(--body);color:#FEB4B4}
+#fbError:empty{display:none}
+.fb-note{margin:14px 0 0;color:#CFC7DE;font-size:13px}
+.sheet-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.sheet-actions .btn{gap:10px}
+/* ---------- Toast, tag, focus ---------- */
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:60;max-width:calc(100vw - 32px);
+  background:rgba(16,16,20,.96);border:1px solid var(--green);border-radius:8px;padding:13px 18px;
+  color:#fff;font:800 13px/1.3 var(--body);letter-spacing:.06em;box-shadow:0 18px 40px rgba(0,0,0,.55)}
+#toast[hidden]{display:none}
+.concept-tag{position:fixed;left:12px;bottom:12px;z-index:55;font:800 11px/1 var(--body);letter-spacing:.1em;
+  text-transform:uppercase;background:rgba(16,16,20,.9);color:#fff;border:1px solid var(--yellow);
+  padding:8px 10px;border-radius:4px}
+a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+/* ---------- Responsive ---------- */
+@media (max-width:1020px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .strip .wrap{grid-template-columns:minmax(0,1fr)}
+  .tabs{display:none}
+  #stepper{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:760px){
+  .topbar .wrap{gap:10px}
+  .pill{display:none}
+  .switch{padding:8px 10px;font-size:11px}
+  .section .btn,.sheet .btn{width:100%}
+  .actions .btn,.footrow .btn,.prompt-actions .btn{width:100%}
+  .actions .grow{display:none}
+  #toast{bottom:66px}
+}
+@media (max-width:460px){
+  #stepper{grid-template-columns:minmax(0,1fr)}
+  .step{padding:12px}
+  .concept-tag{font-size:10px;padding:6px 8px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+.grid > .span2{grid-column:1 / -1}
+.journey + .grid{margin-top:22px}
+.prompt-wrap{margin-top:16px}
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <a class="logo-lockup" href="../../index.html#/home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <nav class="tabs" aria-label="Lobby">
+      <a class="on" href="#top">Build</a>
+      <a href="../../index.html#/home">Home</a>
+    </nav>
+    <span class="spacer"></span>
+    <span class="pill"><i></i>Island build</span>
+    <button class="switch" id="devMode" type="button" aria-pressed="false">Dev mode<span class="knob" aria-hidden="true"></span></button>
+    <a class="btn btn-ghost" href="../../index.html#/home">Home</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- Tagline, progress rail, crumbs: the lobby's message-of-the-day strip, carrying this screen's state -->
+  <section class="strip">
+    <div class="wrap">
+      <p class="tagline">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+      <div class="rail-side">
+        <div class="xp-bar" role="progressbar" aria-label="Build progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25">
+          <i id="progressFill"></i>
+        </div>
+        <div class="xp-lbl"><span>Build progress</span><span>Idea → Island</span></div>
+      </div>
+      <p class="crumbs">Simulation &amp; Tycoon › Just give me the basics · Brand: <b>KPop Demon Hunters</b></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <!-- The journey: four numbered stations, the current one lit, finished ones ticked and badged -->
+      <div class="journey">
+        <div class="journey-head">
+          <div>
+            <div class="eyebrow"><span class="dot"></span>Build journey</div>
+            <p>Four stations from an empty project to a published island. The station you are on is lit.</p>
+          </div>
+          <span class="plate"><span class="ok">✓</span> Guided build</span>
+        </div>
+        <ol id="stepper"></ol>
+        <p class="track-hint">Pick a station to jump to it →</p>
+      </div>
+
+      <div class="grid">
+        <!-- Step title -->
+        <div class="span2">
+          <div class="head">
+            <div>
+              <div class="eyebrow"><span class="dot"></span>Now building</div>
+              <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+            </div>
+            <div class="badges">
+              <span class="badge ready">● Live</span>
+              <span class="badge meta">Solo · Guided</span>
+            </div>
+          </div>
+          <p class="lead-sub">Watch the walkthrough, follow the instructions, then copy the prompt into your UEFN MCP when you are ready. Nothing here is a dead end: Back and Next always work.</p>
+        </div>
+
+        <!-- Video: the lobby's mode tile, holding the 16:9 player -->
+        <div class="tile">
+          <div class="tile-head">
+            <div class="badges">
+              <span class="badge ready">● Video walkthrough</span>
+              <span class="badge meta">16:9 · 1080p</span>
+            </div>
+            <span class="num">Walkthrough</span>
+          </div>
+          <div class="frame">
+            <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Video walkthrough"
+              width="1280" height="720" loading="lazy" allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+          </div>
+          <a class="watch" href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Video not loading? Watch on YouTube ↗</a>
+        </div>
+
+        <!-- Instructions: the lobby's plate panel -->
+        <div class="panel">
+          <div class="head">
+            <div>
+              <div class="eyebrow"><span class="dot"></span>Instructions</div>
+              <p>Follow these in order. The devices and the tip come from your game type.</p>
+            </div>
+          </div>
+          <div id="stepBody"></div>
+        </div>
+
+        <!-- MCP prompt plate -->
+        <div class="panel prompt-wrap span2">
+          <div class="head">
+            <div>
+              <div class="eyebrow"><span class="dot"></span>UEFN MCP prompt</div>
+              <p class="help">Copy this into the UEFN MCP so the project, the devices and the layout are set up for you.</p>
+            </div>
+            <span class="plate"><span class="ok">✓</span> Ready to paste</span>
+          </div>
+          <label class="flabel" for="prompt">Prompt for this step</label>
+          <p class="help">Read-only. Copy it, paste it into your MCP chat, and keep the answer in the project.</p>
+          <textarea id="prompt" readonly spellcheck="false"></textarea>
+          <div class="prompt-actions">
+            <button class="btn btn-play" id="copy" type="button">Copy prompt</button>
+            <span class="plate">Keys <span class="key" aria-hidden="true">Ctrl</span> <span class="key" aria-hidden="true">C</span></span>
+            <span id="copyStatus" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+
+        <!-- Feedback trigger, then the step controls -->
+        <div class="footrow span2">
+          <button class="btn btn-ghost" id="feedbackBtn" type="button">Report a problem</button>
+          <span class="plate">Saved on this device only</span>
+        </div>
+
+        <div class="actions span2">
+          <button class="btn btn-ghost" id="back" type="button">← Back</button>
+          <span class="plate">Keys <span class="key" aria-hidden="true">Enter</span> activate</span>
+          <span class="grow"></span>
+          <a class="btn btn-ghost" href="../questions-1-default/index.html">Edit game type</a>
+          <button class="btn btn-play" id="next" type="button">Next →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<!-- Report a problem: the lobby's plate panel, as a dialog. Copy is the baseline's, word for word. -->
+<dialog id="feedback" aria-labelledby="fbTitle">
+  <form class="sheet" id="fbForm" method="dialog" novalidate>
+    <div class="sheet-top">
+      <div>
+        <h2 id="fbTitle">Report a problem</h2>
+        <p class="fb-step" id="fbStep">Step 1: Create Your Project</p>
+      </div>
+      <button class="x" id="fbClose" type="button" aria-label="Close">✕</button>
+    </div>
+
+    <div class="fb-field">
+      <div class="eyebrow fb-eyebrow">What went wrong?</div>
+      <div class="chips">
+        <label class="chip-r"><input type="radio" name="reason" value="out-of-date"><span class="rd" aria-hidden="true"></span>Out of date</label>
+        <label class="chip-r"><input type="radio" name="reason" value="broken"><span class="rd" aria-hidden="true"></span>Doesn't work</label>
+        <label class="chip-r"><input type="radio" name="reason" value="unclear"><span class="rd" aria-hidden="true"></span>Hard to follow</label>
+        <label class="chip-r"><input type="radio" name="reason" value="video"><span class="rd" aria-hidden="true"></span>Video problem</label>
+        <label class="chip-r"><input type="radio" name="reason" value="other"><span class="rd" aria-hidden="true"></span>Something else</label>
+      </div>
+    </div>
+
+    <div class="fb-field">
+      <label class="flabel" for="fbText">What happened? (optional)</label>
+      <textarea class="fld" id="fbText" rows="4" placeholder="Which instruction tripped you up, and what did you see?"></textarea>
+    </div>
+
+    <div class="fb-field">
+      <label class="flabel" for="fbEmail">Email (optional, if you'd like a reply)</label>
+      <input class="fld" id="fbEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+    </div>
+
+    <p id="fbError" role="alert"></p>
+    <p class="fb-note">For now this is saved on this device only.</p>
+
+    <div class="sheet-actions">
+      <button class="btn btn-ghost" id="fbCancel" type="button">Cancel <span class="key" aria-hidden="true">Esc</span></button>
+      <button class="btn btn-play" type="submit">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+<div class="concept-tag">Lessons 4 - Choose Your Mode</div>
+
+<script src="lessons.js"></script>
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lessons 7 - Spotlight &middot; Forge</title>
+<meta name="description" content="Forge walkthrough: follow the step, watch the video, copy the prompt for the UEFN MCP." />
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ---------- Where this design comes from ----------
+     Concept 9 - "Spotlight" (public/concepts/9-spotlight/index.html), read as a design system.
+     Taken from it at its own values: the :root tokens (--ink #101014, --ink-soft, --line, --muted,
+     --gutter, the --display/--title stacks, --ease), its local Inter + Archivo Black faces with
+     Inter Tight from Google Fonts, the 160deg #868AFD -> #B9A1F0 45% -> #F1B8DD stage gradient and
+     its radial white bloom, the 26px frosted card (blur(22px) saturate(140%), 1px white hairline,
+     0 24px 60px -28px shadow), the 999px pill / .chip vocabulary and the fixed corner tag.
+     That page's bar sits on the light gradient and so recolours the mark with logo-img-black; this
+     bar does the same. Here the current step is the thing in the spotlight: the lit instrument
+     panel on the dark stage floor holds the title and the video, and the frosted surfaces carry
+     the instructions and the MCP read-out. */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: "Archivo Black";
+    src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2");
+    font-weight: 400;
+    font-display: swap;
+  }
+  :root {
+    --ink: #101014;
+    --ink-soft: #28282C;
+    --line: #303034;
+    --muted: #ACACAD;
+    --gutter: clamp(20px, 5vw, 72px);
+    --display: "Archivo Black", "Inter Tight", "Inter", sans-serif;
+    --title: "Inter Tight", "Inter", sans-serif;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    /* the concept's own surfaces */
+    --stage: linear-gradient(160deg, #868AFD 0%, #B9A1F0 45%, #F1B8DD 100%);
+    --glass: rgba(255, 255, 255, .8);
+    --frost: rgba(255, 255, 255, .07);
+    --hair: rgba(255, 255, 255, .16);
+    --text: #E8E8EC;
+    --text-dim: rgba(255, 255, 255, .66);
+    --violet: #868AFD;
+    --pink: #F1B8DD;
+    --mint: #AAE755;
+    --cyan: #44D5BF;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--ink);
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .wrap { margin: 0 auto; }
+  /* ---------- Stage: the light the step stands in ---------- */
+  .stage {
+    position: relative;
+    background: var(--stage);
+    overflow: hidden;
+    isolation: isolate;
+    padding-bottom: clamp(30px, 4.5vw, 58px);
+  }
+  .stage::before {
+    content: "";
+    position: absolute;
+    z-index: -2;
+    width: min(64vw, 820px);
+    aspect-ratio: 1;
+    right: -8vw;
+    top: -10vw;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(255,255,255,.7), rgba(255,255,255,.16) 62%, rgba(255,255,255,0) 100%);
+  }
+  .stage::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: auto 0 0;
+    height: 46%;
+    background: linear-gradient(180deg, rgba(16,16,20,0) 0%, rgba(16,16,20,.16) 100%);
+    pointer-events: none;
+  }
+  /* ---------- Header: 72px, the shared lockup on the column ---------- */
+  header.top {
+    height: 72px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .top-controls { display: flex; align-items: center; gap: 8px; }
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(16,16,20,.32);
+    background: rgba(255,255,255,.42);
+    color: var(--ink);
+    font: 700 13px/1 "Inter", sans-serif;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
+  }
+  .key:hover { background: rgba(255,255,255,.78); transform: translateY(-1px); }
+  #devMode[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+  #devMode[aria-pressed="true"]::before { background: var(--mint); }
+  #devMode::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(16,16,20,.4);
+    transition: background-color .25s var(--ease);
+  }
+  /* ---------- Hero: crumbs, the tagline, the rail, the stepper ---------- */
+  /* .wrap owns the column's gutter, so the hero is sized by min-height and the copy carries its own
+     breathing room - no padding is added to .wrap itself. */
+  .hero { position: relative; display: flex; align-items: center; min-height: clamp(200px, 19vw, 254px); }
+  .hero-copy { position: relative; z-index: 1; max-width: min(100%, 680px); padding-block: 18px 14px; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    font: 700 12.5px/1 "Inter", sans-serif;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+  }
+  .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+  .tagline { margin: 0; max-width: 46ch; font-size: clamp(1.02rem, 1.2vw, 1.16rem); line-height: 1.5; color: var(--ink-soft); font-weight: 500; }
+  /* the progress rail, the landing page's .bar in ink-on-gradient */
+  .rail { height: 8px; margin: 20px 0 4px; border-radius: 99px; background: rgba(16,16,20,.18); overflow: hidden; }
+  #progressFill {
+    display: block;
+    height: 100%;
+    width: 25%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #33BFFF, #868AFD);
+    transition: width .8s var(--ease);
+  }
+  .crumbs { margin: 14px 0 10px; font: 700 11px/1.5 "Inter", sans-serif; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+  .crumbs b { font-weight: 800; }
+  /* the stepper: four plates, the current one lit */
+  .steps { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; }
+  .steps li { min-width: 0; }
+  .step {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 13px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(16,16,20,.26);
+    background: rgba(255,255,255,.5);
+    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    backdrop-filter: blur(14px) saturate(130%);
+    color: var(--ink-soft);
+    font: 700 13px/1.25 "Inter", sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease), transform .3s var(--ease), box-shadow .3s var(--ease);
+  }
+  .step:hover { transform: translateY(-2px); background: rgba(255,255,255,.8); }
+  .step .n {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(16,16,20,.14);
+    font: 400 14px/1 var(--display);
+  }
+  .step.done { background: rgba(16,16,20,.8); border-color: var(--ink); color: #fff; }
+  .step.done .n { background: rgba(255,255,255,.22); color: #fff; }
+  .step[aria-current="step"] {
+    background: #fff;
+    border-color: var(--ink);
+    color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(255,255,255,.85), 0 18px 40px -18px rgba(16,16,20,.6);
+  }
+  .step[aria-current="step"] .n { background: var(--ink); color: #fff; }
+  .hero .figure {
+    position: absolute;
+    right: clamp(0px, 1.4vw, 26px);
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .hero .figure img { height: 100%; width: auto; max-width: none; filter: drop-shadow(0 24px 34px rgba(16,16,20,.3)); }
+  /* ---------- The stage floor: dark ink with pools of light ---------- */
+  .spot {
+    position: relative;
+    padding-block: clamp(26px, 3.4vw, 46px) clamp(48px, 6vw, 84px);
+    background:
+      radial-gradient(58% 44% at 16% 0%, rgba(134,138,253,.36), rgba(134,138,253,0) 72%),
+      radial-gradient(50% 40% at 88% 24%, rgba(241,184,221,.28), rgba(241,184,221,0) 74%),
+      radial-gradient(44% 38% at 52% 100%, rgba(68,213,191,.14), rgba(68,213,191,0) 72%),
+      var(--ink);
+    color: var(--text);
+  }
+  /* frosted surface with a hairline edge - the landing page's .card, over ink */
+  .panel {
+    position: relative;
+    border-radius: 26px;
+    background: var(--frost);
+    -webkit-backdrop-filter: blur(22px) saturate(140%);
+    backdrop-filter: blur(22px) saturate(140%);
+    border: 1px solid var(--hair);
+    box-shadow: 0 24px 60px -28px rgba(0,0,0,.7);
+  }
+  .instrument { padding: clamp(16px, 2.2vw, 26px); }
+  .readout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 13px;
+    border-bottom: 1px solid var(--hair);
+    font: 700 10.5px/1 "Inter", sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .readout .grow { flex: 1; }
+  .readout .live { display: inline-flex; align-items: center; gap: 8px; color: var(--text); }
+  .readout .live::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 3px rgba(170,231,85,.18);
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .step-head { position: relative; padding: clamp(18px, 2.4vw, 28px) 0 clamp(14px, 1.8vw, 20px); }
+  .step-head::before {
+    content: "";
+    position: absolute;
+    left: -6%;
+    top: -40%;
+    width: min(70%, 620px);
+    height: 190%;
+    background: radial-gradient(closest-side, rgba(255,255,255,.17), rgba(255,255,255,0) 100%);
+    pointer-events: none;
+  }
+  h1 {
+    position: relative;
+    margin: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(2rem, 4.2vw, 3.6rem);
+    line-height: .95;
+    letter-spacing: -.015em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  h1:focus { outline: none; }
+  .plate {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255,255,255,.24);
+    box-shadow: 0 40px 90px -44px rgba(134,138,253,.9), 0 0 0 1px rgba(16,16,20,.6);
+  }
+  #video { display: block; width: 100%; aspect-ratio: 16 / 9; height: auto; border: 0; background: #000; }
+  .fallback { margin: 12px 0 0; font: 600 13.5px/1.5 "Inter", sans-serif; color: var(--text-dim); }
+  .fallback a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: clamp(16px, 1.8vw, 26px); align-items: start; margin-top: clamp(16px, 1.8vw, 26px); }
+  .brief { padding: clamp(20px, 2.6vw, 32px); }
+  .brief-label { margin: 0 0 14px; font: 700 10.5px/1 "Inter", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); }
+  #stepBody { font-size: 16.5px; line-height: 1.65; color: var(--text); }
+  #stepBody > :first-child { margin-top: 0; }
+  #stepBody > :last-child { margin-bottom: 0; }
+  #stepBody p { margin: 0 0 16px; max-width: 68ch; }
+  #stepBody h2 {
+    margin: 26px 0 12px;
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: clamp(1.15rem, 1.7vw, 1.45rem);
+    line-height: 1.1;
+    text-transform: uppercase;
+    color: #fff;
+  }
+  /* The list items are inline content with <strong> inside them, so the li stays a plain block and the
+     marker is hung in the margin instead of making the li a grid or flex container. */
+  #stepBody ol, #stepBody ul { list-style: none; margin: 0 0 16px; padding: 0; }
+  #stepBody ol { counter-reset: step; }
+  #stepBody ol > li { counter-increment: step; position: relative; padding-left: 38px; margin-bottom: 12px; }
+  #stepBody ol > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #868AFD, #F1B8DD);
+    color: var(--ink);
+    font: 700 12px/1 "Inter", sans-serif;
+  }
+  #stepBody ul > li { position: relative; padding-left: 22px; margin-bottom: 10px; }
+  #stepBody ul > li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: .64em;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+  }
+  #stepBody a { color: #fff; }
+  #stepBody .devname {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 7px;
+    background: rgba(134,138,253,.2);
+    border: 1px solid rgba(134,138,253,.45);
+    color: #DEE0FF;
+    font-weight: 700;
+    line-height: inherit;
+  }
+  #stepBody .tip {
+    margin: 0 0 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(170,231,85,.34);
+    border-left: 3px solid var(--mint);
+    background: rgba(170,231,85,.1);
+    color: #F0F8E3;
+  }
+  #stepBody .tip::before {
+    content: "Tip";
+    display: block;
+    margin-bottom: 7px;
+    font: 700 10.5px/1 "Inter", sans-serif;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--mint);
+  }
+  /* the MCP prompt, as a read-out */
+  .console { padding: clamp(18px, 2.4vw, 26px); }
+  .console h2 {
+    margin: 16px 0 4px;
+    font: 700 15px/1.3 "Inter", sans-serif;
+    letter-spacing: .01em;
+    color: #fff;
+  }
+  .console .help { margin: 0 0 14px; font-size: 14px; line-height: 1.5; color: var(--text-dim); }
+  #prompt {
+    width: 100%;
+    min-height: 208px;
+    padding: 14px;
+    resize: vertical;
+    border-radius: 14px;
+    border: 1px solid var(--hair);
+    background: rgba(9,9,13,.72);
+    color: #D7DAEA;
+    font: 500 12.5px/1.65 ui-monospace, SFMono-Regular, "Consolas", "Liberation Mono", monospace;
+  }
+  #prompt:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
+  .console-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+  #copyStatus { font: 700 12px/1.4 "Inter", sans-serif; letter-spacing: .04em; color: var(--mint); }
+  /* buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 22px;
+    border-radius: 999px;
+    border: 1.5px solid transparent;
+    text-decoration: none;
+    font: 700 15px/1 "Inter", sans-serif;
+    cursor: pointer;
+    transition: transform .25s var(--ease), background-color .25s var(--ease), color .25s var(--ease), box-shadow .25s var(--ease), border-color .25s var(--ease);
+  }
+  .btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+  .btn-light { background: #fff; color: var(--ink); box-shadow: 0 14px 34px -16px rgba(0,0,0,.9); }
+  .btn-light:hover { transform: translateY(-2px); box-shadow: 0 20px 40px -16px rgba(0,0,0,.95); }
+  .btn-ghost { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.28); color: #fff; }
+  .btn-ghost:hover { background: rgba(255,255,255,.14); transform: translateY(-2px); }
+  .btn.small { padding: 12px 16px; font-size: 13.5px; }
+  .btn-light .arrow { display: grid; place-items: center; width: 26px; height: 26px; margin-right: -8px; border-radius: 50%; background: var(--ink); color: #fff; transition: transform .25s var(--ease); }
+  .btn-light:hover .arrow { transform: translateX(3px); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: clamp(18px, 2.2vw, 28px); }
+  #next { margin-left: auto; }
+  /* the dialog and the toast */
+  #feedback {
+    width: min(560px, calc(100vw - 28px));
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    padding: 0;
+    border: 1px solid var(--hair);
+    border-radius: 24px;
+    background: rgba(18,18,25,.95);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    backdrop-filter: blur(24px) saturate(140%);
+    color: var(--text);
+    box-shadow: 0 40px 110px -30px #000;
+  }
+  #feedback::backdrop { background: rgba(8,8,12,.62); }
+  .fb-in { padding: clamp(20px, 3vw, 28px); }
+  .fb-top { display: flex; align-items: flex-start; gap: 14px; }
+  .fb-top h2 { flex: 1; margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(1.35rem, 2.4vw, 1.7rem); line-height: 1; text-transform: uppercase; color: #fff; }
+  .fb-x { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.28); background: rgba(255,255,255,.06); color: #fff; font: 700 15px/1 "Inter", sans-serif; cursor: pointer; }
+  .fb-x:hover { background: rgba(255,255,255,.16); }
+  #fbStep { margin: 12px 0 18px; font: 700 10.5px/1.5 "Inter", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); }
+  .fb-field { display: block; margin: 0 0 16px; }
+  .fb-field > span { display: block; margin-bottom: 8px; font: 700 10.5px/1 "Inter", sans-serif; letter-spacing: .16em; text-transform: uppercase; color: var(--text-dim); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-radius: 999px;
+    border: 1.5px solid rgba(255,255,255,.26);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    font: 600 13.5px/1 "Inter", sans-serif;
+    cursor: pointer;
+    transition: background-color .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .25s var(--ease);
+  }
+  .chip:hover { transform: translateY(-2px); border-color: rgba(255,255,255,.5); }
+  .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; }
+  .chip:has(input:checked) { background: #fff; border-color: #fff; color: var(--ink); }
+  .chip:has(input:focus-visible) { outline: 3px solid var(--mint); outline-offset: 2px; }
+  #feedback textarea, #feedback input[type="email"] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--hair);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    font: 500 14.5px/1.5 "Inter", sans-serif;
+  }
+  #feedback textarea { min-height: 96px; resize: vertical; }
+  #feedback textarea:focus, #feedback input[type="email"]:focus { outline: 2px solid var(--violet); outline-offset: 1px; }
+  #fbError { margin: 0 0 14px; font-weight: 600; color: #FFB3AE; }
+  #fbError:empty { display: none; }
+  .fb-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+  .fb-note { margin: 16px 0 0; font-size: 13px; color: var(--text-dim); }
+  #toast {
+    position: fixed;
+    left: var(--gutter);
+    bottom: calc(58px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    max-width: min(28rem, calc(100vw - 2 * var(--gutter)));
+    padding: 13px 18px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.96);
+    color: var(--ink);
+    font: 700 13.5px/1.35 "Inter", sans-serif;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,.8);
+  }
+  #toast[hidden] { display: none; }
+  .concept-tag {
+    position: fixed;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+    z-index: 50;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: rgba(16,16,20,.85);
+    color: #fff;
+    font: 700 11px/1 "Inter", sans-serif;
+    letter-spacing: .04em;
+  }
+  @media (max-width: 1040px) {
+    .hero .figure { display: none; }
+  }
+  @media (max-width: 980px) {
+    .cols { grid-template-columns: minmax(0, 1fr); }
+    #prompt { min-height: 168px; }
+  }
+  @media (max-width: 640px) {
+    .stage::before { width: 120vw; right: -50vw; top: 40px; }
+    .hero-copy { max-width: none; }
+    .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .step { font-size: 12.5px; padding: 10px 11px; }
+    .step .n { width: 24px; height: 24px; font-size: 13px; }
+    h1 { font-size: clamp(1.8rem, 9vw, 2.4rem); }
+    #stepBody { font-size: 16px; }
+    .actions { gap: 8px; }
+    .btn { padding: 14px 18px; font-size: 14.5px; }
+    #next { margin-left: 0; width: 100%; }
+    .actions .btn-ghost, .actions .btn-light { flex: 1 1 auto; }
+    .fb-actions .btn { flex: 1 1 auto; }
+    #toast { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  }
+  @media (max-width: 400px) {
+    .step { font-size: 12px; }
+    #stepBody ol > li { padding-left: 32px; }
+    #stepBody ol > li::before { width: 22px; height: 22px; font-size: 11px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: .01s !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+<div class="stage">
+  <header class="wrap top">
+    <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+      <span class="logo-wrap"><img class="logo-img logo-img-black" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <div class="top-controls">
+      <a class="key" href="../../index.html#/home">Home</a>
+      <button class="key" id="devMode" type="button" aria-pressed="false">Dev mode</button>
+    </div>
+  </header>
+
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Forge walkthrough</p>
+      <p class="tagline">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+      <div class="rail" role="progressbar" aria-label="Lesson progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25"><i id="progressFill"></i></div>
+      <p class="crumbs">Simulation &amp; Tycoon &rsaquo; Just give me the basics <span aria-hidden="true">&middot;</span> Brand: <b>KPop Demon Hunters</b></p>
+    </div>
+    <figure class="figure">
+      <img src="../_media/char-fn-18-outfit-jett.webp" alt="" width="875" height="1400" loading="lazy">
+    </figure>
+  </section>
+
+  <nav class="wrap" aria-label="Build steps">
+    <ol class="steps" id="stepper"></ol>
+  </nav>
+</div>
+
+<section class="spot">
+  <div class="wrap">
+    <article class="panel instrument">
+      <div class="readout">
+        <span class="live">Now building</span>
+        <span class="grow"></span>
+        <span>Video &middot; 16:9</span>
+      </div>
+      <div class="step-head">
+        <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+      </div>
+      <div class="plate">
+        <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Forge walkthrough video" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <p class="fallback">Video not loading? <a href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Watch on YouTube &#8599;</a></p>
+    </article>
+
+    <div class="cols">
+      <article class="panel brief" aria-labelledby="briefTitle">
+        <p class="brief-label" id="briefTitle">Instructions</p>
+        <div id="stepBody"></div>
+      </article>
+
+      <aside class="panel console" aria-labelledby="promptTitle">
+        <div class="readout">
+          <span>UEFN MCP</span>
+          <span class="grow"></span>
+          <span class="live">Prompt</span>
+        </div>
+        <h2 id="promptTitle">Prompt for the UEFN MCP</h2>
+        <p class="help">Paste this into the UEFN MCP in your editor. It is written for the step you are on.</p>
+        <textarea id="prompt" readonly spellcheck="false" aria-labelledby="promptTitle"></textarea>
+        <div class="console-row">
+          <button class="btn btn-light small" id="copy" type="button">Copy prompt</button>
+          <span id="copyStatus" role="status" aria-live="polite"></span>
+        </div>
+      </aside>
+    </div>
+
+    <div class="actions">
+      <!-- Back leads the row and the report trigger closes it, which is the baseline's order: Back is where
+           the eye goes first, and the report link belongs beside the step it is about. -->
+      <button class="btn btn-ghost" id="back" type="button">&larr; Back</button>
+      <a class="btn btn-ghost" href="../questions-1-default/index.html">Edit game type</a>
+      <button class="btn btn-ghost" id="feedbackBtn" type="button">Report a problem</button>
+      <button class="btn btn-light" id="next" type="button">Next: Block Out the Island <span class="arrow" aria-hidden="true">&rarr;</span></button>
+    </div>
+  </div>
+</section>
+
+<dialog id="feedback" aria-labelledby="fbTitle">
+  <div class="fb-in">
+    <div class="fb-top">
+      <h2 id="fbTitle">Report a problem</h2>
+      <button class="fb-x" id="fbClose" type="button" aria-label="Close">&#10005;</button>
+    </div>
+    <p id="fbStep">Step 1 &middot; Create Your Project</p>
+    <form id="fbForm" novalidate>
+      <div class="chips" role="radiogroup" aria-label="Reason for the report">
+        <label class="chip"><input type="radio" name="reason" value="Out of date"><span>Out of date</span></label>
+        <label class="chip"><input type="radio" name="reason" value="Doesn't work"><span>Doesn't work</span></label>
+        <label class="chip"><input type="radio" name="reason" value="Hard to follow"><span>Hard to follow</span></label>
+        <label class="chip"><input type="radio" name="reason" value="Video problem"><span>Video problem</span></label>
+        <label class="chip"><input type="radio" name="reason" value="Something else"><span>Something else</span></label>
+      </div>
+      <label class="fb-field" for="fbText">
+        <span>What happened? (optional)</span>
+        <textarea id="fbText" name="text" spellcheck="false"></textarea>
+      </label>
+      <label class="fb-field" for="fbEmail">
+        <span>Email (optional, if you'd like a reply)</span>
+        <input id="fbEmail" name="email" type="email" autocomplete="email" />
+      </label>
+      <p id="fbError" role="alert"></p>
+      <div class="fb-actions">
+        <button class="btn btn-ghost" id="fbCancel" type="button">Cancel</button>
+        <button class="btn btn-light" type="submit">Send</button>
+      </div>
+      <p class="fb-note">For now this is saved on this device only.</p>
+    </form>
+  </div>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+<span class="concept-tag">Lessons 7 - Spotlight</span>
+
+<script src="lessons.js"></script>
+</body>
+</html>
+

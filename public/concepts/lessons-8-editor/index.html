@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lessons 8 - The Editor · Forge</title>
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" />
+<style>
+/* Lesson walkthrough wearing Concept 10, "The Editor" (public/concepts/10-uefn-editor): Unreal Editor's own
+   tool language - outliner tree for the steps, Details panel for the instructions, drawer for the prompt. */
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --bg: #101014;
+  --panel: #18181C;
+  --raised: #202024;
+  --line: #28282C;
+  --line-2: rgba(255, 255, 255, .15);
+  --ink: #FFFFFF;
+  --ink-2: rgba(255, 255, 255, .75);
+  --ink-3: rgba(255, 255, 255, .65);
+  --accent: #26BBFF;
+  --on-accent: #101014;
+  --ease-2: cubic-bezier(.45, 0, .55, 1);
+  --mono: ui-monospace, "Cascadia Mono", Consolas, "SFMono-Regular", Menlo, monospace;
+  --display: "Inter Tight", "Inter", system-ui, sans-serif;
+  --text: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--text);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+p, h1, h2, h3, ul, ol, li { margin: 0; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.01em; line-height: 1.06; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.mono { font-family: var(--mono); }
+.page { padding: 24px 0 96px; }
+
+/* ---- header: the bar keeps its own rule and controls ---- */
+.bar {
+  position: sticky; top: 0; z-index: 20; height: 72px;
+  background: rgba(16, 16, 20, .72);
+  backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px);
+  border-bottom: 1px solid var(--line);
+}
+.bar-row { display: flex; align-items: center; gap: 16px; height: 72px; }
+.bar-meta {
+  margin-left: auto; display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+.bar-meta b { font-weight: 400; color: #fff; }
+.bar-dot { width: 6px; height: 6px; border-radius: 50%; background: #5FE367; box-shadow: 0 0 0 3px rgba(95, 227, 103, .18); }
+.bar-nav { display: flex; align-items: center; gap: 8px; }
+.dev-key {
+  display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px;
+  border: 1px solid var(--line-2); border-radius: 8px; background: rgba(255, 255, 255, .05);
+  color: var(--ink-2); font: 500 12px/1 var(--text); letter-spacing: .28px; cursor: pointer;
+  transition: background-color .1s linear, color .1s linear;
+}
+.dev-key:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.dev-key[aria-pressed="true"] { color: #fff; background: rgba(255, 255, 255, .14); border-color: #fff; }
+.dev-lamp { width: 8px; height: 8px; border-radius: 2px; background: rgba(255, 255, 255, .3); }
+.dev-key[aria-pressed="true"] .dev-lamp { background: #5FE367; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 8px 16px; border: 1px solid transparent; border-radius: 8px;
+  font-family: var(--text); font-size: 14px; font-weight: 500; line-height: 1; letter-spacing: .28px;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background-color .1s linear, border-color .1s linear, color .1s linear;
+}
+.btn-primary { background: var(--accent); color: var(--on-accent); }
+.btn-primary:hover { background: #69D0FF; }
+.btn-quiet { background: rgba(255, 255, 255, .06); border-color: var(--line-2); color: #fff; }
+.btn-quiet:hover { background: rgba(255, 255, 255, .12); }
+.btn:disabled { background: rgba(255, 255, 255, .05); color: var(--ink-3); cursor: default; }
+
+/* ---- hero, rail, crumbs ---- */
+.hero { display: grid; gap: 8px; margin-bottom: 18px; }
+.eyebrow { font-size: 12px; font-weight: 500; line-height: 1; letter-spacing: .36px; text-transform: uppercase; color: var(--accent); }
+.tagline { color: var(--ink-2); font-size: 17px; max-width: 46em; }
+.rail {
+  position: relative; height: 6px; border-radius: 9999px; margin-bottom: 14px;
+  background: rgba(255, 255, 255, .07); border: 1px solid var(--line); overflow: hidden;
+}
+.rail-fill { display: block; height: 100%; width: 25%; background: var(--grad, linear-gradient(225deg, #DFBAF8, #33BFFF)); transition: width .3s var(--ease-2); }
+.crumbs {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 18px;
+  font-size: 11px; letter-spacing: .06em; color: var(--ink-3);
+}
+.crumb-on { padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, .14); color: #fff; }
+.crumb { padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, .06); }
+.crumb-sep, .crumb-dot { color: var(--ink-3); }
+
+/* ---- workbench: outliner rail beside the stage ---- */
+.workbench { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 18px; align-items: start; }
+.stage { display: grid; gap: 18px; min-width: 0; }
+#stepTitle { font-size: clamp(30px, 4.4vw, 44px); max-width: 20em; }
+#stepTitle:focus { outline: none; }
+
+.panel { border-radius: 20px; background: var(--panel); border: 1px solid var(--line); overflow: hidden; }
+.panel-head {
+  display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+  border-bottom: 1px solid var(--line); background: var(--raised);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+.panel-head b { font-weight: 400; color: #fff; }
+.panel-head em { margin-left: auto; font-style: normal; color: var(--ink-3); }
+.panel-note { padding: 10px 14px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+/* ---- the four steps as an Outliner tree ---- */
+.tree { padding: 8px; position: sticky; top: 88px; }
+.tree ol, #stepper { list-style: none; }
+#stepper li { position: relative; }
+#stepper li::before {
+  content: ""; position: absolute; left: 13px; top: 18px;
+  width: 0; height: 0; border: 4px solid transparent; border-left-color: var(--ink-3);
+}
+#stepper li:has([aria-current="step"])::before {
+  top: 20px; margin-top: 0; border-left-color: transparent; border-top-color: var(--accent); border-width: 5px 4px 0;
+}
+#stepper .step {
+  display: block; width: 100%; text-align: left; padding: 9px 30px 9px 32px;
+  border: 0; border-radius: 8px; background: transparent; color: var(--ink-3);
+  font-family: var(--text); font-size: 13.5px; line-height: 1.4; cursor: pointer;
+  transition: background .2s var(--ease-2), color .2s var(--ease-2);
+}
+#stepper .step:hover { background: rgba(255, 255, 255, .05); color: var(--ink); }
+#stepper .step .n { display: inline-block; min-width: 20px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+#stepper .step[aria-current="step"] { background: rgba(255, 255, 255, .1); color: #fff; box-shadow: inset 2px 0 0 var(--accent); }
+#stepper .step[aria-current="step"] .n { color: var(--accent); }
+#stepper .step.done, #stepper li.done .step { color: var(--ink-2); }
+#stepper .done::after {
+  content: "✓"; position: absolute; right: 12px; top: 8px; color: #5FE367; font-size: 12px;
+}
+
+/* ---- the video plate ---- */
+.vp-tabs { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 10px 12px 0; }
+.vp-tab { padding: 5px 10px; border-radius: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--ink-3); background: rgba(255, 255, 255, .05); }
+.vp-tab.on { color: #fff; background: rgba(255, 255, 255, .12); }
+.vp-tab-arrow { color: var(--ink-3); font-size: 9px; }
+.frame16 { position: relative; aspect-ratio: 16 / 9; margin: 10px 0 0; background: #000; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.frame16 iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.vp-note { padding: 10px 14px; font-size: 12px; color: var(--ink-3); }
+.vp-note a { color: #fff; text-underline-offset: 3px; }
+
+/* ---- instructions: the prose the script renders ---- */
+.doc-body { padding: 16px 18px 20px; }
+.prose { color: var(--ink-2); font-size: 15.5px; }
+.prose p + p { margin-top: 12px; }
+.prose strong { color: #fff; font-weight: 600; }
+.prose h2 {
+  margin: 22px 0 10px; font-family: var(--mono); font-size: 11px; font-weight: 400;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  padding-top: 12px; border-top: 1px solid var(--line);
+}
+.prose code { font-family: var(--mono); font-size: .92em; color: #fff; background: rgba(255, 255, 255, .07); padding: 1px 5px; border-radius: 4px; }
+/* list markers live in the margin: a list item that becomes a flex/grid box would split its inline
+   <strong> into separate columns, so nothing here may be a container. */
+.prose ol, .prose ul { list-style: none; margin: 14px 0; padding: 0; counter-reset: st; }
+.prose li { position: relative; padding-left: 32px; margin-bottom: 10px; }
+.prose ol li { counter-increment: st; }
+.prose ol li::before {
+  content: counter(st); position: absolute; left: 0; top: 3px; width: 21px; height: 21px;
+  border-radius: 6px; background: rgba(255, 255, 255, .08); color: var(--ink-2);
+  font-family: var(--mono); font-size: 11px; line-height: 21px; text-align: center;
+}
+.prose ul li::before {
+  content: ""; position: absolute; left: 8px; top: 11px; width: 5px; height: 5px;
+  background: var(--ink-3); border-radius: 1px;
+}
+.prose .devname { display: inline; font-family: var(--mono); font-size: .94em; font-weight: 400; color: #fff; }
+.prose .tip {
+  display: block; margin: 16px 0; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line-2); border-left: 2px solid var(--accent);
+  background: rgba(255, 255, 255, .04); color: var(--ink-2); font-size: 14.5px;
+}
+
+/* ---- the prompt, as a drawer ---- */
+.drawer { border-radius: 20px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .05); overflow: hidden; }
+.drawer-head {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 16px;
+  border-bottom: 1px solid var(--line); background: rgba(255, 255, 255, .03);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--ink-3);
+}
+.drawer-head b { font-weight: 400; color: #fff; }
+.drawer-head em { margin-left: auto; font-style: normal; }
+.drawer-body { padding: 14px 16px 16px; }
+.drawer-help { font-size: 13.5px; color: var(--ink-3); margin-bottom: 10px; }
+#prompt {
+  display: block; width: 100%; min-height: 96px; resize: vertical;
+  padding: 11px 12px; border: 1px solid var(--line-2); border-radius: 10px;
+  background: #0C0C0F; color: #fff; font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+}
+.drawer-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+#copyStatus { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: var(--ink-3); }
+
+/* ---- actions on a toolbar ---- */
+.toolbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 12px 14px; border-radius: 16px; background: var(--raised); border: 1px solid var(--line);
+}
+.tb-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-left: auto; }
+
+/* ---- report dialog ---- */
+#feedback {
+  width: min(560px, calc(100vw - 28px)); padding: 0; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line-2); border-radius: 20px;
+}
+#feedback::backdrop { background: rgba(8, 8, 10, .74); }
+.dlg-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--raised); border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.dlg-x { margin-left: auto; width: 30px; height: 30px; border: 1px solid var(--line-2); border-radius: 6px; background: rgba(255, 255, 255, .05); color: #fff; font: 400 14px/1 var(--text); cursor: pointer; }
+.dlg-x:hover { background: rgba(255, 255, 255, .12); }
+.dlg-body { padding: 14px; }
+.fb-title { font-family: var(--display); font-size: 20px; font-weight: 700; }
+#fbStep { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; color: var(--ink-3); margin-top: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; padding: 0; border: 0; }
+.chips legend { padding: 0; margin-bottom: 8px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.chip { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border: 1px solid var(--line-2); border-radius: 9999px; background: rgba(255, 255, 255, .04); font-size: 13px; color: var(--ink-2); cursor: pointer; }
+.chip:hover { background: rgba(255, 255, 255, .09); }
+.chip:has(input:checked) { background: rgba(255, 255, 255, .15); border-color: #fff; color: #fff; }
+.chip input { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; margin: 0; border: 1px solid var(--line-2); border-radius: 50%; background: transparent; }
+.chip input:checked { background: #fff; border-color: #fff; }
+.fld { display: block; margin-top: 14px; }
+.fld > span { display: block; margin-bottom: 6px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.fld textarea, .fld input {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--line-2); border-radius: 10px;
+  background: #0C0C0F; color: #fff; font: inherit; font-size: 14px;
+}
+.fld textarea { min-height: 84px; resize: vertical; }
+#fbError { min-height: 0; margin-top: 10px; color: #FF9B9B; font-size: 13.5px; }
+.dlg-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border-top: 1px solid var(--line); background: var(--raised); }
+.dlg-note { font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+.dlg-btns { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+/* ---- toast and the corner tag ---- */
+.toast {
+  position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 40;
+  max-width: min(560px, calc(100vw - 24px)); padding: 10px 14px; border-radius: 10px;
+  background: var(--raised); border: 1px solid var(--line-2); color: #fff;
+  font-size: 13px; letter-spacing: .04em; box-shadow: 0 12px 40px rgba(0, 0, 0, .5);
+}
+.concept-tag {
+  position: fixed; left: 14px; bottom: 14px; z-index: 30;
+  padding: 6px 10px; border-radius: 8px; background: rgba(16, 16, 20, .82);
+  border: 1px solid var(--line-2); color: var(--ink-2);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em; backdrop-filter: blur(20px);
+}
+
+/* ---- furniture: the Outliner rail ---- */
+.tri {
+  flex: none; display: inline-block; vertical-align: middle; width: 0; height: 0;
+  border: 4px solid transparent; border-left-color: var(--ink-3);
+}
+.tri-open { border-left-color: transparent; border-top-color: var(--ink-3); border-width: 5px 4px 0; }
+.panel-head .tri { margin: -2px 2px 0 0; }
+.tree-panel { position: sticky; top: 88px; }
+.tree-panel .tree { position: static; padding: 4px 8px 8px; }
+/* the step rows are the tree's children: indented under the panel head, each with its disclosure triangle */
+#stepper .step { border-radius: 8px; }
+#stepper li + li { margin-top: 2px; }
+
+/* ---- furniture: the Details panel reads as rows and section fold-outs ---- */
+.doc-body { padding: 4px 16px 18px; }
+#stepBody > p:first-child { margin-top: 14px; }
+#stepBody h2 { display: block; }
+/* the section head carries the disclosure triangle; the rows below it are the open section */
+#stepBody h2::before {
+  content: ""; display: inline-block; vertical-align: middle; margin: -3px 9px 0 0;
+  width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--ink-3); border-width: 5px 4px 0;
+}
+#stepBody ol, #stepBody ul {
+  border: 1px solid rgba(255, 255, 255, .05); border-radius: 12px; overflow: hidden; background: rgba(255, 255, 255, .02);
+}
+#stepBody li { margin: 0; padding: 10px 13px 10px 38px; }
+#stepBody li + li { border-top: 1px solid rgba(255, 255, 255, .05); }
+#stepBody ol li::before { top: 12px; left: 12px; }
+#stepBody ul li::before { top: 20px; left: 16px; border-radius: 50%; }
+#stepBody .devname { display: inline-block; min-width: 15ch; }
+@media (min-width: 720px) and (max-width: 900px) { #stepBody .devname { min-width: 0; } }
+
+@media (max-width: 900px) {
+  .workbench { grid-template-columns: minmax(0, 1fr); }
+  .tree { position: static; }
+  #stepTitle { font-size: clamp(26px, 7vw, 34px); }
+}
+@media (max-width: 560px) {
+  .bar-meta { display: none; }
+  .toolbar { padding: 10px; }
+  .tb-right { margin-left: 0; width: 100%; }
+  .tb-right .btn { flex: 1 1 auto; }
+  .concept-tag { bottom: 72px; font-size: 10px; }
+  .prose li { padding-left: 28px; }
+}
+
+/* ---- furniture: the Outliner panel head sits over the four step rows (a pseudo-element, so the list the
+   script fills keeps exactly four children) ---- */
+#stepper { position: relative; }
+#stepper::before {
+  content: "Outliner  ·  island build  ·  4 steps";
+  display: block; margin: -4px -8px 6px; padding: 11px 14px;
+  border-bottom: 1px solid var(--line); background: var(--raised);
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+}
+
+/* ---- furniture: the prompt is a console drawer ---- */
+.drawer { position: relative; }
+.drawer-head { border-radius: 20px 20px 0 0; background: linear-gradient(rgba(255, 255, 255, .05), rgba(255, 255, 255, .01)); }
+.drawer-head .crumb { text-transform: none; }
+#prompt {
+  background: #0A0A0D; border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 0 0 1px rgba(0, 0, 0, .45);
+}
+#prompt:focus { outline: 2px solid #fff; outline-offset: 2px; }
+.drawer-foot { border-top: 1px dashed var(--line-2); padding-top: 12px; }
+#copyStatus:empty::before { content: "not copied yet"; opacity: .7; }
+
+/* ---- furniture: the report dialog wears the same shell ---- */
+#feedback { overflow: hidden; box-shadow: 0 30px 90px rgba(0, 0, 0, .7); }
+.dlg-head { border-radius: 20px 20px 0 0; }
+.dlg-x { transition: background-color .1s linear, border-color .1s linear; }
+.dlg-x:hover { border-color: #fff; }
+.dlg-body { padding: 16px 16px 4px; }
+.fb-title { line-height: 1.1; }
+.chip { transition: background-color .12s linear, border-color .12s linear, color .12s linear; }
+.chip input { transition: background-color .12s linear; }
+#fbError:empty { display: none; }
+.dlg-foot { border-radius: 0 0 20px 20px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
+
+/* ---- furniture: toolbar and toast keep the tool's crisp edges ---- */
+.toolbar { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04); }
+.toast[hidden] { display: none; }
+.toast { transition: opacity .2s var(--ease-2); }
+
+@media (max-width: 900px) { .tree-panel { position: static; } }
+@media (max-width: 420px) {
+  #stepper .step { padding-right: 26px; }
+  .prose .devname { min-width: 0; }
+}
+</style>
+<!-- Last in the head, so the shared chrome rules win any tie against this page's own. -->
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="bar wrap">
+  <div class="bar-row">
+    <a class="logo-lockup" href="../../index.html#/home">
+      <span class="logo-wrap"><img class="logo-img" src="../../assets/logo.svg" alt="Forge" /></span>
+      <span class="logo-word">Forge</span>
+    </a>
+    <p class="bar-meta"><span class="bar-dot"></span> UEFN <b>34.10</b> · <b>MCP linked</b></p>
+    <nav class="bar-nav">
+      <a class="btn btn-quiet" href="../../index.html#/home">Home</a>
+      <button class="dev-key" type="button" id="devMode" aria-pressed="false"><span class="dev-lamp"></span>Dev mode</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap page">
+
+  <section class="hero">
+    <p class="eyebrow">Walkthrough · Outliner</p>
+    <p class="tagline">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+  </section>
+
+  <div class="rail" role="progressbar" aria-label="Build progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25">
+    <i class="rail-fill" id="progressFill"></i>
+  </div>
+
+  <p class="crumbs"><span class="crumb-on">Simulation &amp; Tycoon</span> <span class="crumb-sep">›</span> Just give me the basics <span class="crumb-dot">·</span> Brand: KPop Demon Hunters</p>
+
+  <div class="workbench">
+    <ol class="tree panel" id="stepper" aria-label="Build steps"></ol>
+
+    <div class="stage">
+      <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+
+      <div class="panel">
+        <div class="vp-tabs">
+          <span class="vp-tab on">Preview</span>
+          <span class="vp-tab-arrow">▸</span>
+          <span class="vp-tab">Perspective</span>
+          <span class="vp-tab">Outliner</span>
+          <span class="vp-tab">Details</span>
+        </div>
+        <div class="frame16">
+          <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Lesson video" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        <p class="vp-note">Video not loading? <a href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Watch on YouTube &nearr;</a></p>
+      </div>
+
+      <section class="panel">
+        <div class="panel-head"><span class="tri tri-open"></span><b>Details</b> — step instructions <em>4 steps</em></div>
+        <div class="doc-body"><div class="prose" id="stepBody"></div></div>
+        <p class="panel-note">Follow the steps in order, then run the prompt below against your island.</p>
+      </section>
+
+      <section class="drawer">
+        <div class="drawer-head"><span class="crumb crumb-on">UEFN MCP</span> <b>Prompt for this step</b> <em>read-only</em></div>
+        <div class="drawer-body">
+          <p class="drawer-help">Paste this into your MCP client to let the editor make the changes for this step.</p>
+          <textarea id="prompt" readonly spellcheck="false" aria-label="MCP prompt for this step"></textarea>
+          <div class="drawer-foot">
+            <button class="btn btn-quiet" type="button" id="copy">Copy prompt</button>
+            <span id="copyStatus" role="status"></span>
+          </div>
+        </div>
+      </section>
+
+      <div class="toolbar">
+        <button class="btn btn-quiet" type="button" id="feedbackBtn">Report a problem</button>
+        <div class="tb-right">
+          <button class="btn btn-quiet" type="button" id="back">← Back</button>
+          <a class="btn btn-quiet" href="../questions-1-default/index.html">Edit game type</a>
+          <button class="btn btn-primary" type="button" id="next">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="feedback" aria-labelledby="fbStep">
+    <form id="fbForm" method="dialog">
+      <div class="dlg-head"><b>Report a problem</b> <button class="dlg-x" type="button" id="fbClose" aria-label="Close">✕</button></div>
+      <div class="dlg-body">
+        <p class="fb-title">Report a problem</p>
+        <p id="fbStep"></p>
+        <fieldset class="chips">
+          <legend>What went wrong?</legend>
+          <label class="chip"><input type="radio" name="reason" value="Out of date" /><span>Out of date</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Doesn't work" /><span>Doesn't work</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Hard to follow" /><span>Hard to follow</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Video problem" /><span>Video problem</span></label>
+          <label class="chip"><input type="radio" name="reason" value="Something else" /><span>Something else</span></label>
+        </fieldset>
+        <label class="fld" for="fbText"><span>What happened? (optional)</span><textarea id="fbText" rows="3"></textarea></label>
+        <label class="fld" for="fbEmail"><span>Email (optional, if you'd like a reply)</span><input id="fbEmail" type="email" autocomplete="email" /></label>
+        <p id="fbError" role="alert"></p>
+      </div>
+      <div class="dlg-foot">
+        <span class="dlg-note">For now this is saved on this device only.</span>
+        <div class="dlg-btns">
+          <button class="btn btn-quiet" type="button" id="fbCancel">Cancel</button>
+          <button class="btn btn-primary" type="submit">Send</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+</main>
+
+<p class="toast mono" role="status" id="toast" hidden></p>
+<p class="concept-tag">Lessons 8 - The Editor</p>
+
+<script src="lessons.js" defer></script>
+</body>
+</html>

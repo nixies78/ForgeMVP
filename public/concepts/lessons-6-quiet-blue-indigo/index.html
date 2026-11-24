@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lessons 6 - Quiet Power, Blue + Indigo - Forge</title>
+<meta name="description" content="Lesson screen concept in the Quiet Power blue-and-indigo language: one step at a time, video, instructions and a copyable UEFN MCP prompt.">
+<link rel="icon" href="../../assets/logo.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================================
+   * Design source: public/concepts/8-quiet-dark-blue-indigo/index.html
+   * ("Quiet Power, Blue + Indigo" - landing page 8).
+   *
+   * Taken from it, value for value:
+   *   - the palette: --bg #101014, --tile #18181C, --line #28282C, --muted #ACACAD,
+   *     Blue #33BFFF for the thing that is live/ready and Indigo #868AFD for the
+   *     supporting detail (its .btn-glass hover, its .card hover, its ramp).
+   *   - the type: Inter Tight 700/800 tight and letter-spaced for headings, Inter
+   *     for the interface, .eyebrow labels at 13px /.12em uppercase in --muted.
+   *   - the materials: hairlines instead of boxes (its .stats { border-block: 1px
+   *     solid var(--line) } and .result div { border-bottom }), the soft radial
+   *     blue-into-indigo glow behind the top of the page (its .hero::before), the
+   *     glass pill (its .pill / .btn-glass), the 3px blue-to-indigo progress ramp
+   *     (its .progress i), the corner .tag, and its ease curve.
+   *   - the components: .pill / .pill.live, .chip / .chip.on, .panel labels,
+   *     .progress, the numbered .steps rail, and .panel-label.
+   *
+   * Not taken: the hero's sales copy, the three ways in, and its footer.
+   * Nothing here is a card with a box around it: every boundary on this screen is
+   * one hairline, which is what makes it the quietest of the eight.
+   * ========================================================================= */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --bg: #101014;
+    --tile: #18181C;
+    --line: #28282C;
+    --muted: #ACACAD;
+    /* Main accent: --color-palette-blue-400. Secondary: --color-palette-indigo-400. */
+    --accent: #33BFFF;
+    --accent-2: #868AFD;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--title); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- Header: 72px, the shared lockup, this concept's own controls ---- */
+  header.wrap { height: 72px; display: flex; align-items: center; gap: 20px; }
+  .head-spacer { flex: 1 1 auto; }
+  .head-link {
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    color: var(--muted); padding: 6px 2px;
+    transition: color .3s var(--ease);
+  }
+  .head-link:hover { color: #fff; }
+  .head-toggle {
+    display: inline-flex; align-items: center; gap: 9px;
+    font: 600 13px/1 var(--body); color: #fff;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 999px; padding: 8px 14px; cursor: pointer;
+    transition: background .3s, border-color .3s, color .3s;
+  }
+  .head-toggle:hover { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .head-toggle::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--line); transition: background .3s, box-shadow .3s;
+  }
+  .head-toggle[aria-pressed="true"] { border-color: rgba(51, 191, 255, .55); }
+  .head-toggle[aria-pressed="true"]::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(51, 191, 255, .18); }
+
+  /* ---------- The screen -------------------------------------------------- */
+  main { padding-bottom: 88px; position: relative; }
+  main::before { /* the landing page's blue heart with an indigo falloff */
+    content: "";
+    position: absolute;
+    left: 50%; top: -140px;
+    width: min(900px, 120vw); height: 420px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(51, 191, 255, .10), rgba(134, 138, 253, .06) 58%, transparent);
+    pointer-events: none;
+  }
+  .screen { position: relative; }
+  .tagline {
+    color: var(--muted);
+    font-size: clamp(16px, 1.5vw, 19px);
+    max-width: 40em;
+    margin: 40px 0 0;
+  }
+  .tagline strong { color: #fff; font-weight: 600; }
+
+  /* Progress rail: the ramp, one hairline wide, no track box. */
+  .rail { display: flex; align-items: center; gap: 14px; margin-top: 30px; }
+  .rail-track {
+    position: relative; flex: 1 1 auto; height: 3px;
+    background: rgba(255, 255, 255, .1); border-radius: 3px; overflow: hidden;
+  }
+  .rail-track i {
+    display: block; width: 25%; height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width .5s var(--ease);
+  }
+  .rail-num { font: 700 12px/1 var(--body); letter-spacing: .1em; color: var(--muted); }
+
+  /* Crumbs: one hairline above and below, the landing page's .stats treatment. */
+  .crumbs {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px;
+    margin-top: 34px; padding-block: 13px;
+    border-block: 1px solid var(--line);
+    font-size: 13.5px; color: var(--muted);
+  }
+  .crumbs a { color: var(--muted); text-decoration: none; transition: color .3s; }
+  .crumbs a:hover { color: #fff; }
+  .crumbs .sep { color: var(--line); }
+  .crumbs .brand { color: var(--accent-2); }
+
+  /* Stepper: a numbered rail, the landing page's .steps turned into four buttons. */
+  .stepper {
+    list-style: none; display: grid; grid-template-columns: repeat(4, 1fr);
+    margin: 30px 0 0; padding: 0; gap: 18px;
+  }
+  .stepper li { position: relative; padding-top: 18px; }
+  .stepper li::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px;
+    background: var(--line);
+  }
+  /* The script marks the buttons, not the rows: :has() carries the mark back up to the hairline. */
+  .stepper li:has(.step.done)::before { background: var(--accent-2); }
+  .stepper li:has(.step[aria-current="step"])::before { background: var(--accent); }
+  .stepper .step {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 0; padding: 0;
+    color: var(--muted); font: 400 14.5px/1.35 var(--body);
+    transition: color .3s var(--ease);
+  }
+  .stepper .step:hover { color: #fff; }
+  .stepper .step .n {
+    display: block; margin-bottom: 4px;
+    font: 700 11px/1 var(--body); letter-spacing: .14em; color: var(--line);
+    transition: color .3s;
+  }
+  .stepper .step.done .n { color: var(--accent-2); }
+  .stepper .step[aria-current="step"] { color: #fff; font-weight: 600; }
+  .stepper .step[aria-current="step"] .n { color: var(--accent); }
+  .stepper .step.done .n::after { content: " \2713"; }
+  .stepper .step:focus { outline: none; }
+  .stepper .step:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+
+  /* The step title - the one thing on the page allowed to be loud. */
+  .stephead { margin-top: 40px; }
+  .eyebrow {
+    margin: 0; font-weight: 700; font-size: 13px;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--accent);
+  }
+  h1 {
+    font-weight: 800; font-size: clamp(32px, 4.2vw, 52px); line-height: 1.02;
+    letter-spacing: -0.035em; margin: 12px 0 0; max-width: 22ch;
+  }
+  h1:focus { outline: none; }
+
+  /* Two columns: the walkthrough on the left, the instruction on the right. */
+  .cols { display: grid; grid-template-columns: 1.55fr 1fr; gap: 48px; margin-top: 36px; }
+  .video { margin: 0; }
+  .frame {
+    aspect-ratio: 16 / 9; overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .09); border-radius: 14px;
+    background: var(--tile);
+  }
+  .frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+  .video-note { margin: 12px 0 0; font-size: 13.5px; color: var(--muted); }
+  .video-note a { color: var(--accent-2); text-decoration: none; }
+  .video-note a:hover { text-decoration: underline; }
+
+  /* Rendered step content: prose, a numbered list, a tip, a device list. */
+  .body p { color: #D8D8DA; margin: 0 0 16px; }
+  .body p:last-child { margin-bottom: 0; }
+  .body strong { color: #fff; font-weight: 600; }
+  .body ol, .body ul { list-style: none; margin: 0 0 16px; padding: 0; }
+  .body li { position: relative; padding-left: 30px; margin-bottom: 11px; color: #D8D8DA; }
+  .body li:last-child { margin-bottom: 0; }
+  .body ol { counter-reset: n; }
+  .body ol > li::before {
+    counter-increment: n; content: counter(n, decimal-leading-zero);
+    position: absolute; left: 0; top: 2px;
+    font: 700 11.5px/1.5 var(--body); letter-spacing: .06em; color: var(--accent-2);
+  }
+  .body ul > li::before {
+    content: ""; position: absolute; left: 4px; top: 11px;
+    width: 5px; height: 5px; border-radius: 50%; background: var(--line);
+  }
+  .body h2 {
+    font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+    margin: 26px 0 12px; padding-top: 22px; border-top: 1px solid var(--line);
+  }
+  .tip {
+    margin: 22px 0 0; padding: 14px 16px;
+    border-left: 2px solid var(--line); border-radius: 0 12px 12px 0;
+    background: rgba(134, 138, 253, .07);
+    color: #C9C9CC; font-size: 14.5px;
+  }
+  .devname {
+    font: 600 13px/1.4 var(--body); color: #DFE0FF;
+    background: rgba(134, 138, 253, .13);
+    border: 1px solid rgba(134, 138, 253, .28);
+    border-radius: 999px; padding: 2px 9px; white-space: nowrap;
+  }
+
+  /* ---------- The MCP prompt: a plate held by hairlines, not a box ---------- */
+  .plate, .actions { margin-top: 52px; padding-top: 26px; border-top: 1px solid var(--line); }
+  .plate-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+  .plate-head h2 { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; margin: 0; }
+  .plate-head .help { margin: 0; font-size: 13.5px; color: var(--muted); }
+  .copyrow { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px; margin-top: 16px; }
+  #prompt {
+    flex: 1 1 420px; min-width: 0; min-height: 104px; resize: vertical;
+    padding: 15px 16px;
+    background: var(--tile); color: #E6E6E8;
+    border: 1px solid var(--line); border-radius: 14px;
+    font: 400 13.5px/1.7 ui-monospace, "SFMono-Regular", Consolas, monospace;
+    transition: border-color .3s;
+  }
+  #prompt:hover { border-color: rgba(134, 138, 253, .45); }
+  .copycol { display: grid; gap: 10px; justify-items: start; }
+  .copy-status { margin: 0; font-size: 12.5px; color: var(--muted); letter-spacing: .02em; }
+  .copy-status.live { color: var(--accent); }
+
+  /* ---------- Buttons: the landing page's two, at screen scale ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+    font: 700 14.5px/1 var(--body); text-decoration: none;
+    padding: 13px 22px; border-radius: 999px; cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s, border-color .3s, color .3s;
+  }
+  .btn-primary { background: var(--accent); color: #101014; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(51, 191, 255, .3); }
+  .btn-glass {
+    color: #fff; background: rgba(255, 255, 255, .06);
+    border-color: rgba(255, 255, 255, .18);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  }
+  .btn-glass:hover:not(:disabled) { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ---------- Actions ---------- */
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; }
+  .actions .push { flex: 1 1 auto; }
+  .editlink {
+    font-size: 13.5px; color: var(--muted); text-decoration: underline;
+    text-decoration-color: var(--line); text-underline-offset: 4px;
+  }
+  .editlink:hover { color: #fff; text-decoration-color: var(--accent-2); }
+
+  /* ---------- Report a problem ---------- */
+  dialog {
+    width: min(560px, calc(100vw - 32px)); margin: auto;
+    padding: 26px; color: #fff;
+    background: var(--tile); border: 1px solid var(--line); border-radius: 20px;
+    box-shadow: 0 30px 90px -30px rgba(0, 0, 0, .8);
+  }
+  dialog::backdrop { background: rgba(8, 8, 11, .72); }
+  /* The close cross sits on the title's line, hairlined like every other control on this screen: the
+     script focuses it on close and binds the click, so the dialog has a way out that is not Cancel. */
+  .fb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .fb-x {
+    flex: none; width: 32px; height: 32px; display: grid; place-items: center;
+    font: inherit; font-size: 18px; line-height: 1; color: var(--muted);
+    background: none; border: 1px solid var(--line); border-radius: 9px; cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .fb-x:hover { color: #fff; border-color: var(--accent-2); }
+  dialog h2 { font-weight: 700; font-size: 20px; letter-spacing: -0.02em; margin: 0; }
+  dialog .sub { margin: 6px 0 0; font-size: 13.5px; color: var(--muted); }
+  .reasons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip span {
+    display: inline-block; padding: 8px 13px; border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, .16); color: #D8D8DA;
+    font: 600 12.5px/1 var(--body); cursor: pointer; transition: background .3s, border-color .3s, color .3s;
+  }
+  .chip span:hover { border-color: rgba(134, 138, 253, .5); }
+  .chip input:checked + span { background: var(--accent); color: #101014; border-color: transparent; }
+  .chip input:checked + span::before { content: "\2713"; margin-right: 6px; font-weight: 800; }
+  .chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
+  .field { display: block; margin-top: 20px; }
+  .field span {
+    display: block; margin-bottom: 8px;
+    font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  }
+  .field input, .field textarea {
+    width: 100%; padding: 12px 14px;
+    background: var(--bg); color: #fff;
+    border: 1px solid var(--line); border-radius: 12px;
+    font: 400 14.5px/1.5 var(--body);
+  }
+  .field textarea { min-height: 88px; resize: vertical; }
+  .fb-error { margin: 16px 0 0; font-size: 13.5px; color: #FF9E9E; }
+  .fb-note { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .fb-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+  .fb-actions .push { flex: 1 1 auto; }
+
+  /* ---------- Toast and the corner tag ---------- */
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    z-index: 20; max-width: calc(100vw - 32px);
+    padding: 12px 18px; border-radius: 999px;
+    background: rgba(24, 24, 28, .94); border: 1px solid var(--line);
+    color: #fff; font: 600 13.5px/1.4 var(--body);
+    box-shadow: 0 20px 50px -20px rgba(0, 0, 0, .8);
+  }
+  .concept-tag {
+    position: fixed; right: 12px; bottom: 12px; z-index: 10;
+    font: 600 11px/1 var(--body); letter-spacing: .04em;
+    color: var(--muted); background: rgba(24, 24, 28, .9);
+    border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px;
+  }
+
+  @media (max-width: 900px) {
+    .cols { grid-template-columns: 1fr; gap: 32px; }
+    .stepper { grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+  }
+  @media (max-width: 520px) {
+    .tagline { margin-top: 28px; }
+    .stepper { grid-template-columns: 1fr; gap: 4px; }
+    .stepper li { padding: 12px 0 0 16px; }
+    .stepper li::before { left: 0; right: auto; top: 0; bottom: 0; width: 1px; height: auto; }
+    .stephead { margin-top: 30px; }
+    .plate, .actions { margin-top: 40px; }
+    .actions .btn { flex: 1 1 auto; }
+    dialog { padding: 20px; }
+    .concept-tag { right: 8px; bottom: 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <span class="head-spacer"></span>
+  <a class="head-link" href="../../index.html#/home">Home</a>
+  <button class="head-toggle" id="devMode" type="button" aria-pressed="false">Dev mode</button>
+</header>
+
+<main>
+  <div class="screen wrap">
+
+    <p class="tagline">Design your game, then follow a step-by-step walkthrough - with video - to <strong>actually build it</strong>.</p>
+
+    <div class="rail">
+      <div class="rail-track" role="progressbar" aria-label="Build progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25">
+        <i id="progressFill"></i>
+      </div>
+      <span class="rail-num">25%</span>
+    </div>
+
+    <nav class="crumbs" aria-label="Breadcrumb">
+      <a href="../../index.html#/home">Simulation &amp; Tycoon</a>
+      <span class="sep" aria-hidden="true">&rsaquo;</span>
+      <span>Just give me the basics</span>
+      <span class="sep" aria-hidden="true">&middot;</span>
+      <span class="brand">Brand: KPop Demon Hunters</span>
+    </nav>
+
+    <ol class="stepper" id="stepper">
+      <li><button class="step" type="button"><span class="n">01</span>Create Your Project</button></li>
+      <li><button class="step" type="button"><span class="n">02</span>Block Out Your Island</button></li>
+      <li><button class="step" type="button"><span class="n">03</span>Add the Core Devices</button></li>
+      <li><button class="step" type="button"><span class="n">04</span>Make It Look Good</button></li>
+    </ol>
+
+    <div class="stephead">
+      <p class="eyebrow">Step 1 of 4</p>
+      <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+    </div>
+
+    <div class="cols">
+      <figure class="video">
+        <div class="frame">
+          <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" title="Build walkthrough" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <figcaption class="video-note">Video not loading? <a href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Watch on YouTube &nearr;</a></figcaption>
+      </figure>
+
+      <div class="body" id="stepBody">
+        <p>Open UEFN (via the Epic Games Launcher, or "Launch UEFN" from Fortnite's Creative options) and start a new project.</p>
+        <ol>
+          <li>Click <strong>New Project</strong> in the UEFN Project Browser.</li>
+          <li>Choose the <strong>KPop Demon Hunters</strong> brand template from the template picker so your project starts with its themed assets already loaded.</li>
+          <li>Give your project a name that matches your game idea.</li>
+          <li>Open the project &mdash; it loads into the UEFN editor with your starter island/assets ready to go.</li>
+        </ol>
+        <p class="tip">Save before you change anything else: the template's own maps are never overwritten, so a fresh save is your way back if an experiment goes wrong.</p>
+      </div>
+    </div>
+
+    <section class="plate" aria-labelledby="promptTitle">
+      <div class="plate-head">
+        <h2 id="promptTitle">Prompt for the UEFN MCP</h2>
+        <p class="help">Paste this into your MCP-connected editor to set the project up for you.</p>
+      </div>
+      <div class="copyrow">
+        <textarea id="prompt" readonly rows="5" aria-labelledby="promptTitle" spellcheck="false">Create a new UEFN project named after my game idea, based on the KPop Demon Hunters brand template, and save it before any other edits.</textarea>
+        <div class="copycol">
+          <button class="btn btn-glass" id="copy" type="button">Copy prompt</button>
+          <p class="copy-status" id="copyStatus" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="actions" aria-label="Step controls">
+      <button class="btn btn-glass" id="back" type="button" disabled>&larr; Back</button>
+      <button class="btn btn-glass" id="feedbackBtn" type="button">Report a problem</button>
+      <a class="editlink" href="../questions-1-default/index.html">Edit game type</a>
+      <span class="push"></span>
+      <button class="btn btn-primary" id="next" type="button">Next: Block Out Your Island &rarr;</button>
+    </section>
+
+  </div>
+</main>
+
+<dialog id="feedback" aria-labelledby="fbTitle">
+  <form id="fbForm" method="dialog" novalidate>
+    <div class="fb-head">
+      <h2 id="fbTitle">Report a problem</h2>
+      <button class="fb-x" id="fbClose" type="button" aria-label="Close">&#10005;</button>
+    </div>
+    <p class="sub" id="fbStep">Step 1: Create Your Project</p>
+
+    <div class="reasons">
+      <label class="chip"><input type="radio" name="reason" value="Out of date"><span>Out of date</span></label>
+      <label class="chip"><input type="radio" name="reason" value="Doesn't work"><span>Doesn't work</span></label>
+      <label class="chip"><input type="radio" name="reason" value="Hard to follow"><span>Hard to follow</span></label>
+      <label class="chip"><input type="radio" name="reason" value="Video problem"><span>Video problem</span></label>
+      <label class="chip"><input type="radio" name="reason" value="Something else"><span>Something else</span></label>
+    </div>
+
+    <label class="field" for="fbText"><span>What happened? (optional)</span>
+      <textarea id="fbText" name="text" placeholder="The step said one thing and UEFN did another."></textarea>
+    </label>
+
+    <label class="field" for="fbEmail"><span>Email (optional, if you'd like a reply)</span>
+      <input id="fbEmail" name="email" type="email" placeholder="you@example.com" autocomplete="email">
+    </label>
+
+    <p class="fb-error" id="fbError" role="alert"></p>
+
+    <div class="fb-actions">
+      <p class="fb-note">For now this is saved on this device only.</p>
+      <span class="push"></span>
+      <!-- Cancel closes, Send submits. They are two different things to the script: it binds close to
+           #fbCancel and validates on the form's submit event, so Send must not close the dialog on the way
+           in or a missing reason would be reported to a form nobody can see. -->
+      <button class="btn btn-glass" id="fbCancel" type="button">Cancel</button>
+      <button class="btn btn-primary" type="submit">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<div class="concept-tag">Lessons 6 - Quiet Power, Blue + Indigo</div>
+
+<script src="lessons.js"></script>
+</body>
+</html>

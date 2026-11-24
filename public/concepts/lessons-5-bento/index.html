@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lessons 5 - Creator Bento · Forge</title>
+  <meta name="description" content="The Lesson walkthrough - build your island step by step - in the Creator Bento design language." />
+  <link rel="icon" href="../../assets/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* Design language: Concept 5 - "Creator Bento" (public/concepts/5-bento/index.html).
+     * Taken from that landing page at its own values: #101014 page under #18181C / #202024 tiles, its
+     * hairlines (#303034, #404044), --radius 22px on --gap 14px, the 6-column bento with span classes,
+     * Inter Tight display over Inter body, and its components - .tile, .label, .pill, .chip, .icon,
+     * .btn-go / .btn-ghost and the fixed corner .concept-tag.
+     * Changed on purpose: --dim (#787678, 3.9:1 on a tile) is kept for hairlines only, and every line of
+     * copy here is --muted or lighter so body text clears AA. Its sales copy, its three ways in and its
+     * footer do not come across: this is the screen a creator works in once the plan exists.
+     * The DOM keeps the brief's reading order; the desktop grid only slides the step title beside the
+     * video, and below 1000px every tile falls back to one column in that same order. */
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Archivo Black"; src: url("../../assets/fonts/archivo-black-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+    :root {
+      --page: #101014;
+      --tile: #18181C;
+      --tile-2: #202024;
+      --line: #303034;
+      --line-2: #404044;
+      --muted: #ACACAD;
+      --dim: #787678;
+      --white: #FFFFFF;
+      --text: #D6D6D7;
+      --green: #5FE367;
+      --teal: #44D5BF;
+      --g-green: linear-gradient(90deg, #5FE367, #A0E1FF);
+      --g-teal: linear-gradient(90deg, #44D5BF, #C7C8FE);
+      --radius: 22px;
+      --gap: 14px;
+      --title: "Inter Tight", "Inter", system-ui, sans-serif;
+      --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--page); color: var(--white); }
+    body { font-family: var(--body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    img { max-width: 100%; display: block; }
+    a { color: inherit; text-decoration: none; }
+    /* .wrap is the shared 1136px column: chrome.css owns its width and gutter, so nothing here sets them. */
+    .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    /* ---------- header: 72px, the shared lockup, plus this screen's controls ---------- */
+    .nav { position: sticky; top: 0; z-index: 20; height: 72px; background: rgba(16,16,20,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 100%; gap: 16px; }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-link { font-weight: 600; font-size: 14px; color: var(--muted); }
+    .nav-link:hover { color: var(--white); }
+    .dev { display: inline-flex; align-items: center; gap: 8px; font: 700 13px/1 var(--body); color: var(--muted); background: var(--tile); border: 1px solid var(--line-2); border-radius: 999px; padding: 9px 14px; cursor: pointer; }
+    .dev i { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); font-style: normal; }
+    .dev:hover { border-color: var(--muted); color: var(--white); }
+    .dev[aria-pressed="true"] { color: #0b1a0c; background: var(--green); border-color: var(--green); }
+    .dev[aria-pressed="true"] i { background: #0b1a0c; }
+    /* ---------- buttons ---------- */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--body); font-weight: 700; font-size: 15px; line-height: 1; border: 1px solid transparent; border-radius: 999px; padding: 13px 22px; cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease; }
+    .btn-go { background: var(--green); color: #0b1a0c; }
+    .btn-go:hover { transform: translateY(-1px); box-shadow: 0 8px 30px -6px rgba(95,227,103,.55); }
+    .btn-ghost { background: transparent; border: 1px solid var(--line-2); color: var(--white); }
+    .btn-ghost:hover { border-color: var(--muted); }
+    .btn-sm { padding: 9px 16px; font-size: 14px; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn:focus-visible, .dev:focus-visible, .step:focus-visible, .nav-link:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    /* ---------- the bento the whole screen lives in ---------- */
+    .lesson { padding: 22px 0 56px; }
+    .bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--gap); }
+    .tile { position: relative; min-width: 0; background: var(--tile); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; }
+    .label { font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; display: flex; align-items: center; gap: 8px; }
+    .label i { width: 7px; height: 7px; border-radius: 50%; background: var(--g-green); font-style: normal; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: var(--muted); border: 1px solid var(--line); background: var(--tile-2); border-radius: 999px; padding: 6px 14px 6px 8px; }
+    .pill b { background: var(--g-green); color: #0b1a0c; border-radius: 999px; padding: 2px 9px; font-size: 12px; }
+    /* placement: the DOM keeps the brief's order, the grid slides the step title beside the video */
+    .t-tagline { grid-column: 1 / span 4; grid-row: 1; }
+    .t-crumbs { grid-column: 5 / span 2; grid-row: 1; }
+    .t-prog { grid-column: 1 / -1; grid-row: 2; padding: 20px 24px; }
+    .t-stepper { grid-column: 1 / -1; grid-row: 3; padding: 20px 24px; }
+    .t-video { grid-column: 1 / span 4; grid-row: 4 / span 2; padding: 0; display: flex; flex-direction: column; }
+    .t-step { grid-column: 5 / span 2; grid-row: 4 / span 2; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; background: radial-gradient(120% 90% at 85% 10%, rgba(68,213,191,.20), transparent 55%), radial-gradient(90% 80% at 10% 100%, rgba(95,227,103,.12), transparent 60%), var(--tile); }
+    .t-body { grid-column: 1 / -1; grid-row: 6; padding: 32px; }
+    .t-prompt { grid-column: 1 / span 4; grid-row: 7; }
+    .t-report { grid-column: 5 / span 2; grid-row: 7; display: flex; flex-direction: column; justify-content: space-between; gap: 18px; background: radial-gradient(100% 120% at 100% 0%, rgba(68,213,191,.16), transparent 55%), var(--tile); }
+    .t-actions { grid-column: 1 / -1; grid-row: 8; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+    /* ---------- tagline + crumbs ---------- */
+    .lede { margin: 0; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.45; color: var(--text); max-width: 46ch; }
+    .crumbs { margin: 0; font-size: 13.5px; font-weight: 600; color: var(--muted); line-height: 1.6; }
+    .crumbs .sep, .crumbs .dot { color: var(--muted); margin: 0 2px; }
+    .crumbs .brand { color: var(--white); }
+    /* ---------- progress rail + stepper ---------- */
+    .prog-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .prog-note { font-size: 13px; color: var(--muted); }
+    .rail { height: 8px; border-radius: 999px; background: var(--tile-2); border: 1px solid var(--line); overflow: hidden; }
+    #progressFill { display: block; height: 100%; width: 25%; background: var(--g-green); border-radius: 999px; transition: width .35s ease; }
+    #stepper { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .step { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; font: 600 14.5px/1.3 var(--body); color: var(--muted); background: var(--tile-2); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+    .step > span:last-child { min-width: 0; }
+    .step .n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: transparent; border: 2px solid var(--line-2); color: var(--muted); font: 800 13px/1 var(--title); }
+    .step:hover { border-color: var(--muted); color: var(--white); }
+    .step.done { color: var(--white); }
+    .step.done .n { background: var(--green); border-color: var(--green); color: #0b1a0c; }
+    .step[aria-current="step"] { color: var(--white); background: rgba(95,227,103,.12); border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+    .step[aria-current="step"] .n { background: var(--green); border-color: var(--green); color: #0b1a0c; }
+    /* ---------- the video: the one large tile ---------- */
+    .t-video .head { padding: 22px 24px 0; }
+    .t-video .frame { flex: none; margin-top: 14px; aspect-ratio: 16 / 9; background: var(--page); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .t-video .frame iframe { display: block; width: 100%; height: 100%; border: 0; }
+    .t-video .fallback { margin: 0; padding: 12px 24px 14px; font-size: 13px; color: var(--muted); }
+    .t-video .fallback a { color: var(--teal); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+    .t-video .fallback a:hover { color: var(--white); }
+    /* ---------- the step tile: sits beside the video, holds the h1 ---------- */
+    .t-step h1 { font-family: var(--title); font-weight: 800; font-size: clamp(28px, 3vw, 42px); line-height: 1.02; letter-spacing: -.035em; margin: 0 0 14px; }
+    .t-step h1:focus { outline: none; }
+    .t-step .step-note { margin: 0; font-size: 14.5px; color: var(--muted); }
+    .t-step .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--white); background: var(--tile-2); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; white-space: nowrap; }
+    .chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); font-style: normal; }
+    /* ---------- the instructions: the tile that grows ---------- */
+    #stepBody { font-size: 16px; line-height: 1.65; color: var(--text); max-width: 82ch; }
+    #stepBody > :first-child { margin-top: 0; }
+    #stepBody > :last-child { margin-bottom: 0; }
+    #stepBody p { margin: 0 0 14px; }
+    #stepBody h2 { font-family: var(--title); font-weight: 700; font-size: 22px; line-height: 1.15; letter-spacing: -.02em; color: var(--white); margin: 28px 0 14px; }
+    #stepBody strong { color: var(--white); font-weight: 700; }
+    #stepBody em { color: var(--white); font-style: italic; }
+    #stepBody a { color: var(--teal); text-decoration: underline; }
+    /* The list items are inline content with <strong> inside them, so every li stays a plain block with the
+       marker hung in the margin at position:absolute - a flex or grid li would break "Click <strong>New
+       Project</strong> in the UEFN Project Browser" into three stacked fragments. */
+    #stepBody ol { counter-reset: stp; list-style: none; margin: 0 0 16px; padding: 0; }
+    #stepBody ol > li { counter-increment: stp; position: relative; padding-left: 44px; margin: 0 0 12px; }
+    #stepBody ol > li::before { content: counter(stp); position: absolute; left: 0; top: 1px; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--tile-2); border: 1px solid var(--line-2); color: var(--white); font: 800 13px/1 var(--title); }
+    #stepBody ul { list-style: none; margin: 0 0 16px; padding: 0; }
+    #stepBody ul > li { position: relative; padding-left: 24px; margin: 0 0 10px; }
+    #stepBody ul > li::before { content: ""; position: absolute; left: 4px; top: .62em; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+    #stepBody li > :last-child { margin-bottom: 0; }
+    #stepBody .devname { display: inline-block; color: var(--white); font-weight: 700; background: var(--tile-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 2px 11px; font-size: 14.5px; }
+    #stepBody .tip { margin: 22px 0 0; padding: 14px 18px; border: 1px solid var(--line-2); border-left: 3px solid var(--teal); border-radius: 14px; background: var(--tile-2); color: var(--text); font-size: 15px; }
+    /* ---------- the MCP prompt ---------- */
+    .t-prompt .help { margin: 0 0 14px; font-size: 14px; color: var(--muted); }
+    #prompt { display: block; width: 100%; min-height: 148px; resize: vertical; font: 500 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text); background: var(--page); border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 16px; }
+    #prompt:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    .prompt-row { display: flex; align-items: center; gap: 14px; margin-top: 14px; flex-wrap: wrap; }
+    #copyStatus { font: 600 13px/1.3 var(--body); color: var(--teal); }
+    #copyStatus:empty { min-height: 1.3em; }
+    /* ---------- report trigger + actions ---------- */
+    .t-report .icon { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--tile-2); border: 1px solid var(--line); }
+    .t-report .icon svg { width: 22px; height: 22px; }
+    .t-report .note { margin: 16px 0 0; font-size: 14.5px; color: var(--muted); }
+    .t-report .btn { align-self: flex-start; }
+    .t-actions .mid { font-size: 14px; color: var(--muted); }
+    .t-actions .mid a { color: var(--white); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+    .t-actions .mid a:hover { color: var(--green); }
+    .t-actions .ends { display: flex; align-items: center; gap: 12px; }
+    /* ---------- toast ---------- */
+    #toast { position: fixed; top: 88px; left: 50%; transform: translateX(-50%); z-index: 60; max-width: calc(100vw - 32px); background: var(--tile-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 12px 20px; font: 600 14px/1.3 var(--body); color: var(--white); box-shadow: 0 18px 40px -14px rgba(0,0,0,.85); }
+    #toast[hidden] { display: none; }
+    /* ---------- the report dialog ---------- */
+    #feedback { padding: 0; width: min(560px, calc(100vw - 28px)); color: var(--white); background: var(--tile); border: 1px solid var(--line-2); border-radius: var(--radius); box-shadow: 0 40px 80px -30px rgba(0,0,0,.9); }
+    #feedback::backdrop { background: rgba(8,8,10,.7); }
+    #feedback .fb { margin: 0; padding: 26px; }
+    .fb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 20px; }
+    .fb-head h2 { font-family: var(--title); font-weight: 800; font-size: 26px; letter-spacing: -.03em; margin: 0; }
+    .fb-step { margin: 6px 0 0; font-size: 14px; font-weight: 600; color: var(--muted); }
+    .fb-x { flex: none; width: 34px; height: 34px; display: grid; place-items: center; font-size: 15px; color: var(--muted); background: var(--tile-2); border: 1px solid var(--line); border-radius: 50%; cursor: pointer; }
+    .fb-x:hover { color: var(--white); border-color: var(--muted); }
+    .fb-reasons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .fb-reasons label { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: var(--muted); background: var(--tile-2); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+    .fb-reasons label:hover { border-color: var(--muted); color: var(--white); }
+    .fb-reasons input { accent-color: var(--green); margin: 0; }
+    .fb-reasons label:has(input:checked) { color: var(--white); background: rgba(95,227,103,.12); border-color: var(--green); box-shadow: inset 0 0 0 1px var(--green); }
+    .fb-field { display: block; margin-top: 20px; }
+    .fb-field > span { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+    .fb-field textarea, .fb-field input { display: block; width: 100%; font: 500 14px/1.5 var(--body); color: var(--text); background: var(--page); border: 1px solid var(--line-2); border-radius: 14px; padding: 12px 14px; }
+    .fb-field textarea { resize: vertical; }
+    .fb-field textarea:focus-visible, .fb-field input:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+    #fbError { margin: 16px 0 0; font-size: 13.5px; font-weight: 600; color: #FFB4B4; }
+    #fbError:empty { display: none; }
+    .fb-foot { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .fb-note { margin: 0; font-size: 12.5px; color: var(--muted); max-width: 30ch; }
+    .fb-actions { display: flex; align-items: center; gap: 10px; }
+    /* ---------- the concept tag ---------- */
+    .concept-tag { position: fixed; left: 14px; bottom: 14px; z-index: 50; font: 700 12px/1 var(--body); color: var(--white); background: rgba(24,24,28,.92); border: 1px solid var(--line-2); border-radius: 999px; padding: 8px 12px; display: flex; align-items: center; gap: 7px; }
+    .concept-tag i { width: 8px; height: 8px; border-radius: 50%; background: var(--g-green); }
+    /* ---------- responsive: one column in DOM order ---------- */
+    @media (max-width: 1000px) {
+      .t-tagline, .t-crumbs, .t-prog, .t-stepper, .t-video, .t-step, .t-body, .t-prompt, .t-report, .t-actions { grid-column: 1 / -1; grid-row: auto; }
+      .t-step { gap: 18px; }
+      .t-video .head { padding: 22px 22px 0; }
+      .t-video .fallback { padding: 12px 22px 14px; }
+    }
+    @media (max-width: 760px) {
+      #stepper { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #stepBody { max-width: none; }
+    }
+    @media (max-width: 560px) {
+      :root { --gap: 12px; --radius: 18px; }
+      .lesson { padding-top: 16px; }
+      .tile { padding: 22px; }
+      .t-video, .t-actions { padding: 0; }
+      .t-video .head { padding: 20px 20px 0; }
+      .t-video .fallback { padding: 12px 20px 14px; }
+      .t-prog, .t-stepper { padding: 18px; }
+      .t-actions { padding: 16px 18px; }
+      .t-actions .ends { width: 100%; justify-content: space-between; }
+      .t-actions .ends .btn { flex: 1; }
+      .t-step h1 { font-size: 28px; }
+      #stepBody ol > li { padding-left: 38px; }
+      .fb-foot { flex-direction: column; align-items: stretch; }
+      .fb-actions { justify-content: flex-end; }
+      .fb-note { max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { #progressFill, .btn, .step { transition: none; } }
+  </style>
+  <link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+  <header class="nav">
+    <div class="wrap">
+      <a class="logo-lockup" href="../../index.html#/home" aria-label="Forge home">
+        <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span>
+        <span class="logo-word">Forge</span>
+      </a>
+      <nav class="nav-right" aria-label="Lesson controls">
+        <a class="nav-link" href="../../index.html#/home">Home</a>
+        <button class="dev" id="devMode" type="button" aria-pressed="false"><i></i>Dev mode</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap lesson">
+    <section class="bento" aria-label="Lesson walkthrough">
+      <!-- 2 tagline -->
+      <article class="tile t-tagline">
+        <p class="label"><i></i>Your walkthrough</p>
+        <p class="lede">Design your game, then follow a step-by-step walkthrough - with video - to actually build it.</p>
+      </article>
+      <!-- 3 progress rail -->
+      <article class="tile t-prog">
+        <div class="prog-head">
+          <p class="label"><i></i>Progress</p>
+          <span class="prog-note">One step at a time, from empty project to playable island.</span>
+        </div>
+        <div class="rail" role="progressbar" aria-label="Walkthrough progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="25">
+          <span id="progressFill"></span>
+        </div>
+      </article>
+      <!-- 4 crumbs -->
+      <article class="tile t-crumbs">
+        <p class="crumbs">Simulation &amp; Tycoon <span class="sep">&rsaquo;</span> Just give me the basics <span class="dot">&middot;</span> Brand: <span class="brand">KPop Demon Hunters</span></p>
+      </article>
+      <!-- 5 stepper -->
+      <article class="tile t-stepper">
+        <ol id="stepper" aria-label="Walkthrough steps"></ol>
+      </article>
+      <!-- 6 step title -->
+      <article class="tile t-step">
+        <div>
+          <span class="pill"><b>UEFN</b> Step by step</span>
+        </div>
+        <div>
+          <p class="label"><i></i>Your step</p>
+          <h1 id="stepTitle" tabindex="-1">Create Your Project</h1>
+          <p class="step-note">Watch the video, follow the instructions, then copy the prompt into the UEFN MCP.</p>
+          <div class="chips">
+            <span class="chip"><i></i>Video</span>
+            <span class="chip"><i></i>Instructions</span>
+            <span class="chip"><i></i>MCP prompt</span>
+          </div>
+        </div>
+      </article>
+      <!-- 7 video -->
+      <article class="tile t-video">
+        <div class="head">
+          <p class="label"><i></i>Step video</p>
+        </div>
+        <div class="frame">
+          <iframe id="video" src="https://www.youtube-nocookie.com/embed/RjLHj-gSfr8" style="width:100%;aspect-ratio:16 / 9;height:auto" title="Walkthrough video for this step" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <p class="fallback">Video not loading? <a href="https://www.youtube.com/watch?v=RjLHj-gSfr8" target="_blank" rel="noopener">Watch on YouTube &#8599;</a></p>
+      </article>
+      <!-- 8 instructions: the tile that grows - no fixed height, the row takes what the copy needs -->
+      <article class="tile t-body">
+        <p class="label"><i></i>Step instructions</p>
+        <div id="stepBody"></div>
+      </article>
+      <!-- 9 MCP prompt -->
+      <article class="tile t-prompt">
+        <p class="label"><i></i>MCP prompt</p>
+        <p class="help">Paste this into the UEFN MCP to scaffold this step in your project.</p>
+        <label class="sr-only" for="prompt">MCP prompt for this step</label>
+        <textarea id="prompt" readonly></textarea>
+        <div class="prompt-row">
+          <button class="btn btn-go btn-sm" id="copy" type="button">Copy prompt</button>
+          <span id="copyStatus" role="status" aria-live="polite"></span>
+        </div>
+      </article>
+      <!-- 10 report trigger -->
+      <article class="tile t-report">
+        <div>
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#44D5BF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4" /><path d="M12 17h.01" /><path d="M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" /></svg>
+          </span>
+          <p class="label" style="margin-top:18px">Something not right?</p>
+          <p class="note">Stuck on a step, or the video will not play? Tell us what happened - it is how the walkthrough gets fixed.</p>
+        </div>
+        <button class="btn btn-ghost" id="feedbackBtn" type="button">Report a problem</button>
+      </article>
+      <!-- 11 actions -->
+      <article class="tile t-actions">
+        <div class="ends">
+          <button class="btn btn-ghost" id="back" type="button">&#8592; Back</button>
+        </div>
+        <p class="mid">Game type: Simulation &amp; Tycoon &middot; <a href="../questions-1-default/index.html">Edit game type</a></p>
+        <div class="ends">
+          <button class="btn btn-go" id="next" type="button">Next &#8594;</button>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <dialog id="feedback" aria-labelledby="fbTitle">
+    <form class="fb" id="fbForm" method="dialog">
+      <div class="fb-head">
+        <div>
+          <h2 id="fbTitle">Report a problem</h2>
+          <p class="fb-step" id="fbStep">Step 1 &middot; Create Your Project</p>
+        </div>
+        <button class="fb-x" id="fbClose" type="button" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="label">What went wrong?</p>
+      <div class="fb-reasons">
+        <label><input type="radio" name="reason" value="Out of date" /><span>Out of date</span></label>
+        <label><input type="radio" name="reason" value="Doesn't work" /><span>Doesn't work</span></label>
+        <label><input type="radio" name="reason" value="Hard to follow" /><span>Hard to follow</span></label>
+        <label><input type="radio" name="reason" value="Video problem" /><span>Video problem</span></label>
+        <label><input type="radio" name="reason" value="Something else" /><span>Something else</span></label>
+      </div>
+      <label class="fb-field" for="fbText">
+        <span>What happened? (optional)</span>
+        <textarea id="fbText" rows="4" placeholder="The video stops halfway through, and step 3 skips the device setup."></textarea>
+      </label>
+      <label class="fb-field" for="fbEmail">
+        <span>Email (optional, if you'd like a reply)</span>
+        <input id="fbEmail" type="email" autocomplete="email" placeholder="you@example.com" />
+      </label>
+      <p id="fbError" role="alert"></p>
+      <div class="fb-foot">
+        <p class="fb-note">For now this is saved on this device only.</p>
+        <div class="fb-actions">
+          <button class="btn btn-ghost btn-sm" id="fbCancel" type="button">Cancel</button>
+          <button class="btn btn-go btn-sm" type="submit">Send</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" hidden></div>
+
+  <div class="concept-tag"><i></i>Lessons 5 - Creator Bento</div>
+
+  <script src="lessons.js"></script>
+</body>
+</html>
