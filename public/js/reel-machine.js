@@ -24,6 +24,9 @@
  *     </section>
  *   </div>
  *
+ * A lock does not have to live inside its reel: `data-lock-for="f"` ties a button anywhere under
+ * options.root to that reel, which is how a page puts its keys in a row of their own.
+ *
  * The module adds `.rm-window` + `.rm-strip` (+ `.rm-lock`) and toggles these on the reel container
  * and its lock, so a page can style every state without scripting it:
  *
@@ -224,7 +227,9 @@ export async function createMachine(options) {
     win.append(strip);
     windowMount.append(win);
 
-    let lock = reel.querySelector('[data-lock]');
+    /* The page's own lock for this reel: inside the reel if it is there, otherwise a key the page has put
+       somewhere else and tied to the reel by name - a row of keys under the window, a control rail. */
+    let lock = reel.querySelector('[data-lock]') || root.querySelector(`[data-lock-for="${key}"]`);
     if (!lock) {
       lock = document.createElement('button');
       lock.type = 'button';
