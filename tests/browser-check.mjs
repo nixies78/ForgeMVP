@@ -1287,11 +1287,28 @@ async function checkMockupHeaders(send, results) {
         const nav = document.querySelector('header');
         if (!nav) return null;
         const band = nav.getBoundingClientRect().bottom;
+        /* Text that is clipped away by a window it sits in is not on the page, however far up its own box
+         * reaches. A reel is exactly this: the entries above a drum are inside an overflow:hidden window
+         * and measure far above the machine - and a page whose reels are turning when it draws, like
+         * 2c-portrait, has them at their highest when this is measured. Only a leaf that is ENTIRELY
+         * outside a clipping ancestor is dropped, so a half-visible one is still measured where it is. */
+        const clippedAway = (el) => {
+          const r = el.getBoundingClientRect();
+          for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+            const cs = getComputedStyle(p);
+            if (!/(hidden|clip|auto|scroll)/.test(cs.overflowX + ' ' + cs.overflowY)) continue;
+            const pr = p.getBoundingClientRect();
+            const outside = r.right <= pr.left || r.left >= pr.right || r.bottom <= pr.top || r.top >= pr.bottom;
+            if (outside) return true;
+          }
+          return false;
+        };
         const leaves = [...document.querySelectorAll('body *')].filter((el) =>
           !nav.contains(el) && !el.children.length && (el.textContent || '').trim()
         ).filter((el) => {
           const cs = getComputedStyle(el);
           if (cs.visibility === 'hidden' || cs.display === 'none' || Number(cs.opacity) < 0.05) return false;
+          if (clippedAway(el)) return false;
           return el.getBoundingClientRect().height > 0 && el.getBoundingClientRect().top >= 0;
         }).map((el) => ({ el, top: el.getBoundingClientRect().top }));
         const worst = leaves.slice().sort((a, b) => a.top - b.top)[0];

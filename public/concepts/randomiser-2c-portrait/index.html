@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Randomiser 2c - Portrait reels</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  /* Randomiser 2c - Portrait reels.
+     The moulded machine from 2b with one entry changed: a reel entry is a picture with its name under it
+     rather than a thumbnail with the name beside it. That makes the entries taller, so the pictures are
+     bigger and the reels are narrower - the whole widget shrinks to 880px and fits a phone three across
+     without the entries losing anything. The panel's head is gone (the counts move into the labels, where
+     there is room for them) and so is the status line, because the keys already say what is held. Two
+     things this page adds of its own: the reels spin when the page opens, and the machine has a voice -
+     a tick for every entry that goes past and a clack when a reel lands, with one small key to silence it. */
+  :root {
+    --bg: #101014;
+    --tile: #18181C;
+    --line: #28282C;
+    --line-2: #303034;
+    --muted: #ACACAD;
+    --dim: #787678;
+    /* Main accent: --color-palette-blue-400. Secondary: --color-palette-indigo-400 - the same mapping
+       Randomiser 2 uses. Blue is the action and the focus; indigo is the kind tag on an entry. The selected
+       hold key is the library's yellow-400, because a hold lamp on a machine is yellow, and yellow-200 is
+       the only hover this page takes from a colour of its own rather than from a shade of the two accents. */
+    --accent: #33BFFF;
+    --accent-2: #868AFD;
+    --hold: #F7D82B;          /* yellow-400: a hold key that is selected */
+    --hold-down: #736514;     /* yellow-200: any hold key under the pointer */
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* One reel entry is a column now - an 80px picture with the name under it and the kind under that -
+       which is half again the height 2b's rows were and is what buys the bigger pictures. The width it
+       gives back is not spent: the reels are narrower, the machine is narrower, and three of them still
+       fit across a phone. */
+    --item-h: 10.5rem;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* .wrap, the logo lockup and the smooth anchor scrolling come from public/concepts/_shared/chrome.css,
+     linked below this style block. The column is not this page's decision. */
+
+  /* Header: the shared 72px bar, the 44px Epic mark from the shared chrome. The bar stays a block, so the
+     .wrap inside it is the shared column (1136px, centred by its own margins) rather than a flex item that
+     would shrink to its content and float into the middle of the bar. */
+  header { height: 72px; }
+  header .wrap { display: flex; align-items: center; gap: 16px; height: 100%; }
+  header .bar-label { margin-left: auto; font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); }
+
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+  /* ---------- Hero: one line and one sentence, because the machine is directly under it ---------- */
+  .hero { padding-block: 18px 22px; text-align: center; position: relative; }
+  .hero::before { /* blue heart, indigo falloff - kept behind the widget, not centred on an empty screen */
+    content: "";
+    position: absolute;
+    left: 50%; top: -120px;
+    width: min(900px, 100%); height: 380px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(51, 191, 255, .10), rgba(134, 138, 253, .06) 58%, transparent);
+    pointer-events: none;
+  }
+  /* Randomiser 1's headline at Randomiser 1's size: the page heading stays the biggest thing here, and
+     the result below it is the 36px strapline. */
+  .hero h1 {
+    position: relative;
+    font-family: var(--title);
+    font-weight: 800;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .hero h1 span { display: block; }
+  .hero h1 .dim { color: var(--dim); }
+  .hero p { position: relative; color: var(--muted); font-size: 16px; max-width: 46em; margin: 10px auto 0; }
+  .hero p strong { color: #fff; font-weight: 600; }
+
+  /* ---------- Buttons: keys with depth, in this page's two colours ---------- */
+  /* ---------- Page buttons: concept 8's flat pill, in this page's two colours ---------- */
+  /* Only the machine is moulded. The buttons that belong to the page - the two actions under the pitch and
+     the one that closes it - stay the flat pill the rest of the set uses, so the depth on the page reads as
+     one object rather than as a treatment applied to everything. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-family: var(--body);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 24px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s, border-color .3s, color .3s, opacity .3s;
+  }
+  .btn svg { width: 16px; height: 16px; flex: none; }
+  .btn-primary { background: var(--accent); color: #101014; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(51, 191, 255, .3); }
+  .btn-glass {
+    color: #fff;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .btn-glass:hover:not(:disabled) { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* Inside the machine's rail the same buttons are moulded keys: a lit top edge, a darker bottom edge, a
+     short skirt under the key and a shadow it casts on the case, and they travel down onto that skirt when
+     they are pressed. The colours are still the page's flat blue and case grey - the depth is drawn in
+     shades of them, not in gloss. */
+  .rail .btn {
+    padding: 14px 18px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    transition: transform .09s ease, box-shadow .09s ease, background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
+  }
+  .rail .btn-primary {
+    color: #07131B;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
+    border-color: #0B5C82;
+    background: linear-gradient(180deg, #7BDAFF 0%, var(--accent) 52%, #219ED6 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .65),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #106A94,
+      0 7px 12px -2px rgba(51, 191, 255, .35);
+  }
+  .rail .btn-primary:hover:not(:disabled) { transform: none; background: linear-gradient(180deg, #8FE0FF 0%, #47C6FF 52%, #2AA8E0 100%); }
+  .rail .btn-key {
+    color: #D5D5DA;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+    border-color: #08080B;
+    background: linear-gradient(180deg, #35353D 0%, #26262C 52%, #1F1F24 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .14),
+      inset 0 -2px 0 rgba(0, 0, 0, .55),
+      0 4px 0 #0A0A0D,
+      0 7px 12px -2px rgba(0, 0, 0, .7);
+  }
+  .rail .btn-key:hover:not(:disabled) { color: #fff; background: linear-gradient(180deg, #3E3E48 0%, #2C2C34 52%, #24242B 100%); }
+  /* Pressed: the key sits on the case with no skirt left to fall. */
+  .rail .btn:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, .45), inset 0 -1px 0 rgba(255, 255, 255, .12), 0 1px 0 rgba(0, 0, 0, .8);
+  }
+  .rail .btn:disabled { opacity: .45; transform: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -2px 0 rgba(0, 0, 0, .4); }
+
+  /* ---------- The machine: one panel, one window, a row of keys, a rail ---------- */
+  /* Skeuomorphic digital: the panel is a device - a moulded case with a recessed window, a sheet of glass
+     over the reels and keys that stand up off the surface and press down when you use them - while the
+     colours, the type and the corners stay the page's own. Nothing here is a picture of a machine; it is
+     drawn out of shadows and highlights, which is all a moulding ever was. */
+  /* Narrower than the page's own 1136px column: with the name under the picture a reel needs less width
+     than a row did, and a machine that is a little narrower than the words around it reads as an object
+     on the page rather than as a band across it. */
+  .machine { padding-bottom: 22px; }
+  .machine .rig { max-width: 880px; margin-inline: auto; }
+  .rig {
+    --lid: 12px;          /* the window's lip: the case around the aperture */
+    --slot: 8px;          /* between two reels: the gap the glass spans, not a divider */
+    border: 1px solid #050507;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #23242B 0%, #1B1C22 26%, #17181D 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .07),
+      inset 0 -1px 0 rgba(0, 0, 0, .8),
+      0 18px 34px -12px rgba(0, 0, 0, .7);
+  }
+  /* The deck: the window and its furniture on the left, the controls in their own rail on the right.
+     The window starts at the top of the case now that the panel's head is gone. */
+  .rig-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 232px;
+    gap: 20px;
+    align-items: start;
+    padding: 22px;
+  }
+  .deck { min-width: 0; }
+  /* One row of three, and the same three columns in the window and in the keys, so a reel, its label and
+     its key are one line down the panel. */
+  .heads, .viewport, .keys {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--slot);
+  }
+  .heads { padding: 0 var(--lid) 10px; }
+  /* The reel's name and how many entries are in it, as one label: "Flavour or brand (31)". The count is
+     part of the name rather than a second line, so the panel needs no head above the window. */
+  .col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  .col-count { font-weight: 400; letter-spacing: .02em; color: var(--dim); text-transform: none; }
+  .col-count b { font-weight: 700; color: #fff; }
+
+  /* The window: ONE aperture across all three reels. Its ground is LIGHTER than the page rather than darker
+     - a lit opening against a dark room - so the three reels sit in their own pool of light and the page
+     gets the contrast of one bright object on it. The lip catches the case's highlight, the rim at the top
+     and bottom shades the reels nearest the edges, and that shading is what makes them look like they are
+     behind something rather than printed on it. */
+  .viewport {
+    position: relative;
+    padding: var(--lid);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #2A2D38 0%, #1E212A 42%, #171A21 100%);
+    box-shadow:
+      inset 0 3px 6px rgba(0, 0, 0, .95),
+      inset 0 -3px 6px rgba(0, 0, 0, .9),
+      0 1px 0 rgba(255, 255, 255, .06);
+  }
+  /* The glass: one sheet across the whole window, over the strip area only. The keys below it sit on the
+     panel, not behind the window, so the sheet stops where the reels do. */
+  .viewport::after {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    left: var(--lid); right: var(--lid); top: var(--lid);
+    height: var(--item-h);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .015) 18%, rgba(255, 255, 255, 0) 44%);
+    box-shadow:
+      inset 0 13px 16px -13px rgba(0, 0, 0, .95),
+      inset 0 -13px 16px -13px rgba(0, 0, 0, .95),
+      inset 0 0 0 1px rgba(255, 255, 255, .05);
+  }
+  /* A reel behind the glass. No box of its own: the window's lip, its shadow and the gap between two reels
+     are what separate them, and the reels sit as close together as the glass allows. */
+  .col { position: relative; min-width: 0; }
+  /* A reel that is holding: its own stretch of the window warms with the key's yellow, so the state is
+     visible on the reel and not only on the key that set it. */
+  .col::before {
+    content: "";
+    position: absolute; inset: 0; z-index: 1;
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(247, 216, 43, .13), rgba(247, 216, 43, .04));
+    opacity: 0;
+    transition: opacity .3s var(--ease);
+  }
+  .col.is-locked::before { opacity: 1; }
+
+  /* The strip's own box: exactly one entry tall, so a resting reel and the animation's last frame agree,
+     and clipped, because everything past the window's edge is inside the machine. */
+  .rm-window {
+    position: relative;
+    height: var(--item-h);
+    overflow: hidden;
+    border-radius: 10px;
+    background: none;
+  }
+  /* Shading at the top and bottom of a reel while it is moving, so the strip reads as a drum turning. */
+  .rm-window::after {
+    content: "";
+    position: absolute; inset: 0;
+    pointer-events: none;
+    background: linear-gradient(#06060aea, transparent 26%, transparent 74%, #06060aea);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .col.is-spinning .rm-window::after { opacity: 1; }
+  .rm-strip { will-change: transform; }
+  /* One entry: the picture, the name under it, the kind under that - a column, centred. The height is
+     fixed by --item-h, so an entry with a one-line name and one with a two-line name are the same size
+     and the drum never changes shape as it turns. */
+  .item {
+    height: var(--item-h);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
+    padding: 12px 10px;
+    text-align: center;
+    transition: filter .35s ease-out;
+  }
+  /* Motion blur only while the reel is fast; it fades out before the reel stops. */
+  .rm-strip.is-moving .item { filter: blur(.6px); }
+
+  .item .rm-pic {
+    width: 5rem; height: 5rem; flex: none;
+    border-radius: 10px; overflow: hidden;
+    position: relative; display: grid; place-items: center;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
+  }
+  /* Reel icons are square logos on a transparent ground: drawn whole (the masks use contain), never cropped. */
+  .item .rm-pic.has-icon { padding: 3px; }
+  .item .cell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+  .item .name {
+    font-family: var(--title); font-weight: 800; font-size: .9375rem; line-height: 1.2;
+    letter-spacing: -0.015em; overflow-wrap: anywhere;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .item .kind-tag {
+    display: block;
+    font: 700 .625rem/1.4 var(--body);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .item.is-empty .rm-pic { border: 1px dashed rgba(255, 255, 255, .22); }
+  .item.is-empty .name { color: var(--dim); font-weight: 600; font-size: .875rem; }
+
+  /* The picture is missing until /concepts/_media/randomiser/ is filled, so the initials carry the entry.
+     At 80px the initials are the whole placeholder, and the well's own dashes say the picture is
+     provisional. */
+  .rm-ph {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    background: linear-gradient(145deg, var(--ph-dark), var(--ph-mid));
+    color: var(--ph-light);
+  }
+  .rm-ph .rm-initials { font-family: var(--title); font-weight: 800; font-size: 1.5rem; line-height: 1; letter-spacing: -0.02em; }
+  .rm-ph .rm-coming { display: none; }
+  .k-flavour { --ph-dark: #251530; --ph-mid: #573270; --ph-light: #DFBAF8; }
+  .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
+  .k-type    { --ph-dark: #0A2633; --ph-mid: #185977; --ph-light: #A0E1FF; }
+  .k-hook    { --ph-dark: #2D1424; --ph-mid: #693055; --ph-light: #F1B8DD; }
+  /* Reel icon colours (reel-icon.css), one theme per reel, from Randomiser 1's placeholder colours.
+     entryImage() puts the kind class on the picture box. */
+  .k-flavour { --icon-dark: #573270; --icon-main: #B27CE0; --icon-light: #F3E4FF; }
+  .k-brand   { --icon-dark: #744F0E; --icon-main: #E6A73C; --icon-light: #FFF1D6; }
+  .k-type    { --icon-dark: #185977; --icon-main: #3FB2E6; --icon-light: #E3F6FF; }
+  .k-hook    { --icon-dark: #693055; --icon-main: #E07CB6; --icon-light: #FFE6F4; }
+
+  /* HOLD: a key on the panel under its own reel, exactly where a fruit machine keeps its hold buttons. At
+     rest it is the same case-grey key as "Unlock all and spin" in the rail - same face, same ink, same
+     skirt - so the panel's five keys are one set of keys. Selected it is the library's yellow-400 #F7D82B,
+     the lamp coming on, sunk into the case with its light on the case around it. Under the pointer it is
+     yellow-200 #736514 whatever state it is in: a released key warms one step towards the colour it would
+     take if you held it, a selected key dims one step. Neither ever turns grey or black under the mouse. */
+  .keys { padding: var(--lid) var(--lid) 0; }
+  .lock {
+    width: 100%;
+    padding: 10px 12px 12px;
+    border-radius: 10px;
+    font: 700 12px/1 var(--body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #D5D5DA;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+    background: linear-gradient(180deg, #35353D 0%, #26262C 52%, #1F1F24 100%);
+    border: 1px solid #08080B;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    cursor: pointer;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .14),
+      inset 0 -2px 0 rgba(0, 0, 0, .55),
+      0 4px 0 #0A0A0D,
+      0 6px 10px -2px rgba(0, 0, 0, .75);
+    transition: transform .09s ease, box-shadow .09s ease, background .25s ease, color .25s ease, text-shadow .25s ease;
+  }
+  /* Yellow-200, one step down the ramp, so the pointer warms a lamp instead of switching a colour off. */
+  .lock:hover:not(:disabled) {
+    color: #FFF3BE;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .5);
+    border-color: #3F360A;
+    background: linear-gradient(180deg, #8C7A18 0%, var(--hold-down) 52%, #5B500F 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .22),
+      inset 0 -2px 0 rgba(0, 0, 0, .45),
+      0 4px 0 #332C08,
+      0 6px 10px -2px rgba(115, 101, 20, .5);
+  }
+  /* Down into the case: no skirt and no cast shadow left to fall. */
+  .lock:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, .8),
+      inset 0 -1px 0 rgba(255, 255, 255, .05),
+      0 1px 0 #0A0A0D;
+  }
+  /* Selected: the lamp is on. Yellow-400, pressed into the case, with a little of its light on the case. */
+  .lock.is-locked {
+    transform: translateY(3px);
+    color: #2A2203;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .4);
+    border-color: #6E5B0C;
+    background: linear-gradient(180deg, #F9E264 0%, var(--hold) 52%, #B59E20 100%);
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, .35),
+      inset 0 -1px 0 rgba(255, 255, 255, .3),
+      0 1px 0 #0A0A0D,
+      0 0 18px rgba(247, 216, 43, .45);
+  }
+  /* A selected key under the pointer dims one step but stays yellow, and stays pressed. */
+  .lock.is-locked:hover:not(:disabled) {
+    box-shadow:
+      inset 0 2px 4px rgba(0, 0, 0, .6),
+      inset 0 -1px 0 rgba(255, 255, 255, .12),
+      0 1px 0 #0A0A0D,
+      0 0 14px rgba(115, 101, 20, .6);
+  }
+  /* The padlock is inked with the key: light on the grey key, dark on the yellow one, light again on the
+     olive hover, and its shadow follows the ink so the mark stays cut into the face either way. */
+  .lock svg { width: 1rem; height: 1rem; flex: none; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .6)); }
+  .lock.is-locked svg { filter: drop-shadow(0 1px 0 rgba(255, 255, 255, .45)); }
+  .lock.is-locked:hover:not(:disabled) svg,
+  .lock:hover:not(:disabled) svg { filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .5)); }
+  .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
+  .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
+
+  /* The controls, in a rail down the right-hand side of the window: the two things you can do, stacked,
+     the sound switch under them, and the machine's own line hidden below all three. The rail starts lower
+     than the window's labels so the buttons line up with the glass they roll, rather than with the labels
+     above it. */
+  .rail { display: flex; flex-direction: column; gap: 12px; padding-top: 32px; }
+  .rail .btn { width: 100%; }
+  /* The sound switch: a small key under the two big ones, with the speaker as its whole label. It is
+     narrow rather than full width, so it reads as a setting rather than as a third action. */
+  .rail .sound { width: auto; align-self: center; padding: 10px 16px 12px; }
+  .sound svg { width: 18px; height: 18px; }
+  .sound .icon-off { display: none; }
+  .sound[aria-pressed="false"] .icon-on { display: none; }
+  .sound[aria-pressed="false"] .icon-off { display: block; }
+  /* The machine's line is not shown: the keys say what is held and the spinning reels say what is moving.
+     It stays in the document for a screen reader, and an error - the one thing with nowhere else to go -
+     is pulled back on screen. */
+  .status {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; border: 0;
+  }
+  .status.is-error {
+    position: static; width: auto; height: auto; margin: 8px 0 0; overflow: visible;
+    clip-path: none; white-space: normal;
+    color: #FE8989; font-size: 13px; line-height: 1.45;
+  }
+
+  /* ---------- The result ---------- */
+  /* The one rule the page does without: the pitch is what the machine just produced, and a line across the
+     page only pushed the two apart. */
+  .result { padding-block: 30px 34px; text-align: center; transition: opacity .2s; }
+  .result.stale { opacity: .45; }
+  .eyebrow { font-weight: 700; font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  /* Randomiser 1's strapline at Randomiser 1's size - 36px at the top of its range, under the page's own
+     48px heading. */
+  .strapline {
+    font-family: var(--title);
+    font-weight: 800;
+    font-size: clamp(1.5rem, 3.6vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 10px auto 20px;
+    max-width: 26em;
+  }
+  /* The hook is a line of its own, never the tail of the sentence above it. */
+  .hook-line { display: block; }
+  /* The three facts, in the quiet strip concept 8 uses for its numbers: a rule above and below, and a
+     hairline between the columns. Without them three columns of prose read as one paragraph. */
+  .details { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-block: 1px solid var(--line); text-align: left; }
+  .detail { padding: 14px 22px; }
+  .detail + .detail { border-left: 1px solid var(--line); }
+  .detail h3 { font-family: var(--title); font-weight: 700; font-size: 19px; line-height: 1.2; letter-spacing: -0.01em; margin: 0 0 6px; }
+  .detail p { color: var(--muted); font-size: 14px; line-height: 1.5; margin: 0; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 14px; margin-top: 20px; }
+  .note { flex-basis: 100%; color: var(--muted); font-size: 13px; margin: 0; min-height: 1.4em; }
+
+  /* ---------- How this works ---------- */
+  .guide { padding-block: 44px 0; display: grid; grid-template-columns: 1fr 1.4fr; gap: 48px; }
+  .guide h2 { font-family: var(--title); font-weight: 700; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.025em; margin: 14px 0 0; }
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li { position: relative; padding: 0 0 18px 40px; }
+  .steps li:last-child { padding-bottom: 0; }
+  /* The line through the dots is what makes the three steps read as one sequence rather than three notes
+     that happen to be near each other. */
+  .steps li::before { content: ""; position: absolute; left: 5px; top: 14px; bottom: -6px; width: 1px; background: var(--line); }
+  .steps li:last-child::before { display: none; }
+  .steps li::after { content: ""; position: absolute; left: 0; top: 8px; width: 11px; height: 11px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 5px var(--bg); }
+  .steps li:last-child::after { background: var(--accent-2); }
+  .steps h3 { font-weight: 700; font-size: 18px; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .steps p { color: var(--muted); margin: 0; }
+
+  /* ---------- Close ---------- */
+  .close { padding-block: 44px 60px; text-align: center; border-top: 1px solid var(--line); margin-top: 44px; }
+  .close h2 { font-family: var(--title); font-weight: 700; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -0.025em; margin: 0 0 18px; }
+
+  .tag {
+    position: fixed; right: 12px; bottom: 12px; z-index: 10;
+    font: 600 11px/1 var(--body); letter-spacing: .04em; color: var(--muted);
+    background: rgba(24, 24, 28, .9); border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px;
+  }
+
+  /* On a phone the three reels keep their row - they are one window, and stacking them would make it three
+     windows - and this is the layout's real payoff: a picture with its name under it still fits in 110px
+     of width, where a 56px thumbnail and a name beside it did not. The picture and the entry come down in
+     size, and the case, the rail and the keys lose their own insets. */
+  @media (max-width: 620px) {
+    .rig { --lid: 9px; --slot: 6px; border-radius: 18px; }
+    .rig-body { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
+    .heads { padding: 0 var(--lid) 8px; }
+    .col-label { font-size: 9.5px; letter-spacing: .06em; }
+    :root { --item-h: 7.75rem; }
+    .item { padding: 8px 6px; gap: 6px; }
+    .item .rm-pic { width: 3.25rem; height: 3.25rem; }
+    .rm-ph .rm-initials { font-size: 1.125rem; }
+    .item .name { font-size: .8125rem; }
+    .item .kind-tag { font-size: .5625rem; }
+    .lock { padding: 9px 6px 11px; font-size: 10.5px; letter-spacing: .06em; gap: 5px; }
+    .lock svg { width: .875rem; height: .875rem; }
+    .rail { gap: 10px; padding-top: 0; }
+    .details { grid-template-columns: 1fr; }
+    .detail { padding: 12px 0; }
+    .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
+    .actions .btn { width: 100%; }
+    .guide { grid-template-columns: 1fr; gap: 28px; padding-block: 34px 0; }
+    .close { padding-block: 34px 48px; margin-top: 34px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../randomiser-1-slots/reel-icon.css" />
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo-wrap" href="#" aria-label="Forge home"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></a>
+    <p class="bar-label">Randomiser · portrait</p>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <h1><span>Roll for a</span><span class="dim">starting point.</span></h1>
+    <p>Three reels, one idea. Forge picks <strong>a flavour, a game type and a hook</strong> and turns them
+      into a one-line pitch you can build in UEFN. Hold the parts you like and spin the rest.</p>
+  </section>
+
+  <section class="machine wrap" aria-label="The three reels">
+    <!-- One panel, and inside it one deck: a label above each reel, one window with the three reels
+         behind the glass, their hold keys in a row on the panel below it, and the controls in a rail down
+         the right-hand side. The panel has no head - the reel's name and its size are one label, and the
+         machine's own line is not shown - so the window is the first thing in the case.
+         The module (public/js/reel-machine.js) fills each [data-mount="window"] and drives the keys, which
+         live outside their reels and name them with data-lock-for. The count in each label is filled from
+         the data on load, never written here. -->
+    <div class="rig">
+      <div class="rig-body">
+        <div class="deck" id="reels">
+          <div class="heads">
+            <p class="col-label">Flavour or brand <span class="col-count">(<b id="count-f">&mdash;</b>)</span></p>
+            <p class="col-label">Game type <span class="col-count">(<b id="count-t">&mdash;</b>)</span></p>
+            <p class="col-label">Hook <span class="col-count">(<b id="count-h">&mdash;</b>)</span></p>
+          </div>
+
+          <div class="viewport">
+            <div class="col" data-reel="f"><div data-mount="window"></div></div>
+            <div class="col" data-reel="t"><div data-mount="window"></div></div>
+            <div class="col" data-reel="h"><div data-mount="window"></div></div>
+          </div>
+
+          <div class="keys">
+            <button class="lock" data-lock data-lock-for="f" type="button"><span data-lock-text>Hold</span></button>
+            <button class="lock" data-lock data-lock-for="t" type="button"><span data-lock-text>Hold</span></button>
+            <button class="lock" data-lock data-lock-for="h" type="button"><span data-lock-text>Hold</span></button>
+          </div>
+        </div>
+
+        <div class="rail">
+          <button class="btn btn-primary" id="spin" type="button" data-spin disabled>
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.9-4.16M13.5 1.5V4.6h-3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="btn-label">Spin the reels</span>
+          </button>
+          <button class="btn btn-key" id="unlock-spin" type="button" data-unlock-all disabled>Unlock all and spin</button>
+          <!-- The sound switch, on its own under the two actions: a key with a speaker for a label, saying
+               whether the machine can be heard. -->
+          <button class="btn btn-key sound" id="sound" type="button" aria-pressed="true" aria-label="Sound on" title="Sound on">
+            <svg class="icon-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="M15.8 9.4a3.6 3.6 0 0 1 0 5.2"/><path d="M18.4 6.6a7.2 7.2 0 0 1 0 10.8"/></svg>
+            <svg class="icon-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9.5h3.2L12 5.6v12.8l-4.8-3.9H4z"/><path d="M15.8 9.9l5 4.2"/><path d="M20.8 9.9l-5 4.2"/></svg>
+          </button>
+          <p class="status" id="status" aria-live="polite">Loading the reels…</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="result wrap" id="result" data-result hidden aria-labelledby="result-h">
+    <h2 class="eyebrow" id="result-h">The pitch</h2>
+    <p class="strapline" data-pitch id="strapline" aria-live="polite"></p>
+    <div class="details">
+      <div class="detail">
+        <h3 id="d-type-h"></h3>
+        <p id="d-type-p"></p>
+      </div>
+      <div class="detail">
+        <h3>Underneath</h3>
+        <p id="d-under-p"></p>
+      </div>
+      <div class="detail">
+        <h3 id="d-hook-h"></h3>
+        <p id="d-hook-p"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" type="button" data-todo="Suggest a pitch">
+        <span class="btn-label">Suggest a pitch</span>
+      </button>
+      <button class="btn btn-glass" type="button" data-todo="Start a document from this">Start a document from this</button>
+      <p class="note" id="todo-note" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <section class="guide wrap" aria-labelledby="guide-h">
+    <div>
+      <p class="eyebrow">How this works</p>
+      <h2 id="guide-h">Hold, spin, build.</h2>
+    </div>
+    <ol class="steps">
+      <li><h3>Hold what you like</h3><p>Happy with the flavour? Hold it: it stays put while the other two reels spin.</p></li>
+      <li><h3>Spin for the rest</h3><p>Every spin lands on a new combination, and never on the one you are looking at.</p></li>
+      <li><h3>Take the pitch away</h3><p>The one-line pitch is your starting point: turn it into a plan and build it in UEFN.</p></li>
+    </ol>
+  </section>
+
+  <section class="close wrap">
+    <h2>Your island starts<br>with one spin.</h2>
+    <button class="btn btn-primary" id="spin-again" type="button" data-spin disabled>
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.9-4.16M13.5 1.5V4.6h-3.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="btn-label">Spin the reels</span>
+    </button>
+  </section>
+</main>
+
+<div class="tag">Randomiser 2c - Portrait reels</div>
+
+<script type="module">
+/* The behaviour is public/js/reel-machine.js - the same machine Randomiser 2 carries inline in its own
+   page, so this design is only about the layout. Everything here is the portrait widget's vocabulary:
+   a hold per reel, one rail of controls, and the reels turning as soon as the page opens.
+   The sound is this page's own and it is synthesised, not a file: the machine is the only thing on this
+   site that makes a noise, so it is better heard than downloaded. */
+import { createMachine, entryImage, PADLOCK } from '../../js/reel-machine.js';
+
+const $ = (id) => document.getElementById(id);
+const spinBtn = $('spin'), spinAgainBtn = $('spin-again'), unlockBtn = $('unlock-spin');
+const soundBtn = $('sound');
+const statusEl = $('status');
+let resultShown = false;
+
+const REEL_WORDS = { f: 'flavour', t: 'game type', h: 'hook' };
+
+/* How long each reel turns for, and how many entries a spin passes: the machine's own numbers, passed to
+   it below and read by the sound so the ticks land where the entries do. */
+const SPIN_MS = { f: 1300, t: 1750, h: 2200 };
+const STRIP_STEPS = 14;
+
+/* ---------- the sound of the machine ----------
+   Three noises, all of them built out of a click and a band of noise: the click of the lever as a spin
+   starts, a tick for every entry that goes past the glass, and the clack of a reel landing. The ticks are
+   placed on the machine's own curve - a cubic-bezier(.2,.62,.28,1), the easing the module animates the
+   strip with - so they start fast, thin out as the reel slows, and the last one is the clack. Nothing here
+   touches the machine's motion; the sound follows it. */
+const SOUND = (() => {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  /* The easing the module animates a reel with, and the inverse of it: given how far along the reel is,
+     how far along the spin is. Bisection - the curve is monotonic, and sixteen passes is more precision
+     than a tick needs. */
+  const EASE = [0.2, 0.62, 0.28, 1];
+  const curve = (a, b, t) => 3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t;
+  const at = (progress) => {
+    let lo = 0, hi = 1;
+    for (let i = 0; i < 16; i += 1) {
+      const mid = (lo + hi) / 2;
+      if (curve(EASE[1], EASE[3], mid) < progress) lo = mid; else hi = mid;
+    }
+    return curve(EASE[0], EASE[2], (lo + hi) / 2);
+  };
+
+  let ctx = null, master = null, on = true;
+
+  /* A context may only be created, and may only run, once the visitor has touched the page. The first
+     touch opens it - the reels that spin on load are silent, and every spin after that is not. */
+  function open() {
+    if (!AC) return null;
+    if (!ctx) {
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.5;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx.state === 'running' ? ctx : null;
+  }
+  addEventListener('pointerdown', open, { once: true });
+  addEventListener('keydown', open, { once: true });
+
+  /* One hit: a short burst of noise through a band pass, faded out with a hard attack. The clack is the
+     same hit lower, longer and louder, with a little body under it, and that is the whole difference
+     between a tick and a reel landing. */
+  function hit({ gain, freq, q, dur, body = 0, bodyFreq = 150 }) {
+    const c = ctx;
+    const len = Math.max(1, Math.round(c.sampleRate * dur));
+    const buf = c.createBuffer(1, len, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i += 1) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.4);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    const band = c.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = freq;
+    band.Q.value = q;
+    const amp = c.createGain();
+    amp.gain.value = gain;
+    src.connect(band).connect(amp).connect(master);
+    src.start();
+    if (body) {
+      const osc = c.createOscillator();
+      const bodyAmp = c.createGain();
+      osc.frequency.setValueAtTime(bodyFreq, c.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(bodyFreq * 0.6, c.currentTime + dur);
+      bodyAmp.gain.setValueAtTime(body, c.currentTime);
+      bodyAmp.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+      osc.connect(bodyAmp).connect(master);
+      osc.start();
+      osc.stop(c.currentTime + dur);
+    }
+  }
+
+  const tick = (volume) => open() && hit({ gain: 0.05 * volume, freq: 2500 + Math.random() * 500, q: 1.4, dur: 0.035 });
+  const clack = () => open() && hit({ gain: 0.13, freq: 850, q: 0.9, dur: 0.11, body: 0.16, bodyFreq: 150 });
+  const lever = () => open() && hit({ gain: 0.08, freq: 1400, q: 1, dur: 0.06 });
+
+  return {
+    /* Every unlocked reel is given its own run of ticks and one clack, at the moment its own animation
+       ends - the three reels turn for different lengths of time, so they land one after another. */
+    spin(keys) {
+      if (!on) return;
+      open();
+      lever();
+      for (const key of keys) {
+        const duration = SPIN_MS[key];
+        for (let i = 1; i < STRIP_STEPS; i += 1) {
+          const progress = i / STRIP_STEPS;
+          /* 90% of the duration is the run; the last 10% is the settle onto the entry, which is shorter
+             than a step and makes no sound of its own. */
+          const wait = duration * 0.9 * at(progress);
+          setTimeout(() => { if (on) tick(0.45 + 0.55 * progress); }, wait);
+        }
+        setTimeout(() => { if (on) clack(); }, duration);
+      }
+    },
+    get on() { return on; },
+    set(value) {
+      on = value;
+      soundBtn.setAttribute('aria-pressed', String(on));
+      soundBtn.setAttribute('aria-label', on ? 'Sound on' : 'Sound off');
+      soundBtn.title = on ? 'Sound on' : 'Sound off';
+      if (on) { open(); tick(1); }
+    }
+  };
+})();
+
+/* ---------- one entry in a drum: a thumbnail and the name beside it ---------- */
+function renderEntry(entry, key) {
+  const item = document.createElement('div');
+  item.className = 'item';
+  if (!entry) {
+    item.classList.add('is-empty');
+    const pic = document.createElement('div');
+    pic.className = 'rm-pic';
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    const name = document.createElement('span');
+    name.className = 'name';
+    name.textContent = 'Spin to start';
+    cell.append(name);
+    item.append(pic, cell);
+    return item;
+  }
+  /* The per-kind gradient the placeholder falls back to is inherited from the item, so the class goes
+     here rather than on the picture. */
+  if (entry.kind) item.classList.add(`k-${entry.kind}`);
+  const pic = entryImage(entry);
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  const name = document.createElement('span');
+  name.className = 'name';
+  name.textContent = entry.name;
+  cell.append(name);
+  if (entry.kind === 'brand') {
+    const tag = document.createElement('span');
+    tag.className = 'kind-tag';
+    tag.textContent = 'Brand';
+    cell.append(tag);
+  }
+  item.append(pic, cell);
+  return item;
+}
+
+/* ---------- the rail's copy, from the machine's state ---------- */
+/* The only copy left on the panel is on the keys and on the two buttons, because the reels say the rest
+   themselves: a spinning reel is visible and a lit key is visible. */
+let wasSpinning = false;
+function onState(s) {
+  spinBtn.querySelector('.btn-label').textContent = s.allLocked ? 'Everything is held' : s.spinning ? 'Spinning…' : 'Spin the reels';
+  spinAgainBtn.querySelector('.btn-label').textContent = s.spinning ? 'Spinning…' : 'Spin the reels';
+  $('result').classList.toggle('stale', s.spinning);
+  /* The size of each reel, in its own label. Counted from the data on load, never written into the
+     markup, so the numbers stay true when the owner adds a flavour or a game type. */
+  for (const [key, count] of Object.entries(s.counts)) $(`count-${key}`).textContent = count;
+  /* The reels starting is the one moment the page has to hear from the machine: every way of spinning -
+     the button, the one that closes the page, unlock-all - goes through here, and the sound follows the
+     reels that are actually about to move. */
+  if (s.spinning && !wasSpinning) SOUND.spin(s.keys.filter((k) => !s.locked[k]));
+  wasSpinning = s.spinning;
+}
+
+function onResult(r) {
+  const result = $('result');
+  if (!r) {
+    if (!resultShown) result.hidden = true;
+    return;
+  }
+  resultShown = true;
+  result.hidden = false;
+  /* The pitch arrives as one sentence; the hook is split back off it and given its own line, so
+     randomiser.js is still the only place that decides what the sentence says. */
+  const hook = document.createElement('span');
+  hook.className = 'hook-line';
+  hook.textContent = r.hookPart;
+  $('strapline').replaceChildren(r.lead ? `${r.lead} ` : '', hook);
+  $('d-type-h').textContent = r.type.name;
+  $('d-type-p').textContent = r.type.desc ? `${r.type.desc}.` : '';
+  $('d-under-p').textContent = r.parts.length ? r.parts.join(' · ') : 'No fixed shape - it is a feeling.';
+  $('d-hook-h').textContent = r.hook.name;
+  $('d-hook-p').textContent = r.hook.desc ? `${r.hook.desc}.` : '';
+}
+
+const machine = await createMachine({
+  root: $('reels'),
+  spinButtons: [spinBtn, spinAgainBtn],
+  unlockButton: unlockBtn,
+  status: statusEl,
+  /* The same numbers the sound schedules its ticks with, so the two never drift apart. */
+  spinMs: SPIN_MS,
+  stripBase: STRIP_STEPS,
+  renderEntry,
+  onState,
+  onResult
+});
+
+if (machine) {
+  /* The hold buttons carry the padlock; the module drives their state and their label. */
+  document.querySelectorAll('[data-lock]').forEach((btn) => btn.insertAdjacentHTML('afterbegin', PADLOCK));
+  spinBtn.addEventListener('click', machine.spin);
+  spinAgainBtn.addEventListener('click', () => {
+    $('reels').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    machine.spin();
+  });
+  unlockBtn.addEventListener('click', machine.unlockAllAndSpin);
+  soundBtn.addEventListener('click', () => SOUND.set(!SOUND.on));
+  document.querySelectorAll('[data-todo]').forEach((btn) => btn.addEventListener('click', () => {
+    $('todo-note').textContent = `"${btn.textContent.trim()}" isn't wired up yet - this page is a design mock-up.`;
+  }));
+
+  /* The reels are already turning when the page arrives - that is the first thing this page says, and it
+     says it on every visit, a refresh included. A visitor who has asked their system for less motion gets
+     the machine still and the button to start it, which is the one exception.
+
+     The cost, if it ever matters: a link carrying a result (the deep link every machine writes after a
+     spin) turns that result over on the way in rather than sitting on it. */
+  if (!machine.reducedMotion.matches) machine.spin();
+}
+</script>
+<!-- Plain script, not a module: this page loads its logic as an ES module and fetches its JSON, and a
+     browser blocks both on a file:// page. This still runs there, and hands the browser over to the
+     server address where the reels do work. -->
+<script src="../../js/local-server-check.js"></script>
+</body>
+</html>
