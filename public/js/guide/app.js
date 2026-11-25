@@ -27,7 +27,7 @@ import { renderGameType } from './screens/gametype.js';
 import { renderQuestion } from './screens/question.js';
 import { renderBrand } from './screens/brand.js';
 import { renderRestriction } from './screens/restriction.js';
-import { renderSummary } from './screens/summary.js';
+import { renderSummary, SUMMARY_LAYOUTS } from './screens/summary.js';
 import { renderExperience } from './screens/experience.js';
 import { renderWalkthrough } from './screens/walkthrough.js';
 import { renderPlaceholder } from './screens/placeholder.js';
@@ -103,7 +103,16 @@ async function boot() {
   const devFromQuery = new URLSearchParams(window.location.search).get('dev');
   const devMode = devFromQuery === '1' ? true : devFromQuery === '0' ? false : store.getDevMode(data.defaultDevMode);
 
-  const state = createState(data, { devMode });
+  /* Same rule for the summary's layout switch: `?layout=new` in the address bar wins, so two tabs
+   * can hold the two designs side by side; otherwise this browser's own last choice, and otherwise
+   * the layout the app shipped with. */
+  const layoutFromQuery = new URLSearchParams(window.location.search).get('layout');
+  const summaryLayout =
+    layoutFromQuery === 'new' || layoutFromQuery === 'classic'
+      ? layoutFromQuery
+      : store.getSummaryLayout('classic', SUMMARY_LAYOUTS);
+
+  const state = createState(data, { devMode, summaryLayout });
 
   /* A shared session in the query string seeds the state, so a link into the middle of the flow has
    * something to resolve against — and so a plan can be sent to someone else. */
@@ -334,6 +343,41 @@ function createActions(ctx) {
 
     setName(name) {
       state.gameName = name;
+    },
+
+    /**
+     * Switch the summary between its two layouts.
+     *
+     * It re-renders in place rather than routing, because the screen has not changed — only which of
+     * its two designs is drawing it. The choice is written to this browser so it survives a reload,
+     * and announced in a notice, so the person comparing them can see which one they are looking at
+     * without reading the switcher's own state back.
+     *
+     * The address bar is updated too. `?layout=` overrides the stored choice on load, so a page opened
+     * from such a link would otherwise snap back to the link's layout on every reload and disagree
+     * with what the switcher says. replaceState, not the hash, so the route and Back are untouched.
+     */
+    setSummaryLayout(layout) {
+      const next = SUMMARY_LAYOUTS.includes(layout) ? layout : 'classic';
+      if (next === state.summaryLayout) return;
+      state.summaryLayout = next;
+      store.setSummaryLayout(next);
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('layout', next);
+        window.history.replaceState(null, '', url);
+      } catch {
+        /* A browser that will not take the URL still gets the layout: the address bar is the lesser
+         * half of this. */
+      }
+      state.notice = {
+        tone: 'info',
+        text:
+          next === 'new'
+            ? 'Showing the new summary layout. Switch back to Classic at any time — nothing you have saved changes.'
+            : 'Showing the summary layout the guide shipped with.'
+      };
+      renderScreen(ctx);
     },
 
     saveGame(name) {

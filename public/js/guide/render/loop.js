@@ -41,6 +41,22 @@ const CHAR_W_BOX = 7.6;    // …at FONT_BOX
 const MAX_STEP_LINES = 2;
 const GAP = 26;            // vertical clearance between the pieces
 
+/**
+ * Arrow weight. The first pass drew 2px lines under a 7×5 head, which reads as a hairline with a
+ * splinter on the end once the drawing is scaled into a column — the owner's note was that the arrows
+ * are "too small right now". Line and head are one pair and move together: a heavier line under the
+ * old head looks like a stick with a splinter on the end, and a bigger head on the old line looks
+ * detached from it.
+ *
+ * `HEAD_LENGTH` is also how far short of its target each line stops, so the head's tip is the end of
+ * the arrow rather than a widening somewhere along it.
+ */
+const ARROW_WIDTH = 3.2;
+const HEAD_LENGTH = 12;
+const HEAD_SPREAD = 5.2;
+/** The faint dashed ring the steps sit on. */
+const RING_WIDTH = 1.5;
+
 let uid = 0;
 
 /** Apply colours through inline styles, where var() is dependable. */
@@ -230,7 +246,7 @@ export function renderCoreLoop(coreLoop) {
   root.append(
     make('circle', { cx: VW / 2, cy, r: RING_R, fill: 'none' }, {
       stroke: 'var(--loop-stroke, #FFFFFF0D)',
-      strokeWidth: '1.5',
+      strokeWidth: String(RING_WIDTH),
       strokeDasharray: '3 7'
     })
   );
@@ -356,16 +372,23 @@ function tangentArc(from, to, cy) {
   const sweep = span > Math.PI ? 1 : 1; // always clockwise on screen
   const p1 = { x: cx + Math.cos(a1) * RING_R, y: cy + Math.sin(a1) * RING_R };
   const p2 = { x: cx + Math.cos(a2) * RING_R, y: cy + Math.sin(a2) * RING_R };
-  const large = Math.abs(a2 - a1) > Math.PI ? 1 : 0;
+  /* The visible arc stops where the head begins, so the head is the end of the arrow and not a
+   * widening drawn over the line. The head's own tip stays on the ring at a2. */
+  const aEnd = Math.max(a1, a2 - HEAD_LENGTH / RING_R);
+  const pEnd = { x: cx + Math.cos(aEnd) * RING_R, y: cy + Math.sin(aEnd) * RING_R };
+  const large = Math.abs(aEnd - a1) > Math.PI ? 1 : 0;
+  const hasLine = Math.abs(a2 - a1) > HEAD_LENGTH / RING_R;
 
   const g = make('g', {});
-  g.append(
-    make(
-      'path',
-      { d: `M ${round(p1.x)} ${round(p1.y)} A ${RING_R} ${RING_R} 0 ${large} ${sweep} ${round(p2.x)} ${round(p2.y)}`, fill: 'none' },
-      { stroke: 'var(--loop-muted, #FFFFFFBF)', strokeWidth: '2' }
-    )
-  );
+  if (hasLine) {
+    g.append(
+      make(
+        'path',
+        { d: `M ${round(p1.x)} ${round(p1.y)} A ${RING_R} ${RING_R} 0 ${large} ${sweep} ${round(pEnd.x)} ${round(pEnd.y)}`, fill: 'none' },
+        { stroke: 'var(--loop-muted, #FFFFFFBF)', strokeWidth: String(ARROW_WIDTH), strokeLinecap: 'butt' }
+      )
+    );
+  }
   /* Arrowhead: a small triangle rotated to the arc's tangent at its end point. */
   const tangent = a2 + Math.PI / 2; // tangent direction when travelling clockwise
   g.append(triangle(p2.x, p2.y, tangent, 'var(--loop-accent, #26BBFF)'));
@@ -375,13 +398,21 @@ function tangentArc(from, to, cy) {
 /** A straight arrow with an arrowhead at the end. */
 function arrow(x1, y1, x2, y2, name) {
   const g = make('g', {});
-  g.append(
-    make('path', { d: `M ${round(x1)} ${round(y1)} L ${round(x2)} ${round(y2)}`, fill: 'none' }, {
-      stroke: 'var(--loop-accent, #26BBFF)',
-      strokeWidth: '2'
-    })
-  );
   const angle = Math.atan2(y2 - y1, x2 - x1);
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  /* Same rule as the arcs: the shaft stops where the head starts. A gap too short to hold both is
+   * drawn as a head alone rather than as a line through it. */
+  if (length > HEAD_LENGTH) {
+    const shaftX = x2 - Math.cos(angle) * HEAD_LENGTH;
+    const shaftY = y2 - Math.sin(angle) * HEAD_LENGTH;
+    g.append(
+      make('path', { d: `M ${round(x1)} ${round(y1)} L ${round(shaftX)} ${round(shaftY)}`, fill: 'none' }, {
+        stroke: 'var(--loop-accent, #26BBFF)',
+        strokeWidth: String(ARROW_WIDTH),
+        strokeLinecap: 'butt'
+      })
+    );
+  }
   g.append(triangle(x2, y2, angle, 'var(--loop-accent, #26BBFF)'));
   const t = document.createElementNS('http://www.w3.org/2000/svg', 'title');
   t.textContent = name;
@@ -391,8 +422,8 @@ function arrow(x1, y1, x2, y2, name) {
 
 /** A filled arrowhead pointing along `angle`, with its tip at (x, y). */
 function triangle(x, y, angle, fill) {
-  const size = 7;
-  const spread = 2.5;
+  const size = HEAD_LENGTH;
+  const spread = HEAD_SPREAD;
   const points = [
     [0, 0],
     [-size, -spread],

@@ -182,6 +182,22 @@ export const UI = {
   save: 'Save',
   rename: 'Rename',
   remove: 'Delete',
+  /* ------------------------------ the summary's pitch ------------------------------
+   * The card that opens the redesigned summary: the game's own one-liner, then the three things you
+   * can do with it. `underneath` is the randomiser's own phrase, kept so the two pages read as the
+   * same product rather than as two takes on the same idea. */
+  startingPoint: 'Your starting point',
+  underneath: 'Underneath, that means:',
+
+  /* ------------------------------ the layout switcher ------------------------------
+   * A temporary control on the summary screen only, for comparing the two designs on the real page.
+   * It says what it is so it is never mistaken for part of the product. */
+  layoutLabel: 'Layout',
+  layoutClassic: 'Classic',
+  layoutNew: 'New',
+  layoutNote:
+    'A temporary switch between the two versions of this page, so they can be compared with the same answers. Nothing else in the guide changes.',
+
   guidedInstead: 'Answer questions instead',
   visibleWithDevModeOff: 'Only researched game types are shown. Turn on dev mode to see all 97.',
   baselineOnly:

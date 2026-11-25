@@ -15,6 +15,8 @@
 export const SCHEMA = 3;
 export const STORAGE_KEY = 'forge.guide.savedGames';
 export const DEV_MODE_KEY = 'forge.guide.devMode';
+/** Which summary layout this browser is showing. Temporary, and deleted with the switcher. */
+export const SUMMARY_LAYOUT_KEY = 'forge.guide.summaryLayout';
 /** v1's keys, read once so existing saves survive the upgrade. */
 export const LEGACY_STORAGE_KEY = 'uefnGameCreatorGuide.savedGames';
 export const LEGACY_DEV_MODE_KEY = 'uefnGameCreatorGuide.devMode';
@@ -257,6 +259,20 @@ export function createStore(storage, options = {}) {
 
     setDevMode(on) {
       return writeJson(DEV_MODE_KEY, Boolean(on));
+    },
+
+    /**
+     * Which summary layout to show. `classic` unless this browser has been told otherwise — the
+     * redesign is opt-in while it is being compared, so an existing session sees no change at all.
+     * Anything that is not a layout the app knows is treated as the fallback rather than trusted.
+     */
+    getSummaryLayout(fallback = 'classic', known = ['classic', 'new']) {
+      const value = readJson(SUMMARY_LAYOUT_KEY, null);
+      return known.includes(value) ? value : fallback;
+    },
+
+    setSummaryLayout(layout) {
+      return writeJson(SUMMARY_LAYOUT_KEY, String(layout));
     }
   };
 

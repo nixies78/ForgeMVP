@@ -38,8 +38,9 @@ import {
   savedGameNotice,
   walkthroughSteps
 } from '../public/js/guide/state.js';
-import { createStore, memoryStorage, MAX_SAVED, SCHEMA, STORAGE_KEY, LEGACY_STORAGE_KEY } from '../public/js/guide/store.js';
+import { createStore, memoryStorage, MAX_SAVED, SCHEMA, STORAGE_KEY, LEGACY_STORAGE_KEY, SUMMARY_LAYOUT_KEY } from '../public/js/guide/store.js';
 import { parseShare, buildShare } from '../public/js/guide/share.js';
+import { articleFor, buildPitch, factsLine, TYPE_VOICE } from '../public/js/guide/pitch.js';
 import { parseHash, toHash, applyRoute } from '../public/js/guide/router.js';
 import { WALKTHROUGH_STEPS, DESIGN_MODES, EXPERIENCE_LEVELS, PLACEHOLDER_NOTES } from '../public/js/guide/content.js';
 
@@ -181,6 +182,88 @@ test('every brand can be shown, gated and credited', () => {
     }
   }
   assert.ok(data.defaultBrandId && data.brandsById.has(data.defaultBrandId), 'the default brand exists');
+});
+
+/* ============================ the pitch (the summary's first line) ============================ */
+
+test('every researched game type has a voice to pitch with', () => {
+  /* The pitch is only as good as this table: a researched type with no entry gets the flat fallback,
+   * which is exactly the thing the rewrite exists to avoid on the 13 types people actually reach. */
+  assert.equal(researchedKeys.length, 13, 'thirteen researched types');
+  for (const key of researchedKeys) {
+    const voice = TYPE_VOICE[key];
+    assert.ok(voice, `${key} has a voice`);
+    assert.ok(voice.noun && voice.noun.trim(), `${key} names itself inside the sentence`);
+    assert.ok(voice.hook && voice.hook.name && voice.hook.description, `${key} has a hook and a description of it`);
+    assert.ok(Array.isArray(voice.facts) && voice.facts.length >= 3, `${key} says what it means underneath`);
+    assert.ok(voice.facts.every((fact) => typeof fact === 'string' && fact.trim()), `${key} facts are all readable`);
+  }
+  /* And nothing is written for a type that does not exist, which is how a table like this rots. */
+  for (const key of Object.keys(TYPE_VOICE)) {
+    assert.ok(data.gameTypes[key], `TYPE_VOICE names ${key}, which is not a game type in the data`);
+  }
+});
+
+test('the pitch reads the way the randomiser reads', () => {
+  const box = buildPitch({
+    key: 'combat_box_fights',
+    type: data.gameTypes.combat_box_fights,
+    category: data.gameCategories.find((c) => c.id === 'combat'),
+    brand: data.brandsById.get('star_wars')
+  });
+
+  assert.equal(box.strapline, 'A Box Fight, set in the world of Star Wars. So fast you barely think.');
+  assert.equal(box.noun, 'Box Fight', 'the sentence uses the singular, not the list heading "Box Fights"');
+  assert.equal(box.hook.name, 'So fast you barely think');
+  assert.equal(box.voice, 'researched');
+  assert.equal(factsLine(box.facts), 'Fighting · Teams against each other · 2–4 · One arena · Under 5 minutes');
+
+  /* An unbranded game drops the clause rather than naming "Original" as a world. */
+  const plain = buildPitch({
+    key: 'combat_box_fights',
+    type: data.gameTypes.combat_box_fights,
+    category: null,
+    brand: data.brandsById.get('original')
+  });
+  assert.equal(plain.strapline, 'A Box Fight. So fast you barely think.');
+});
+
+test('the article is right, and a type with no voice is not given one', () => {
+  assert.equal(articleFor('Box Fight'), 'A');
+  assert.equal(articleFor('Elimination / Deathmatch'), 'An');
+  assert.equal(articleFor('Action RPG'), 'An');
+  assert.equal(articleFor('Horror Chase'), 'A');
+
+  for (const key of researchedKeys) {
+    const type = data.gameTypes[key];
+    const pitch = buildPitch({ key, type, category: null, brand: null });
+    assert.match(pitch.strapline, /^(A|An) /, `${key}: the sentence opens with an article`);
+    assert.ok(!/^A [AEIOU]/.test(pitch.strapline.slice(2)), `${key}: no "A" before a vowel`);
+    assert.ok(pitch.strapline.endsWith('.'), `${key}: the sentence closes`);
+  }
+
+  /* A draft has no hook and no facts, and none are invented for it: the pitch is its own description
+   * and nothing else. 74 of the 97 types are drafts, so this is the common case, not the edge case. */
+  const draft = buildPitch({ key: draftKeys[0], type: data.gameTypes[draftKeys[0]], category: null, brand: null });
+  assert.equal(draft.hook, null, 'a draft is not given a voice it has not earned');
+  assert.deepEqual(draft.facts, [], 'and no facts row is invented for it');
+  assert.equal(draft.voice, 'baseline');
+  assert.equal(draft.description, data.gameTypes[draftKeys[0]].description);
+
+  /* The ten "just give me the basics" entries are described rather than named, because "A Just give me
+   * the basics" is not a sentence. */
+  const basicsKey = basicKeys.find((k) => data.gameTypes[k].category === 'combat');
+  const basics = buildPitch({
+    key: basicsKey,
+    type: data.gameTypes[basicsKey],
+    category: data.gameCategories.find((c) => c.id === 'combat'),
+    brand: data.brandsById.get('star_wars')
+  });
+  assert.equal(basics.voice, 'essentials');
+  assert.equal(basics.strapline, `An essentials combat build, set in the world of Star Wars. ${data.gameTypes[basicsKey].description}`);
+  assert.ok(!/Just give me the basics,/.test(basics.strapline), 'the entry is never named as though it were a game');
+
+  assert.equal(buildPitch({ key: 'nope', type: null }), null, 'no game type means no pitch, rather than a throw');
 });
 
 test('a game type always has a core loop to show, from itself or its baseline', () => {
@@ -601,6 +684,27 @@ test('the dev-mode preference persists', () => {
   assert.equal(store.getDevMode(), false, 'off by default');
   store.setDevMode(true);
   assert.equal(createStore(storage).getDevMode(), true, 'and survives a reload');
+});
+
+test('the summary layout defaults to the one the app shipped with', () => {
+  /* The redesign is opt-in while the two are being compared, so an existing session - or a cleared
+   * storage - sees exactly the page it saw before. A stored value the app does not know is treated as
+   * absent rather than trusted, because a stale key must not render a layout that no longer exists. */
+  const storage = memoryStorage();
+  const store = createStore(storage);
+  assert.equal(store.getSummaryLayout(), 'classic', 'classic unless this browser says otherwise');
+
+  store.setSummaryLayout('new');
+  assert.equal(createStore(storage).getSummaryLayout(), 'new', 'and the choice survives a reload');
+  assert.equal(store.getSummaryLayout('classic', ['classic']), 'classic', 'a layout the app no longer knows is ignored');
+
+  const junk = createStore(memoryStorage({ [SUMMARY_LAYOUT_KEY]: JSON.stringify('sideways') }));
+  assert.equal(junk.getSummaryLayout('classic'), 'classic', 'an unknown stored layout falls back');
+
+  /* The state carries it too, and refuses anything but the two the screen can draw. */
+  assert.equal(createState(data).summaryLayout, 'classic');
+  assert.equal(createState(data, { summaryLayout: 'new' }).summaryLayout, 'new');
+  assert.equal(createState(data, { summaryLayout: 'nonsense' }).summaryLayout, 'classic');
 });
 
 test('v1 saved games are imported once, reported, and mapped to the new taxonomy', () => {
@@ -1275,14 +1379,23 @@ test('the page follows the architecture spec it was rebuilt from', async () => {
 });
 
 test('every wizard screen carries a visible way back, and home does not', async () => {
-  const screens = await readdir(path.join(GUIDE_DIR, 'screens'));
+  const dir = path.join(GUIDE_DIR, 'screens');
+  const screens = await readdir(dir);
   const withBack = [];
   for (const file of screens.filter((f) => f.endsWith('.js'))) {
-    const src = await readFile(path.join(GUIDE_DIR, 'screens', file), 'utf8');
     /* A step's way back is either the shared previousStep() affordance or a button that calls
      * actions.back() - the stub screens walk back with go({screen:'home'}) instead, which is still a
-     * way back. What matters is that the screen builds one. */
-    if (/actions\.back\(\)/.test(src) || /label: '(←\s*)?Back/.test(src)) withBack.push(file.replace('.js', ''));
+     * way back. What matters is that the screen builds one.
+     *
+     * The check reads the screen's own module *and the guide modules it imports*, because the summary
+     * has two layouts now and they share one Back row in render/summary-parts.js. Following the real
+     * imports keeps the question the test was always asking - does this screen have a way back? - as
+     * opposed to where in the module tree the string happens to be written. It is also stricter than
+     * reading one file: a screen that imports its Back row from shared furniture still has to reach a
+     * module that actually builds one. */
+    const sources = await moduleSources(path.join(dir, file));
+    const combined = [...sources.values()].join('\n');
+    if (/actions\.back\(\)/.test(combined) || /label: '(←\s*)?Back/.test(combined)) withBack.push(file.replace('.js', ''));
   }
   for (const screen of ['category', 'gametype', 'question', 'brand', 'restriction', 'summary', 'experience', 'walkthrough', 'placeholder']) {
     assert.ok(withBack.includes(screen), `the ${screen} screen has no Back control`);
@@ -1323,6 +1436,29 @@ test('every asset the page promises is on disk', async () => {
 
 
 /* ------------------------------ helpers ------------------------------ */
+
+/**
+ * A module's own source, plus the source of every relative import it reaches inside js/guide.
+ *
+ * Used by the checks that ask a question about a screen rather than about a file — "does this screen
+ * have a way back?" — where the answer may be assembled from shared furniture in the render/ folder.
+ * Only paths under js/guide are followed, so the walk stays inside the app.
+ */
+async function moduleSources(entry, seen = new Map()) {
+  if (seen.has(entry)) return seen;
+  let source;
+  try {
+    source = await readFile(entry, 'utf8');
+  } catch {
+    return seen;
+  }
+  seen.set(entry, source);
+  for (const match of source.matchAll(/from\s+'(\.[^']+)'/g)) {
+    const target = path.resolve(path.dirname(entry), match[1]);
+    if (target.startsWith(GUIDE_DIR)) await moduleSources(target, seen);
+  }
+  return seen;
+}
 
 async function walk(dir) {
   const out = [];

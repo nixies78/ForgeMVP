@@ -738,6 +738,127 @@ body.g-app {
 }
 .g-recap-value .g-btn { min-height: 32px; padding: 0 var(--fn-space-3); font-size: 13px; }
 
+/* ---------- the layout switcher (temporary) ----------
+ * The summary screen has two layouts while they are being compared, and this is how the comparison is
+ * made: on the real page, with the real answers, rather than in two screenshots. It is the only piece
+ * of the page that is not part of the product, so it is drawn as an annotation — a dashed rule, an
+ * inset ground, and a note that says what it is. It goes when the decision is made. */
+.g-layoutswitch {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fn-space-3);
+  padding: var(--fn-space-3) var(--fn-space-4);
+  margin-bottom: var(--fn-space-5);
+  border: 1px dashed var(--fn-border-strong);
+  border-radius: var(--fn-radius-card);
+  background: var(--fn-canvas-inset);
+}
+.g-layoutswitch-label {
+  margin: 0;
+  font-size: var(--fn-meta-size);
+  line-height: var(--fn-meta-line);
+  letter-spacing: var(--fn-meta-tracking);
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--fn-text-muted);
+}
+.g-layoutswitch-group { display: flex; flex-wrap: wrap; gap: var(--fn-space-2); }
+.g-layoutswitch-btn {
+  min-height: 32px;
+  padding: 0 var(--fn-space-4);
+  border: 1px solid var(--fn-border-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--fn-text-secondary);
+  font-family: var(--fn-font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--fn-motion) ease, color var(--fn-motion) ease, border-color var(--fn-motion) ease;
+}
+.g-layoutswitch-btn:hover { background: var(--fn-surface-panel-hover); color: var(--fn-text); }
+/* Which one is showing is carried by aria-pressed as well as by the fill, so it is never colour alone. */
+.g-layoutswitch-btn[aria-pressed='true'] {
+  background: var(--fn-action);
+  border-color: var(--fn-action);
+  color: var(--fn-on-action);
+}
+.g-layoutswitch-note {
+  flex: 1 1 260px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--fn-text-muted);
+}
+
+/* ---------- the pitch ----------
+ * The game's own one-liner: the sentence the whole questionnaire exists to produce, and the three
+ * things you can do with a finished design. The 4px rule down its left edge is the same one the plan's
+ * layout tip and a chosen answer wear — it marks the panel the page is about, without a second colour. */
+.g-pitchcard { border-left: 4px solid var(--fn-action); }
+.g-pitchcard-line {
+  margin: 0;
+  font-family: var(--fn-font-ui);
+  font-weight: 700;
+  font-size: var(--fn-section-size);
+  line-height: var(--fn-section-line);
+  letter-spacing: var(--fn-display-tracking);
+  color: var(--fn-text);
+  max-width: 44ch;
+  text-wrap: balance;
+}
+.g-pitchcard-line-item {
+  margin: 0 0 var(--fn-space-3);
+  color: var(--fn-text-secondary);
+  max-width: var(--fn-measure);
+}
+.g-pitchcard-line-item strong { color: var(--fn-text); }
+.g-pitchcard-facts {
+  margin: 0 0 var(--fn-space-4);
+  font-size: var(--fn-nav-size);
+  line-height: var(--fn-nav-line);
+  color: var(--fn-text-muted);
+  max-width: var(--fn-measure);
+}
+.g-pitchcard-facts-lead { color: var(--fn-text-secondary); }
+/* The rule above the controls separates the pitch from what you do with it, so the space below it is
+ * the controls' own and does not need the panel's padding on top of it. */
+.g-pitchcard .g-hr { margin-bottom: var(--fn-space-4); }
+
+/* ---------- the core loop, two columns ----------
+ * The drawing and its legend are one answer in two forms, so they sit side by side and are read
+ * together. The words take the narrow column on the left: the list is short, and putting it beside the
+ * drawing rather than under it is what stops the picture from being the only thing on the page that
+ * reads as the answer. The words come first in the markup too, so a screen reader meets them first. */
+.g-loopcols {
+  display: grid;
+  grid-template-columns: minmax(0, 260px) minmax(0, 1fr);
+  gap: var(--fn-space-6);
+  align-items: start;
+}
+.g-loopcols > * { min-width: 0; }
+.g-loopcols-side {
+  border-right: 1px solid var(--fn-border);
+  padding-right: var(--fn-space-5);
+}
+/* The column's own edge is the boundary between the two halves, so the legend does not draw a second
+ * rule 12px away from it saying the same thing. */
+.g-loopcols-side .g-legend { border-top: 0; padding-top: 0; }
+.g-loopcols-side .g-legend .g-section { margin-top: 0; }
+
+/* Below the width where two columns fit, the legend goes back on top of the drawing — it is the
+ * reading order the classic layout uses, and it is what fits. */
+@media (max-width: 900px) {
+  .g-loopcols { grid-template-columns: minmax(0, 1fr); gap: var(--fn-space-4); }
+  .g-loopcols-side {
+    border-right: 0;
+    border-bottom: 1px solid var(--fn-border);
+    padding-right: 0;
+    padding-bottom: var(--fn-space-4);
+  }
+}
+
 .g-label {
   display: block;
   font-size: var(--fn-meta-size);

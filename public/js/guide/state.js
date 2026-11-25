@@ -64,6 +64,12 @@ export function createState(dataset, options = {}) {
     gameId: null,
     gameName: '',
     devMode: Boolean(options.devMode),
+    /**
+     * Which of the summary screen's two layouts to show: 'classic' (as shipped) or 'new' (the
+     * pitch-first redesign). It is a comparison switch rather than a setting, so it goes when the
+     * decision is made — see screens/summary.js.
+     */
+    summaryLayout: options.summaryLayout === 'new' ? 'new' : 'classic',
     experienceLevel: 'beginner',
     /** Which of the three design modes a placeholder screen is showing. */
     mode: null,
