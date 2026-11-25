@@ -40,11 +40,11 @@
     --ease: cubic-bezier(.2, .7, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-    /* One reel entry is a column now - an 80px picture with the name under it and the kind under that -
+    /* One reel entry is a column now - a 112px picture with the name under it and the kind under that -
        which is half again the height 2b's rows were and is what buys the bigger pictures. The width it
        gives back is not spent: the reels are narrower, the machine is narrower, and three of them still
-       fit across a phone. */
-    --item-h: 10.5rem;
+       fit across a phone. The window grew with the picture and nothing else did. */
+    --item-h: 12.5rem;
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
@@ -151,7 +151,18 @@
       0 4px 0 #106A94,
       0 7px 12px -2px rgba(51, 191, 255, .35);
   }
-  .rail .btn-primary:hover:not(:disabled) { transform: none; background: linear-gradient(180deg, #8FE0FF 0%, #47C6FF 52%, #2AA8E0 100%); }
+  /* Under the pointer this key changes shade and nothing else. It has to say so itself: the flat pill's own
+     hover - a lift and a soft glow - also matches this button, and a shadow with no skirt under it is
+     exactly what makes the key look flat the moment the mouse arrives. */
+  .rail .btn-primary:hover:not(:disabled) {
+    transform: none;
+    background: linear-gradient(180deg, #9AE4FF 0%, #47C6FF 52%, #2AA8E0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .7),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #106A94,
+      0 7px 14px -2px rgba(51, 191, 255, .5);
+  }
   .rail .btn-key {
     color: #D5D5DA;
     text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
@@ -169,7 +180,10 @@
     transform: translateY(3px);
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, .45), inset 0 -1px 0 rgba(255, 255, 255, .12), 0 1px 0 rgba(0, 0, 0, .8);
   }
-  .rail .btn:disabled { opacity: .45; transform: none; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -2px 0 rgba(0, 0, 0, .4); }
+  /* Unavailable: the key fades, and that is all it does. It keeps its face and its skirt, because on this
+     page the spin key is unavailable for the first two seconds of every visit - and a moulded key that
+     flattens while the pointer is on it is exactly what reads as broken, whether it is waiting or hovering. */
+  .rail .btn:disabled { opacity: .45; transform: none; cursor: default; }
 
   /* ---------- The machine: one panel, one window, a row of keys, a rail ---------- */
   /* Skeuomorphic digital: the panel is a device - a moulded case with a recessed window, a sheet of glass
@@ -296,8 +310,8 @@
   .rm-strip.is-moving .item { filter: blur(.6px); }
 
   .item .rm-pic {
-    width: 5rem; height: 5rem; flex: none;
-    border-radius: 10px; overflow: hidden;
+    width: 7rem; height: 7rem; flex: none;
+    border-radius: 12px; overflow: hidden;
     position: relative; display: grid; place-items: center;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
   }
@@ -320,7 +334,7 @@
   .item.is-empty .name { color: var(--dim); font-weight: 600; font-size: .875rem; }
 
   /* The picture is missing until /concepts/_media/randomiser/ is filled, so the initials carry the entry.
-     At 80px the initials are the whole placeholder, and the well's own dashes say the picture is
+     At 112px the initials are the whole placeholder, and the well's own dashes say the picture is
      provisional. */
   .rm-ph {
     position: absolute; inset: 0;
@@ -328,7 +342,7 @@
     background: linear-gradient(145deg, var(--ph-dark), var(--ph-mid));
     color: var(--ph-light);
   }
-  .rm-ph .rm-initials { font-family: var(--title); font-weight: 800; font-size: 1.5rem; line-height: 1; letter-spacing: -0.02em; }
+  .rm-ph .rm-initials { font-family: var(--title); font-weight: 800; font-size: 2rem; line-height: 1; letter-spacing: -0.02em; }
   .rm-ph .rm-coming { display: none; }
   .k-flavour { --ph-dark: #251530; --ph-mid: #573270; --ph-light: #DFBAF8; }
   .k-brand   { --ph-dark: #322206; --ph-mid: #744F0E; --ph-light: #FCD796; }
@@ -418,11 +432,13 @@
   .lock .rm-shackle { transition: transform .15s; transform-origin: 17px 11px; }
   .lock:not(.is-locked) .rm-shackle { transform: translate(5px, -3px); }
 
-  /* The controls, in a rail down the right-hand side of the window: the two things you can do, stacked,
-     the sound switch under them, and the machine's own line hidden below all three. The rail starts lower
-     than the window's labels so the buttons line up with the glass they roll, rather than with the labels
-     above it. */
-  .rail { display: flex; flex-direction: column; gap: 12px; padding-top: 32px; }
+  /* The controls, in a rail down the right-hand side of the case: the two things you can do, stacked, and
+     the sound switch under them. The rail takes the full height of the deck beside it - the row starts its
+     items, so it has to ask for the stretch - and its stack sits in the middle of that, so the keys read as
+     belonging to the whole machine rather than to the top of the window. A position that has to be
+     centring rather than a padding, because the entry grew and dragged the deck down with it. The machine's
+     own line is out of the flow entirely, hidden until it has an error to show. */
+  .rail { display: flex; flex-direction: column; justify-content: center; align-self: stretch; gap: 12px; }
   .rail .btn { width: 100%; }
   /* The sound switch: a small key under the two big ones, with the speaker as its whole label. It is
      narrow rather than full width, so it reads as a setting rather than as a third action. */
@@ -507,15 +523,15 @@
     .rig-body { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
     .heads { padding: 0 var(--lid) 8px; }
     .col-label { font-size: 9.5px; letter-spacing: .06em; }
-    :root { --item-h: 7.75rem; }
+    :root { --item-h: 9.5rem; }
     .item { padding: 8px 6px; gap: 6px; }
-    .item .rm-pic { width: 3.25rem; height: 3.25rem; }
-    .rm-ph .rm-initials { font-size: 1.125rem; }
+    .item .rm-pic { width: 4.5rem; height: 4.5rem; border-radius: 10px; }
+    .rm-ph .rm-initials { font-size: 1.375rem; }
     .item .name { font-size: .8125rem; }
     .item .kind-tag { font-size: .5625rem; }
     .lock { padding: 9px 6px 11px; font-size: 10.5px; letter-spacing: .06em; gap: 5px; }
     .lock svg { width: .875rem; height: .875rem; }
-    .rail { gap: 10px; padding-top: 0; }
+    .rail { gap: 10px; }
     .details { grid-template-columns: 1fr; }
     .detail { padding: 12px 0; }
     .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
