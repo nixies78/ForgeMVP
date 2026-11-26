@@ -74,16 +74,30 @@ const VARIANTS = {
 /**
  * A button. Renders as an <a> when given `href`, so links stay links: right-clickable, shareable,
  * and correct for keyboard and screen-reader users.
+ *
+ * `iconOnly` hides the label rather than dropping it, so the control keeps the same accessible name
+ * and tooltip as the labelled version and only the pixels change. It is a presentation flag, not a
+ * second kind of button.
  */
-export function button({ label, onClick, variant = 'secondary', iconName = null, href = null, disabled = false, title = null, type = 'button' }) {
+export function button({
+  label,
+  onClick,
+  variant = 'secondary',
+  iconName = null,
+  href = null,
+  disabled = false,
+  title = null,
+  type = 'button',
+  iconOnly = false
+}) {
   const content = [];
   if (iconName && iconName === 'arrowLeft') content.push(icon(iconName, 16));
-  content.push(h('span', {}, label));
+  content.push(h('span', { class: iconOnly ? 'g-sr-only' : '' }, label));
   if (iconName && iconName !== 'arrowLeft') content.push(icon(iconName, 16));
 
   const props = {
-    class: `${VARIANTS[variant] || VARIANTS.secondary}${disabled ? ' is-disabled' : ''}`,
-    title
+    class: `${VARIANTS[variant] || VARIANTS.secondary}${disabled ? ' is-disabled' : ''}${iconOnly ? ' is-icononly' : ''}`,
+    title: title || (iconOnly ? label : null)
   };
   if (href && !disabled) {
     const a = h('a', { ...props, href }, ...content);
@@ -91,7 +105,18 @@ export function button({ label, onClick, variant = 'secondary', iconName = null,
     return a;
   }
   const el = h('button', { ...props, type, disabled }, ...content);
-  if (onClick && !disabled) el.addEventListener('click', onClick);
+  /* The listener goes on whether or not the control starts disabled. A native disabled button does not
+   * dispatch clicks, so the attribute is the gate — and a control that is enabled later (Start Building
+   * is gated on the field having a name, Save on the name having changed) has to already have somewhere
+   * for its click to land. Attaching only when it starts enabled is how a button enables itself and
+   * then does nothing at all, which is what Start Building did for anyone who named a game without
+   * saving first. */
+  if (onClick) {
+    el.addEventListener('click', (event) => {
+      if (el.disabled) return;
+      onClick(event);
+    });
+  }
   return el;
 }
 

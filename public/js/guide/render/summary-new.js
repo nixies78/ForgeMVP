@@ -29,7 +29,7 @@ import { h, frag } from '../dom.js';
 import { effectiveCoreLoop } from '../data.js';
 import { UI } from '../content.js';
 import { buildPitch, factsLine } from '../pitch.js';
-import { button, buttonRow, eyebrow, noticeBox, pageTitle, panel, paragraph } from './ui.js';
+import { button, eyebrow, noticeBox, pageTitle, panel, paragraph } from './ui.js';
 import { renderCoreLoop } from './loop.js';
 import { loopLegend } from './loop-legend.js';
 import { backRow, nameAndStart, planPanel, recapPanel, walkthroughNote } from './summary-parts.js';
@@ -43,7 +43,7 @@ export function renderSummaryNew(ctx) {
   const pitch = buildPitch({ key: state.gameTypeKey, type, category: cat, brand });
 
   return frag(
-    pitchSplit(ctx, pitch, { type, cat, brand }),
+    pitchBand(ctx, pitch, { type, cat, brand }),
 
     noticeBox(state.notice, () => actions.clearNotice()),
 
@@ -82,23 +82,24 @@ export function renderSummaryNew(ctx) {
 }
 
 /**
- * The game's own one-liner, with the three things you can do with it.
+ * The game's own one-liner, and the panel that names and keeps it.
  *
- * Two columns, not a stack. On the left the title, the sentence, a line that decodes it and a line of
- * facts; on the right the name field, Start Building, Save and the share link, in a rail of their own.
+ * Two columns, not a stack. `.g-pitch-text` on the left carries the title, the sentence, a line that
+ * decodes it and a line of facts; `.g-pitch-save` on the right is the project's name field, Save, Share
+ * and Start Building.
  *
- * The rail is doing more than packing. Reading order and doing order are different orders, and a stack
+ * The split is doing more than packing. Reading order and doing order are different orders, and a stack
  * has to pick one of them: put the sentence first and the controls are four rows down with the pitch
  * already scrolled past, or put the controls first and the page opens with a text box instead of with
  * the game. Side by side, both are true at once — the eye starts on the sentence, the hand finds the
- * buttons at the same height, and the whole header is one band instead of a stack (about 260px against
+ * controls at the same height, and the whole header is one band instead of a stack (about 270px against
  * 698px).
  *
  * Nothing here repeats itself. The sentence already names the type, the brand and the hook, so the type
  * is not named again as a heading, and the hook's own description is folded into the decoding line
  * rather than given a row.
  */
-function pitchSplit(ctx, pitch, { type, cat, brand }) {
+function pitchBand(ctx, pitch, { type, cat, brand }) {
   const { state } = ctx;
   const facts = pitch ? factsLine(pitch.facts) : '';
   const typeLabel = pitch ? pitch.noun : type ? type.label : 'Your game';
@@ -116,17 +117,17 @@ function pitchSplit(ctx, pitch, { type, cat, brand }) {
 
   return h(
     'div',
-    { class: 'g-pitchsplit' },
+    { class: 'g-pitch' },
 
     h(
       'div',
-      { class: 'g-pitchsplit-left' },
+      { class: 'g-pitch-text' },
       eyebrow('Summary'),
       pageTitle('Here is your game.'),
-      h('h2', { class: 'g-pitchsplit-line' }, pitch ? pitch.strapline : 'Your game'),
+      h('h2', { class: 'g-pitch-line' }, pitch ? pitch.strapline : 'Your game'),
       h(
         'p',
-        { class: 'g-pitchsplit-deck' },
+        { class: 'g-pitch-deck' },
         h('strong', {}, typeLabel),
         ' · ',
         cat ? cat.label : '—',
@@ -135,50 +136,72 @@ function pitchSplit(ctx, pitch, { type, cat, brand }) {
         decoding ? ' — ' : '',
         decoding
       ),
-      facts
-        ? h('p', { class: 'g-pitchsplit-facts' }, h('span', {}, `${UI.underneath} `), facts)
-        : null
+      facts ? h('p', { class: 'g-pitch-facts' }, h('span', {}, `${UI.underneath} `), facts) : null
     ),
 
-    h('aside', { class: 'g-pitchsplit-rail', 'aria-label': 'Name and save this game' }, ...saveRail(ctx, pitch))
+    h('aside', { class: 'g-pitch-save', 'aria-label': 'Name and save this project' }, ...pitchSave(ctx))
   );
 }
 
 /**
- * The rail: the name field, the primary action, then the two secondary ones.
+ * The save panel: the project's name, the two things you can do with it, and Start Building.
  *
- * Start Building is full width above the pair because it is what the page is for, and because the button
- * is disabled until the game has a name — a disabled control you are about to enable should be the
- * obvious next thing, not the second of two buttons.
+ * The name field and its two actions are **one row**, and the actions are icon buttons. That is a fix
+ * rather than a preference: as labelled buttons they shared the panel's width, and "Save changes" and
+ * "Copy a link to this plan" both wrapped to two lines — two ragged two-line labels on the page's
+ * primary control block, next to a single-line field. An icon button cannot wrap, is the same height as
+ * the field it belongs to, and puts the two actions where the thing they act on is.
+ *
+ * Save is **disabled until there is something to save** — no name yet, or a name that is already what
+ * is stored — so it reports state rather than offering an action that would do nothing. Share is always
+ * available, because the link is valid whether or not the game has been saved.
+ *
+ * The panel carries no storage caveat. "Saved in this browser only. Your answers are not sent
+ * anywhere." is a real thing to say once, and the home screen says it where saving is explained; under
+ * a Save button it was the third line of fine print in a header that had too many.
  */
-function saveRail(ctx, pitch) {
+function pitchSave(ctx) {
   const { state, actions, store } = ctx;
-  const saved = state.gameId ? store.get(state.gameId) : null;
-  const named = Boolean(state.gameName && state.gameName.trim());
-  const { nameInput, startButton } = nameAndStart(ctx);
+  const record = state.gameId ? store.get(state.gameId) : null;
+  const storedName = record ? record.name : null;
+  const name = (state.gameName || '').trim();
+  const canSave = Boolean(name) && name !== storedName;
+
+  const { nameInput, startButton } = nameAndStart(ctx, { describedBy: null });
+
+  const saveButton = button({
+    label: UI.save,
+    title: record ? 'Save changes' : 'Save this game',
+    iconName: 'save',
+    iconOnly: true,
+    variant: 'secondary',
+    disabled: !canSave,
+    onClick: () => actions.saveGame(nameInput.value)
+  });
+
+  const shareButton = button({
+    label: UI.share,
+    title: UI.shareTitle,
+    iconName: 'link',
+    iconOnly: true,
+    variant: 'secondary',
+    onClick: () => actions.copyShareLink()
+  });
+
+  /* Save follows the field itself, so it turns on the moment the name differs from what is stored and
+   * turns off again the moment it does not — including when someone types a change and then types it
+   * back. `button()` attaches its handler whether or not the control starts disabled, which is what
+   * makes enabling it here work. */
+  nameInput.addEventListener('input', () => {
+    const next = nameInput.value.trim();
+    const ready = Boolean(next) && next !== storedName;
+    saveButton.disabled = !ready;
+    saveButton.classList.toggle('is-disabled', !ready);
+  });
 
   return [
     h('label', { class: 'g-label', for: 'gameName' }, UI.savePrompt),
-    nameInput,
-    startButton,
-    buttonRow([
-      button({
-        label: saved ? 'Save changes' : UI.save,
-        variant: 'secondary',
-        onClick: () => actions.saveGame(nameInput.value)
-      }),
-      button({
-        label: 'Copy a link to this plan',
-        variant: 'quiet',
-        onClick: () => actions.copyShareLink()
-      })
-    ]),
-    h(
-      'p',
-      { class: 'g-meta-line g-small', id: 'gameNameHint' },
-      named
-        ? 'Saved in this browser only. Your answers are not sent anywhere.'
-        : 'Saved in this browser only — give it a name to start building.'
-    )
+    h('div', { class: 'g-pitch-save-row' }, nameInput, saveButton, shareButton),
+    startButton
   ];
 }

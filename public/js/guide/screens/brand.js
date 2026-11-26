@@ -82,7 +82,7 @@ export function renderBrand(ctx) {
               label: `${preview.label} key art`
             }),
             paragraph(preview.description),
-            h('p', { class: 'g-pitch' }, preview.pitch),
+            h('p', { class: 'g-brandpitch' }, preview.pitch),
             h(
               'div',
               { class: 'g-provides' },

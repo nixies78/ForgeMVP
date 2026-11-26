@@ -121,8 +121,18 @@ export function icon(name, size = 16) {
     chevron: 'M9 6l6 6-6 6',
     close: 'M6 6l12 12M18 6L6 18',
     play: 'M8 5.5v13l11-6.5z',
-    plus: 'M12 5v14M5 12h14'
+    plus: 'M12 5v14M5 12h14',
+    /* The floppy disk: the body with its cut corner, the shutter at the top, the label at the foot. */
+    save: ['M6 3h8l4 4v14H6z', 'M9 3v5h6V3', 'M9 13h6v6H9'],
+    /* A chain link. It is one shape made of two arcs, and a single `d` cannot hold it without the two
+     * overlapping into a blob at the join, which is why an icon here may be several paths. */
+    link: [
+      'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71',
+      'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'
+    ]
   };
+  const shape = paths[name] || paths.chevron;
+  const drawn = (Array.isArray(shape) ? shape : [shape]).map((d) => svg('path', { d }));
   return svg(
     'svg',
     {
@@ -137,7 +147,7 @@ export function icon(name, size = 16) {
       'aria-hidden': 'true',
       focusable: 'false'
     },
-    svg('path', { d: paths[name] || paths.chevron })
+    ...drawn
   );
 }
 

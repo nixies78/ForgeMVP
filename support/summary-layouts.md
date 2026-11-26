@@ -11,12 +11,16 @@ everything forever.
 
 | | **Classic** | **New** |
 |---|---|---|
-| The top block | a title, a lead, then everything below | one band: title, pitch and specs on the left, the name/save/share rail on the right |
+| The top block | a title, a lead, then everything below | one band: title, pitch and specs on the left, the name/save/share panel on the right |
 | The pitch | not shown | the game's own one-liner, built from the game type, the brand and the answers |
-| Name / Save / Share | a "Keep it" panel at the bottom, under the device plan | a rail beside the pitch, at the top |
+| Name / Save / Share | a "Keep it" panel at the bottom, under the device plan | a panel beside the pitch, at the top: the name field with Save and Share as icon buttons beside it |
 | The core loop | diagram full width, "In words" underneath | "In words" in a 260px left column, diagram on the right |
-| Height of the top block | 114px — it carries almost nothing | about 272px |
+| Height of the top block | 114px — it carries almost nothing | **244px** |
 | Everything else | identical | identical |
+
+The band's own parts are named for what they hold: `.g-pitch` is the band, `.g-pitch-text` is the
+sentence and what decodes it, `.g-pitch-save` is the panel. (`.g-pitch` used to be the brand screen's
+preview sentence, which is now `.g-brandpitch` — see "One class, two meanings" below.)
 
 Classic is what shipped. It is unchanged, and it is the default: a session that has never touched the
 comparison bar — including every existing browser and every shared link — sees exactly the page it saw
@@ -35,7 +39,8 @@ the drawing the page exists to show was something you had to scroll to find.
 The card stacked twelve rows, and three of them said the same thing about the same game: the sentence
 already carries the type and the hook, and then the type's description and the hook's description each
 got a row of their own. Six ways to make it smaller, measured in a real browser at 1440×1000, are in
-`.scratch/summary-mocks/` (throwaway, not committed); the one that shipped is the split band at 272px.
+`.scratch/summary-mocks/` (throwaway, not committed); the one that shipped is the split band, now at
+**244px** with the core loop at **444px**.
 
 What it does differently:
 
@@ -43,12 +48,38 @@ What it does differently:
    label above it rather than being a second headline competing with it.
 2. **One decoding line.** `Type · Category · Brand — what it is`, with the hook's description riding at
    the end of it, instead of one row per fact.
-3. **A rail, not a stack.** Reading order and doing order are different orders, and a stack has to pick
-   one of them: sentence first and the controls are four rows down, controls first and the page opens
-   with a text box instead of with the game. Side by side, both are true at once — the eye starts on the
-   sentence, the hand finds the buttons at the same height.
-4. **The name field, Save and the share link** are one row under Start Building, which is full width
-   because it is what the page is for and because it is the control gated on the name.
+3. **A panel beside the sentence, not a stack under it.** Reading order and doing order are different
+   orders, and a stack has to pick one of them: sentence first and the controls are four rows down,
+   controls first and the page opens with a text box instead of with the game. Side by side, both are
+   true at once — the eye starts on the sentence, the hand finds the controls at the same height.
+4. **The field and its two actions are one row.** Save and Share are icon buttons inside that row, and
+   that is a fix rather than a preference: as labelled buttons they were each the width of the field
+   beside them, and "Save changes" and "Copy a link to this plan" both wrapped to two ragged lines on
+   the page's primary control block. An icon cannot wrap. The buttons are the library's 40px body
+   control and the field is the library's 44px, so the row is centred rather than stretched — making
+   the buttons 44px to match the field would have put two CTA-sized controls on a body screen, which is
+   the rule `tests/browser-check.mjs` measures every other screen against.
+5. **Save reports state.** It is disabled while there is nothing to save — no name yet, or a name that
+   is already what is stored — so it never offers an action that would do nothing. Share stays enabled,
+   because the link is valid whether or not the game is saved.
+6. **No storage caveat in the panel.** "Saved in this browser only. Your answers are not sent anywhere."
+   is worth saying once, and the home screen says it where saving is explained; under a Save button in
+   the header it was the third line of fine print in a block that had too many.
+
+## One class, two meanings, and the bug that hid in it
+
+`.g-pitch` was already in the stylesheet: the brand screen's preview sentence, a lead paragraph with
+`max-width: var(--fn-measure)`. The band took the name, inherited that rule, and came out **772px wide
+inside an 1112px column** — and because that column is `minmax(0, 1fr)`, the grid did exactly as it was
+told and resolved `1fr` to the 364px that was left over. The save panel then sat in the middle of the
+page instead of flush right, and the sentence wrapped to three lines because the text column was half
+the width it should have been.
+
+Nothing in a test that reads source text can see that, and the whole header was 88px taller for it. The
+paragraph is now `.g-brandpitch`, which is what it always was — the brand preview's pitch, sitting among
+`.g-brandhero`, `.g-provides` and `.g-caveat` — and `tests/browser-check.mjs` measures the band against
+the column it sits in rather than trusting it.
+
 
 ## Where the pitch comes from
 
@@ -102,8 +133,8 @@ It is deliberately not built like the rest of the app, and each of those decisio
 
 `?layout=new` and `?layout=classic` in the query string **win over the stored choice**, so the two
 designs can be opened side by side in two tabs. Switching updates the address bar to match, so the URL
-and the page can never disagree. The "Copy a link to this plan" button deliberately does **not** carry
-`layout`: the layout is a local comparison tool, not part of the plan.
+and the page can never disagree. Share (`title="Copy a link to this plan"`) deliberately does **not**
+carry `layout`: the layout is a local comparison tool, not part of the plan.
 
 ## Retiring it
 
@@ -120,3 +151,17 @@ When the decision is made, delete the loser:
 
 Whatever is left of `render/summary-parts.js` — the plan panel, the recap, the save controls the classic
 layout uses, the legend, the Back row — is shared, so it stays either way.
+
+Note that `.g-brandpitch` is **not** part of this: it is the brand screen's own sentence and shares
+nothing with the summary but a word.
+
+## What holds it
+
+- `npm test` (138 tests, no dependencies) pins the copy, the pitch rules, the two keys in `store.js`, and
+  the bar's colour being the only thing outside the palette.
+- `node tests/browser-check.mjs http://localhost:8080/` (17 checks) drives the real thing. Two of them are
+  about this work: `summary-new` loads `?layout=new` — the only check that renders the redesign at all,
+  which is why a render-time crash lived in it unnoticed — and `summary-new pitch panel` measures the
+  band against the column it sits in, the field and its two actions sharing one line, Save being off
+  until there is something to save, and Start Building working for someone who names a game and never
+  presses Save.

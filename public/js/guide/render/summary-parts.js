@@ -38,9 +38,16 @@ export function recapRow(term, value, onEdit) {
  *
  * They come as a pair because the button is disabled until the field has something in it, so whoever
  * places them has to place both. The handler is on the field itself, so it works wherever they end up.
+ *
+ * `describedBy` is the id of whatever note explains the field. The classic layout has one; the
+ * redesign does not, because the note it used to carry ("Saved in this browser only…") was a caveat
+ * about storage rather than about the field, and it printed under a button that already says what it
+ * does. Pointing `aria-describedby` at an element that is not there is worse than not pointing it at
+ * anything, so the caller says whether it exists.
  */
-export function nameAndStart(ctx) {
+export function nameAndStart(ctx, options = {}) {
   const { state, actions } = ctx;
+  const describedBy = options.describedBy === undefined ? 'gameNameHint' : options.describedBy;
 
   const nameInput = h('input', {
     type: 'text',
@@ -50,7 +57,7 @@ export function nameAndStart(ctx) {
     placeholder: UI.savePlaceholder,
     autocomplete: 'off',
     maxlength: '60',
-    'aria-describedby': 'gameNameHint'
+    'aria-describedby': describedBy
   });
 
   const startButton = button({

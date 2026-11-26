@@ -66,6 +66,15 @@ const CHECKS = [
   { name: 'summary', url: `${BASE}${SHARE}#/summary`, desktop: 1440, mobile: 420,
     must: ['Here is your game.', 'How the game plays', 'In words', 'Your plan', 'Every choice', 'Start Building'],
     hasSvg: true },
+  /* The redesigned summary, which nothing else here renders: every other entry loads the classic layout
+   * the app defaults to, so a layout that only the new one uses could crash on screen and every check
+   * would still pass. That is not hypothetical — a shadowed helper name made this screen throw on render
+   * while the whole suite stayed green. The layout belongs in the query string, before the hash: the
+   * hash is the route. */
+  { name: 'summary-new', url: `${BASE}${SHARE}&layout=new#/summary`, desktop: 1440, mobile: 420,
+    must: ['Here is your game.', 'How the game plays', 'In words', 'Your plan', 'Every choice', 'Start Building',
+      'Project name', 'Save', 'Share'],
+    hasSvg: true },
   { name: 'experience', url: `${BASE}${SHARE}#/experience`, desktop: 1440,
     must: ['experience level', 'Complete beginner', 'Basic Navigation'] },
   { name: 'walk-core', url: `${BASE}${SHARE}#/walk/3`, desktop: 1440,
@@ -763,6 +772,9 @@ async function main() {
   /* Phase three: the mockups' own contract. */
   await checkMockupHeaders(send, results);
 
+  /* Phase four: the redesigned summary's pitch band and its save panel. */
+  await checkPitchPanel(send, results);
+
   close();
   chrome.kill();
 
@@ -1360,6 +1372,133 @@ async function checkMockupHeaders(send, results) {
   for (const problem of problems) console.log(`       ! ${problem}`);
   results.push({
     name: `mockup chrome (${pages.length} pages)`,
+    state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none',
+      shell: { backButtons: 0, h1Count: 0, navItems: 0, crumbLinks: 0 } },
+    problems,
+    pageErrors: []
+  });
+}
+
+/* ============================ phase four: the redesigned summary ============================ */
+
+/** The pitch band, and the panel that names and keeps the game.
+ *
+ * This exists because three separate faults got through every other check at once, and all three were
+ * invisible to anything that reads source text:
+ *
+ *   1. the layout crashed on render, because a helper and a local variable shared a name — nothing else
+ *      in this file loads `?layout=new`, so the screen simply never rendered here;
+ *   2. the band came out 772px inside a 1112px column, because `.g-pitch` was already the brand screen's
+ *      paragraph style and the band inherited its `max-width`. The `1fr` column dutifully resolved to the
+ *      364px that was left, which put the save panel in the middle of the page instead of flush right.
+ *      Layout, not text, so the `must` list in CHECKS cannot see it;
+ *   3. Start Building did nothing for anyone who named a game without saving first, because the button
+ *      helper attached its click handler only when the control started enabled. That was latent until
+ *      Save became disabled-with-nothing-to-save, and then it was the only path through the page.
+ *
+ * So: geometry and behaviour, measured on the real screen. */
+async function checkPitchPanel(send, results) {
+  const problems = [];
+  const evaluate = async (expression) => {
+    const res = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+    if (res.exceptionDetails) {
+      throw new Error(res.exceptionDetails.exception?.description || res.exceptionDetails.text);
+    }
+    return res.result.value;
+  };
+  const sleep2 = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  await send('Emulation.setDeviceMetricsOverride', { width: 1440, height: 1000, deviceScaleFactor: 1, mobile: false });
+  await send('Page.navigate', { url: `${BASE}${SHARE}&layout=new#/summary` });
+  await sleep2(1600);
+
+  const open = await evaluate(`(() => {
+    const r = (el) => el.getBoundingClientRect();
+    const band = document.querySelector('.g-pitch');
+    const text = document.querySelector('.g-pitch-text');
+    const save = document.querySelector('.g-pitch-save');
+    const loop = document.querySelector('.g-panel-loop');
+    const row = document.querySelector('.g-pitch-save-row');
+    if (!band || !text || !save || !loop || !row) return { missing: true };
+    const icons = [...save.querySelectorAll('.g-btn.is-icononly')];
+    const field = save.querySelector('input');
+    return {
+      band: [Math.round(r(band).left), Math.round(r(band).right)],
+      column: [Math.round(r(loop).left), Math.round(r(loop).right)],
+      saveRight: Math.round(r(save).right),
+      /* One row means one line: the field is the library's 44px and its two actions are the library's
+       * 40px, so they share a centre rather than a top edge. */
+      rowCentres: [...row.children].map((el) => Math.round(r(el).top + r(el).height / 2)),
+      rowHeight: Math.round(r(row).height),
+      iconNames: icons.map((b) => (b.querySelector('.g-sr-only') || {}).textContent || ''),
+      iconSquares: icons.map((b) => [Math.round(r(b).width), Math.round(r(b).height)]),
+      saveDisabled: icons[0] ? icons[0].disabled : null,
+      shareDisabled: icons[1] ? icons[1].disabled : null,
+      startDisabled: save.querySelector('.g-btn-primary').disabled,
+      tallest: Math.max(...[...save.querySelectorAll('.g-btn')].map((b) => Math.round(r(b).height))),
+      bandBottom: Math.round(r(band).bottom),
+      loopTop: Math.round(r(loop).top),
+      viewport: window.innerHeight,
+      fieldLabel: (save.querySelector('.g-label') || {}).textContent || ''
+    };
+  })()`);
+
+  if (open.missing) {
+    problems.push('the pitch band, its save panel or the core loop did not render');
+  } else {
+    if (open.band[0] !== open.column[0] || open.band[1] !== open.column[1]) {
+      problems.push(`the pitch band spans ${open.band.join('..')} but the content column is ${open.column.join('..')}`);
+    }
+    if (open.saveRight !== open.column[1]) {
+      problems.push(`the save panel ends at ${open.saveRight}, not at the column edge ${open.column[1]}`);
+    }
+    if (new Set(open.rowCentres).size !== 1) {
+      problems.push(`the field and its two actions are on ${new Set(open.rowCentres).size} different lines: centres ${open.rowCentres.join(', ')}`);
+    }
+    if (open.rowHeight > 48) problems.push(`the field row is ${open.rowHeight}px tall, so something wrapped`);
+    if (open.iconNames.join('/') !== 'Save/Share') problems.push(`the icon buttons are named ${open.iconNames.join(', ') || 'nothing'}`);
+    if (open.iconSquares.some(([w, h]) => w !== h)) problems.push('an icon button is not square');
+    if (!open.saveDisabled) problems.push('Save is offered with nothing to save');
+    if (open.shareDisabled) problems.push('Share is disabled, but the link is valid unsaved');
+    if (!open.startDisabled) problems.push('Start Building is offered with no name');
+    if (open.tallest > 46) problems.push(`a panel button is ${open.tallest}px tall — a label has wrapped`);
+    if (open.loopTop >= open.viewport) problems.push(`the core loop starts at ${open.loopTop}px, below a ${open.viewport}px fold`);
+    if (open.fieldLabel !== 'Project name') problems.push(`the field is labelled "${open.fieldLabel}"`);
+  }
+
+  /* Naming the game has to turn both buttons on, without any save in between. */
+  await evaluate(`(() => {
+    const input = document.getElementById('gameName');
+    if (!input) return false;
+    input.value = 'Browser check game';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return true;
+  })()`);
+  await sleep2(400);
+  const typed = await evaluate(`(() => {
+    const save = document.querySelector('.g-pitch-save');
+    if (!save) return { missing: true };
+    return {
+      saveDisabled: save.querySelector('.g-btn.is-icononly').disabled,
+      startDisabled: save.querySelector('.g-btn-primary').disabled
+    };
+  })()`);
+  if (typed.missing) {
+    problems.push('the save panel went missing after typing a name');
+  } else {
+    if (typed.saveDisabled) problems.push('Save stayed disabled once the name had been changed');
+    if (typed.startDisabled) problems.push('Start Building stayed disabled once the field had a name');
+
+    /* The path the listener bug broke: name it, start building, never press Save. */
+    await evaluate(`document.querySelector('.g-pitch-save .g-btn-primary').click()`);
+    await sleep2(900);
+    const went = await evaluate(`location.hash`);
+    if (went !== '#/experience') problems.push(`Start Building went to ${went} without a save in between`);
+  }
+
+  for (const problem of problems) console.log(`       ! ${problem}`);
+  results.push({
+    name: 'summary-new pitch panel',
     state: { devices: 0, settings: 0, cards: 0, options: 0, svgs: 0, headings: '', progress: '', focusTag: '', whiteSpace: '', overflow: 'none',
       shell: { backButtons: 0, h1Count: 0, navItems: 0, crumbLinks: 0 } },
     problems,

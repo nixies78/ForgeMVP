@@ -177,9 +177,14 @@ export const UI = {
   editGameType: 'Edit game type',
   savedGamesTitle: 'Your games',
   noSavedGames: 'Nothing saved yet. Finish a design and it will appear here.',
-  savePrompt: 'Name this game so you can find it later',
+  savePrompt: 'Project name',
   savePlaceholder: 'e.g. Mosslight',
   save: 'Save',
+  /* The share control's own words. It is an icon button beside the name field, so "Share" is what it
+   * is called and the tooltip says what it does — the old label was a sentence, "Copy a link to this
+   * plan", which wrapped to two lines in the rail and named the mechanism rather than the outcome. */
+  share: 'Share',
+  shareTitle: 'Copy a link to this plan',
   rename: 'Rename',
   remove: 'Delete',
   /* ------------------------------ the summary's pitch ------------------------------

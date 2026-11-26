@@ -80,6 +80,24 @@ body.g-app {
 }
 .g-skip:focus { top: var(--fn-space-4); }
 
+/* Text that is there for a screen reader and not for the eye. It is the whole label of an icon button:
+ * the word is hidden rather than dropped, so the control keeps its accessible name, its tooltip and its
+ * place in the tab order's spoken output, and only the pixels change.
+ *
+ * `clip-path` rather than `display: none` or `visibility: hidden`, both of which take the text out of
+ * the accessibility tree as well — which would leave the button with no name at all. */
+.g-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Focus is one ring, applied everywhere, in the accent — the single place a bright fill is allowed
  * to appear outside a button. */
 .g-app :focus-visible {
@@ -684,7 +702,13 @@ body.g-app {
 }
 
 .g-brandhero { width: 100%; aspect-ratio: 8 / 3; margin-bottom: var(--fn-space-4); }
-.g-pitch { margin: 0 0 var(--fn-space-4); font-size: var(--fn-lead-size); line-height: var(--fn-lead-line); color: var(--fn-text); max-width: var(--fn-measure); }
+/* The brand preview's own sentence, among the brand screen's other pieces (.g-brandhero, .g-provides,
+ * .g-caveat). It was called .g-pitch until the redesigned summary wanted that name for the band that
+ * carries the finished game's pitch — and a lead paragraph and a two-column layout sharing one class is
+ * how the band silently inherited this rule's `max-width: var(--fn-measure)` and shrank to 772px inside
+ * a 1112px column, with `1fr` dutifully resolving to the 364px that was left over. Same style, a name
+ * that says which screen's pitch it is. */
+.g-brandpitch { margin: 0 0 var(--fn-space-4); font-size: var(--fn-lead-size); line-height: var(--fn-lead-line); color: var(--fn-text); max-width: var(--fn-measure); }
 .g-provides { margin-bottom: var(--fn-space-4); }
 .g-caveat, .g-brandblock {
   border-left: 4px solid var(--fn-border-strong);
@@ -886,19 +910,23 @@ body.g-app {
 }
 
 /* ---------- the pitch, and the header it opens ----------
- * The game's own one-liner: the sentence the whole questionnaire exists to produce, and the three
- * things you can do with a finished design. It is a band of two columns rather than a card, and the
- * measurements are why — as twelve stacked rows in a panel it came to 698px and pushed the core loop
- * to 1113px, below the fold on every laptop. See render/summary-new.js.
+ * The game's own one-liner: the sentence the whole questionnaire exists to produce, and the panel that
+ * names and keeps it. It is a band of two columns rather than a card, and the measurements are why — as
+ * twelve stacked rows in a panel it came to 698px and pushed the core loop to 1113px, below the fold on
+ * every laptop. See render/summary-new.js.
+ *
+ * `.g-pitch` is the band; `.g-pitch-text` is the sentence and what decodes it; `.g-pitch-save` is the
+ * project's name, Save, Share and Start Building. The names read as what they hold on purpose: the old
+ * `-left` / `-rail` pair said where the columns were and nothing about what was in them.
  *
  * Where the classic layout puts the plan's own 4px rule down a panel's edge, this one has no panel to
  * put it on: the sentence is the page's headline, and a box around it would be the third thing on the
  * page claiming to be the page's title.
  *
- * The 1fr/360px split collapses to one column at 900px, where the rail would otherwise squeeze the
+ * The 1fr/360px split collapses to one column at 900px, where the panel would otherwise squeeze the
  * sentence into three words a line — the same breakpoint the core loop's two columns use, so the page
  * stacks once rather than twice at two different widths. */
-.g-pitchsplit {
+.g-pitch {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 360px;
   gap: var(--fn-space-6) var(--fn-space-7);
@@ -908,14 +936,14 @@ body.g-app {
 
 /* The screen's own title, kept for focus and for the heading order, sized down to a label: the pitch
  * below it is the bigger statement, and two competing headlines would undo the point of having one. */
-.g-pitchsplit .g-title {
+.g-pitch .g-title {
   margin-bottom: var(--fn-space-2);
   font-size: var(--fn-card-size);
   line-height: var(--fn-card-line);
   max-width: none;
 }
 
-.g-pitchsplit-line {
+.g-pitch-line {
   margin: 0 0 var(--fn-space-3);
   font-family: var(--fn-font-ui);
   font-weight: 700;
@@ -927,50 +955,69 @@ body.g-app {
   text-wrap: balance;
 }
 
-.g-pitchsplit-deck {
+.g-pitch-deck {
   margin: 0 0 var(--fn-space-2);
   font-size: var(--fn-lead-size);
   line-height: 1.45;
   color: var(--fn-text-secondary);
   max-width: var(--fn-measure);
 }
-.g-pitchsplit-deck strong { color: var(--fn-text); }
+.g-pitch-deck strong { color: var(--fn-text); }
 
-.g-pitchsplit-facts {
+.g-pitch-facts {
   margin: 0;
   font-size: var(--fn-nav-size);
   line-height: var(--fn-nav-line);
   color: var(--fn-text-muted);
   max-width: var(--fn-measure);
 }
-.g-pitchsplit-facts span { color: var(--fn-text-secondary); }
+.g-pitch-facts span { color: var(--fn-text-secondary); }
 
-/* The rail. It is a surface rather than a shadow of one — the same panel fill and edge as every other
- * box — because it is the page's one place to act, and a second visual language for "this is where you
- * do things" would be a second thing to learn. */
-.g-pitchsplit-rail {
+/* The save panel. It is a surface rather than a shadow of one — the same panel fill and edge as every
+ * other box — because it is the page's one place to act, and a second visual language for "this is
+ * where you do things" would be a second thing to learn. */
+.g-pitch-save {
   padding: var(--fn-space-5);
   border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
   background: var(--fn-surface-panel);
 }
-.g-pitchsplit-rail .g-label { margin-top: 0; }
-/* Start Building is the width of the rail: it is what the page is for, and it is the one control whose
- * disabled state has to be legible at a glance. It sits directly under the field it is gated on. */
-.g-pitchsplit-rail .g-btn-primary { width: 100%; margin-top: var(--fn-space-1); }
-/* The two secondary actions share the rail's width rather than stacking, which is the whole reason the
- * rail is not a stack: two rows of buttons is what made the old header tall. */
-.g-pitchsplit-rail .g-btnrow {
-  margin-top: var(--fn-space-3);
-  flex-wrap: nowrap;
+.g-pitch-save .g-label { margin-top: 0; }
+
+/* The field and its two actions share one row. The actions are the library's 40px body control and the
+ * field is the library's 44px, so the row is centred rather than stretched: making the buttons 44px to
+ * match the field would put two 44px CTA-sized controls on a body screen, and 1.2.1's body control is
+ * 40px — the same rule the rest of the guide's buttons are measured against.
+ *
+ * An icon button here cannot wrap, which is the point: as labelled buttons "Save changes" and "Copy a
+ * link to this plan" were both the width of the field beside them and both wrapped to two ragged lines
+ * on the page's primary control block. */
+.g-pitch-save-row {
+  display: flex;
   gap: var(--fn-space-2);
+  align-items: center;
+  margin-bottom: var(--fn-space-2);
 }
-.g-pitchsplit-rail .g-btnrow .g-btn { flex: 1 1 0; min-width: 0; }
-.g-pitchsplit-rail .g-meta-line { margin-top: var(--fn-space-3); }
+.g-pitch-save-row .g-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: none;
+  margin-bottom: 0;
+}
+.g-pitch-save-row .g-btn.is-icononly {
+  flex: 0 0 auto;
+  width: 40px;
+  min-height: 40px;
+  padding: 0;
+}
+
+/* Start Building is the width of the panel: it is what the page is for, and it is the one control whose
+ * disabled state has to be legible at a glance. It sits directly under the field it is gated on. */
+.g-pitch-save .g-btn-primary { width: 100%; margin-top: var(--fn-space-1); }
 
 /* One breakpoint, so the whole page stacks at the same width. */
 @media (max-width: 900px) {
-  .g-pitchsplit { grid-template-columns: minmax(0, 1fr); }
+  .g-pitch { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---------- the core loop, two columns ----------
