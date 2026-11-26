@@ -1427,8 +1427,9 @@ async function checkPitchPanel(send, results) {
       column: [Math.round(r(loop).left), Math.round(r(loop).right)],
       saveRight: Math.round(r(save).right),
       /* One row means one line: the field is the library's 44px and its two actions are the library's
-       * 40px, so they share a centre rather than a top edge. */
-      rowCentres: [...row.children].map((el) => Math.round(r(el).top + r(el).height / 2)),
+       * 40px, so they share a centre rather than a top edge. The receipt chip is a child of the row too —
+       * it is positioned against it — but it floats over the line above, so it is not a row member. */
+      rowCentres: [...row.querySelectorAll('input, .g-btn')].map((el) => Math.round(r(el).top + r(el).height / 2)),
       rowHeight: Math.round(r(row).height),
       iconNames: icons.map((b) => (b.querySelector('.g-sr-only') || {}).textContent || ''),
       iconSquares: icons.map((b) => [Math.round(r(b).width), Math.round(r(b).height)]),
@@ -1494,6 +1495,113 @@ async function checkPitchPanel(send, results) {
     await sleep2(900);
     const went = await evaluate(`location.hash`);
     if (went !== '#/experience') problems.push(`Start Building went to ${went} without a save in between`);
+  }
+
+  /* The receipts. Save and Share answer where the eye already is — a chip over the field's label line,
+   * right-aligned to the button that was pressed — and then take themselves away.
+   *
+   * Everything here starts from a clean browser and a fresh name, because the profile keeps localStorage
+   * between runs: a name that is already in the saved games leaves Save disabled and would prove nothing
+   * about the receipt.
+   *
+   * The chip is read through one expression used three times, before and after, so that "it moved the
+   * page" is a comparison of the same measurements rather than an impression. */
+  const receiptProbe = `(() => {
+    const r = (el) => el.getBoundingClientRect();
+    const save = document.querySelector('.g-pitch-save');
+    const chip = document.querySelector('.g-toast');
+    const icons = [...save.querySelectorAll('.g-btn.is-icononly')];
+    const label = save.querySelector('.g-label');
+    const start = save.querySelector('.g-btn-primary');
+    /* The label is a block, so its box is the panel's full width and says nothing about where its words
+     * end — which is the only thing the chip could collide with. A Range is the extent of the text. */
+    const range = document.createRange();
+    range.selectNodeContents(label);
+    const chipBox = r(chip);
+    return {
+      text: chip.textContent,
+      anchoredToSave: chip.classList.contains('g-toast-save'),
+      anchoredToShare: chip.classList.contains('g-toast-share'),
+      quiet: chip.classList.contains('is-quiet'),
+      painted: getComputedStyle(chip).backgroundColor !== 'rgba(0, 0, 0, 0)',
+      saveRightGap: Math.round(r(icons[0]).right - chipBox.right),
+      shareRightGap: Math.round(r(icons[1]).right - chipBox.right),
+      labelGap: Math.round(chipBox.left - range.getBoundingClientRect().right),
+      overStart: Math.round(r(start).top - chipBox.bottom),
+      panelHeight: Math.round(r(save).height),
+      startTop: Math.round(r(start).top),
+      labelLines: label.getClientRects().length,
+      saveDisabled: icons[0].disabled,
+      noticeSlot: !!document.querySelector('.g-notice'),
+      noticeText: (document.querySelector('.g-notice-text') || {}).textContent || null
+    };
+  })()`;
+
+  await send('Page.navigate', { url: BASE });
+  await sleep2(600);
+  await evaluate(`Object.keys(localStorage).filter((k) => k.startsWith('forge.guide')).forEach((k) => localStorage.removeItem(k))`);
+  /* Share is only testable with a clipboard. Without this the app takes its fallback path and draws the
+   * link in the notice slot instead, which is a different assertion — and without the focus emulation
+   * Chrome refuses the write even with the permission granted. */
+  await send('Browser.grantPermissions', { origin: BASE, permissions: ['clipboardReadWrite', 'clipboardSanitizedWrite'] });
+  await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  await send('Page.navigate', { url: `${BASE}${SHARE}&layout=new#/summary` });
+  await sleep2(1600);
+  await evaluate(`(() => {
+    const input = document.getElementById('gameName');
+    input.value = 'Receipt check game';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  })()`);
+  await sleep2(300);
+
+  const beforeSave = await evaluate(receiptProbe);
+  await evaluate(`document.querySelectorAll('.g-pitch-save .g-btn.is-icononly')[0].click()`);
+  await sleep2(400);
+  const afterSave = await evaluate(receiptProbe);
+
+  if (beforeSave.saveDisabled) problems.push('Save was disabled before the receipt could be checked');
+  if (afterSave.text !== 'Project name saved') {
+    problems.push(`the save receipt says ${JSON.stringify(afterSave.text)}, not "Project name saved"`);
+  }
+  if (!afterSave.anchoredToSave || afterSave.anchoredToShare) {
+    problems.push('the save receipt is not anchored to the Save button');
+  }
+  if (Math.abs(afterSave.saveRightGap) > 2) {
+    problems.push(`the save receipt is ${afterSave.saveRightGap}px off the Save button's right edge`);
+  }
+  if (afterSave.labelGap < 8) problems.push(`the save receipt is ${afterSave.labelGap}px from the field's label`);
+  if (afterSave.overStart < 0) problems.push('the save receipt covers Start Building');
+  if (!afterSave.saveDisabled) problems.push('Save is still enabled after saving, with nothing changed since');
+  if (afterSave.noticeSlot) problems.push('the receipt is drawn in the notice slot as well');
+  if (afterSave.panelHeight !== beforeSave.panelHeight || afterSave.startTop !== beforeSave.startTop) {
+    problems.push(`the receipt moved the page: panel ${beforeSave.panelHeight} -> ${afterSave.panelHeight}, Start Building ${beforeSave.startTop} -> ${afterSave.startTop}`);
+  }
+  if (afterSave.labelLines !== 1 || afterSave.labelLines !== beforeSave.labelLines) {
+    problems.push(`the field's label wrapped to ${afterSave.labelLines} line(s) under the receipt`);
+  }
+
+  /* It goes on its own. The chip itself stays: an empty live region that is already in the page is what
+   * makes the next message reliable, so "gone" means emptied and unpainted. */
+  await sleep2(2700);
+  const settled = await evaluate(receiptProbe);
+  if (settled.text) problems.push(`the receipt is still showing ${JSON.stringify(settled.text)} after its life`);
+  if (!settled.quiet || settled.painted) problems.push('the receipt did not clear itself away');
+
+  await evaluate(`document.querySelectorAll('.g-pitch-save .g-btn.is-icononly')[1].click()`);
+  await sleep2(400);
+  const afterShare = await evaluate(receiptProbe);
+  if (afterShare.noticeText) {
+    problems.push(`Share took its clipboard-blocked path in a browser that was granted the clipboard: ${afterShare.noticeText.slice(0, 60)}`);
+  } else {
+    if (afterShare.text !== 'Copied to clipboard') {
+      problems.push(`the share receipt says ${JSON.stringify(afterShare.text)}, not "Copied to clipboard"`);
+    }
+    if (!afterShare.anchoredToShare || afterShare.anchoredToSave) {
+      problems.push('the share receipt is not anchored to the Share button');
+    }
+    if (Math.abs(afterShare.shareRightGap) > 2) {
+      problems.push(`the share receipt is ${afterShare.shareRightGap}px off the Share button's right edge`);
+    }
   }
 
   for (const problem of problems) console.log(`       ! ${problem}`);

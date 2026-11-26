@@ -107,6 +107,46 @@ The other 84 game types (74 drafts and the 10 "just give me the basics" entries)
 voice. A draft reads as its own description; a basics entry is described rather than named, because
 "A Just give me the basics" is not a sentence. `tests/guide.test.mjs` holds all of this.
 
+## The receipts
+
+Save and Share answer where the eye already is. Pressing either draws a chip — `Project name saved`,
+`Copied to clipboard` — over the field's label line, right-aligned to the button that was pressed, and
+two and a half seconds later it clears itself. Nothing is dismissed; there is nothing to dismiss.
+
+This is the third attempt at those messages, and the two that failed are why the rules below are what
+they are.
+
+**A receipt is not a notice.** A **receipt** confirms something the user just did and already knows the
+outcome of: it says the short version, in the place the action happened, and goes. A **notice** is
+something the user has not dealt with yet — the browser refused to store anything, you are at your
+saved-game limit, the game could not be found, the clipboard was blocked so here is the link instead — and
+those stay until they are dismissed, in the page's notice slot at the top. In `app.js` the two are one
+object with a `flash` field on it: `{ tone: 'info', text, flash: 'save' }` is a receipt, anything else in
+`state.notice` is a notice. So a receipt is never mistaken for something that needs an answer, and the
+actions need no layout awareness at all — the classic layout has no button to hang a chip on and draws
+the same message in its usual slot.
+
+**It has to cost the page nothing, which is why it is absolutely positioned.** In flow the chip either
+reserves a line for the rest of the session — paying 28px for the whole visit to say nine words once — or
+it pushes the panel down and pulls it back two and a half seconds later, and a page that jumps under the
+reader is worse than no message. The first attempt reserved a fixed height beside the chip and came out
+2px short, which was enough to move the panel and the core loop below it. Out of flow it can neither move
+anything nor be squeezed by the label, which sits at the far end of the same line. The browser check
+compares the panel's height and Start Building's position before and after a receipt; that comparison is
+the assertion, not a screenshot.
+
+**Under 700px, Save's receipt gives up its offset.** The chip is right-aligned, so Share's lands under
+Share at `right: 0` and Save's is shifted left by exactly one 40px button and one 8px gap. A narrow panel
+cannot afford that shift without the chip reaching back over the label, so there both land under the pair.
+
+**The chip is always in the page, and empty when there is nothing to say.** Removing it would take an
+empty live region out of the document and put a new one back with the next message, and a `role="status"`
+element that arrives complete with its text is the case screen readers disagree about most. `is-quiet` is
+the empty state — no fill, no words, still present — and it is why expiry in `app.js` empties the chip
+rather than re-rendering: a render two and a half seconds after a save would rebuild the name field, and a
+field rebuilt under the caret has lost the caret, at exactly the moment someone is likely to be typing
+the next name.
+
 ## The comparison bar
 
 It is deliberately not built like the rest of the app, and each of those decisions is load-bearing:
@@ -152,16 +192,28 @@ When the decision is made, delete the loser:
 Whatever is left of `render/summary-parts.js` — the plan panel, the recap, the save controls the classic
 layout uses, the legend, the Back row — is shared, so it stays either way.
 
+The receipts outlive the choice either way. `flash()` in `app.js` and the two strings it carries are the
+messages, and the classic layout draws both of them in its notice slot; only `flashChip()` and the
+`.g-toast*` rules go with the redesign.
+
 Note that `.g-brandpitch` is **not** part of this: it is the brand screen's own sentence and shares
 nothing with the summary but a word.
 
 ## What holds it
 
-- `npm test` (138 tests, no dependencies) pins the copy, the pitch rules, the two keys in `store.js`, and
-  the bar's colour being the only thing outside the palette.
-- `node tests/browser-check.mjs http://localhost:8080/` (17 checks) drives the real thing. Two of them are
-  about this work: `summary-new` loads `?layout=new` — the only check that renders the redesign at all,
-  which is why a render-time crash lived in it unnoticed — and `summary-new pitch panel` measures the
-  band against the column it sits in, the field and its two actions sharing one line, Save being off
-  until there is something to save, and Start Building working for someone who names a game and never
-  presses Save.
+- `npm test` (no dependencies) pins the copy, the pitch rules, the two keys in `store.js`, and the bar's
+  colour being the only thing outside the palette.
+- `node tests/browser-check.mjs http://localhost:8080/` — `npm run verify` — (17 checks) drives the real
+  thing. Two of them are about this work: `summary-new` loads `?layout=new`, the only check that renders
+  the redesign at all, which is why a render-time crash lived in it unnoticed; and `summary-new pitch
+  panel` measures the band against the column it sits in, the field and its two actions sharing one line,
+  Save being off until there is something to save, and Start Building working for someone who names a
+  game and never presses Save.
+- The same check holds the receipts, and it does it by comparison rather than by eye: it reads the panel's
+  height and Start Building's position before and after a receipt, which is the assertion that the message
+  moved nothing; the button's right edge against the chip's, which is the assertion that the chip answers
+  where the action happened; the label's words through a `Range`, because the label is a block whose box is
+  the panel's full width and says nothing about where its text ends; and then it waits out the life and
+  asserts the chip is empty and unpainted. It grants itself the clipboard and the focus first: without
+  them Share takes its fallback path and the receipt is never exercised.
+

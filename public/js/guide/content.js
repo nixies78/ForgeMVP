@@ -193,6 +193,14 @@ export const UI = {
    * on the same idea. */
   underneath: 'Underneath, that means:',
 
+  /* The receipt for Save and for Share. Both are short on purpose: they appear beside the button that
+   * was pressed and take themselves away after a couple of seconds, so they are read in passing and a
+   * sentence would be gone before it was finished. "Saved as \"Mosslight\". It will be on the home
+   * screen next time." was the old Save message and said three things, two of which the button, the
+   * field above it and the home screen already say. */
+  savedFlash: 'Project name saved',
+  copiedFlash: 'Copied to clipboard',
+
   /* ------------------------------ the layout comparison bar ------------------------------
    * A temporary bar across the very top of the summary screen, for comparing the two designs on the
    * real page. It wears a colour from outside the palette and says what it is, so it can never be

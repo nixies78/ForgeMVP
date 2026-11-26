@@ -241,8 +241,61 @@ function wireShell(ctx) {
 
 /* ------------------------------------ actions ------------------------------------ */
 
+/**
+ * How long a receipt stays on screen. The stylesheet's `g-toast-life` animation is the same length, so
+ * the fade and the removal end together; this is the one that decides.
+ */
+const FLASH_MS = 2600;
+
+/**
+ * End a receipt.
+ *
+ * The chip is emptied, not removed, and no render is asked for. Both halves of that are deliberate:
+ *
+ *   - The chip is what holds the field's label line open, so taking it out of the page would move
+ *     everything below it — the exact jump that keeping it in the page exists to prevent. It stays,
+ *     empty and un-filled, until the next render draws the quiet version.
+ *   - A render here would rebuild the name field, and a field rebuilt under the caret has lost the
+ *     caret. Two and a half seconds after a save is a perfectly ordinary moment for someone to be
+ *     typing the name of the next thing.
+ *
+ * The class names are the ones `flashChip` in `render/summary-new.js` writes. There is only ever one
+ * receipt on the page, and only the redesigned summary draws them.
+ */
+function quietFlash() {
+  for (const el of document.querySelectorAll('.g-toast')) {
+    el.textContent = '';
+    el.className = 'g-toast is-quiet';
+  }
+}
+
 function createActions(ctx) {
   const { data, state, store } = ctx;
+
+  /**
+   * A receipt for something the user just did: "Project name saved", "Copied to clipboard".
+   *
+   * It is a notice with a `flash` on it, which is the whole difference between the two kinds of message
+   * in this app. A **flash** is about something the user just did and already knows the outcome of — it
+   * confirms, then goes. Anything else in `state.notice` is a **notice**: it is about something the user
+   * needs to know and has not dealt with yet (the browser refused to store anything, you are at your
+   * saved-game limit, the game could not be found), and those stay on screen until they are dismissed.
+   *
+   * `flash` also names the control it belongs to, so the redesigned summary can draw the receipt beside
+   * the button that was pressed rather than pushing a line into the top of the page. The classic layout
+   * has no anchor to hang it on and draws it in its usual notice slot; both get the same message.
+   */
+  function flash(text, anchor) {
+    const token = { tone: 'info', text, flash: anchor };
+    state.notice = token;
+    renderScreen(ctx);
+    setTimeout(() => {
+      /* A newer message has taken the slot and owns it now — this one must not clear it. */
+      if (state.notice !== token) return;
+      state.notice = null;
+      quietFlash();
+    }, FLASH_MS);
+  }
 
   return {
     go: (route, options) => navigate(ctx, route, options),
@@ -338,11 +391,13 @@ function createActions(ctx) {
       });
       try {
         await navigator.clipboard.writeText(url);
-        state.notice = { tone: 'info', text: 'Link copied. Anyone opening it sees this exact plan, in this browser or another.' };
+        flash(UI.copiedFlash, 'share');
       } catch (error) {
+        /* Not a receipt: this is the only way the user is going to get the link, so it stays on screen,
+         * with the URL selectable, until they dismiss it. */
         state.notice = { tone: 'info', text: `Copy this link: ${url}` };
+        renderScreen(ctx);
       }
-      renderScreen(ctx);
     },
 
     setName(name) {
@@ -418,12 +473,13 @@ function createActions(ctx) {
                 ? `You can keep ${result.cap} saved games. Delete one to make room.`
                 : 'This browser will not let the page store anything, so saving is unavailable. Your answers are still on screen.'
         };
-      } else {
-        state.gameId = result.record.id;
-        state.gameName = result.record.name;
-        state.notice = { tone: 'info', text: `Saved as "${result.record.name}". It will be on the home screen next time.` };
+        renderScreen(ctx);
+        return;
       }
-      renderScreen(ctx);
+
+      state.gameId = result.record.id;
+      state.gameName = result.record.name;
+      flash(UI.savedFlash, 'save');
     },
 
     loadSaved(id) {

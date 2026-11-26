@@ -1015,6 +1015,69 @@ body.g-app {
  * disabled state has to be legible at a glance. It sits directly under the field it is gated on. */
 .g-pitch-save .g-btn-primary { width: 100%; margin-top: var(--fn-space-1); }
 
+/* The field's label and the receipt share one line, and the receipt is absolutely positioned on it. That
+ * is the point: a receipt must cost the page nothing. In flow at 900px the chip squeezed the label into
+ * two lines, and reserving a line for it either costs 28px for the rest of the session or pushes the
+ * panel down and pulls it back two and a half seconds later — a page that jumps under the reader is worse
+ * than no message. Out of flow it can neither move anything nor be pushed around by the label, which sits
+ * at the opposite end of the line.
+ *
+ * The receipt is right-aligned, which puts it over the two buttons below — the panel's rightmost
+ * controls. `flash` names which button was pressed, so Save's receipt is shifted left by exactly one 40px
+ * button and one 8px gap and lines up over Save; Share's needs no offset because Share is the rightmost.
+ * Below 700px the panel is too narrow for Save's receipt to sit there without reaching back over the
+ * label, so both land over the pair. */
+.g-pitch-save-row {
+  position: relative;
+  display: flex;
+  gap: var(--fn-space-2);
+  align-items: center;
+  margin-bottom: var(--fn-space-2);
+}
+
+.g-toast {
+  position: absolute;
+  bottom: calc(100% + var(--fn-space-2));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  height: 28px;
+  margin: 0;
+  padding: 0 var(--fn-space-3);
+  border-radius: 999px;
+  background: var(--fn-surface-subtle);
+  color: var(--fn-text);
+  font-size: var(--fn-nav-size);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: g-toast-life 2600ms ease-out both;
+}
+.g-toast-share { right: 0; }
+.g-toast-save { right: calc(40px + var(--fn-space-2)); }
+
+/* Nothing to say: the pill is still in the page, with no fill and no words. Hiding it with `visibility`
+ * or `display` would take it back out of the accessibility tree, and an empty live region that is already
+ * there is what makes the message reliable when it comes. */
+.g-toast.is-quiet { background: none; animation: none; }
+
+/* One animation for the whole life: in, hold, out. The removal is a timer in app.js rather than an
+ * `animationend`, so that a reader who has asked for less motion still gets the message — without the
+ * movement, and it still goes. */
+@keyframes g-toast-life {
+  0% { opacity: 0; transform: translateY(4px); }
+  7% { opacity: 1; transform: translateY(0); }
+  86% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .g-toast { animation: none; }
+}
+
+@media (max-width: 700px) {
+  .g-toast-save { right: 0; }
+}
+
 /* One breakpoint, so the whole page stacks at the same width. */
 @media (max-width: 900px) {
   .g-pitch { grid-template-columns: minmax(0, 1fr); }

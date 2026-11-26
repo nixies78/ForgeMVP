@@ -45,7 +45,9 @@ export function renderSummaryNew(ctx) {
   return frag(
     pitchBand(ctx, pitch, { type, cat, brand }),
 
-    noticeBox(state.notice, () => actions.clearNotice()),
+    /* A receipt is drawn beside the button that earned it, inside the panel above; this slot is left for
+     * the messages that are not receipts — the ones the user has to do something about. */
+    state.notice && !state.notice.flash ? noticeBox(state.notice, () => actions.clearNotice()) : null,
 
     panel({
       eyebrowText: 'Core loop',
@@ -144,6 +146,30 @@ function pitchBand(ctx, pitch, { type, cat, brand }) {
 }
 
 /**
+ * The receipt for Save or Share: a chip that appears over the field's label line, right-aligned so it
+ * sits above the two buttons below it — the panel's rightmost controls. `flash` names which button was
+ * pressed, so the stylesheet shifts Save's receipt left by exactly one button and one gap and it lines up
+ * over Save rather than over the pair.
+ *
+ * **It is always rendered, and empty when there is nothing to say.** A live region that is already in the
+ * document and then changes its text is announced far more reliably than one inserted at the same moment
+ * as its text, which is the case screen readers disagree about most. `is-quiet` is the empty state: a
+ * pill with no fill and no words, invisible but still present.
+ *
+ * Not every notice is a receipt. One the user has not dealt with yet (the browser refused to store
+ * anything, you are at your saved-game limit) is drawn in the notice slot above, where it stays until it
+ * is dismissed.
+ */
+function flashChip(notice) {
+  const flash = notice && notice.flash ? notice.flash : null;
+  return h(
+    'p',
+    { class: `g-toast ${flash ? `g-toast-${flash}` : 'is-quiet'}`, role: 'status' },
+    flash ? notice.text : ''
+  );
+}
+
+/**
  * The save panel: the project's name, the two things you can do with it, and Start Building.
  *
  * The name field and its two actions are **one row**, and the actions are icon buttons. That is a fix
@@ -201,7 +227,7 @@ function pitchSave(ctx) {
 
   return [
     h('label', { class: 'g-label', for: 'gameName' }, UI.savePrompt),
-    h('div', { class: 'g-pitch-save-row' }, nameInput, saveButton, shareButton),
+    h('div', { class: 'g-pitch-save-row' }, nameInput, saveButton, shareButton, flashChip(state.notice)),
     startButton
   ];
 }
