@@ -360,6 +360,20 @@ test('the installer registers the launcher in Startup and adds a desktop shortcu
   assert.doesNotMatch(bat, /file:\/\/\//, 'the installer must never use a file:// path');
 });
 
+test('a hand-start reads the same settings file as the logon entry', async () => {
+  // start.bat ran `node server.js --open` whatever .local/settings.ini said, so the one setting that
+  // changes how a copy behaves - LIVE, which refreshes open pages when a file under public/ changes -
+  // was honoured at logon and ignored the moment the server was started by hand from this file.
+  const bat = await readFile(path.join(ROOT, 'start.bat'), 'utf8');
+
+  assert.match(bat, /\.local\\settings\.ini/, 'reads per-copy settings');
+  assert.match(bat, /set "PORT=8080"/, 'defaults to port 8080');
+  assert.match(bat, /if "%LIVE%"=="1"/, 'honours LIVE from the settings file');
+  assert.match(bat, /node tools\\dev-supervisor\.mjs/, 'LIVE=1 runs the supervisor, which passes --live');
+  assert.match(bat, /node server\.js --open/, 'and otherwise the plain server still opens the browser');
+  assert.doesNotMatch(bat, /file:\/\/\//, 'never a file:// path');
+});
+
 test('the uninstaller removes both shortcuts', async () => {
   const bat = await readFile(path.join(ROOT, 'uninstall-startup.bat'), 'utf8');
   assert.match(bat, /del "%LNK%"/, 'removes the Startup shortcut');
