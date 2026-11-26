@@ -135,11 +135,16 @@
      they are pressed. The colours are still the page's flat blue and case grey - the depth is drawn in
      shades of them, not in gloss. */
   .rail .btn {
-    padding: 14px 18px;
+    /* The keys are the one part of the widget that can hand the reels back some room, so they scale with
+       the page: above 1000px both clamps sit at their ceiling and nothing here has changed, and below it
+       the type comes down to 12.5px and the padding to 10px while the rail narrows with them. */
+    padding: clamp(10px, 1.45vw, 14px) clamp(10px, 1.35vw, 18px);
+    font-size: clamp(12.5px, 1.5vw, 15px);
     border: 1px solid transparent;
     border-radius: 12px;
     transition: transform .09s ease, box-shadow .09s ease, background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
   }
+  .rail .btn svg { width: 1.05em; height: 1.05em; }
   .rail .btn-primary {
     color: #07131B;
     text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
@@ -210,7 +215,10 @@
      The window starts at the top of the case now that the panel's head is gone. */
   .rig-body {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 232px;
+    /* The rail narrows with the page rather than holding 232px all the way down to the phone breakpoint,
+       which is where the reels were losing their width: at 1000px the keys are still 232px wide, at 700px
+       they are 182px and the reels have the rest. */
+    grid-template-columns: minmax(0, 1fr) clamp(146px, 26%, 232px);
     gap: 20px;
     align-items: start;
     padding: 22px;
@@ -226,8 +234,11 @@
   .heads { padding: 0 var(--lid) 10px; }
   /* The reel's name and how many entries are in it, as one label: "Flavour or brand (31)". The count is
      part of the name rather than a second line, so the panel needs no head above the window. */
-  .col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  .col-count { font-weight: 400; letter-spacing: .02em; color: var(--dim); text-transform: none; }
+  .col-label { font-size: clamp(9.5px, 1.1vw, 10.5px); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  /* The count stays with the word before it: "(31)" is a bracket and a number and breaks in the middle of
+     itself if it is allowed to, and a label that wraps as "FLAVOUR OR BRAND" / "31)" is worse than one that
+     wraps as "FLAVOUR OR" / "BRAND (31)". */
+  .col-count { font-weight: 400; letter-spacing: .02em; color: var(--dim); text-transform: none; white-space: nowrap; }
   .col-count b { font-weight: 700; color: #fff; }
 
   /* The window: ONE aperture across all three reels. Its ground is LIGHTER than the page rather than darker
@@ -269,7 +280,6 @@
   .col::before {
     content: "";
     position: absolute; inset: 0; z-index: 1;
-    border-radius: 10px;
     background: linear-gradient(180deg, rgba(247, 216, 43, .13), rgba(247, 216, 43, .04));
     opacity: 0;
     transition: opacity .3s var(--ease);
@@ -282,7 +292,6 @@
     position: relative;
     height: var(--item-h);
     overflow: hidden;
-    border-radius: 10px;
     background: none;
   }
   /* Shading at the top and bottom of a reel while it is moving, so the strip reads as a drum turning. */
@@ -295,10 +304,22 @@
     transition: opacity .3s;
   }
   .col.is-spinning .rm-window::after { opacity: 1; }
+  /* Corners. The window is ONE aperture and a reel is a slice of it, so the rounding belongs to the two
+     slices at the ends of the window and to nothing in between: the left reel is rounded on its left, the
+     right reel on its right, the middle reel not at all. Each reel used to round all four of its own
+     corners, which drew a rounded box inside the aperture - invisible until a reel was held or turning,
+     when its shaded panel showed four corners that do not exist on the machine. */
+  .viewport > .col .rm-window, .viewport > .col::before { border-radius: 0; }
+  .viewport > .col:first-child .rm-window, .viewport > .col:first-child::before { border-radius: 10px 0 0 10px; }
+  .viewport > .col:last-child .rm-window, .viewport > .col:last-child::before { border-radius: 0 10px 10px 0; }
   .rm-strip { will-change: transform; }
   /* One entry: the picture, the name under it, the kind under that - a column, centred. The height is
      fixed by --item-h, so an entry with a one-line name and one with a two-line name are the same size
-     and the drum never changes shape as it turns. */
+     and the drum never changes shape as it turns. The name block is fixed too - two lines and the kind
+     line under them, reserved whether the label needs them or not - so that three entries with labels of
+     three different lengths still put their pictures in the same place across the window. Without that
+     reservation the column centres each entry on its own content and the pictures wander up and down
+     between reels, which is exactly what a drum must not do. */
   .item {
     height: var(--item-h);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
@@ -313,12 +334,17 @@
     width: 7rem; height: 7rem; flex: none;
     border-radius: 12px; overflow: hidden;
     position: relative; display: grid; place-items: center;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .08);
   }
   /* Reel icons are square logos on a transparent ground: drawn whole (the masks use contain), never cropped. */
   .item .rm-pic.has-icon { padding: 3px; }
-  .item .cell { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; }
+  /* The cell takes the entry's whole width so the name inside it has a width to fill: a shrink-to-fit cell
+     would size itself to its own label, and the fitter would then measure a short label as if it were a
+     narrow reel and shrink it for no reason. */
+  .item .cell { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; min-width: 0; height: 3.25rem; }
+  /* The name takes the whole width of the entry, so the label the fitter measures is the label the browser
+     breaks: a shrink-to-fit box would report the width of its own longest line and never look too small. */
   .item .name {
+    width: 100%;
     font-family: var(--title); font-weight: 800; font-size: .9375rem; line-height: 1.2;
     letter-spacing: -0.015em; overflow-wrap: anywhere;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -442,8 +468,8 @@
   .rail .btn { width: 100%; }
   /* The sound switch: a small key under the two big ones, with the speaker as its whole label. It is
      narrow rather than full width, so it reads as a setting rather than as a third action. */
-  .rail .sound { width: auto; align-self: center; padding: 10px 16px 12px; }
-  .sound svg { width: 18px; height: 18px; }
+  .rail .sound { width: auto; align-self: center; padding: .67em 1.05em .8em; }
+  .sound svg { width: 1.2em; height: 1.2em; }
   .sound .icon-off { display: none; }
   .sound[aria-pressed="false"] .icon-on { display: none; }
   .sound[aria-pressed="false"] .icon-off { display: block; }
@@ -523,11 +549,15 @@
     .rig-body { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
     .heads { padding: 0 var(--lid) 8px; }
     .col-label { font-size: 9.5px; letter-spacing: .06em; }
-    :root { --item-h: 9.5rem; }
+    :root { --item-h: 10.5rem; }
     .item { padding: 8px 6px; gap: 6px; }
     .item .rm-pic { width: 4.5rem; height: 4.5rem; border-radius: 10px; }
     .rm-ph .rm-initials { font-size: 1.375rem; }
-    .item .name { font-size: .8125rem; }
+    /* A phone reel is 79px wide, and two lines of 13px type is not enough for the longest labels in the
+       data - so a phone gives a name three lines and the fitter reads that from this clamp. The cell
+       reserves all three whether they are used or not, which is what keeps the pictures in line. */
+    .item .cell { height: 4rem; }
+    .item .name { font-size: .8125rem; -webkit-line-clamp: 3; }
     .item .kind-tag { font-size: .5625rem; }
     .lock { padding: 9px 6px 11px; font-size: 10.5px; letter-spacing: .06em; gap: 5px; }
     .lock svg { width: .875rem; height: .875rem; }
@@ -574,9 +604,9 @@
       <div class="rig-body">
         <div class="deck" id="reels">
           <div class="heads">
-            <p class="col-label">Flavour or brand <span class="col-count">(<b id="count-f">&mdash;</b>)</span></p>
-            <p class="col-label">Game type <span class="col-count">(<b id="count-t">&mdash;</b>)</span></p>
-            <p class="col-label">Hook <span class="col-count">(<b id="count-h">&mdash;</b>)</span></p>
+            <p class="col-label">Flavour or brand&nbsp;<span class="col-count">(<b id="count-f">&mdash;</b>)</span></p>
+            <p class="col-label">Game type&nbsp;<span class="col-count">(<b id="count-t">&mdash;</b>)</span></p>
+            <p class="col-label">Hook&nbsp;<span class="col-count">(<b id="count-h">&mdash;</b>)</span></p>
           </div>
 
           <div class="viewport">
@@ -786,7 +816,16 @@ const SOUND = (() => {
   };
 })();
 
-/* ---------- one entry in a drum: a thumbnail and the name beside it ---------- */
+/* ---------- one entry in a drum: a picture with the name under it ---------- */
+/* A label of more than three words keeps its last two together, so it breaks 3-and-2 rather than leaving
+   one word on a line of its own - "Punishing, and proud of it" is not four lines and an orphan, it is two
+   lines with a pair at the end. The non-breaking space is what holds them; nothing else needs to know. */
+function labelText(name) {
+  const words = String(name).split(' ');
+  if (words.length <= 3) return String(name);
+  return [...words.slice(0, -2), words.slice(-2).join('\u00a0')].join(' ');
+}
+
 function renderEntry(entry, key) {
   const item = document.createElement('div');
   item.className = 'item';
@@ -811,7 +850,7 @@ function renderEntry(entry, key) {
   cell.className = 'cell';
   const name = document.createElement('span');
   name.className = 'name';
-  name.textContent = entry.name;
+  name.textContent = labelText(entry.name);
   cell.append(name);
   if (entry.kind === 'brand') {
     const tag = document.createElement('span');
@@ -821,6 +860,83 @@ function renderEntry(entry, key) {
   }
   item.append(pic, cell);
   return item;
+}
+
+/* ---------- a label that fits its reel ----------
+   Reel labels are data, not copy: "Metroidvania" is one word, "Punishing, and proud of it" is five, and the
+   same entry has to read in a 300px desktop reel and a 100px one on a phone. So every name is measured once
+   it is on the page and scaled to fit: the longest word sets the ceiling, because a word cannot be broken
+   without looking broken, and then the label as a whole comes down until it sits in two lines - but no
+   further than a floor, since a name nobody can read is worse than a name that is cut.
+
+   The measuring happens in one layout, in a box off the page: every distinct word in every label goes into
+   a span of its own at the label's own font, all of them are read at once so the browser flushes once, and
+   from then on a line of text is a sum of word widths. Widths scale with the font size, so one measurement
+   answers every size and the search for a size is arithmetic instead of a reflow. */
+const FIT = { lines: 2, step: 0.5, floor: 10.5, floorRatio: 0.72, room: 0.99 };
+function fitNames() {
+  const names = [...document.querySelectorAll('.item .name')];
+  if (!names.length) return;
+  /* Clearing the inline size first means the size to start from is whatever the stylesheet says at this
+     width, so the phone's own base is respected and the fitter only ever shrinks. Reading a computed size
+     does not lay anything out, so all of them can be read before anything is measured. */
+  names.forEach((name) => { name.style.fontSize = ''; });
+  const sizes = new Map(names.map((name) => [name, parseFloat(getComputedStyle(name).fontSize) || 15]));
+  const reference = Math.max(...sizes.values());
+  const css = getComputedStyle(names.find((name) => sizes.get(name) === reference) || names[0]);
+
+  const tokensOf = (name) => name.textContent.trim().split(' ').filter(Boolean);
+  const wanted = new Set();
+  names.forEach((name) => tokensOf(name).forEach((token) => wanted.add(token)));
+
+  const probe = document.createElement('div');
+  probe.setAttribute('aria-hidden', 'true');
+  probe.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;white-space:nowrap;'
+    + `font-family:${css.fontFamily};font-weight:${css.fontWeight};font-size:${reference}px;letter-spacing:${css.letterSpacing};`;
+  const list = [...wanted];
+  probe.innerHTML = list
+    .map((token) => `<span>${token.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`)
+    .join('');
+  const pair = document.createElement('span');
+  pair.textContent = 'x\u00a0x';
+  probe.append(pair);
+  document.body.append(probe);
+  const widths = new Map();
+  [...probe.children].forEach((span, i) => { if (i < list.length) widths.set(list[i], span.getBoundingClientRect().width); });
+  const withGap = pair.getBoundingClientRect().width;
+  pair.textContent = 'xx';
+  /* A gap between two words, measured rather than guessed: a span holding nothing but a space has no width. */
+  const space = Math.max(0, withGap - pair.getBoundingClientRect().width);
+  probe.remove();
+
+  for (const name of names) {
+    const room = name.clientWidth * FIT.room;
+    const tokens = tokensOf(name);
+    if (!room || !tokens.length) continue;
+    const base = sizes.get(name);
+    const floor = Math.max(FIT.floor, base * FIT.floorRatio);
+    /* How many lines the label may have is the stylesheet's business, not the fitter's: the same rule that
+       draws the clamp sets the fitter's budget, so the two cannot disagree - two lines on a desktop reel,
+       three on a phone, where 13px type in two lines would mean an ellipsis on a real label. */
+    const budget = parseInt(getComputedStyle(name).webkitLineClamp, 10) || FIT.lines;
+    let size = base;
+    const widest = tokens.reduce((max, token) => Math.max(max, widths.get(token) || 0), 0);
+    if (widest > room) size = Math.max(floor, size * (room / widest));
+    /* Greedy line breaking, the way the browser does it: fill a line, wrap, repeat. */
+    const linesAt = (candidate) => {
+      const k = candidate / reference;
+      let lines = 1;
+      let line = 0;
+      for (const token of tokens) {
+        const width = (widths.get(token) || 0) * k;
+        if (line && line + space * k + width > room) { lines += 1; line = width; }
+        else line = line ? line + space * k + width : width;
+      }
+      return lines;
+    };
+    while (size > floor && linesAt(size) > budget) size = Math.max(floor, size - FIT.step);
+    if (size < base - 0.01) name.style.fontSize = `${size.toFixed(2)}px`;
+  }
 }
 
 /* ---------- the rail's copy, from the machine's state ---------- */
@@ -888,6 +1004,17 @@ if (machine) {
   document.querySelectorAll('[data-todo]').forEach((btn) => btn.addEventListener('click', () => {
     $('todo-note').textContent = `"${btn.textContent.trim()}" isn't wired up yet - this page is a design mock-up.`;
   }));
+
+  /* The labels are fitted before the reels start, not after: fitting is a layout, and a layout in the
+     middle of a spin is a stutter nobody asked for. The fonts have to be in first - a label measured in a
+     fallback font is measured wrong - so the wait for them is bounded, and a late arrival is refitted only
+     if the machine has stopped by then. */
+  const refit = () => { if (!$('reels').querySelector('.is-spinning')) fitNames(); };
+  await Promise.race([document.fonts.ready, new Promise((done) => setTimeout(done, 900))]);
+  fitNames();
+  document.fonts.ready.then(refit);
+  let refitTimer = 0;
+  addEventListener('resize', () => { clearTimeout(refitTimer); refitTimer = setTimeout(refit, 120); });
 
   /* The reels are already turning when the page arrives - that is the first thing this page says, and it
      says it on every visit, a refresh included. A visitor who has asked their system for less motion gets
