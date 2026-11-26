@@ -65,10 +65,10 @@
     ],
     "brand_image_spec": {
       "logo": {
-        "size_px": "160x160",
-        "format": "PNG with transparent background",
-        "displayed_at_px": 44,
-        "notes": "Square brand logo/icon used on the small selection tiles. Keep the mark centred with ~10% padding inside the square so it doesn't touch the edges. Oversized at 160px so it stays sharp on high-DPI screens."
+        "size_px": "512x512",
+        "format": "WebP with transparent background",
+        "displayed_at_px": 64,
+        "notes": "Square brand logo/icon used on the small selection tiles. Keep the mark centred with ~10% padding inside the square so it doesn't touch the edges. Oversized at 512px so it stays sharp on high-DPI screens."
       },
       "hero": {
         "size_px": "1200x450",
@@ -76,7 +76,7 @@
         "displayed_at_px": "up to ~750 wide",
         "notes": "Wide key-art banner shown at the top of the brand detail panel. 8:3 is a third shorter than a standard 16:9 frame, so compose for a letterbox crop rather than a full scene. Avoid putting important detail or text in the outer 5% since it is cropped with object-fit: cover on narrow windows."
       },
-      "location": "Save both files in an 'images/brands' folder next to uefn_game_wizard.html, named <brand_id>_logo.png and <brand_id>_hero.jpg.",
+      "location": "Save both files in this repository's 'public/images/brands' folder, named <brand_id>_logo.webp and <brand_id>_hero.jpg.",
       "brand_ids": [
         "original",
         "star_wars",
@@ -210,7 +210,7 @@
       },
       "pitch": "Total creative freedom. No brand rules to follow and no revenue to share \u2014 just you, Fortnite's full toolkit, and whatever you can imagine.",
       "images": {
-        "logo": "images/brands/original_logo.png",
+        "logo": "images/brands/original_logo.svg",
         "hero": "images/brands/original_hero.jpg"
       },
       "suggested_game_types": []
@@ -269,7 +269,7 @@
       },
       "pitch": "Hand your players a lightsaber. Four iconic planets, real Force powers, and 230+ authentic sound effects make this the most content-rich template on the list.",
       "images": {
-        "logo": "images/brands/star_wars_logo.png",
+        "logo": "images/brands/star_wars_logo.webp",
         "hero": "images/brands/star_wars_hero.jpg"
       },
       "suggested_game_types": [
@@ -332,7 +332,7 @@
       },
       "pitch": "Stylish, supernatural, and built for melee. Fight demons as Rumi, Mira, Zoey, or Jinu using the newest template Epic has shipped.",
       "images": {
-        "logo": "images/brands/kpop_demon_hunters_logo.png",
+        "logo": "images/brands/kpop_demon_hunters_logo.webp",
         "hero": "images/brands/kpop_demon_hunters_hero.jpg"
       },
       "suggested_game_types": [
@@ -396,7 +396,7 @@
       },
       "pitch": "Everything snaps together. Minifigure-scale building, three prebuilt biomes, and a ready-made farming tycoon \u2014 the friendliest starting point for an all-ages hit.",
       "images": {
-        "logo": "images/brands/lego_logo.png",
+        "logo": "images/brands/lego_logo.webp",
         "hero": "images/brands/lego_hero.jpg"
       },
       "suggested_game_types": [
@@ -460,7 +460,7 @@
       },
       "pitch": "High-stakes minigames with a built-in hook. Ships with both a Minigame Mastery and a Social Deduction template, so the trickiest logic is already wired up for you.",
       "images": {
-        "logo": "images/brands/squid_game_logo.png",
+        "logo": "images/brands/squid_game_logo.webp",
         "hero": "images/brands/squid_game_hero.jpg"
       },
       "suggested_game_types": [
@@ -521,7 +521,7 @@
       },
       "pitch": "Zombies that actually behave like zombies. The Walker NPC template teaches you enemy AI you'll reuse in every horror game you make afterwards.",
       "images": {
-        "logo": "images/brands/walking_dead_logo.png",
+        "logo": "images/brands/walking_dead_logo.webp",
         "hero": "images/brands/walking_dead_hero.jpg"
       },
       "suggested_game_types": [
@@ -583,7 +583,7 @@
       },
       "pitch": "Cowabunga, fully wired. Four Turtles, four villains, four weapon types, and a working arcade mode \u2014 drop in and start fighting.",
       "images": {
-        "logo": "images/brands/tmnt_logo.png",
+        "logo": "images/brands/tmnt_logo.webp",
         "hero": "images/brands/tmnt_hero.jpg"
       },
       "suggested_game_types": [
@@ -644,7 +644,7 @@
       },
       "pitch": "Instant party game. Every player's outfit auto-converts into a Fall Guys Bean, and the obstacle-course kit handles the rest.",
       "images": {
-        "logo": "images/brands/fall_guys_logo.png",
+        "logo": "images/brands/fall_guys_logo.webp",
         "hero": "images/brands/fall_guys_hero.jpg"
       },
       "suggested_game_types": [

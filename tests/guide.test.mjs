@@ -21,7 +21,8 @@ import {
   effectiveCoreLoop,
   effectiveLayoutTip,
   isBaselineOnly,
-  brandsForGameType
+  brandsForGameType,
+  brandAssets
 } from '../public/js/guide/data.js';
 import { rebuildDevices, findOption, universalPolishDevices, clearResolveCache } from '../public/js/guide/resolve.js';
 import {
@@ -1473,7 +1474,12 @@ test('every wizard screen carries a visible way back, and home does not', async 
      * module that actually builds one. */
     const sources = await moduleSources(path.join(dir, file));
     const combined = [...sources.values()].join('\n');
-    if (/actions\.back\(\)/.test(combined) || /label: '(←\s*)?Back/.test(combined)) withBack.push(file.replace('.js', ''));
+    /* The check has to know the shared label as well as the old literal. Every step's Back is written
+     * `label: UI.back` now, so a screen whose way back reads that constant and calls go({screen:'home'})
+     * rather than actions.back() - which is exactly what the placeholder does - was reported as having no
+     * Back control at all. It matched only because its label used to be the literal "Back to the three
+     * modes". */
+    if (/actions\.back\(\)/.test(combined) || /label:\s*(UI\.back|'(←\s*)?Back)/.test(combined)) withBack.push(file.replace('.js', ''));
   }
   for (const screen of ['category', 'gametype', 'question', 'brand', 'restriction', 'summary', 'experience', 'walkthrough', 'placeholder']) {
     assert.ok(withBack.includes(screen), `the ${screen} screen has no Back control`);
@@ -1496,6 +1502,120 @@ test('every brand hero the data names is on disk, with the exact case it is spel
     if (!entries.includes(name)) missing.push(`${brand.id}: ${name}`);
   }
   assert.deepEqual(missing, [], `brand art is named differently on disk:\n  ${missing.join('\n  ')}`);
+});
+
+test('every brand logo the data names is on disk, and is the file the page asks for', async () => {
+  /* The hero check above could not see the logo's fault, and could not have: the page built the logo's
+   * path from the id convention and never read `images.logo` at all. Every brand could name a file that
+   * really existed and the page would still request `<id>_logo.png` and show a monogram - which is what
+   * the brand tiles did. So this asks both questions at once: is the declared file on disk, and does
+   * brandAssets() hand back the path the data declares? */
+  const dir = path.join(PUBLIC_DIR, 'images', 'brands');
+  const entries = await readdir(dir).catch(() => []);
+  const problems = [];
+  for (const brand of data.brands) {
+    const declared = brand.images && brand.images.logo;
+    if (!declared) {
+      problems.push(`${brand.id}: declares no images.logo`);
+      continue;
+    }
+    if (!entries.includes(path.basename(declared))) problems.push(`${brand.id}: ${declared} is not on disk`);
+    const built = brandAssets(data, brand).logo;
+    if (built !== declared) problems.push(`${brand.id}: the page asks for ${built}, the data names ${declared}`);
+  }
+  assert.deepEqual(problems, [], `brand logos do not line up:\n  ${problems.join('\n  ')}`);
+});
+
+test('every way back in the wizard says Back, and only Back', async () => {
+  /* Three names for one control: the walkthrough's later steps said "Previous", the placeholder screen
+   * said "Back to the three modes", and the others said "Back". A reader comparing two screens could not
+   * tell whether the two did the same thing, and the labels had already drifted apart once. One name,
+   * taken from content.js, on every screen that has a step behind it. */
+  for (const name of ['brand', 'restriction', 'walkthrough', 'placeholder']) {
+    const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', `${name}.js`), 'utf8');
+    assert.match(source, /label:\s*UI\.back/, `${name}.js takes its way back from UI.back`);
+    assert.ok(
+      !/label:\s*'(Let's go back|Previous|Back to the)/i.test(source),
+      `${name}.js has a second name for going back`
+    );
+  }
+  const content = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'content.js'), 'utf8');
+  assert.ok(!/letsGoBack/.test(content), 'the old "Let\'s go back" label is gone');
+  assert.ok(!/previous:\s*'Previous'/.test(content), 'the old "Previous" label is gone');
+});
+
+test('a brand tile holds the line for its marker whether or not it is the chosen one', async () => {
+  /* The bug: the chosen marker was only rendered on the chosen tile, so picking a brand grew that one tile
+   * by a badge and re-ragged the row around it. Every tile renders the marker, and the ones that are not
+   * chosen keep its space with `visibility`, which also keeps the words out of the accessibility tree. */
+  const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'brand.js'), 'utf8');
+  assert.match(
+    source,
+    /g-brandtile-marker\$\{state\.brandKey === brand\.id \? '' : ' is-hidden'\}/,
+    'the marker is rendered on every tile and hidden on the others'
+  );
+
+  const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  assert.match(ruleBody(css, '.g-brandstrip'), /grid-auto-rows:\s*1fr/, 'every row of the strip is the same height');
+  assert.match(ruleBody(css, '.g-brandtile'), /flex:\s*1 1 auto/, 'a tile fills its grid cell, not its own content');
+  assert.match(ruleBody(css, '.g-brandtile-marker'), /margin-top:\s*auto/, 'the marker sits on the bottom of the tile');
+  assert.match(ruleBody(css, '.g-brandtile-marker.is-hidden'), /visibility:\s*hidden/, 'a hidden marker keeps its space');
+  assert.match(
+    ruleBody(css, '.g-brandtile-label'),
+    /font-size:\s*var\(--fn-nav-size\)/,
+    'the tile label is set at the navigation size rather than the body size'
+  );
+});
+
+test('the gate collapses its panels and indexes them from a rail that cannot navigate', async () => {
+  /* The gate is the longest read in the wizard, so it collapses. The rail is what makes that safe: a
+   * closed panel must never be a place a jump can land, which is why the rail opens its target first.
+   *
+   * And the rail must scroll rather than link. This app routes on the hash, and router.js answers a hash it
+   * does not recognise by going home, so `href="#some-section"` would eject the reader from the wizard -
+   * the failure mode that makes the sidebar a trap rather than a convenience. */
+  const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'restriction.js'), 'utf8');
+  assert.match(source, /collapsible:\s*true/, 'the gate asks for collapsible panels');
+  assert.match(source, /open:\s*index === 0/, 'the first panel is the one that starts open');
+  assert.match(source, /scrollIntoView\(/, 'the rail scrolls to its panel');
+  assert.match(source, /node\.open = true/, 'the rail opens the panel before scrolling to it');
+  assert.ok(!/href:\s*'?#/.test(source), 'no rail entry uses a hash href, which the router would read as a route');
+  assert.match(source, /disconnect\(\)/, 'the previous rail observer is disconnected, so a visit leaves nothing behind');
+
+  const ui = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'render', 'ui.js'), 'utf8');
+  assert.match(ui, /'details'/, 'a collapsible panel is a native details element');
+  assert.match(ui, /'summary'/, 'with a summary as its control');
+
+  const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  assert.match(
+    css,
+    /\.g-disclosure\[open\] > \.g-disclosure-head::before\s*\{[^}]*rotate\(90deg\)/,
+    'the chevron turns to point down when the panel opens'
+  );
+  assert.match(ruleBody(css, '.g-gaterail'), /position:\s*sticky/, 'the rail stays with the reader');
+  assert.match(ruleBody(css, '.g-disclosure'), /scroll-margin-top/, 'a jumped-to panel stops below the sticky bars');
+  assert.match(
+    css,
+    /@media \(max-width: 900px\)\s*\{[^@]*\.g-gaterail\s*\{\s*display:\s*none/,
+    'the rail is hidden below the width where two columns fit'
+  );
+  assert.match(css, /\.g-disclosure-body\s*\{\s*display:\s*block/, 'print shows a panel that was closed on screen');
+});
+
+test('a rule whose lead-in is half a sentence is not broken across two lines', async () => {
+  /* 23 of the 121 rules are written as a clause plus the rest of the sentence, and promotion to its own
+   * line would start the next line with the comma that joins the two halves. The comma right after the
+   * bold is the signal, and the screen marks those rules so the stylesheet can leave them in the line. */
+  const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'restriction.js'), 'utf8');
+  assert.match(source, /startsWith\(','\)/, 'the screen reads what follows the lead-in');
+  assert.match(source, /is-runon/, 'and marks the rule whose sentence runs on');
+  const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  assert.match(
+    ruleBody(css, '.g-rules li.is-runon > b:first-child'),
+    /display:\s*inline/,
+    'a run-on lead-in stays inside its sentence'
+  );
+  assert.match(ruleBody(css, '.g-rules li > b:first-child'), /display:\s*block/, 'every other lead-in gets its own line');
 });
 
 test('every asset the page promises is on disk', async () => {

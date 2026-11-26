@@ -188,13 +188,18 @@ export function brandsForGameType(dataset, gameTypeKey) {
 export function brandAssets(dataset, brand) {
   const spec = dataset.brandImageSpec;
   const ids = (spec && spec.brand_ids) || dataset.brands.map((b) => b.id);
-  const size = (spec && spec.logo && spec.logo.displayed_at_px) || 44;
+  const size = (spec && spec.logo && spec.logo.displayed_at_px) || 64;
   return {
-    logo: `images/brands/${brand.id}_logo.png`,
+    /* The data file names both images, so the convention below is only the fallback for a brand that
+     * has not declared them. The logo used to be convention-only, and that mattered: every brand in
+     * the file declares `images.logo`, so the page went on asking for the `<id>_logo.png` name no
+     * matter what the data said, and a brand pointing at art that actually existed was silently
+     * ignored. The hero beside it has always read the data first. */
+    logo: (brand.images && brand.images.logo) || `images/brands/${brand.id}_logo.png`,
     hero: (brand.images && brand.images.hero) || `images/brands/${brand.id}_hero.jpg`,
     logoDisplayPx: size,
     /** Told to a contributor by the placeholder, so a missing file is self-explaining. */
-    logoSpec: (spec && spec.logo && `${spec.logo.size_px} ${spec.logo.format}`) || '160x160 PNG, transparent',
+    logoSpec: (spec && spec.logo && `${spec.logo.size_px} ${spec.logo.format}`) || '512x512 WebP, transparent',
     heroSpec: (spec && spec.hero && `${spec.hero.size_px} ${spec.hero.format}`) || '1200x450 JPG (8:3)',
     hasLogo: false,
     knownBrandIds: ids

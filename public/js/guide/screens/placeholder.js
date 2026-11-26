@@ -34,7 +34,7 @@ export function renderPlaceholder(ctx) {
       : null,
 
     buttonRow([
-      button({ label: 'Back to the three modes', iconName: 'arrowLeft', onClick: () => actions.go({ screen: 'home' }) }),
+      button({ label: UI.back, iconName: 'arrowLeft', onClick: () => actions.go({ screen: 'home' }) }),
       mode.id === 'ai_chat'
         ? button({ label: 'Open the chat test page', variant: 'secondary', href: 'chat.html' })
         : button({ label: UI.guidedInstead, variant: 'primary', iconName: 'arrow', onClick: () => actions.go({ screen: 'category' }) })

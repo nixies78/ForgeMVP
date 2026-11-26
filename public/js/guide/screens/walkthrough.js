@@ -41,7 +41,7 @@ export function renderWalkthrough(ctx) {
 
     buttonRow(
       [
-        button({ label: index === 0 ? UI.back : UI.previous, iconName: 'arrowLeft', onClick: () => actions.back() }),
+        button({ label: UI.back, iconName: 'arrowLeft', onClick: () => actions.back() }),
         h(
           'div',
           { class: 'g-btnrow-inner' },

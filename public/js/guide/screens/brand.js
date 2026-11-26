@@ -5,12 +5,13 @@
  * types", the panel says whether the brand suits *the type you just chose*, which is the question the
  * user actually has at this point.
  *
- * "Let's go back" is an explicit route, not an afterthought: by now every design question has been
+ * The way back is an explicit route, not an afterthought: by now every design question has been
  * answered, and discovering that a brand's rules do not suit the game is a normal, expected moment.
  */
 
 import { h, frag, plural, richText } from '../dom.js';
 import { brandsForGameType, brandAssets } from '../data.js';
+import { UI } from '../content.js';
 import { button, buttonRow, badgeChip, eyebrow, imageSlot, lead, pageTitle, panel, paragraph } from '../render/ui.js';
 
 export function renderBrand(ctx) {
@@ -57,7 +58,16 @@ export function renderBrand(ctx) {
               compact: true
             }),
             h('span', { class: 'g-brandtile-label' }, brand.label),
-            state.brandKey === brand.id ? h('span', { class: 'g-brandtile-marker' }, '✓ Chosen') : null
+            /* The marker is always rendered and hidden with `visibility`, rather than left out when the
+             * tile is not chosen: it used to appear only on the chosen tile, so picking a brand grew that
+             * one tile by a badge's height and re-ragged the whole row around it. `visibility: hidden`
+             * also keeps it out of the accessibility tree, so a reader is never told about a marker that
+             * is not shown. */
+            h(
+              'span',
+              { class: `g-brandtile-marker${state.brandKey === brand.id ? '' : ' is-hidden'}` },
+              '✓ Chosen'
+            )
           )
         );
       })
@@ -108,7 +118,7 @@ export function renderBrand(ctx) {
 
     buttonRow(
       [
-        button({ label: "← Let's go back", onClick: () => actions.back() }),
+        button({ label: UI.back, iconName: 'arrowLeft', onClick: () => actions.back() }),
         h(
           'div',
           { class: 'g-btnrow-inner' },

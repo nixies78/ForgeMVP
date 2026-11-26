@@ -660,15 +660,25 @@ body.g-app {
 .g-brandstrip {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  /* `1fr` rather than the default auto: every tile is the same height, on every row, however many lines
+   * its label takes. "Original (No Brand Template)" wraps where "LEGO" does not, and an auto row grew to
+   * fit it, so one long label made its whole row taller than the row above. */
+  grid-auto-rows: 1fr;
   gap: var(--fn-space-3);
   margin-bottom: var(--fn-space-5);
 }
+
+/* The grid item is the listitem wrapper, not the button, so the button has to be told to fill it: at
+ * `width: 100%` with an auto height it fitted its own content instead, and the row's tallest tile simply
+ * stood taller than the others. */
+.g-brandstrip > [role='listitem'] { display: flex; }
 
 .g-brandtile {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--fn-space-2);
+  flex: 1 1 auto;
   width: 100%;
   padding: var(--fn-space-4) var(--fn-space-3);
   background: var(--fn-surface-panel);
@@ -689,7 +699,9 @@ body.g-app {
 /* 1.2.2: 1px, like every other chosen box (see .g-choice.is-selected). */
 .g-brandtile.is-chosen { border-color: var(--fn-action); border-width: 1px; }
 .g-brandlogo { width: 64px; height: 64px; border-radius: 8px; }
-.g-brandtile-label { font-weight: 600; }
+/* 14px rather than the 16px body size: these are labels on a control, and the one the reader compares
+ * brands by, so they sit on the same step as the app's own navigation. */
+.g-brandtile-label { font-weight: 600; font-size: var(--fn-nav-size); line-height: 1.35; }
 .g-brandtile-marker {
   font-size: var(--fn-meta-size);
   letter-spacing: var(--fn-meta-tracking);
@@ -699,7 +711,13 @@ body.g-app {
   color: var(--fn-on-action);
   border-radius: 999px;
   padding: 2px 8px;
+  /* Pinned to the bottom of the tile, so every label starts at the same height down the row and the
+   * marker sits on the baseline of the row rather than floating under a one-line label. */
+  margin-top: auto;
 }
+/* The tile that is not chosen keeps the marker's line, empty: `visibility` holds the space and takes the
+ * words out of the accessibility tree, where removing the element would have grown the tile instead. */
+.g-brandtile-marker.is-hidden { visibility: hidden; }
 
 .g-brandhero { width: 100%; aspect-ratio: 8 / 3; margin-bottom: var(--fn-space-4); }
 /* The brand preview's own sentence, among the brand screen's other pieces (.g-brandhero, .g-provides,
@@ -719,8 +737,157 @@ body.g-app {
 
 /* ============================== rules gate ============================== */
 
-.g-rules { margin: 0; padding-left: 1.15em; color: var(--fn-text-secondary); max-width: var(--fn-measure); }
-.g-rules li { margin-bottom: var(--fn-space-3); }
+/* The gate is the longest read in the wizard - three sections, and fourteen to nineteen rules depending
+ * on the brand - so it has to work when it is skimmed as well as when it is read. Three decisions follow.
+ *
+ * The panels collapse, so the screen opens as a list of headings rather than a wall of prose. The first
+ * one starts open: a page of closed bars hides the thing it is asking the reader to agree to, and nobody
+ * can agree with a page they have not seen.
+ *
+ * The rules are the part that has to be scannable. Every rule in the data already opens with a bold
+ * lead-in - "You get no soundtrack." - which is the sentence a glance lands on, so the lead-in is set on
+ * its own line at full contrast with the explanation secondary underneath. That hierarchy was authored
+ * in the content and was being flattened by one muted colour over the whole list, which is why nothing
+ * stood out.
+ *
+ * And the sections get a rail, sticky, because the panels are collapsible: having scrolled to the bottom
+ * of a long one, the reader should not have to scroll back up to reach the next. The two are not in
+ * tension - the rail moves between sections, the panels decide how much of one is on screen at a time -
+ * and clicking a rail entry opens its panel first, so a jump never lands on a closed bar. */
+
+.g-gatecols {
+  display: grid;
+  /* The reading column keeps the measure it always had; the rail takes the width that used to sit empty
+   * beside it, and `space-between` puts the rail against the right edge so the leftover becomes a gap
+   * between the two rather than a margin nobody asked for. `1fr` here instead would have let the rules
+   * run to a hundred-character line, which is trading one reading problem for another. */
+  grid-template-columns: minmax(0, var(--fn-measure)) minmax(150px, 220px);
+  justify-content: space-between;
+  gap: var(--fn-space-6);
+  align-items: start;
+}
+.g-gatecols > * { min-width: 0; }
+
+.g-gaterail {
+  position: sticky;
+  /* Below both bars rather than under them: --sh-header-h is the fixed site header, and --sh-app-head-h
+   * the crumb bar sticky beneath it. Both are measured at runtime by js/guide/chrome.js, because the
+   * crumb bar's height is its padding plus its tallest child and it wraps on a narrow screen. */
+  top: calc(var(--sh-header-h, 72px) + var(--sh-app-head-h, 40px) + var(--fn-space-5));
+}
+.g-gaterail-title {
+  margin: 0 0 var(--fn-space-3);
+  font-size: var(--fn-meta-size);
+  letter-spacing: var(--fn-meta-tracking);
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--fn-text-muted);
+}
+.g-gaterail-list { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--fn-border); }
+.g-gaterail-list li { margin: 0; }
+/* A button, not a link. This app routes on the hash, and router.js answers a hash it does not recognise
+ * by going home, so `href="#where-this-comes-from"` would leave the wizard rather than move down the
+ * page - the rail has to scroll, not navigate. */
+.g-gaterail-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  margin-left: -2px;
+  padding: var(--fn-space-2) var(--fn-space-3);
+  border: 0;
+  border-left: 2px solid transparent;
+  border-radius: 0 var(--fn-radius-button) var(--fn-radius-button) 0;
+  background: none;
+  color: var(--fn-text-secondary);
+  font: inherit;
+  font-size: var(--fn-nav-size);
+  line-height: 1.35;
+  cursor: pointer;
+}
+.g-gaterail-link:hover { color: var(--fn-text); background: var(--fn-surface-panel-hover); }
+.g-gaterail-link.is-current { color: var(--fn-text); border-left-color: var(--fn-action); font-weight: 600; }
+.g-gaterail-count {
+  display: block;
+  font-size: var(--fn-meta-size);
+  font-weight: 600;
+  letter-spacing: var(--fn-meta-tracking);
+  color: var(--fn-text-muted);
+}
+
+/* The rail is a desktop affordance. Below the width where two columns fit it is gone, and the panels are
+ * the navigation - which they already are, since each one is headed by the section it holds. */
+@media (max-width: 900px) {
+  .g-gatecols { grid-template-columns: minmax(0, 1fr); gap: var(--fn-space-5); }
+  .g-gaterail { display: none; }
+}
+
+/* ---------- the collapsible panel ---------- */
+
+/* `scroll-margin-top` is what a panel the rail scrolls to obeys - as do focus and a fragment - so the
+ * panel stops below both sticky bars instead of sliding its own heading underneath them. Same two
+ * measured heights the rail is positioned by. */
+.g-disclosure {
+  padding: 0;
+  scroll-margin-top: calc(var(--sh-header-h, 72px) + var(--sh-app-head-h, 40px) + var(--fn-space-4));
+}
+.g-disclosure > .g-disclosure-head {
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--fn-space-3);
+  margin-bottom: 0;
+  padding: var(--fn-space-4) var(--fn-space-6);
+  list-style: none;
+  cursor: pointer;
+}
+.g-disclosure > .g-disclosure-head::-webkit-details-marker { display: none; }
+.g-disclosure > .g-disclosure-head::marker { content: ''; }
+/* The browser's own marker is replaced by a triangle that points at a closed panel and turns to point
+ * down when it opens - the convention every reader already knows from a file tree or a mobile site
+ * index. Drawn from borders rather than from an icon so it inherits the text colour and needs no asset. */
+.g-disclosure > .g-disclosure-head::before {
+  content: '';
+  flex: none;
+  width: 0;
+  height: 0;
+  border-left: 6px solid currentColor;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  transition: transform var(--fn-motion) ease;
+}
+.g-disclosure[open] > .g-disclosure-head::before { transform: rotate(90deg); }
+.g-disclosure > .g-disclosure-head:hover .g-cardtitle { text-decoration: underline; }
+.g-disclosure-headtext { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.g-disclosure-head .g-panel-actions { margin-left: auto; }
+.g-disclosure-body { padding: 0 var(--fn-space-6) var(--fn-space-6); }
+.g-disclosure-body > :last-child { margin-bottom: 0; }
+@media (max-width: 560px) {
+  .g-disclosure > .g-disclosure-head { padding: var(--fn-space-4); }
+  .g-disclosure-body { padding: 0 var(--fn-space-4) var(--fn-space-5); }
+}
+
+.g-rules { margin: 0; padding-left: 1.15em; color: var(--fn-text-secondary); max-width: none; }
+.g-rules li { margin-bottom: var(--fn-space-5); }
+.g-rules li:last-child { margin-bottom: 0; }
+.g-rules li::marker { color: var(--fn-text-muted); font-weight: 700; }
+/* The leading bold of a rule, and only that: `:first-child` counts element children, so a bold that
+ * appears later inside a sentence is not it and stays inline where it belongs. All 121 rules in the data
+ * lead with one, which is what makes the list scannable once the lead-ins are pulled out. */
+.g-rules li > b:first-child {
+  display: block;
+  margin-bottom: var(--fn-space-1);
+  color: var(--fn-text);
+  font-size: 17px;
+  line-height: 1.35;
+}
+/* The 23 rules whose lead-in is a clause rather than a sentence keep flowing: promoting those would start
+ * the next line with the comma joining the two halves. They give up the line break and the size step and
+ * keep the full-contrast colour, because the lead-in is still the part the eye lands on. */
+.g-rules li.is-runon > b:first-child {
+  display: inline;
+  margin-bottom: 0;
+  font-size: inherit;
+  color: var(--fn-text);
+}
 .g-legalnote {
   border: 1px dashed var(--fn-border-strong);
   border-radius: var(--fn-radius-card);
@@ -728,7 +895,7 @@ body.g-app {
   margin-bottom: var(--fn-space-5);
   color: var(--fn-text-secondary);
 }
-.g-legalnote p { margin: 0; }
+.g-legalnote p { margin: 0; max-width: var(--fn-measure); }
 
 /* ============================== summary ============================== */
 
@@ -1368,6 +1535,15 @@ body.g-app {
     --fn-surface-glass: var(--ue-canvas);
   }
   .g-btnrow, .g-skip, .g-video { display: none !important; }
+  /* A printed gate is read rather than operated: the rail is a control for moving around a screen, and
+   * every panel prints its contents whether or not it happened to be open, because on paper a closed
+   * panel is a missing section of the document. Chrome hides a closed panel's contents in one of two
+   * ways depending on its age - `display: none` from the UA stylesheet, and the newer
+   * `::details-content` wrapper - so both are overridden. The chevron goes with the interaction. */
+  .g-gaterail { display: none; }
+  .g-disclosure-body { display: block; }
+  .g-disclosure::details-content { content-visibility: visible; }
+  .g-disclosure > .g-disclosure-head::before { display: none; }
   body.g-app { background: var(--fn-print-paper); color: var(--fn-print-ink); }
   .g-panel, .g-device, .g-choice, .g-option { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }
   .g-main a { color: var(--fn-print-ink); }

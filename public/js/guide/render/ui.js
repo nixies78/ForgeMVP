@@ -253,16 +253,59 @@ function monogram(value) {
  * `heading` takes a node when the title is the screen's own <h1> (the question screen and the
  * walkthrough do this), because focus lands on the h1 after every screen change and a screen with no
  * h1 leaves a keyboard user at the top of the document.
+ *
+ * `collapsible` renders the panel as a native `<details>` instead of a `<section>`. The open/closed
+ * state, the keyboard handling and the announcement all come from the platform, rather than from a click
+ * handler plus an `aria-expanded` that has to be kept in step with a class. `open` decides how it starts.
+ *
+ * A `<summary>` may hold heading content and phrasing content only, which is why the collapsible head is
+ * assembled from a `<span>` and the title's own heading and not from the `<div>` and `<p>` the section
+ * version uses: a paragraph inside a summary is invalid, and the eyebrow is a paragraph everywhere else.
  */
-export function panel({ title, eyebrowText, heading = null, children, actions = null, className = '' }) {
+export function panel({
+  title,
+  eyebrowText,
+  heading = null,
+  children,
+  actions = null,
+  className = '',
+  collapsible = false,
+  open = false
+}) {
+  const headingNode = heading || (title ? cardTitle(title) : null);
+  const hasHead = Boolean(title || eyebrowText || actions || heading);
+
+  if (collapsible) {
+    return h(
+      'details',
+      { class: `g-panel g-disclosure ${className}`.trim(), open: open || null },
+      hasHead
+        ? h(
+            'summary',
+            { class: 'g-panel-head g-disclosure-head' },
+            title || eyebrowText || heading
+              ? h(
+                  'span',
+                  { class: 'g-disclosure-headtext' },
+                  eyebrowText ? h('span', { class: 'g-eyebrow' }, eyebrowText) : null,
+                  headingNode
+                )
+              : null,
+            actions ? h('div', { class: 'g-panel-actions' }, ...actions) : null
+          )
+        : null,
+      h('div', { class: 'g-disclosure-body' }, ...children)
+    );
+  }
+
   return h(
     'section',
     { class: `g-panel ${className}`.trim() },
-    title || eyebrowText || actions || heading
+    hasHead
       ? h(
           'header',
           { class: 'g-panel-head' },
-          h('div', {}, eyebrowText ? eyebrow(eyebrowText) : null, heading || (title ? cardTitle(title) : null)),
+          h('div', {}, eyebrowText ? eyebrow(eyebrowText) : null, headingNode),
           actions ? h('div', { class: 'g-panel-actions' }, ...actions) : null
         )
       : null,

@@ -18,23 +18,36 @@
 /* ============================== measurements ============================== */
 
 /**
- * Publish the header's real height as `--sh-header-h`.
+ * Publish an element's real height as a CSS variable.
  *
  * The spec fixes the header at 72px, and both the body's top offset and the app container's sticky
  * header are positioned from it. On a very narrow screen the header's single row may still wrap, and if
  * the two disagree about the height, the sticky bar covers content. Measured rather than assumed.
+ *
+ * The crumb bar below it is measured the same way and for the same reason: its height is its padding
+ * plus whichever of its children is tallest, and it wraps on a narrow screen, so a number written into
+ * the stylesheet is a number that will be wrong somewhere. Anything that has to stick *below* both bars
+ * - the rules gate's section rail - is positioned from the pair of them.
+ *
+ * Only a positive height is published: an element that is `display: none`, as the whole shell is in
+ * print, must not overwrite the last real measurement with a zero.
  */
-export function measureHeader(header) {
-  if (!header) return null;
+export function measureHeight(el, variable) {
+  if (!el) return null;
 
   const apply = () => {
-    const height = Math.round(header.getBoundingClientRect().height);
-    if (height > 0) document.documentElement.style.setProperty('--sh-header-h', `${height}px`);
+    const height = Math.round(el.getBoundingClientRect().height);
+    if (height > 0) document.documentElement.style.setProperty(variable, `${height}px`);
   };
 
-  if (typeof ResizeObserver === 'function') new ResizeObserver(apply).observe(header);
+  if (typeof ResizeObserver === 'function') new ResizeObserver(apply).observe(el);
   else window.addEventListener('resize', apply);
   apply();
 
   return { apply };
+}
+
+/** The site header's height, as `--sh-header-h`. Kept as its own name because the shell reads it. */
+export function measureHeader(header) {
+  return measureHeight(header, '--sh-header-h');
 }

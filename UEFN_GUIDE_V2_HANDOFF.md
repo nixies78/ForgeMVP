@@ -1199,8 +1199,10 @@ The full rule text lives in `uefn-brand` data and should be carried over verbati
 
 | Asset | Path | Size | Format | Notes |
 |---|---|---|---|---|
-| Logo | `images/brands/<id>_logo.png` | 160×160 (displayed at 44px) | PNG, transparent background | Keep the mark centred with ~10% padding inside the square so it doesn't touch the edges. Oversized so it stays sharp on high-DPI screens. |
+| Logo | `images/brands/<id>_logo.webp` | 512×512 (displayed at 64px) | WebP, transparent background | Keep the mark centred with ~10% padding inside the square so it doesn't touch the edges. Oversized so it stays sharp on high-DPI screens. The `original` template has no brand behind it, so its tile is `original_logo.svg`, drawn in this repo. |
 | Hero | `images/brands/<id>_hero.jpg` | 1200×450 (8:3) | JPG (or PNG) — 8:3 cinematic banner | Shown atop the brand detail panel. 8:3 is a third shorter than 16:9, so compose for a letterbox crop rather than a full scene. Avoid important detail or text in the outer 5% — it's cropped with `object-fit: cover` on narrow windows. |
+
+The path convention above is a fallback, not the rule: `brandAssets()` in `public/js/guide/data.js` reads the brand's own `images.logo` and `images.hero` first, so a brand can point at a differently named file.
 
 `brand_ids`: `original`, `star_wars`, `kpop_demon_hunters`, `lego`, `squid_game`, `walking_dead`, `tmnt`, `fall_guys`
 

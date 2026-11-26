@@ -15,7 +15,7 @@ import { loadData } from './data.js';
 import { browserStorage, createStore } from './store.js';
 import { applySavedGame, createState, nextUnanswered, predecessor, progressFor, recordAnswer, savedGameNotice, trailFor, walkthroughSteps } from './state.js';
 import { applyRoute, parseHash, startRouter, toHash } from './router.js';
-import { measureHeader } from './chrome.js';
+import { measureHeader, measureHeight } from './chrome.js';
 import { parseShare, shareUrl } from './share.js';
 import { UI, WALKTHROUGH_STEPS } from './content.js';
 import { fill } from './dom.js';
@@ -223,6 +223,9 @@ function wireShell(ctx) {
   }
 
   measureHeader(els.siteHeader);
+  /* The crumb bar's height, for anything that has to stick below both bars rather than under them: the
+   * rules gate's section rail. Nothing reads it until a screen asks for it. */
+  measureHeight(els.appHead, '--sh-app-head-h');
 
   /* The crumb bar (the shell's #appHead) is transparent over the top of the page and takes its material only
    * once the page has scrolled under it: on load the artwork and the page's glow run to the top of the window

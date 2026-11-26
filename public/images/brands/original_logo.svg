@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-labelledby="t">
+  <title id="t">Original - no brand template</title>
+  <!-- The "no brand template" tile. Drawn here rather than sourced, because it is the one tile in the
+       strip that stands for no brand at all: a plain block, in neutrals, that reads as "start from
+       scratch" beside seven marks that are somebody else's. -->
+  <g>
+    <polygon points="80,23 132,49 80,75 28,49" fill="#EDEEF1"/>
+    <polygon points="28,49 80,75 80,137 28,111" fill="#A7AAB3"/>
+    <polygon points="80,75 132,49 132,111 80,137" fill="#6B6F79"/>
+    <!-- The top face's outline, so the block keeps an edge on a light surround as well as a dark one. -->
+    <polygon points="80,23 132,49 80,75 28,49" fill="none" stroke="#12151C" stroke-opacity=".18" stroke-width="2" stroke-linejoin="round"/>
+  </g>
+</svg>
