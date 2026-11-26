@@ -112,7 +112,11 @@ async function boot() {
       ? layoutFromQuery
       : store.getSummaryLayout('classic', SUMMARY_LAYOUTS);
 
-  const state = createState(data, { devMode, summaryLayout });
+  const state = createState(data, {
+    devMode,
+    summaryLayout,
+    summaryBarOpen: store.getSummaryBarOpen(true)
+  });
 
   /* A shared session in the query string seeds the state, so a link into the middle of the flow has
    * something to resolve against — and so a plan can be sent to someone else. */
@@ -349,13 +353,15 @@ function createActions(ctx) {
      * Switch the summary between its two layouts.
      *
      * It re-renders in place rather than routing, because the screen has not changed — only which of
-     * its two designs is drawing it. The choice is written to this browser so it survives a reload,
-     * and announced in a notice, so the person comparing them can see which one they are looking at
-     * without reading the switcher's own state back.
+     * its two designs is drawing it. The choice is written to this browser so it survives a reload.
+     *
+     * It lays out no notice. The comparison bar is fixed across the top of the summary and already says
+     * what it is and which layout is showing, so a notice would be the same sentence a second time,
+     * pushed into the page's own content where it competes with the pitch.
      *
      * The address bar is updated too. `?layout=` overrides the stored choice on load, so a page opened
      * from such a link would otherwise snap back to the link's layout on every reload and disagree
-     * with what the switcher says. replaceState, not the hash, so the route and Back are untouched.
+     * with what the bar says. replaceState, not the hash, so the route and Back are untouched.
      */
     setSummaryLayout(layout) {
       const next = SUMMARY_LAYOUTS.includes(layout) ? layout : 'classic';
@@ -370,13 +376,18 @@ function createActions(ctx) {
         /* A browser that will not take the URL still gets the layout: the address bar is the lesser
          * half of this. */
       }
-      state.notice = {
-        tone: 'info',
-        text:
-          next === 'new'
-            ? 'Showing the new summary layout. Switch back to Classic at any time — nothing you have saved changes.'
-            : 'Showing the summary layout the guide shipped with.'
-      };
+      renderScreen(ctx);
+    },
+
+    /**
+     * Open or roll up the comparison bar. Its own state, separate from the layout: rolling the bar up
+     * is "stop showing me the tool", not "stop comparing" — the layout you chose stays.
+     */
+    setSummaryBar(open) {
+      const next = Boolean(open);
+      if (next === state.summaryBarOpen) return;
+      state.summaryBarOpen = next;
+      store.setSummaryBarOpen(next);
       renderScreen(ctx);
     },
 

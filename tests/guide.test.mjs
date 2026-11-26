@@ -38,7 +38,7 @@ import {
   savedGameNotice,
   walkthroughSteps
 } from '../public/js/guide/state.js';
-import { createStore, memoryStorage, MAX_SAVED, SCHEMA, STORAGE_KEY, LEGACY_STORAGE_KEY, SUMMARY_LAYOUT_KEY } from '../public/js/guide/store.js';
+import { createStore, memoryStorage, MAX_SAVED, SCHEMA, STORAGE_KEY, LEGACY_STORAGE_KEY, SUMMARY_LAYOUT_KEY, SUMMARY_BAR_KEY } from '../public/js/guide/store.js';
 import { parseShare, buildShare } from '../public/js/guide/share.js';
 import { articleFor, buildPitch, factsLine, TYPE_VOICE } from '../public/js/guide/pitch.js';
 import { parseHash, toHash, applyRoute } from '../public/js/guide/router.js';
@@ -705,6 +705,84 @@ test('the summary layout defaults to the one the app shipped with', () => {
   assert.equal(createState(data).summaryLayout, 'classic');
   assert.equal(createState(data, { summaryLayout: 'new' }).summaryLayout, 'new');
   assert.equal(createState(data, { summaryLayout: 'nonsense' }).summaryLayout, 'classic');
+
+  /* The comparison bar is open unless this browser has rolled it up. It is the only way to reach the
+   * other layout, so a session that has never touched it should find it; and it is a separate decision
+   * from which layout is showing, because rolling the bar away is "stop showing me the tool", not
+   * "stop comparing". */
+  assert.equal(store.getSummaryBarOpen(), true, 'the bar starts open');
+  assert.equal(createState(data).summaryBarOpen, true, 'and the state agrees');
+  assert.equal(createState(data, { summaryBarOpen: false }).summaryBarOpen, false, 'and a rolled-up bar is carried too');
+
+  store.setSummaryBarOpen(false);
+  assert.equal(createStore(storage).getSummaryBarOpen(), false, 'rolled up survives a reload');
+  assert.equal(store.getSummaryLayout(), 'new', 'and the layout it was comparing is untouched by that');
+});
+
+test('the comparison bar is the one thing painted outside the palette', async () => {
+  const guide = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
+
+  /* The whole app is one palette and one visual language, and this bar is the deliberate exception —
+   * a temporary tool for comparing two designs, which must not read as part of the product. That is a
+   * claim worth pinning, because it is the kind of exception that spreads: the moment a second
+   * component consumes `--fn-compare`, the bar stops meaning "not the product" and starts being a
+   * second accent.
+   *
+   * So: the colour is declared in tokens.css like every other, the bar is the only thing that consumes
+   * it, and the bar is fixed across the top rather than sitting in the page's flow. */
+  assert.match(tokens, /--fn-compare:\s*#[0-9A-Fa-f]{6}/, 'the exception colour is declared in tokens.css');
+
+  const consumers = guide
+    .split(/\n(?=\S)/)
+    .flatMap((block) => (block.includes('var(--fn-compare)') ? block.match(/^[^{]*/)[0].trim().split(/,\s*/) : []));
+  assert.ok(consumers.length > 0, 'the bar consumes the exception colour');
+  for (const selector of consumers) {
+    assert.ok(
+      /\.g-compare/.test(selector),
+      `${selector} consumes --fn-compare; only the comparison bar may, or the exception stops meaning anything`
+    );
+  }
+
+  /* Fixed across the top of the window, above the site header's own layer, so it never pushes the
+   * product down the page — a comparison tool that takes layout space has become part of the layout. */
+  const bar = ruleBody(guide, '.g-compare');
+  assert.match(bar, /position:\s*fixed/, 'the bar is fixed rather than in the page flow');
+  assert.match(bar, /top:\s*0/, 'and sits at the very top of the window');
+  assert.match(bar, /z-index:\s*(\d+)/, 'with a layer of its own');
+  const layer = Number(bar.match(/z-index:\s*(\d+)/)[1]);
+  const header = Number((await readFile(path.join(PUBLIC_DIR, 'css', 'shell.css'), 'utf8')).match(/\.sh-header\s*\{[^}]*z-index:\s*(\d+)/)[1]);
+  assert.ok(layer > header, `the bar (${layer}) has to sit above the site header (${header})`);
+
+  /* The guide's own button fills are the palette's, and none of them appear on the bar: it is drawn
+   * from its own ink instead. */
+  const barRules = guide.match(/\.g-compare[a-z-]*(?:\[[^\]]*\])?\s*\{[^}]*\}/g) || [];
+  assert.ok(barRules.length >= 4, `the bar's rules were found to check (got ${barRules.length})`);
+  for (const rule of barRules) {
+    assert.ok(
+      !/var\(--fn-(action|on-action|surface-|text|border)/.test(rule),
+      `the bar borrows the guide's palette:\n${rule.trim()}`
+    );
+  }
+});
+
+test('switching layouts does not lay out a notice of its own', async () => {
+  const app = await readFile(path.join(GUIDE_DIR, 'app.js'), 'utf8');
+
+  /* The bar is fixed across the top of the summary and already says what it is and which layout is
+   * showing, so a notice would be the same sentence a second time — pushed into the page's own content,
+   * where it competes with the pitch for the first thing the eye lands on. The bar carries the
+   * explanation permanently instead, which is also why it is not dismissible away to nothing. */
+  const action = app.slice(app.indexOf('setSummaryLayout(layout)'), app.indexOf('setSummaryBar(open)'));
+  assert.ok(action.length > 0, 'the action is found');
+  assert.ok(!/state\.notice\s*=/.test(action), 'switching layouts sets no notice');
+
+  /* And the bar's own explanation is in the markup, not in a notice. */
+  const screen = await readFile(path.join(GUIDE_DIR, 'screens', 'summary.js'), 'utf8');
+  assert.match(screen, /UI\.compareNote/, 'the bar carries the explanation itself');
+  assert.match(screen, /data-open/, 'and has both an open and a rolled-up state');
+  /* The rolled-up tab is a button like the other two, so the bar can always be brought back. */
+  assert.match(screen, /g-compare-tab/, 'rolling it up leaves a way back to it');
 });
 
 test('v1 saved games are imported once, reported, and mapped to the new taxonomy', () => {

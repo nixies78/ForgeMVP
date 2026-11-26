@@ -17,6 +17,8 @@ export const STORAGE_KEY = 'forge.guide.savedGames';
 export const DEV_MODE_KEY = 'forge.guide.devMode';
 /** Which summary layout this browser is showing. Temporary, and deleted with the switcher. */
 export const SUMMARY_LAYOUT_KEY = 'forge.guide.summaryLayout';
+/** Whether the comparison bar is open or rolled up to its tab. Temporary too. */
+export const SUMMARY_BAR_KEY = 'forge.guide.summaryBar';
 /** v1's keys, read once so existing saves survive the upgrade. */
 export const LEGACY_STORAGE_KEY = 'uefnGameCreatorGuide.savedGames';
 export const LEGACY_DEV_MODE_KEY = 'uefnGameCreatorGuide.devMode';
@@ -273,6 +275,22 @@ export function createStore(storage, options = {}) {
 
     setSummaryLayout(layout) {
       return writeJson(SUMMARY_LAYOUT_KEY, String(layout));
+    },
+
+    /**
+     * Whether the comparison bar is open. Open by default — the bar is the only way to reach the other
+     * layout, so a session that has never closed it should find it. Rolling it up is a decision about
+     * the bar covering the page's own header, and it is remembered, so it is made once rather than on
+     * every visit to the summary.
+     */
+    getSummaryBarOpen(fallback = true) {
+      const value = readJson(SUMMARY_BAR_KEY, null);
+      if (value === null || value === undefined) return fallback;
+      return value === true || value === 'true';
+    },
+
+    setSummaryBarOpen(open) {
+      return writeJson(SUMMARY_BAR_KEY, Boolean(open));
     }
   };
 

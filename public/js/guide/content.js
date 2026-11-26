@@ -183,20 +183,25 @@ export const UI = {
   rename: 'Rename',
   remove: 'Delete',
   /* ------------------------------ the summary's pitch ------------------------------
-   * The card that opens the redesigned summary: the game's own one-liner, then the three things you
-   * can do with it. `underneath` is the randomiser's own phrase, kept so the two pages read as the
-   * same product rather than as two takes on the same idea. */
-  startingPoint: 'Your starting point',
+   * The line of facts under the game's own one-liner in the redesigned summary. `underneath` is the
+   * randomiser's own phrase, kept so the two pages read as the same product rather than as two takes
+   * on the same idea. */
   underneath: 'Underneath, that means:',
 
-  /* ------------------------------ the layout switcher ------------------------------
-   * A temporary control on the summary screen only, for comparing the two designs on the real page.
-   * It says what it is so it is never mistaken for part of the product. */
-  layoutLabel: 'Layout',
-  layoutClassic: 'Classic',
-  layoutNew: 'New',
-  layoutNote:
-    'A temporary switch between the two versions of this page, so they can be compared with the same answers. Nothing else in the guide changes.',
+  /* ------------------------------ the layout comparison bar ------------------------------
+   * A temporary bar across the very top of the summary screen, for comparing the two designs on the
+   * real page. It wears a colour from outside the palette and says what it is, so it can never be
+   * mistaken for part of the product — and it carries the explanation itself, which is why switching
+   * lays out no notice of its own. */
+  compareLabel: 'Layout comparison',
+  compareClassic: 'Classic',
+  compareNew: 'New',
+  /* One line, so the bar is never taller than the header it covers. The long version of this sentence
+   * was a notice inside the page, where it had room; here it is a strip at the top of the window. */
+  compareNote: 'Temporary — nothing else in the guide changes, and nothing you have saved is affected.',
+  compareHide: 'Roll this bar up',
+  compareTab: 'Layout',
+  compareOpenTitle: 'Open the layout comparison',
 
   guidedInstead: 'Answer questions instead',
   visibleWithDevModeOff: 'Only researched game types are shown. Turn on dev mode to see all 97.',

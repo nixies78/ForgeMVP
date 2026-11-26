@@ -70,6 +70,8 @@ export function createState(dataset, options = {}) {
      * decision is made — see screens/summary.js.
      */
     summaryLayout: options.summaryLayout === 'new' ? 'new' : 'classic',
+    /** Whether the comparison bar above the summary is open or rolled up to its tab. */
+    summaryBarOpen: options.summaryBarOpen !== false,
     experienceLevel: 'beginner',
     /** Which of the three design modes a placeholder screen is showing. */
     mode: null,

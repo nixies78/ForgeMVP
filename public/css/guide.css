@@ -738,93 +738,240 @@ body.g-app {
 }
 .g-recap-value .g-btn { min-height: 32px; padding: 0 var(--fn-space-3); font-size: 13px; }
 
-/* ---------- the layout switcher (temporary) ----------
+/* ---------- the layout comparison bar (temporary) ----------
  * The summary screen has two layouts while they are being compared, and this is how the comparison is
- * made: on the real page, with the real answers, rather than in two screenshots. It is the only piece
- * of the page that is not part of the product, so it is drawn as an annotation — a dashed rule, an
- * inset ground, and a note that says what it is. It goes when the decision is made. */
-.g-layoutswitch {
+ * made: on the real page, with the real answers, rather than in two screenshots.
+ *
+ * It is fixed across the very top of the window and deliberately covers the site header, and it wears
+ * the one colour in the app that is not the library's (`--fn-compare`, see tokens.css). Both are the
+ * point: every other surface in the guide is painted from the palette, so a bar that is not reads as an
+ * instrument over the page rather than as a feature of it — which is what it is, and what it has to
+ * keep saying, because it is the only chrome here that will be deleted.
+ *
+ * It also rolls up. A tool that permanently costs the page its own header is worse than the thing it
+ * is comparing, so collapsing leaves a small tab in the window's right-hand gutter and the header is
+ * whole again. The state is remembered, so that is decided once.
+ *
+ * 50 is the site header's own layer; this has to beat it or the bar slides under the header it exists
+ * to sit above. */
+.g-compare {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  background: var(--fn-compare);
+  color: var(--fn-compare-ink);
+}
+
+.g-compare-in {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--fn-space-3);
-  padding: var(--fn-space-3) var(--fn-space-4);
-  margin-bottom: var(--fn-space-5);
-  border: 1px dashed var(--fn-border-strong);
-  border-radius: var(--fn-radius-card);
-  background: var(--fn-canvas-inset);
+  max-width: 1240px;
+  /* Exactly the header's height, so an open bar covers the whole bar rather than leaving a sliver of
+   * it showing underneath. The two are 72px in shell.css (`--sh-header-base`); a bar that half-covered
+   * the header would read as a rendering fault rather than as a deliberate overlay. */
+  min-height: 72px;
+  margin: 0 auto;
+  padding: var(--fn-space-2) var(--fn-space-6);
 }
-.g-layoutswitch-label {
+
+.g-compare-mark { font-size: 11px; line-height: 1; opacity: 0.65; }
+.g-compare-title {
   margin: 0;
   font-size: var(--fn-meta-size);
   line-height: var(--fn-meta-line);
   letter-spacing: var(--fn-meta-tracking);
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--fn-text-muted);
 }
-.g-layoutswitch-group { display: flex; flex-wrap: wrap; gap: var(--fn-space-2); }
-.g-layoutswitch-btn {
-  min-height: 32px;
-  padding: 0 var(--fn-space-4);
-  border: 1px solid var(--fn-border-strong);
+.g-compare-group { display: flex; gap: var(--fn-space-1); }
+
+/* A control on the bar rather than one of the guide's: it is drawn from the bar's own ink so the
+ * palette's button fills never appear on it. */
+.g-compare-btn,
+.g-compare-toggle,
+.g-compare-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fn-space-2);
+  min-height: 30px;
+  padding: 0 var(--fn-space-3);
+  border: 1px solid color-mix(in srgb, var(--fn-compare-ink) 40%, transparent);
   border-radius: 999px;
   background: transparent;
-  color: var(--fn-text-secondary);
+  color: color-mix(in srgb, var(--fn-compare-ink) 82%, transparent);
   font-family: var(--fn-font-ui);
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color var(--fn-motion) ease, color var(--fn-motion) ease, border-color var(--fn-motion) ease;
+  transition: color var(--fn-motion) ease, border-color var(--fn-motion) ease;
 }
-.g-layoutswitch-btn:hover { background: var(--fn-surface-panel-hover); color: var(--fn-text); }
-/* Which one is showing is carried by aria-pressed as well as by the fill, so it is never colour alone. */
-.g-layoutswitch-btn[aria-pressed='true'] {
-  background: var(--fn-action);
-  border-color: var(--fn-action);
-  color: var(--fn-on-action);
+/* Type-only hover, deliberately: a hover that paints a fill has to paint a documented one, and the
+ * documented fills are the palette's. This bar is not the palette's, so it darkens instead. */
+.g-compare-btn:hover,
+.g-compare-toggle:hover,
+.g-compare-tab:hover {
+  border-color: var(--fn-compare-ink);
+  color: var(--fn-compare-ink);
 }
-.g-layoutswitch-note {
-  flex: 1 1 260px;
+/* Which layout is showing is carried by aria-pressed as well as by the fill, so it is never colour
+ * alone — the same rule the rest of the app's controls follow. */
+.g-compare-btn[aria-pressed='true'] {
+  background: var(--fn-compare-ink);
+  border-color: var(--fn-compare-ink);
+  color: var(--fn-compare);
+}
+.g-compare-note {
+  flex: 1 1 320px;
   margin: 0;
   font-size: 12px;
-  line-height: 1.45;
-  color: var(--fn-text-muted);
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--fn-compare-ink) 75%, transparent);
+}
+/* The dismiss, drawn the way an overlay's is: one round cross with its meaning in the accessible name
+ * rather than beside it. "Roll up" as a word next to a cross reads as two controls. */
+.g-compare-toggle {
+  width: 30px;
+  padding: 0;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
 }
 
-/* ---------- the pitch ----------
+/* Rolled up: a tab in the window's gutter, outside the 1136px column, so the header underneath is
+ * whole rather than half-covered. The left gutter is where it goes — the owner pointed at the top-left
+ * of the page, and the right-hand corner is the Admin action, which is the one thing on the header
+ * worth not covering. */
+.g-compare[data-open='false'] { background: none; }
+.g-compare-tab {
+  position: absolute;
+  top: 0;
+  left: var(--fn-space-4);
+  border-radius: 0 0 var(--fn-radius-button) var(--fn-radius-button);
+  border-top: none;
+  background: var(--fn-compare);
+  color: var(--fn-compare-ink);
+}
+.g-compare-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--fn-compare-ink);
+}
+.g-compare-tab-value {
+  padding-left: var(--fn-space-2);
+  border-left: 1px solid color-mix(in srgb, var(--fn-compare-ink) 40%, transparent);
+  font-weight: 700;
+}
+/* Under 700px the gutter is 18px, so a tab that clears the logo on a desktop would sit on top of it.
+ * It moves to the bottom corner instead, which is the same way back without covering the header of a
+ * phone — where the header is most of the width.
+ *
+ * The note goes at this width too. A fixed bar is a bigger share of a phone's screen, and the three
+ * things it has to say are already in what is left: the label, and which of the two is pressed. */
+@media (max-width: 700px) {
+  .g-compare-tab {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    border-radius: 0 var(--fn-radius-button) 0 0;
+  }
+  .g-compare-in { padding: var(--fn-space-2) var(--fn-space-4); }
+  .g-compare-note { display: none; }
+  .g-compare-title { flex: 1 1 auto; }
+}
+
+/* ---------- the pitch, and the header it opens ----------
  * The game's own one-liner: the sentence the whole questionnaire exists to produce, and the three
- * things you can do with a finished design. The 4px rule down its left edge is the same one the plan's
- * layout tip and a chosen answer wear — it marks the panel the page is about, without a second colour. */
-.g-pitchcard { border-left: 4px solid var(--fn-action); }
-.g-pitchcard-line {
-  margin: 0;
+ * things you can do with a finished design. It is a band of two columns rather than a card, and the
+ * measurements are why — as twelve stacked rows in a panel it came to 698px and pushed the core loop
+ * to 1113px, below the fold on every laptop. See render/summary-new.js.
+ *
+ * Where the classic layout puts the plan's own 4px rule down a panel's edge, this one has no panel to
+ * put it on: the sentence is the page's headline, and a box around it would be the third thing on the
+ * page claiming to be the page's title.
+ *
+ * The 1fr/360px split collapses to one column at 900px, where the rail would otherwise squeeze the
+ * sentence into three words a line — the same breakpoint the core loop's two columns use, so the page
+ * stacks once rather than twice at two different widths. */
+.g-pitchsplit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: var(--fn-space-6) var(--fn-space-7);
+  align-items: start;
+  margin-bottom: var(--fn-space-6);
+}
+
+/* The screen's own title, kept for focus and for the heading order, sized down to a label: the pitch
+ * below it is the bigger statement, and two competing headlines would undo the point of having one. */
+.g-pitchsplit .g-title {
+  margin-bottom: var(--fn-space-2);
+  font-size: var(--fn-card-size);
+  line-height: var(--fn-card-line);
+  max-width: none;
+}
+
+.g-pitchsplit-line {
+  margin: 0 0 var(--fn-space-3);
   font-family: var(--fn-font-ui);
   font-weight: 700;
   font-size: var(--fn-section-size);
   line-height: var(--fn-section-line);
   letter-spacing: var(--fn-display-tracking);
   color: var(--fn-text);
-  max-width: 44ch;
+  max-width: 30ch;
   text-wrap: balance;
 }
-.g-pitchcard-line-item {
-  margin: 0 0 var(--fn-space-3);
+
+.g-pitchsplit-deck {
+  margin: 0 0 var(--fn-space-2);
+  font-size: var(--fn-lead-size);
+  line-height: 1.45;
   color: var(--fn-text-secondary);
   max-width: var(--fn-measure);
 }
-.g-pitchcard-line-item strong { color: var(--fn-text); }
-.g-pitchcard-facts {
-  margin: 0 0 var(--fn-space-4);
+.g-pitchsplit-deck strong { color: var(--fn-text); }
+
+.g-pitchsplit-facts {
+  margin: 0;
   font-size: var(--fn-nav-size);
   line-height: var(--fn-nav-line);
   color: var(--fn-text-muted);
   max-width: var(--fn-measure);
 }
-.g-pitchcard-facts-lead { color: var(--fn-text-secondary); }
-/* The rule above the controls separates the pitch from what you do with it, so the space below it is
- * the controls' own and does not need the panel's padding on top of it. */
-.g-pitchcard .g-hr { margin-bottom: var(--fn-space-4); }
+.g-pitchsplit-facts span { color: var(--fn-text-secondary); }
+
+/* The rail. It is a surface rather than a shadow of one — the same panel fill and edge as every other
+ * box — because it is the page's one place to act, and a second visual language for "this is where you
+ * do things" would be a second thing to learn. */
+.g-pitchsplit-rail {
+  padding: var(--fn-space-5);
+  border: 1px solid var(--fn-border);
+  border-radius: var(--fn-radius-card);
+  background: var(--fn-surface-panel);
+}
+.g-pitchsplit-rail .g-label { margin-top: 0; }
+/* Start Building is the width of the rail: it is what the page is for, and it is the one control whose
+ * disabled state has to be legible at a glance. It sits directly under the field it is gated on. */
+.g-pitchsplit-rail .g-btn-primary { width: 100%; margin-top: var(--fn-space-1); }
+/* The two secondary actions share the rail's width rather than stacking, which is the whole reason the
+ * rail is not a stack: two rows of buttons is what made the old header tall. */
+.g-pitchsplit-rail .g-btnrow {
+  margin-top: var(--fn-space-3);
+  flex-wrap: nowrap;
+  gap: var(--fn-space-2);
+}
+.g-pitchsplit-rail .g-btnrow .g-btn { flex: 1 1 0; min-width: 0; }
+.g-pitchsplit-rail .g-meta-line { margin-top: var(--fn-space-3); }
+
+/* One breakpoint, so the whole page stacks at the same width. */
+@media (max-width: 900px) {
+  .g-pitchsplit { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* ---------- the core loop, two columns ----------
  * The drawing and its legend are one answer in two forms, so they sit side by side and are read

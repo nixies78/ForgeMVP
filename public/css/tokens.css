@@ -146,6 +146,21 @@
   --fn-border-strong: var(--ue-border-strong);         /* anything that carries meaning, and a card on hover */
   --fn-border-strong-hover: var(--ue-border-strong-hover);
 
+  /* [deliberate exception] The layout comparison bar. Temporary, and deleted with the switcher.
+   *
+   * It is the one colour in the app that is not the library's, and that is the point rather than an
+   * oversight: the bar is a tool for comparing two designs, not part of the guide, and a tool that is
+   * painted like the product reads as a feature. The palette's own rule - one accent fill, and it is
+   * for actions - is what a second colour would normally break. Here the exception is bounded: the
+   * colour appears in exactly one component, it is never used to state anything, and no control inside
+   * the guide proper consumes it.
+   *
+   * Magenta, because the palette already owns blue (actions), indigo (the ramp's far end) and yellow
+   * (warning), so a warm hue is the one thing the eye cannot mistake for either a call to action or a
+   * status. The ink is the canvas, which is the label the library already puts on a bright fill. */
+  --fn-compare: #FF3FB4;
+  --fn-compare-ink: var(--ue-canvas);
+
   /* [derived] The interactive-surface hover: the surface repaints, so it lifts as well. A control
    * does not lift - the library's controls change their fill and nothing else. */
   --fn-lift: 3px;
