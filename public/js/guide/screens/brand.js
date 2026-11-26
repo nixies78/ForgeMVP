@@ -12,7 +12,7 @@
 import { h, frag, plural, richText } from '../dom.js';
 import { brandsForGameType, brandAssets } from '../data.js';
 import { UI } from '../content.js';
-import { button, buttonRow, badgeChip, eyebrow, imageSlot, lead, pageTitle, panel, paragraph } from '../render/ui.js';
+import { button, buttonRow, badgeChip, eyebrow, externalLink, imageSlot, lead, pageTitle, panel, paragraph } from '../render/ui.js';
 
 export function renderBrand(ctx) {
   const { data, state, actions } = ctx;
@@ -105,9 +105,8 @@ export function renderBrand(ctx) {
             h(
               'p',
               { class: 'g-meta-line' },
-              h(
-                'a',
-                { href: preview.restriction_confirmation.guidelines_url, target: '_blank', rel: 'noreferrer noopener' },
+              externalLink(
+                preview.restriction_confirmation.guidelines_url,
                 preview.restriction_confirmation.guidelines_label || 'Official guidelines'
               ),
               ' · usage rules are summarised on the next screen before anything is committed.'

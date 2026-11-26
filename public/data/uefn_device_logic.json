@@ -200,12 +200,12 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://legal.epicgames.com/fortnite/developer-rules",
-          "https://dev.epicgames.com/documentation/fortnite/engagement-payout-in-fortnite-creative",
-          "https://dev.epicgames.com/documentation/fortnite/in-island-transactions-overview-in-fortnite",
-          "https://dev.epicgames.com/documentation/fortnite/import-from-fab-in-unreal-editor-for-fortnite",
-          "https://legal.epicgames.com/epicgames/uefn"
+        "sources": [
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" },
+          { "url": "https://dev.epicgames.com/documentation/fortnite/engagement-payout-in-fortnite-creative", "label": "Engagement Payout in Fortnite Creative" },
+          { "url": "https://dev.epicgames.com/documentation/fortnite/in-island-transactions-overview-in-fortnite", "label": "In Island Transactions Overview in Fortnite" },
+          { "url": "https://dev.epicgames.com/documentation/fortnite/import-from-fab-in-unreal-editor-for-fortnite", "label": "Import from Fab in Unreal Editor for Fortnite" },
+          { "url": "https://legal.epicgames.com/epicgames/uefn", "label": "Unreal Editor for Fortnite Supplemental Terms" }
         ]
       },
       "pitch": "Total creative freedom. No brand rules to follow and no revenue to share \u2014 just you, Fortnite's full toolkit, and whatever you can imagine.",
@@ -262,9 +262,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/en-us/fortnite/star-wars-brand-rules-in-fortnite",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/en-us/fortnite/star-wars-brand-rules-in-fortnite", "label": "STAR WARS™ Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Hand your players a lightsaber. Four iconic planets, real Force powers, and 230+ authentic sound effects make this the most content-rich template on the list.",
@@ -325,9 +325,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/en-us/fortnite/kpop-demon-hunters-brand-rules-in-fortnite",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/en-us/fortnite/kpop-demon-hunters-brand-rules-in-fortnite", "label": "KPop Demon Hunters Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Stylish, supernatural, and built for melee. Fight demons as Rumi, Mira, Zoey, or Jinu using the newest template Epic has shipped.",
@@ -389,9 +389,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/en-us/fortnite/lego-brand-rules-in-fortnite",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/en-us/fortnite/lego-brand-rules-in-fortnite", "label": "LEGO® Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Everything snaps together. Minifigure-scale building, three prebuilt biomes, and a ready-made farming tycoon \u2014 the friendliest starting point for an all-ages hit.",
@@ -453,9 +453,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/en-us/fortnite/squid-game-brand-rules-in-fortnite",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/en-us/fortnite/squid-game-brand-rules-in-fortnite", "label": "Squid Game Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "High-stakes minigames with a built-in hook. Ships with both a Minigame Mastery and a Social Deduction template, so the trickiest logic is already wired up for you.",
@@ -514,9 +514,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/fortnite/the-walking-dead-universe-brand-rules-in-fortnite?lang=en-US",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/fortnite/the-walking-dead-universe-brand-rules-in-fortnite?lang=en-US", "label": "The Walking Dead Universe Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Zombies that actually behave like zombies. The Walker NPC template teaches you enemy AI you'll reuse in every horror game you make afterwards.",
@@ -576,9 +576,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/fortnite/teenage-mutant-ninja-turtles-brand-rules-in-fortnite?lang=en-US",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/fortnite/teenage-mutant-ninja-turtles-brand-rules-in-fortnite?lang=en-US", "label": "Teenage Mutant Ninja Turtles Brand Rules in Fortnite" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Cowabunga, fully wired. Four Turtles, four villains, four weapon types, and a working arcade mode \u2014 drop in and start fighting.",
@@ -637,9 +637,9 @@
             ]
           }
         ],
-        "source_urls": [
-          "https://dev.epicgames.com/documentation/fortnite/working-with-fall-guys-islands-in-fortnite-creative?lang=en-US",
-          "https://legal.epicgames.com/fortnite/developer-rules"
+        "sources": [
+          { "url": "https://dev.epicgames.com/documentation/fortnite/working-with-fall-guys-islands-in-fortnite-creative?lang=en-US", "label": "Working with Fall Guys Islands in Fortnite Creative" },
+          { "url": "https://legal.epicgames.com/fortnite/developer-rules", "label": "Fortnite Developer Rules" }
         ]
       },
       "pitch": "Instant party game. Every player's outfit auto-converts into a Fall Guys Bean, and the obstacle-course kit handles the rest.",

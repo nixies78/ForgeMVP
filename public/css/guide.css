@@ -219,6 +219,9 @@ body.g-app {
 .g-list { margin: 0 0 var(--fn-space-4); padding-left: 1.15em; color: var(--fn-text-secondary); max-width: var(--fn-measure); }
 .g-list li { margin-bottom: var(--fn-space-2); }
 .g-list-tight li { margin-bottom: var(--fn-space-1); word-break: break-word; }
+/* The mark on a link that leaves the app sits on the text's baseline rather than its own: an inline SVG
+ * stands on its bottom edge by default, which drops it below the words it is marking. */
+.g-main a[target='_blank'] > svg { vertical-align: -0.15em; margin-left: 0.3em; }
 
 /* ============================== breadcrumbs ============================== */
 
@@ -757,12 +760,15 @@ body.g-app {
 
 .g-gatecols {
   display: grid;
-  /* The reading column keeps the measure it always had; the rail takes the width that used to sit empty
-   * beside it, and `space-between` puts the rail against the right edge so the leftover becomes a gap
-   * between the two rather than a margin nobody asked for. `1fr` here instead would have let the rules
-   * run to a hundred-character line, which is trading one reading problem for another. */
-  grid-template-columns: minmax(0, var(--fn-measure)) minmax(150px, 220px);
-  justify-content: space-between;
+  /* The rail is the narrow column, on the left, starting at the same left edge as the page title, with the
+   * reading column beside it. That is the arrangement this app already uses for its other two-column block
+   * (.g-loopcols, on the summary screen), and the one a reader expects: navigation is the first thing in a
+   * document, not the last.
+   *
+   * The reading column keeps the measure rather than taking `1fr`. The point of the rail is that the width
+   * beside the text is used by something, not that the text is stretched to a hundred-character line to
+   * fill it - which is the reading problem the wider column created in the first place. */
+  grid-template-columns: minmax(0, 190px) minmax(0, var(--fn-measure));
   gap: var(--fn-space-6);
   align-items: start;
 }
@@ -896,6 +902,14 @@ body.g-app {
   color: var(--fn-text-secondary);
 }
 .g-legalnote p { margin: 0; max-width: var(--fn-measure); }
+
+/* The citations are small print, and the panel says so with its material rather than with its heading: no
+ * panel fill, the same dashed edge the standing-rules note above it uses, and 13px text throughout, so a
+ * link in the list is the same size as the sentence introducing it. */
+.g-panel-source {
+  background: none;
+  border-style: dashed;
+}
 
 /* ============================== summary ============================== */
 

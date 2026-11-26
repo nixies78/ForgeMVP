@@ -1618,6 +1618,77 @@ test('a rule whose lead-in is half a sentence is not broken across two lines', a
   assert.match(ruleBody(css, '.g-rules li > b:first-child'), /display:\s*block/, 'every other lead-in gets its own line');
 });
 
+test('a citation names the page it points at, and every link that leaves the app says so', async () => {
+  /* The panel used to print the address. An address is a thing the reader has to decode before they can
+   * decide whether to follow it, and the page's own title is the answer to "what is this, and do I trust
+   * it?" — so the data carries the title, and every link that opens a new tab carries the standard mark
+   * for that (a box with an arrow leaving it) instead of leaving the reader to discover it. */
+  const json = JSON.parse(await readFile(path.join(PUBLIC_DIR, 'data', 'uefn_device_logic.json'), 'utf8'));
+  let citations = 0;
+  for (const brand of json.brand_templates) {
+    const confirmation = brand.restriction_confirmation;
+    const sources = confirmation.sources;
+    assert.ok(Array.isArray(sources) && sources.length >= 2, `${brand.id} cites the pages its rules came from`);
+    assert.equal(confirmation.source_urls, undefined, `${brand.id} no longer carries a bare list of addresses`);
+    for (const source of sources) {
+      assert.match(source.url, /^https:\/\//, `${brand.id}: "${source.label}" has a real address`);
+      assert.ok(
+        source.label && !/^https?:\/\//.test(source.label),
+        `${brand.id}: "${source.label}" is the page's title, not its address`
+      );
+      assert.ok(
+        !/Fortnite Documentation \| Epic Developer Community/.test(source.label),
+        `${brand.id}: the citation site's own boilerplate is stripped from "${source.label}"`
+      );
+      citations += 1;
+    }
+  }
+  assert.ok(citations >= 12, `the brands cite ${citations} pages between them`);
+
+  const dom = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'dom.js'), 'utf8');
+  assert.match(dom, /external:\s*\[/, 'the box-with-an-arrow mark is in the icon set');
+
+  const ui = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'render', 'ui.js'), 'utf8');
+  assert.match(ui, /export function externalLink/, 'one shared builder draws an outbound link');
+  assert.match(ui, /target: '_blank'/, 'and it is where the new tab is opened');
+
+  const screen = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'restriction.js'), 'utf8');
+  assert.match(screen, /externalLink\(source\.url, source\.label\)/, 'the panel links the title it fetched');
+  assert.ok(!/href: url/.test(screen), 'and never prints the address as the words of the link');
+
+  for (const name of ['restriction.js', 'brand.js']) {
+    const src = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', name), 'utf8');
+    assert.ok(
+      !/target: '_blank'/.test(src),
+      `${name} uses externalLink rather than hand-rolling the new-tab attributes`
+    );
+  }
+});
+
+test('the rail is the left column, and the small print is headed like everything else', async () => {
+  /* Two things a reader meets before they read a word of the rules: which side the navigation is on, and
+   * whether the fourth panel is a panel. The rail takes the narrow first column, as this app's other
+   * two-column block does — navigation is the beginning of a document, not its end. And the citations
+   * panel is headed by a real title, so its summary line is the same height as the three above it and the
+   * chevron has something to line up with; the panel says "small print" with its material instead. */
+  const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'restriction.js'), 'utf8');
+  assert.ok(
+    source.indexOf('      rail,') < source.indexOf("class: 'g-gate-main'"),
+    'the rail comes first in the markup, which is the order Tab and a screen reader follow'
+  );
+  assert.match(source, /title: 'Where this comes from'/, 'the citations panel is headed by a title');
+  assert.ok(!/eyebrowText/.test(source), 'no panel in the gate is headed by an eyebrow any more');
+
+  const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  const cols = ruleBody(css, '.g-gatecols');
+  assert.match(cols, /grid-template-columns:\s*minmax\(0, 190px\)\s+minmax\(0, var\(--fn-measure\)\)/, 'the rail is the narrow first column');
+  assert.ok(!/space-between/.test(cols), 'the two columns sit together, with the leftover width after them');
+
+  const smallPrint = ruleBody(css, '.g-panel-source');
+  assert.match(smallPrint, /background:\s*none/, 'the citations panel drops the panel fill');
+  assert.match(smallPrint, /border-style:\s*dashed/, 'and takes the same edge the standing-rules note uses');
+});
+
 test('every asset the page promises is on disk', async () => {
   const html = await readFile(path.join(PUBLIC_DIR, 'index.html'), 'utf8');
   const referenced = [...html.matchAll(/(?:src|href|poster)="(assets\/[^"]+)"/g)].map((m) => m[1]);

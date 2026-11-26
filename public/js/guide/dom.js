@@ -129,7 +129,11 @@ export function icon(name, size = 16) {
     link: [
       'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71',
       'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'
-    ]
+    ],
+    /* The box with an arrow leaving it: the mark that says a link opens somewhere else, and the one every
+     * browser and documentation site already uses for it. Three paths because the box is open at the
+     * corner the arrow leaves through. */
+    external: ['M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6', 'M15 3h6v6', 'M10 14 21 3']
   };
   const shape = paths[name] || paths.chevron;
   const drawn = (Array.isArray(shape) ? shape : [shape]).map((d) => svg('path', { d }));

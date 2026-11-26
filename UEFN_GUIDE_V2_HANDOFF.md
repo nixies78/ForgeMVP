@@ -1129,7 +1129,12 @@ Layout tip: (same as Circuit Racing)
 
 ### 5.5 Brand templates — all 8
 
-`brand_templates` is an **array**. Each entry: `{ id, label, description, pitch, caveat, provides[], images{logo,hero}, suggested_game_types[], restriction_confirmation{ guidelines_url, guidelines_label, sections[], source_urls[] } }`.
+`brand_templates` is an **array**. Each entry: `{ id, label, description, pitch, caveat, provides[], images{logo,hero}, suggested_game_types[], restriction_confirmation{ guidelines_url, guidelines_label, sections[], sources[{url,label}] } }`.
+
+`sources` is the citation list the gate prints in its "Where this comes from" panel. `label` is the cited
+page's own `<title>` (with the documentation site's boilerplate suffix stripped), because the panel shows
+the page's name and links it rather than printing a raw URL. It replaced a `source_urls[]` array of bare
+strings.
 
 `suggested_game_types` maps game types this brand suits. The brand screen uses it to badge suitability.
 

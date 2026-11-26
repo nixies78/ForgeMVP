@@ -46,6 +46,26 @@ export function paragraph(value) {
   return h('p', { class: 'g-body' }, value);
 }
 
+/**
+ * A link that leaves the app, marked as one.
+ *
+ * Every external link in the guide opens in a new tab, and a reader who is not told that has the page
+ * change under them with no way back but the browser's own button. The mark is the standard one - a box
+ * with an arrow leaving it - and it is drawn by `icon()` so it inherits the link's colour and needs no
+ * asset and no extra request.
+ *
+ * `label` is the page's own title, not its address: a bare URL in a list of citations is a thing the
+ * reader has to decode before they can decide whether to follow it.
+ */
+export function externalLink(href, label, className = null) {
+  return h(
+    'a',
+    { href, class: className, target: '_blank', rel: 'noreferrer noopener' },
+    label,
+    icon('external', 14)
+  );
+}
+
 /** A breadcrumb line: "Combat › Elimination / Deathmatch · Question 2 of 4".
  *  A crumb is a link exactly when it has somewhere to go; the trail's last item is where the user
  *  already is, so it is text. The trail itself comes from state.js's trailFor(). */

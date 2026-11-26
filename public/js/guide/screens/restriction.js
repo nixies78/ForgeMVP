@@ -19,7 +19,7 @@
 
 import { h, frag, richText } from '../dom.js';
 import { UI } from '../content.js';
-import { button, buttonRow, eyebrow, lead, pageTitle, panel, paragraph } from '../render/ui.js';
+import { button, buttonRow, eyebrow, externalLink, lead, pageTitle, panel, paragraph } from '../render/ui.js';
 
 /* One observer for the rail, disconnected and replaced on every render of this screen. A live
  * IntersectionObserver is kept alive by the browser for as long as it is observing something, so one
@@ -140,36 +140,45 @@ export function renderRestriction(ctx) {
     return node;
   });
 
+  /* The cited pages, each with the title it carries rather than its address. This replaced a list of bare
+   * urls, which is a thing the reader has to decode before they can decide whether to follow it: what the
+   * list needs to say is "Fortnite Developer Rules, on Epic's legal site", not sixty characters of path. A
+   * bare string is still accepted, so a brand added from an older copy cannot quietly lose its citations. */
+  const sources = (confirmation.sources || []).map((source) =>
+    typeof source === 'string' ? { url: source, label: source } : source
+  );
+
   const sourcePanel = panel({
-    eyebrowText: 'Where this comes from',
+    /* A title, not an eyebrow. The other three panels are headed by their section name, and heading this
+     * one with 10px of tracked-out capitals put its only line where the chevron had nothing to line up
+     * with - it read as a different kind of thing in the same list. The panel still says "small print"
+     * with its own style; that is the stylesheet's job, not the heading's. */
+    title: 'Where this comes from',
     className: 'g-panel-source',
     collapsible: true,
     children: [
       h(
         'p',
-        {},
-        h(
-          'a',
-          { href: confirmation.guidelines_url, target: '_blank', rel: 'noreferrer noopener' },
-          confirmation.guidelines_label || 'Official guidelines'
-        ),
+        { class: 'g-small' },
+        externalLink(confirmation.guidelines_url, confirmation.guidelines_label || 'Official guidelines'),
         licensed ? ' — the full, authoritative version. The summary above is a plain-English reading of it.' : ''
       ),
+      /* `g-small` as well as `g-meta-line`: the meta line's own size is the nav size, which at 14px was the
+       * largest text in a panel meant to be the quietest, and it left the citations at a different size from
+       * the sentence introducing them. The whole panel is one size now. */
       brand.verified_on
-        ? h('p', { class: 'g-meta-line' }, `Rules verified on ${brand.verified_on}.`)
+        ? h('p', { class: 'g-meta-line g-small' }, `Rules verified on ${brand.verified_on}.`)
         : h(
             'p',
-            { class: 'g-meta-line' },
+            { class: 'g-meta-line g-small' },
             'These rules were transcribed from Epic\'s per-brand pages and are dated — no per-brand verification date is recorded yet.'
           ),
       data.brandRulesNote ? h('p', { class: 'g-small g-muted' }, richText(data.brandRulesNote)) : null,
-      (confirmation.source_urls || []).length
+      sources.length
         ? h(
             'ul',
-            { class: 'g-list g-list-tight' },
-            ...confirmation.source_urls.map((url) =>
-              h('li', {}, h('a', { href: url, target: '_blank', rel: 'noreferrer noopener' }, url))
-            )
+            { class: 'g-list g-list-tight g-small' },
+            ...sources.map((source) => h('li', {}, externalLink(source.url, source.label)))
           )
         : null
     ]
@@ -223,9 +232,13 @@ export function renderRestriction(ctx) {
     pageTitle(`${brand.label} comes with some usage rules.`),
     lead('Read these once. If they do not suit the game you are designing, go back — nothing is committed yet.'),
 
+    /* The rail comes first in the markup as well as on the page. Markup order is what a screen reader and
+     * a Tab key follow, and navigation belongs before the sections it names - it is also the order this
+     * app's own two-column layout already uses (.g-loopcols, on the summary screen). */
     h(
       'div',
       { class: 'g-gatecols' },
+      rail,
       h(
         'div',
         { class: 'g-gate-main' },
@@ -243,8 +256,7 @@ export function renderRestriction(ctx) {
             )
           : null,
         sourcePanel
-      ),
-      rail
+      )
     ),
 
     type ? paragraph(`Chosen game type: ${type.label}. The brand affects the assets you build with, not the device list.`) : null,
