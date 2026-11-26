@@ -324,6 +324,14 @@
     height: var(--item-h);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px;
     padding: 12px 10px;
+    /* ...and the entry sits 8px below the middle of the window, because of what the reservation above
+       costs: the space a short label leaves in the reserved block is invisible, and it is all BELOW the
+       name, so the picture reads as sitting high even though the block is perfectly centred. For the
+       common two-line label that tail is 16px, and half of it is where the eye expects the entry to be.
+       A one-line label still sits a little high and a two-line one with a brand tag a little low - the
+       price of the three pictures staying in line, which matters more. A phone's block is a line deeper,
+       so the shift there is 16px (see the phone rules). */
+    position: relative; top: 8px;
     text-align: center;
     transition: filter .35s ease-out;
   }
@@ -549,13 +557,17 @@
     .rig-body { grid-template-columns: minmax(0, 1fr); gap: 14px; padding: 14px; }
     .heads { padding: 0 var(--lid) 8px; }
     .col-label { font-size: 9.5px; letter-spacing: .06em; }
-    :root { --item-h: 10.5rem; }
-    .item { padding: 8px 6px; gap: 6px; }
-    .item .rm-pic { width: 4.5rem; height: 4.5rem; border-radius: 10px; }
-    .rm-ph .rm-initials { font-size: 1.375rem; }
     /* A phone reel is 79px wide, and two lines of 13px type is not enough for the longest labels in the
        data - so a phone gives a name three lines and the fitter reads that from this clamp. The cell
-       reserves all three whether they are used or not, which is what keeps the pictures in line. */
+       reserves all three whether they are used or not, which is what keeps the pictures in line, and the
+       entry sits 16px below the middle for the same reason it sits 8px on a desktop: this block is a line
+       deeper, so the empty tail under a two-line label is about twice the size. Four pixels of window are
+       added back so that the deepest entry possible - a three-line name with a brand tag under it - still
+       clears the glass with the shift applied. */
+    :root { --item-h: 10.75rem; }
+    .item { padding: 8px 6px; gap: 6px; top: 16px; }
+    .item .rm-pic { width: 4.5rem; height: 4.5rem; border-radius: 10px; }
+    .rm-ph .rm-initials { font-size: 1.375rem; }
     .item .cell { height: 4rem; }
     .item .name { font-size: .8125rem; -webkit-line-clamp: 3; }
     .item .kind-tag { font-size: .5625rem; }
