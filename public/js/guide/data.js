@@ -73,6 +73,7 @@ export function parseData(raw) {
     brandsById,
     brandImageSpec: raw.meta.brand_image_spec || null,
     brandRulesNote: raw.meta.brand_rules_research_note || '',
+    brandRulesNoteLinks: raw.meta.brand_rules_research_note_links || [],
     defaultBrandId: raw.meta.default_brand_id || (raw.brand_templates[0] && raw.brand_templates[0].id),
     defaultDevMode: Boolean(raw.meta.dev_mode_default),
     universal: raw.universal_devices.map((d) => d.ref),

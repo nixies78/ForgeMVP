@@ -39,6 +39,40 @@ function prefersReducedMotion() {
   return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/**
+ * The research note, with the addresses it names turned into links.
+ *
+ * One of its sentences quotes an address as evidence that the page behind it is stale, and printing the
+ * address leaves the reader to work out what it is before they can judge the claim. The data carries that
+ * page's title beside the address, so the sentence can name the page and link it instead.
+ *
+ * The split happens on the text before `richText` sees it, which keeps the note's own `<b>`/`<i>` runs
+ * working and keeps this function out of the markup business: there is still no HTML parsing in the app,
+ * and the only thing added to a note is a link the data asked for.
+ */
+function noteWithLinks(text, links) {
+  const source = String(text || '');
+  const known = (links || []).filter((link) => link && link.url);
+  const pieces = [];
+  let rest = source;
+
+  while (rest) {
+    /* The earliest address still in the text, so a note naming two pages still reads in its own order. */
+    let next = null;
+    for (const link of known) {
+      const at = rest.indexOf(link.url);
+      if (at !== -1 && (!next || at < next.at)) next = { link, at };
+    }
+    if (!next) break;
+    pieces.push(richText(rest.slice(0, next.at)));
+    pieces.push(externalLink(next.link.url, next.link.label || next.link.url));
+    rest = rest.slice(next.at + next.link.url.length);
+  }
+  pieces.push(richText(rest));
+
+  return frag(...pieces);
+}
+
 /** "1 rules" is not a sentence: the rail states the size of what it is pointing at. */
 function ruleCount(count) {
   return count === 1 ? '1 rule' : `${count} rules`;
@@ -173,7 +207,9 @@ export function renderRestriction(ctx) {
             { class: 'g-meta-line g-small' },
             'These rules were transcribed from Epic\'s per-brand pages and are dated — no per-brand verification date is recorded yet.'
           ),
-      data.brandRulesNote ? h('p', { class: 'g-small g-muted' }, richText(data.brandRulesNote)) : null,
+      data.brandRulesNote
+        ? h('p', { class: 'g-small g-muted' }, noteWithLinks(data.brandRulesNote, data.brandRulesNoteLinks))
+        : null,
       sources.length
         ? h(
             'ul',

@@ -90,6 +90,9 @@
     },
     "default_brand_id": "original",
     "brand_rules_research_note": "Brand restriction data was verified against Epic's per-brand rules pages in July 2026. NOTE: https://create.fortnite.com/news/ip-partner-fee-schedule is stale \u2014 it omits Star Wars and KPop Demon Hunters entirely, and incorrectly implies Star Wars does not support in-island transactions. The per-brand rules pages are authoritative. Star Wars is currently the only brand supporting in-island transactions (20% engagement + 30% transaction share to Disney); Fall Guys is Epic-owned and carries no revenue share.",
+    "brand_rules_research_note_links": [
+      { "url": "https://create.fortnite.com/news/ip-partner-fee-schedule", "label": "IP Partner Licensing Program Fee Schedule" }
+    ],
     "game_categories": [
       {
         "id": "combat",

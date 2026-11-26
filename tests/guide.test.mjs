@@ -1665,6 +1665,33 @@ test('a citation names the page it points at, and every link that leaves the app
   }
 });
 
+test("the research note names the page whose address it quotes", async () => {
+  /* The note says one of Epic's pages is stale and quotes its address as the evidence. An address is not a
+   * name: the data carries that page's title beside it, and the screen composes the sentence around a link,
+   * so the reader is told what the page is before deciding whether the claim holds. */
+  const json = JSON.parse(await readFile(path.join(PUBLIC_DIR, 'data', 'uefn_device_logic.json'), 'utf8'));
+  const note = json.meta.brand_rules_research_note;
+  const named = [...note.matchAll(/https?:\/\/\S+/g)].map((m) => m[0].replace(/[.,;]$/, ''));
+  assert.ok(named.length >= 1, 'the note quotes at least one address');
+  const links = json.meta.brand_rules_research_note_links || [];
+  for (const url of named) {
+    const link = links.find((l) => l.url === url);
+    assert.ok(link, `${url} is named in the note, so it needs a label beside it in the data`);
+    assert.ok(
+      link.label && !/^https?:\/\//.test(link.label),
+      `"${link.label}" is the page's title, not its address`
+    );
+  }
+
+  const screen = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'restriction.js'), 'utf8');
+  assert.match(
+    screen,
+    /noteWithLinks\(data\.brandRulesNote, data\.brandRulesNoteLinks\)/,
+    'the note is composed with the pages it names'
+  );
+  assert.ok(!/richText\(data\.brandRulesNote\)/.test(screen), 'and not printed as one flat string');
+});
+
 test('the rail is the left column, and the small print is headed like everything else', async () => {
   /* Two things a reader meets before they read a word of the rules: which side the navigation is on, and
    * whether the fourth panel is a panel. The rail takes the narrow first column, as this app's other
