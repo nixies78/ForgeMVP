@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - AI chat wireframe 1 - Launchpad</title>
+<link rel="icon" href="../../assets/logo.svg">
+<style>
+  /* ------------------------------------------------------------------------------------------------
+   * Wireframe 1 - Launchpad.
+   *
+   * The owner's own suggestion, drawn: the page opens on four example prompts and twelve theme chips
+   * ABOVE a centred chat box. This file is wireframe 1 of 3 for the AI chat page; the three share one
+   * notation and one CSS kit, which is recorded in support/chat-wireframes-brief.md. The kit below is
+   * copied verbatim from that brief so the three pages can be compared like for like - only the block
+   * at the end of this stylesheet is this page's own.
+   * ------------------------------------------------------------------------------------------------ */
+
+  /* ============================== shared kit (from the brief) ============================== */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --page: #0E0F12;        /* the concept page's own ground */
+    --panel: #15181C;       /* bezels, notes */
+    --rule: #2C3036;        /* page hairlines */
+    --ink: #E9EAEC;         /* page text */
+    --dim: #9BA0A7;         /* page secondary text */
+    --paper: #F2F3F5;       /* wireframe canvas */
+    --wf-ink: #23262B;      /* wireframe text */
+    --wf-dim: #767D85;      /* wireframe secondary text */
+    --wf-line: #C9CDD3;     /* wireframe hairline */
+    --wf-line-2: #9AA0A7;   /* wireframe solid edge */
+    --wf-dash: #B4BAC1;     /* empty state */
+    --wf-fill: #FFFFFF;     /* wireframe surface */
+    --wf-fill-2: #E4E7EA;   /* wireframe filled surface */
+    --accent: #33BFFF;      /* the one live colour */
+    --accent-ink: #0A2633;
+    --note: #F9A91F;        /* annotations */
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--ink); font: 400 1rem/1.6 var(--body); }
+  main.wrap { padding-block: 40px 88px; }
+  h1 { font: 800 clamp(2rem, 4.6vw, 3rem)/1.04 var(--body); letter-spacing: -.025em; margin: 0 0 .5rem; }
+  .eyebrow { font: 700 .75rem/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 14px; }
+  .lede { color: var(--ink); margin: 0 0 14px; max-width: 62ch; font-size: 1.05rem; }
+  .legend { color: var(--dim); font-size: .82rem; margin: 0; max-width: 78ch; }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .sec { margin-top: 60px; }
+  .sec > h2 { font: 800 1.4rem/1.2 var(--body); letter-spacing: -.015em; margin: 0 0 10px; }
+  .sec > p { margin: 0 0 18px; color: var(--dim); max-width: 74ch; }
+  .cap { color: var(--dim); font-size: .82rem; margin: 12px 2px 0; }
+
+  /* one frame and its notes: 812px of canvas beside a 296px note column inside the 1136px column */
+  .row2 { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 28px; align-items: start; margin-top: 22px; }
+  .frame { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 12px; }
+  .frame-label { display: flex; justify-content: space-between; gap: 12px; padding: 2px 4px 10px;
+    font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .canvas { background: var(--paper); color: var(--wf-ink); border-radius: 10px; padding: 1.1em; font-size: 14px; line-height: 1.45; }
+
+  /* in-canvas chrome: the app bar, then the screen */
+  .appbar { display: flex; align-items: center; gap: .7em; padding-bottom: .9em; border-bottom: 1px solid var(--wf-line); }
+  .appmark { width: 1.6em; height: 1.6em; border-radius: .35em; background: var(--wf-line-2); flex: none; }
+  .appname { font: 800 .82em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
+  .appnav { display: flex; gap: .5em; margin-left: 1em; }
+  .appnav i { display: block; width: 3.6em; height: .5em; border-radius: 1em; background: var(--wf-line); }
+  .soon { margin-left: auto; border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .25em .7em;
+    font: 700 .68em/1.3 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .screen { padding-top: 1.5em; }
+  .h3 { font: 700 1.25em/1.25 var(--body); letter-spacing: -.01em; margin: 0 0 .5em; }
+  .ln { display: block; height: .5em; border-radius: .4em; background: var(--wf-line); margin: .5em 0; }
+  .w90 { width: 90%; } .w75 { width: 75%; } .w60 { width: 60%; } .w40 { width: 40%; }
+
+  /* the composer, wherever it sits */
+  .composer { border: 1.5px dashed var(--wf-dash); border-radius: .7em; background: var(--wf-fill); padding: .85em .9em; }
+  .composer .ph { color: var(--wf-dim); font-size: .95em; }
+  .caret { display: inline-block; width: 1.5px; height: 1em; background: var(--wf-line-2); vertical-align: -.15em; }
+  .composer-foot { display: flex; align-items: center; gap: .6em; margin-top: 1.1em; font-size: .78em; color: var(--wf-dim); }
+  .composer-foot .spacer { margin-left: auto; }
+  .send { width: 2.1em; height: 2.1em; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; flex: none; }
+  .alt { margin-left: auto; font-size: .78em; color: var(--wf-dim); }
+
+  /* starter shelf: eyebrow, prompt rows, chips, and the brief tray */
+  .wf-eyebrow { font: 700 .76em/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--wf-dim); margin: 0 0 .8em; }
+  .prow { display: flex; align-items: center; gap: .6em; background: var(--wf-fill); border: 1px solid var(--wf-line);
+    border-radius: .5em; padding: .6em .8em; margin-bottom: .45em; font-size: .95em; }
+  .prow .cue { color: var(--wf-dim); }
+  .prow .go { margin-left: auto; font: 700 .72em/1 var(--body); color: var(--wf-dim); border: 1px solid var(--wf-line);
+    border-radius: .4em; padding: .3em .55em; white-space: nowrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4em; }
+  .chip { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .3em .8em; font-size: .85em; background: var(--wf-fill); white-space: nowrap; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .tray { display: flex; align-items: center; flex-wrap: wrap; gap: .5em; border: 1px dashed var(--wf-dash);
+    border-radius: .6em; padding: .7em .8em; background: var(--wf-fill); margin-top: 1.1em; font-size: .9em; }
+  .tray .lab { font: 700 .72em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .brief-line { color: var(--wf-ink); }
+  .btn { display: inline-flex; align-items: center; gap: .45em; border-radius: .45em; padding: .5em .9em;
+    font: 700 .85em/1 var(--body); border: 1px solid var(--wf-line-2); background: var(--wf-fill); color: var(--wf-ink); white-space: nowrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn[aria-disabled="true"] { background: var(--wf-fill-2); color: var(--wf-dim); border-color: var(--wf-line); }
+
+  /* the conversation */
+  .turn { display: flex; gap: .6em; margin-bottom: .8em; }
+  .turn.user { justify-content: flex-end; }
+  .avatar { width: 1.7em; height: 1.7em; border-radius: .4em; background: var(--wf-line-2); flex: none; }
+  .bub { max-width: 78%; border-radius: .8em; padding: .7em .85em; font-size: .92em; }
+  .bub.ai { background: var(--wf-fill); border: 1px solid var(--wf-line-2); }
+  .bub.user { background: var(--wf-fill-2); border: 1px solid var(--wf-line); }
+  .taprow { display: flex; flex-wrap: wrap; gap: .4em; margin-top: .7em; }
+  .tapcard { border: 1.5px solid var(--wf-line-2); border-radius: .6em; padding: .6em .8em; background: var(--wf-fill);
+    font-size: .9em; font-weight: 600; }
+  .card { border: 1px solid var(--wf-line-2); border-radius: .7em; background: var(--wf-fill); padding: .9em; font-size: .9em; }
+  .card + .card { margin-top: .8em; }
+  .card-head { display: flex; align-items: center; gap: .5em; margin-bottom: .7em; }
+  .card-head .t { font: 700 .95em/1.2 var(--body); }
+  .state { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .2em .6em; font-size: .72em; font-weight: 700; color: var(--wf-dim); }
+  .slot { display: flex; align-items: baseline; gap: .6em; padding: .45em 0; border-top: 1px dashed var(--wf-line); font-size: .92em; }
+  .slot .k { min-width: 7.5em; color: var(--wf-dim); font-size: .82em; }
+  .slot .v.empty { color: var(--wf-dim); }
+  .dot { width: .55em; height: .55em; border-radius: 50%; border: 1.5px solid var(--wf-line-2); display: inline-block; }
+  .dot.on { background: var(--accent); border-color: var(--accent); }
+  .step { display: flex; align-items: center; gap: .6em; padding: .38em 0; border-top: 1px dashed var(--wf-line); font-size: .9em; }
+  .step .n { width: 1.5em; height: 1.5em; border-radius: .3em; background: var(--wf-fill-2); display: grid; place-items: center;
+    font: 700 .75em/1 var(--body); color: var(--wf-dim); flex: none; }
+  .step .n.on { background: var(--accent); color: var(--accent-ink); }
+  .mk { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 .7em/1 var(--body); vertical-align: .2em; margin-left: .35em; flex: none; }
+
+  /* the notes panel: commentary beside the frame, never inside it */
+  .notes { display: grid; gap: 14px; align-content: start; }
+  .notes > .nh { font: 700 .72rem/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 0; }
+  .note { background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--note); border-radius: 10px; padding: 12px 14px; }
+  .note h4 { margin: 0 0 6px; font: 700 13px/1.35 var(--body); display: flex; gap: 8px; align-items: center; }
+  .note h4 .n { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 11px/1 var(--body); flex: none; }
+  .note p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--dim); }
+  .note p + p { margin-top: 6px; }
+
+  /* phone frames: the same kit at a smaller canvas size - everything inside is in em */
+  .phones { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 22px; }
+  .phone { width: 296px; background: var(--panel); border: 1px solid var(--rule); border-radius: 24px; padding: 10px; }
+  .phone .canvas { font-size: 11.5px; border-radius: 16px; padding: 1em; }
+
+  /* closing blocks */
+  .bets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+  .bet { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+  .bet h3 { margin: 0 0 10px; font: 700 14px/1.3 var(--body); }
+  .bet ul { margin: 0; padding-left: 18px; color: var(--dim); font-size: 13.5px; line-height: 1.6; }
+  .siblings { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .siblings a { color: var(--accent); font-size: .9rem; font-weight: 600; text-decoration: none; border-bottom: 1px solid transparent; }
+  .siblings a:hover { border-bottom-color: currentColor; }
+  .tag { position: fixed; left: 14px; bottom: 14px; z-index: 9; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 999px; padding: 6px 12px; font: 600 11px/1.3 var(--mono); letter-spacing: .06em; color: var(--dim); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  @media (max-width: 1080px) {
+    .row2 { grid-template-columns: minmax(0, 1fr); }
+    .bets { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .canvas { font-size: 12.5px; }
+    .phone { width: 100%; }
+    .top-right { display: none; }
+  }
+
+  /* ============================== this page's own rules ============================== */
+  /* The 72px bar: height and the mark are the shared frame's, everything else is this page's. */
+  .top { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--rule); }
+  .top-right { font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+
+  /* The screen's own column inside the canvas. 33em at 14px is ~460px inside an 812px frame, which is
+     what "a centred chat box" looks like on a desktop - the box is not the page, it is a column on it. */
+  .ask { max-width: 33em; margin: 0 auto; }
+  .ask .sub { color: var(--wf-dim); font-size: .95em; margin: 0 0 .2em; }
+
+  /* The owner's order, kept: prompts first, then themes, then the tray, then the box. Each block is
+     separated by a rule rather than by a card, so the canvas does not become four boxes stacked up. */
+  .shelf { margin-top: 1.9em; }
+  .shelf + .shelf { margin-top: 1.7em; }
+  .shelf .hint { margin: .9em 0 0; font-size: .78em; color: var(--wf-dim); }
+
+  /* State 1b: the tray reads the picked chips back as one sentence, which is the whole reason the chips
+     are worth their space - they build the first message instead of only suggesting one. */
+  .tray-actions { display: flex; align-items: center; gap: .5em; margin-left: auto; }
+
+  /* State 2: the shelf survives the first send as a single row of starters above the composer, so the
+     pattern that got the user started is still where they left it. */
+  .starters { display: flex; align-items: center; flex-wrap: wrap; gap: .45em; margin: 1.2em 0 .9em;
+    border-top: 1px solid var(--wf-line); padding-top: 1em; font-size: .88em; }
+  .starters .wf-eyebrow { margin: 0 .3em 0 0; }
+
+  /* The phone frames are drawn as a screen with a docked composer: the shelf scrolls in the region above
+     it and is clipped with a fade, the composer is the last row and never moves. The clipping is a
+     max-height on the region rather than a sticky composer, because a sticky element inside a still
+     picture floats over the picture's own content the moment the page is rendered - which is exactly
+     what the first version of this section did. The "all 4 / all 12" line is pinned above the box on a
+     phone rather than living at the foot of each list, because at 400px it would scroll away with them. */
+  .phone .ask { max-width: none; margin: 0; }
+  .sheetflow { position: relative; max-height: 24em; overflow: hidden; }
+  .sheetflow::after { content: ""; position: absolute; inset: auto 0 0 0; height: 2.4em;
+    background: linear-gradient(transparent, var(--paper)); pointer-events: none; }
+  .dock { margin-top: .2em; }
+  .dock .allrow { display: flex; flex-wrap: wrap; gap: .3em .9em; padding: .8em 0 .1em; font-size: .85em; }
+  .dock .allrow a { color: var(--wf-ink); font-weight: 700; text-decoration: none; }
+
+  /* The two phone frames sit beside their notes on the same 1136px grid as the desktop frames, so the
+     note column lines up all the way down the page instead of jumping sideways at this section. */
+  .phones-row { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 28px; align-items: start; margin-top: 22px; }
+  .phones-row > .phones { margin-top: 0; }
+  @media (max-width: 1080px) { .phones-row { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css">
+</head>
+<body>
+
+<header class="top wrap">
+  <a class="logo-lockup" href="../../mockups/index.html" title="All mockups">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <span class="top-right">AI chat &middot; wireframe 1 of 3 &middot; Launchpad</span>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">AI chat page &middot; wireframe 1 of 3</p>
+  <h1>Launchpad</h1>
+  <p class="lede">
+    The suggestion, drawn: the page opens on <strong>four example prompts</strong> and <strong>twelve theme
+    chips</strong> above a centred chat box. Everything on this cold canvas exists to answer the one
+    question an empty box never answers - <em>what would I even ask?</em> - and the chips go one step
+    further than suggesting, by building the first message out of what the user picks.
+  </p>
+  <p class="legend">
+    <b>Notation.</b> Dashed outline = empty or not built yet. Solid hairline = real chrome. Grey bar =
+    body copy nobody is judging. Blue = the one live action on the canvas. Amber number = a note in the
+    panel beside the frame, which is commentary and not part of the UI. No art and no brand colour
+    anywhere: this is a wireframe, not a mockup.
+  </p>
+
+  <!-- ======================= State 1: the cold canvas ======================= -->
+  <section class="sec">
+    <h2>State 1 &mdash; the cold canvas</h2>
+    <p>
+      Nothing sent yet. This is the state the chat page fails at today (a text box and a placeholder),
+      and the state the suggestion is about, so it gets the whole screen: title, prompts, themes, box -
+      in that order, which is the order the suggestion asked for.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 1 &middot; nothing sent yet</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen">
+            <div class="ask">
+              <p class="h3">What do you want to make?<span class="mk">1</span></p>
+              <p class="sub">Describe it in your own words. Forge asks a few follow-ups, then writes the game type, the devices and a five-step plan you can build in UEFN.</p>
+
+              <div class="shelf">
+                <p class="wf-eyebrow">You could ask something like</p>
+                <div class="prow"><span class="cue">&rsaquo;</span><span>A prop hunt in an abandoned hotel, for four players</span><span class="go">Fill the box</span><span class="mk">3</span></div>
+                <div class="prow"><span class="cue">&rsaquo;</span><span>A boss fight on a moving train - is that buildable?</span><span class="go">Fill the box</span></div>
+                <div class="prow"><span class="cue">&rsaquo;</span><span>Turn my farming tycoon into something with more action</span><span class="go">Fill the box</span></div>
+                <div class="prow"><span class="cue">&rsaquo;</span><span>Something my kids can play in ten minutes</span><span class="go">Fill the box</span></div>
+              </div>
+
+              <div class="shelf">
+                <p class="wf-eyebrow">Or choose some themes</p>
+                <div class="chips">
+                  <span class="chip">Prop Hunt</span><span class="chip">Tycoon</span><span class="chip">Boss Fight</span>
+                  <span class="chip">Parkour</span><span class="chip">Deathrun</span><span class="chip">Escape Room</span>
+                  <span class="chip">Tower Defence</span><span class="chip">Hide &amp; Seek</span><span class="chip">Racing</span>
+                  <span class="chip">Survival</span><span class="chip">Co-op</span><span class="chip">Spooky</span><span class="mk">4</span>
+                </div>
+                <p class="hint">Twelve words a beginner can recognise but would not have thought to type.</p>
+              </div>
+
+              <div class="composer">
+                <div class="ph">Describe the game - a mode, a feeling, a game you liked&hellip; <span class="caret"></span></div>
+                <div class="composer-foot">
+                  <span>Enter to send &middot; Shift + Enter for a new line</span>
+                  <span class="spacer"></span>
+                  <span class="send" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                  <span class="mk">2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">1</span> Lead with the question, not the caret</h4>
+          <p>An empty box asks "what do you know?" and most people do not know. The heading asks something
+            answerable, and the prompts under it are the answer to "answerable how?".</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">2</span> One live action on the whole canvas</h4>
+          <p>Send is the only blue thing on the screen. Everything else is a suggestion, so nothing
+            competes with the box for the next click.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">3</span> A row fills the box, it does not send</h4>
+          <p>Clicking an example puts it in the composer and leaves the caret there, so the user can edit
+            it - half the value of an example is that it can be changed. The row is a sentence in the
+            product's voice, and the product cannot know whether they meant four players or eight.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">4</span> Chips are vocabulary, not options</h4>
+          <p>Twelve chips is about the most a newcomer will read. They are the words of the domain -
+            game types and moods - labelled so it is obvious they are a starting point and not a menu
+            with a wrong answer in it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= State 1b: three chips picked ======================= -->
+  <section class="sec">
+    <h2>State 1b &mdash; three chips picked</h2>
+    <p>
+      The part of the suggestion that does the real work. Picking chips does not just hint at a game, it
+      assembles the opening message in a tray above the box, in the user's own order of thought. It is
+      the difference between a page that suggests and a page that starts.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 1b &middot; three themes chosen</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen">
+            <div class="ask">
+              <p class="h3">What do you want to make?</p>
+
+              <div class="shelf">
+                <p class="wf-eyebrow">Or choose some themes</p>
+                <div class="chips">
+                  <span class="chip on">Prop Hunt</span><span class="chip">Tycoon</span><span class="chip">Boss Fight</span>
+                  <span class="chip">Parkour</span><span class="chip">Deathrun</span><span class="chip">Escape Room</span>
+                  <span class="chip">Tower Defence</span><span class="chip">Hide &amp; Seek</span><span class="chip">Racing</span>
+                  <span class="chip">Survival</span><span class="chip on">Co-op</span><span class="chip on">Spooky</span>
+                </div>
+              </div>
+
+              <div class="tray">
+                <span class="lab">Your brief</span>
+                <span class="chip on">Spooky &times;</span>
+                <span class="chip on">Prop Hunt &times;</span>
+                <span class="chip on">Co-op &times;</span>
+                <span class="brief-line">Make it: a spooky prop hunt, co-op, ten-minute rounds.</span>
+                <span class="tray-actions">
+                  <span class="btn primary">Write it for me</span>
+                  <span class="btn">Clear</span>
+                </span>
+                <span class="mk">5</span>
+              </div>
+
+              <div class="composer" style="margin-top:1.1em">
+                <div class="ph">Or start from scratch and describe it yourself&hellip; <span class="caret"></span></div>
+                <div class="composer-foot">
+                  <span>Enter to send &middot; Shift + Enter for a new line</span>
+                  <span class="spacer"></span>
+                  <span class="send" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">5</span> The tray turns picking into a sentence</h4>
+          <p>Three chips and the brief line under them are the seed of the first message, and
+            <em>Write it for me</em> commits it. The user did the thinking; the page did the phrasing,
+            which is the one thing a beginner cannot do yet.</p>
+          <p>Two decisions to make here: the tray replaces the example rows once it has anything in it
+            (or the page carries both), and the phrase is editable after it is written - a brief the user
+            cannot correct is worse than no brief.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= State 2: after the first message ======================= -->
+  <section class="sec">
+    <h2>State 2 &mdash; after the first message</h2>
+    <p>
+      The shelf cannot survive the first send - the transcript needs the room - so it collapses to one
+      row of starters, and the themes come back where they are worth most: as reply chips on the
+      assistant's follow-up question. The plan the chat produces arrives in the transcript, in the same
+      column the user has been reading.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 2 &middot; one exchange in</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen">
+            <div class="ask">
+              <div class="turn user">
+                <div class="bub user">A spooky prop hunt in an old hotel, co-op, ten-minute rounds.</div>
+              </div>
+
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <span class="ln w90"></span>
+                  <span class="ln w75"></span>
+                  <span class="ln w60"></span>
+                  <p style="margin:.7em 0 0"><strong>Before I write the plan - do you want the props to fight back?</strong></p>
+                  <div class="taprow">
+                    <span class="chip">No, pure hiding</span>
+                    <span class="chip">Yes, props can stun</span>
+                    <span class="chip">Surprise me</span>
+                    <span class="mk">6</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head"><span class="t">Your plan so far</span><span class="state">Draft</span></div>
+                <div class="slot"><span class="k">Game type</span><span>Prop Hunt</span></div>
+                <div class="slot"><span class="k">Players</span><span>4, co-op, ten-minute rounds</span></div>
+                <div class="slot"><span class="k">Brand</span><span class="v empty">not chosen yet</span></div>
+                <div class="slot"><span class="k">Devices</span><span>5 suggested</span></div>
+                <div class="step"><span class="n">1</span><span>Register the props a player can become</span></div>
+                <div class="step"><span class="n">2</span><span>Set the round timer and the hunter's loadout</span></div>
+                <div class="step"><span class="n">3</span><span>Place the hiding spots and the last-prop beacon</span></div>
+                <div class="step"><span class="n">4</span><span>Add the spooky layer: lights, fog, ambience</span></div>
+                <div class="step"><span class="n">5</span><span>Test with four players and tune the round length</span></div>
+                <span class="mk">7</span>
+              </div>
+
+              <div class="starters">
+                <span class="wf-eyebrow">Starters</span>
+                <span class="chip">Prop Hunt</span><span class="chip">Boss Fight</span><span class="chip">Parkour</span>
+                <span class="chip">Escape Room</span><span class="chip">Co-op</span>
+                <span class="alt">More examples</span>
+              </div>
+
+              <div class="composer">
+                <div class="ph">Reply, or add a constraint - "no custom props, keep it simple"&hellip; <span class="caret"></span></div>
+                <div class="composer-foot">
+                  <span>Enter to send &middot; Shift + Enter for a new line</span>
+                  <span class="spacer"></span>
+                  <span class="send" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">6</span> The starters survive the first send</h4>
+          <p>The shelf becomes a rail, and the themes come back as reply chips inside the question -
+            where they are genuinely useful, because "do you want them to fight back?" is a question
+            most people cannot answer in prose either. Same pattern, better moment.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">7</span> The plan lives in the transcript</h4>
+          <p>No side panel and no second place to look: what is produced is what was being read. The
+            price is that the plan scrolls away with the conversation, so a chat of any length needs a
+            way back to it - <em>Your plan so far</em> is also a link, and it should not be a long scroll
+            to find it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= Phone ======================= -->
+  <section class="sec">
+    <h2>On a phone</h2>
+    <p>
+      This is where the suggestion gets hard. Four prompt rows and twelve chips is roughly a screen and
+      a half of suggestions, and the box they are meant to lead to sits <em>below</em> all of it. So on a
+      phone the shelf scrolls in the region above the box, the box is docked to the foot of the screen,
+      and the two "all" links stay where they can be reached.
+    </p>
+
+    <div class="phones-row">
+      <div class="phones">
+      <div class="phone">
+        <div class="frame-label"><span>State 1 &middot; 400px</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="screen">
+            <div class="ask">
+              <div class="sheetflow">
+                <p class="h3">What do you want to make?</p>
+                <div class="shelf">
+                  <p class="wf-eyebrow">You could ask something like</p>
+                  <div class="prow"><span class="cue">&rsaquo;</span><span>A prop hunt in an abandoned hotel</span></div>
+                  <div class="prow"><span class="cue">&rsaquo;</span><span>A boss fight on a moving train</span></div>
+                  <div class="prow"><span class="cue">&rsaquo;</span><span>Something my kids can play in ten minutes</span></div>
+                </div>
+                <div class="shelf">
+                  <p class="wf-eyebrow">Or choose some themes</p>
+                  <div class="chips">
+                    <span class="chip">Prop Hunt</span><span class="chip">Tycoon</span><span class="chip">Boss Fight</span>
+                    <span class="chip">Parkour</span><span class="chip">Deathrun</span><span class="chip">Escape Room</span>
+                    <span class="chip">Co-op</span><span class="chip">Spooky</span>
+                  </div>
+                </div>
+              </div>
+              <div class="dock">
+                <p class="allrow"><a href="#">All 4 examples</a><a href="#">All 12 themes</a><span class="mk">9</span></p>
+                <div class="composer">
+                  <div class="ph">Describe the game&hellip; <span class="caret"></span></div>
+                  <div class="composer-foot">
+                    <span class="spacer"></span>
+                    <span class="send" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="11" height="11"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="mk">8</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="phone">
+        <div class="frame-label"><span>State 2 &middot; 400px</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="soon">Coming soon</span>
+          </div>
+          <div class="screen">
+            <div class="ask">
+              <div class="sheetflow">
+                <div class="turn user"><div class="bub user">A spooky prop hunt in an old hotel, co-op.</div></div>
+                <div class="turn">
+                  <span class="avatar"></span>
+                  <div class="bub ai">
+                    <span class="ln w90"></span>
+                    <span class="ln w60"></span>
+                    <p style="margin:.6em 0 0"><strong>Should the props fight back?</strong></p>
+                    <div class="taprow">
+                      <span class="chip">No, pure hiding</span><span class="chip">Yes, they stun</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="dock">
+                <div class="starters">
+                  <span class="chip">Boss Fight</span><span class="chip">Parkour</span><span class="chip">Co-op</span>
+                </div>
+                <div class="composer">
+                  <div class="ph">Reply&hellip; <span class="caret"></span></div>
+                  <div class="composer-foot">
+                    <span class="spacer"></span>
+                    <span class="send" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="11" height="11"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">8</span> The composer is docked, not parked</h4>
+          <p>The suggestion puts the box last, and on a phone that means below a screen of suggestions.
+            So the box is the last row of the screen and the shelf scrolls in the region above it - the
+            order the owner asked for, with the box reachable at every moment.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">9</span> The shelf shows its head, and keeps its doors</h4>
+          <p>Three examples and eight chips, cut with a fade, because the full shelf is roughly a screen
+            and a half and the box has to stay reachable. The two "all" links move out of the lists on a
+            phone and sit permanently just above the box: at 400px a link at the foot of a scrolling list
+            is a link nobody sees, and those two links are the only way to the rest of the shelf.</p>
+          <p>This is the part of the suggestion most worth testing on a real phone. The shortened shelf
+            is quick to read, and it hides the two prompt rows most likely to teach a beginner what this
+            chat is for.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= What this bets on ======================= -->
+  <section class="sec">
+    <h2>What this direction bets on</h2>
+    <p>
+      Every direction in this set is a bet about which failure the chat page has to solve first. This one
+      bets that the failure is the empty box, and pays for that bet with screen space above it.
+    </p>
+    <div class="bets">
+      <div class="bet">
+        <h3>Good at</h3>
+        <ul>
+          <li>Teaching a beginner what to ask, which no plain chat box does.</li>
+          <li>Giving away the product's own vocabulary - the chips are the answer to "what kinds of games are there?".</li>
+          <li>Showing the shape of the output before anything is typed.</li>
+          <li>Costing nothing to learn: it is still a chat box, with a menu above it.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>Risks</h3>
+        <ul>
+          <li>The box trails two blocks of suggestions, so on a short window it is the last thing on screen - the shelf has to fit, or the composer has to pin.</li>
+          <li>Example prompts date fast, and stale examples make a product look abandoned.</li>
+          <li>A shelf of four can read as "these are the only things you can ask".</li>
+          <li>Chips can turn a conversation into a form, which is the opposite of the point.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>What to instrument</h3>
+        <ul>
+          <li>Prompt rows clicked vs. typed straight into the box.</li>
+          <li>How many chips get picked before the first send - and whether the tray's brief line is edited before it is sent.</li>
+          <li>Whether a seeded first message leads to a finished plan more often than a typed one.</li>
+          <li>How often the starters rail is used after the first exchange: if never, it is decoration.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="siblings">
+      <a href="../chat-2-workbench/index.html">Wireframe 2 - Workbench: the chat as process, a live design panel as product &rarr;</a>
+      <a href="../chat-3-interview/index.html">Wireframe 3 - Interview: the AI speaks first and every answer is a tap &rarr;</a>
+      <a href="../../mockups/index.html">All mockups &rarr;</a>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Wireframe 1 - Launchpad</div>
+</body>
+</html>

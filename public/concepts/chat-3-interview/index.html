@@ -1,0 +1,715 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - AI chat wireframe 3 - Interview</title>
+<link rel="icon" href="../../assets/logo.svg">
+<style>
+  /* ------------------------------------------------------------------------------------------------
+   * Wireframe 3 - Interview.
+   *
+   * The AI speaks first and every answer is a tap. The blank box is the failure mode, so there is no
+   * blank box: the page opens on the first turn of a conversation that has already started, one
+   * answerable question with six tappable answers, and typing is a link at the edge of it rather than
+   * the doorway into it.
+   *
+   * This file is wireframe 3 of 3 for the AI chat page; the three share one notation and one CSS kit,
+   * recorded in support/chat-wireframes-brief.md. The kit below is copied verbatim from that brief so
+   * the three pages can be put side by side and compared like for like - only the block at the end of
+   * this stylesheet is this page's own.
+   * ------------------------------------------------------------------------------------------------ */
+
+  /* ============================== shared kit (from the brief) ============================== */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --page: #0E0F12;        /* the concept page's own ground */
+    --panel: #15181C;       /* bezels, notes */
+    --rule: #2C3036;        /* page hairlines */
+    --ink: #E9EAEC;         /* page text */
+    --dim: #9BA0A7;         /* page secondary text */
+    --paper: #F2F3F5;       /* wireframe canvas */
+    --wf-ink: #23262B;      /* wireframe text */
+    --wf-dim: #767D85;      /* wireframe secondary text */
+    --wf-line: #C9CDD3;     /* wireframe hairline */
+    --wf-line-2: #9AA0A7;   /* wireframe solid edge */
+    --wf-dash: #B4BAC1;     /* empty state */
+    --wf-fill: #FFFFFF;     /* wireframe surface */
+    --wf-fill-2: #E4E7EA;   /* wireframe filled surface */
+    --accent: #33BFFF;      /* the one live colour */
+    --accent-ink: #0A2633;
+    --note: #F9A91F;        /* annotations */
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--ink); font: 400 1rem/1.6 var(--body); }
+  main.wrap { padding-block: 40px 88px; }
+  h1 { font: 800 clamp(2rem, 4.6vw, 3rem)/1.04 var(--body); letter-spacing: -.025em; margin: 0 0 .5rem; }
+  .eyebrow { font: 700 .75rem/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 14px; }
+  .lede { color: var(--ink); margin: 0 0 14px; max-width: 62ch; font-size: 1.05rem; }
+  .legend { color: var(--dim); font-size: .82rem; margin: 0; max-width: 78ch; }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .sec { margin-top: 60px; }
+  .sec > h2 { font: 800 1.4rem/1.2 var(--body); letter-spacing: -.015em; margin: 0 0 10px; }
+  .sec > p { margin: 0 0 18px; color: var(--dim); max-width: 74ch; }
+  .cap { color: var(--dim); font-size: .82rem; margin: 12px 2px 0; }
+
+  /* one frame and its notes: 812px of canvas beside a 296px note column inside the 1136px column */
+  .row2 { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 28px; align-items: start; margin-top: 22px; }
+  .frame { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 12px; }
+  .frame-label { display: flex; justify-content: space-between; gap: 12px; padding: 2px 4px 10px;
+    font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .canvas { background: var(--paper); color: var(--wf-ink); border-radius: 10px; padding: 1.1em; font-size: 14px; line-height: 1.45; }
+
+  /* in-canvas chrome: the app bar, then the screen */
+  .appbar { display: flex; align-items: center; gap: .7em; padding-bottom: .9em; border-bottom: 1px solid var(--wf-line); }
+  .appmark { width: 1.6em; height: 1.6em; border-radius: .35em; background: var(--wf-line-2); flex: none; }
+  .appname { font: 800 .82em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
+  .appnav { display: flex; gap: .5em; margin-left: 1em; }
+  .appnav i { display: block; width: 3.6em; height: .5em; border-radius: 1em; background: var(--wf-line); }
+  .soon { margin-left: auto; border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .25em .7em;
+    font: 700 .68em/1.3 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .screen { padding-top: 1.5em; }
+  .h3 { font: 700 1.25em/1.25 var(--body); letter-spacing: -.01em; margin: 0 0 .5em; }
+  .ln { display: block; height: .5em; border-radius: .4em; background: var(--wf-line); margin: .5em 0; }
+  .w90 { width: 90%; } .w75 { width: 75%; } .w60 { width: 60%; } .w40 { width: 40%; }
+
+  /* the composer, wherever it sits */
+  .composer { border: 1.5px dashed var(--wf-dash); border-radius: .7em; background: var(--wf-fill); padding: .85em .9em; }
+  .composer .ph { color: var(--wf-dim); font-size: .95em; }
+  .caret { display: inline-block; width: 1.5px; height: 1em; background: var(--wf-line-2); vertical-align: -.15em; }
+  .composer-foot { display: flex; align-items: center; gap: .6em; margin-top: 1.1em; font-size: .78em; color: var(--wf-dim); }
+  .composer-foot .spacer { margin-left: auto; }
+  .send { width: 2.1em; height: 2.1em; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; flex: none; }
+  .alt { margin-left: auto; font-size: .78em; color: var(--wf-dim); }
+
+  /* starter shelf: eyebrow, prompt rows, chips, and the brief tray */
+  .wf-eyebrow { font: 700 .76em/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--wf-dim); margin: 0 0 .8em; }
+  .prow { display: flex; align-items: center; gap: .6em; background: var(--wf-fill); border: 1px solid var(--wf-line);
+    border-radius: .5em; padding: .6em .8em; margin-bottom: .45em; font-size: .95em; }
+  .prow .cue { color: var(--wf-dim); }
+  .prow .go { margin-left: auto; font: 700 .72em/1 var(--body); color: var(--wf-dim); border: 1px solid var(--wf-line);
+    border-radius: .4em; padding: .3em .55em; white-space: nowrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4em; }
+  .chip { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .3em .8em; font-size: .85em; background: var(--wf-fill); white-space: nowrap; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .tray { display: flex; align-items: center; flex-wrap: wrap; gap: .5em; border: 1px dashed var(--wf-dash);
+    border-radius: .6em; padding: .7em .8em; background: var(--wf-fill); margin-top: 1.1em; font-size: .9em; }
+  .tray .lab { font: 700 .72em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .brief-line { color: var(--wf-ink); }
+  .btn { display: inline-flex; align-items: center; gap: .45em; border-radius: .45em; padding: .5em .9em;
+    font: 700 .85em/1 var(--body); border: 1px solid var(--wf-line-2); background: var(--wf-fill); color: var(--wf-ink); white-space: nowrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn[aria-disabled="true"] { background: var(--wf-fill-2); color: var(--wf-dim); border-color: var(--wf-line); }
+
+  /* the conversation */
+  .turn { display: flex; gap: .6em; margin-bottom: .8em; }
+  .turn.user { justify-content: flex-end; }
+  .avatar { width: 1.7em; height: 1.7em; border-radius: .4em; background: var(--wf-line-2); flex: none; }
+  .bub { max-width: 78%; border-radius: .8em; padding: .7em .85em; font-size: .92em; }
+  .bub.ai { background: var(--wf-fill); border: 1px solid var(--wf-line-2); }
+  .bub.user { background: var(--wf-fill-2); border: 1px solid var(--wf-line); }
+  .taprow { display: flex; flex-wrap: wrap; gap: .4em; margin-top: .7em; }
+  .tapcard { border: 1.5px solid var(--wf-line-2); border-radius: .6em; padding: .6em .8em; background: var(--wf-fill);
+    font-size: .9em; font-weight: 600; }
+  .card { border: 1px solid var(--wf-line-2); border-radius: .7em; background: var(--wf-fill); padding: .9em; font-size: .9em; }
+  .card + .card { margin-top: .8em; }
+  .card-head { display: flex; align-items: center; gap: .5em; margin-bottom: .7em; }
+  .card-head .t { font: 700 .95em/1.2 var(--body); }
+  .state { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .2em .6em; font-size: .72em; font-weight: 700; color: var(--wf-dim); }
+  .slot { display: flex; align-items: baseline; gap: .6em; padding: .45em 0; border-top: 1px dashed var(--wf-line); font-size: .92em; }
+  .slot .k { min-width: 7.5em; color: var(--wf-dim); font-size: .82em; }
+  .slot .v.empty { color: var(--wf-dim); }
+  .dot { width: .55em; height: .55em; border-radius: 50%; border: 1.5px solid var(--wf-line-2); display: inline-block; }
+  .dot.on { background: var(--accent); border-color: var(--accent); }
+  .step { display: flex; align-items: center; gap: .6em; padding: .38em 0; border-top: 1px dashed var(--wf-line); font-size: .9em; }
+  .step .n { width: 1.5em; height: 1.5em; border-radius: .3em; background: var(--wf-fill-2); display: grid; place-items: center;
+    font: 700 .75em/1 var(--body); color: var(--wf-dim); flex: none; }
+  .step .n.on { background: var(--accent); color: var(--accent-ink); }
+  .mk { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 .7em/1 var(--body); vertical-align: .2em; margin-left: .35em; flex: none; }
+
+  /* the notes panel: commentary beside the frame, never inside it */
+  .notes { display: grid; gap: 14px; align-content: start; }
+  .notes > .nh { font: 700 .72rem/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 0; }
+  .note { background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--note); border-radius: 10px; padding: 12px 14px; }
+  .note h4 { margin: 0 0 6px; font: 700 13px/1.35 var(--body); display: flex; gap: 8px; align-items: center; }
+  .note h4 .n { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 11px/1 var(--body); flex: none; }
+  .note p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--dim); }
+  .note p + p { margin-top: 6px; }
+
+  /* phone frames: the same kit at a smaller canvas size - everything inside is in em */
+  .phones { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 22px; }
+  .phone { width: 296px; background: var(--panel); border: 1px solid var(--rule); border-radius: 24px; padding: 10px; }
+  .phone .canvas { font-size: 11.5px; border-radius: 16px; padding: 1em; }
+
+  /* closing blocks */
+  .bets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+  .bet { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+  .bet h3 { margin: 0 0 10px; font: 700 14px/1.3 var(--body); }
+  .bet ul { margin: 0; padding-left: 18px; color: var(--dim); font-size: 13.5px; line-height: 1.6; }
+  .siblings { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .siblings a { color: var(--accent); font-size: .9rem; font-weight: 600; text-decoration: none; border-bottom: 1px solid transparent; }
+  .siblings a:hover { border-bottom-color: currentColor; }
+  .tag { position: fixed; left: 14px; bottom: 14px; z-index: 9; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 999px; padding: 6px 12px; font: 600 11px/1.3 var(--mono); letter-spacing: .06em; color: var(--dim); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  @media (max-width: 1080px) {
+    .row2 { grid-template-columns: minmax(0, 1fr); }
+    .bets { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .canvas { font-size: 12.5px; }
+    .phone { width: 100%; }
+    .top-right { display: none; }
+  }
+
+  /* ============================== this page's own rules ============================== */
+  /* The 72px bar. The same three lines as wireframes 1 and 2: the frame around the screens is shared,
+     the screens are not. */
+  .top { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--rule); }
+  .top-right { font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+
+  /* A transcript is a reading column, not the canvas width. A question set across 800px reads as a
+     banner; 42em is roughly 590px at 14px, which is the width a person actually reads a conversation at.
+     The brief strip is chrome rather than conversation, so it spans the whole canvas underneath this. */
+  .talk { max-width: 42em; }
+
+  /* The question is the biggest thing on the canvas, and deliberately so: on this screen it does the job
+     a page title would do on any other, and it is the only thing the user is being asked for. */
+  .q { font: 700 1.3em/1.3 var(--body); letter-spacing: -.01em; margin: 1.2em 0 0; max-width: 26em; }
+  .qline { margin: .1em 0 0; font-weight: 700; }
+
+  /* The line above a question names the strip slot it fills ("Goal · question 1"), which is how a user
+     learns that the five dots at the foot of the canvas are a list of questions and not a score. */
+  .who { display: flex; align-items: center; gap: .5em; margin-bottom: .45em;
+    font: 700 .68em/1.1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+
+  /* Edit, and Fix this, are quiet controls on purpose: they are corrections to something already said,
+     and a correction should never compete with the thing it corrects. Same weight as the starter rows'
+     "Fill the box" instead of a filled button. */
+  .edit { font: 700 .72em/1 var(--body); color: var(--wf-dim); border: 1px solid var(--wf-line);
+    border-radius: .4em; padding: .28em .5em; white-space: nowrap; }
+  .who .edit, .card-head > .edit, .card-head > .btn { margin-left: auto; }
+
+  /* The two ways out of a question the user will not answer: a chip that hands the choice to Forge, and a
+     link that hands it back to the user. The link is a link rather than a seventh card, because typing
+     is the exception here and should not look like one more answer. */
+  .askrow { display: flex; align-items: center; flex-wrap: wrap; gap: .5em .9em; margin-top: 1.1em; }
+  .skiplink { font-size: .88em; font-weight: 600; color: var(--wf-dim); text-decoration: underline; text-underline-offset: .22em; }
+
+  /* The composer on this page is one line and no keyboard hints: it is the side door, not the entrance,
+     so it does not get the instruction row wireframes 1 and 2 give theirs. */
+  .composer.quiet { display: flex; align-items: center; gap: .7em; margin-top: 1.7em; }
+  .composer.quiet .ph { flex: 1 1 auto; min-width: 0; }
+
+  /* The decision card: a tap, written out in words. It is a .card in the transcript rather than a plain
+     user bubble, because it is an object the user can reopen rather than a message they sent. */
+  .decision { max-width: 78%; }
+  .why { margin: 0; color: var(--wf-dim); font-size: .95em; }
+  .heard { margin: 0; }
+
+  /* The plan card's two doors. Both live: the draft is buildable, and the argument stays open. */
+  .plan-foot { display: flex; align-items: center; flex-wrap: wrap; gap: .5em; margin-top: 1em;
+    border-top: 1px solid var(--wf-line); padding-top: .85em; }
+
+  /* The brief strip: the receipt for the interview, in the canvas foot where a status bar belongs. It is a
+     list of what has not been said yet rather than a progress bar - a bar would say "nearly done" about a
+     conversation, and 5 of 5 is not the goal, a plan the user agrees with is. */
+  .brief-strip { display: flex; flex-wrap: wrap; align-items: center; gap: .55em .95em; margin-top: 1.8em;
+    border-top: 1px solid var(--wf-line); padding-top: .8em; }
+  .brief-lab { font: 700 .7em/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--wf-dim); }
+  .bl { display: flex; align-items: center; gap: .4em; font-size: .8em; color: var(--wf-dim); }
+  .bl.on { color: var(--accent); font-weight: 700; }
+  .brief-strip .count { margin-left: auto; font: 700 .7em/1.4 var(--mono); letter-spacing: .08em;
+    text-transform: uppercase; color: var(--wf-dim); }
+  /* At 400px the five labels wrap to three lines and stop being a strip, so the phone frame keeps the dots
+     and their titles and drops the words. Five dots still read as "five questions to go". */
+  .brief-strip.mini .dot { margin: 0 .12em; }
+
+  /* On a phone the answer cards are the screen: six full-width targets, one thumb, no keyboard. */
+  .phone .tapcard { flex: 1 1 100%; }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css">
+</head>
+<body>
+
+<header class="top wrap">
+  <a class="logo-lockup" href="../../mockups/index.html" title="All mockups">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <span class="top-right">AI chat &middot; wireframe 3 of 3 &middot; Interview</span>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">AI chat page &middot; wireframe 3 of 3</p>
+  <h1>Interview</h1>
+  <p class="lede">
+    <strong>The AI speaks first and every answer is a tap.</strong> The blank box is the failure mode - it
+    asks a user to bring the question, the vocabulary and the confidence before Forge can help with any of
+    them - so there is no blank box: the page opens as the first turn of a conversation that has already
+    started, one answerable question with six tappable answers, and typing offered as a link at the edge
+    of it.
+  </p>
+  <p class="legend">
+    <b>Notation.</b> Dashed outline = empty, placeholder or not built yet. Grey bar = body copy nobody is
+    judging. Blue = the one live action on the canvas. Amber numbered marker = a note in the panel to the
+    right of the frame, and the notes are commentary rather than part of the UI. Two colours of meaning,
+    no art and no brand colour anywhere: this is a wireframe, not a mockup.
+  </p>
+
+  <!-- ======================= State 1: the first turn ======================= -->
+  <section class="sec">
+    <h2>State 1 &mdash; the first turn</h2>
+    <p>
+      The screen a user meets on a cold canvas, which is the state the chat page fails at today. There is
+      no title, no empty box and no placeholder to get past: the assistant's first line stands where the
+      page's heading would be, and the only thing left to do is answer one question with one tap.
+      Everything else in the canvas is either a way out of that question or the receipt for the answers.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 1 &middot; nothing typed yet</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen">
+            <div class="talk">
+
+              <!-- The first thing on the page is a sentence, not a caret. -->
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <p>Let&rsquo;s find your game. You don&rsquo;t have to know the answer yet.<span class="mk">1</span></p>
+                </div>
+              </div>
+
+              <!-- One question, six words, one tap each: the answer cards are the real input on this page. -->
+              <p class="q">What should a player be doing in the first 30 seconds?<span class="mk">2</span></p>
+              <div class="taprow">
+                <span class="tapcard">Run and hide</span>
+                <span class="tapcard">Fight something</span>
+                <span class="tapcard">Build and farm</span>
+                <span class="tapcard">Explore</span>
+                <span class="tapcard">Race</span>
+                <span class="tapcard">Solve puzzles</span>
+              </div>
+
+              <div class="askrow">
+                <span class="chip">Not sure &mdash; surprise me<span class="mk">3</span></span>
+                <span class="skiplink">Skip &mdash; I&rsquo;ll type it<span class="mk">4</span></span>
+              </div>
+            </div>
+
+            <div class="composer quiet">
+              <span class="ph">Or type it your own way&hellip; <span class="caret"></span></span>
+              <span class="send" aria-hidden="true">
+                <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="mk">5</span>
+            </div>
+
+            <div class="brief-strip">
+              <span class="brief-lab">Brief</span>
+              <span class="bl"><span class="dot"></span>Goal</span>
+              <span class="bl"><span class="dot"></span>Feel</span>
+              <span class="bl"><span class="dot"></span>Players</span>
+              <span class="bl"><span class="dot"></span>Devices</span>
+              <span class="bl"><span class="dot"></span>Steps</span>
+              <span class="count">0 of 5</span>
+              <span class="mk">6</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">1</span> A page that has already started</h4>
+          <p>The failure this direction is built around is not that people cannot type. It is that they
+            cannot type <em>first</em>: an empty box asks the user to bring the question, the vocabulary
+            and the confidence at the same time, and most people arrive with one of the three.</p>
+          <p>So the assistant's first line stands where the page's title would be, and nothing on the
+            canvas is waiting for the user to begin. The trade is made honestly: Forge claims the opening
+            move, and the user answers rather than authors.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">2</span> One question, six answers, one tap each</h4>
+          <p>&ldquo;What should a player be doing in the first 30 seconds?&rdquo; is answerable by anyone
+            who has played a game, and it is the question underneath most of the 13 researched game types
+            in the library: run and hide, fight, build, explore, race, solve.</p>
+          <p>Six covers the shapes. A seventh word is the one nobody reads, and a text field here would
+            put the hardest part of design - naming the core loop - in front of a user who came to be
+            told what the options are.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">3</span> Not knowing is a valid answer</h4>
+          <p>&ldquo;Not sure - surprise me&rdquo; is a real reply rather than a dead end. It keeps the
+            interview moving, it hands the choice to Forge, and it is the cheapest tour of the library a
+            beginner can take. A wizard with a required field could not accept this answer; a
+            conversation can, and that is the whole difference.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">4</span> Typing is a side door, not the doorway</h4>
+          <p>The link is smaller and quieter than the cards on purpose. Someone who already knows what
+            they want - a boss fight on a moving train - should not have to answer a quiz to say it, but
+            the majority should not be invited to start on a blank page either.</p>
+          <p>This is the honest cost of leading with taps: the free-text path is real, and it is easy to
+            walk past. Note 11 names what that costs.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">5</span> The composer is demoted, not deleted</h4>
+          <p>One line at the foot of the canvas, dashed because free text goes there, and the send control
+            is the only blue thing on this screen. No answer card is highlighted: the assistant has no
+            business recommending an answer to a question about the user's own game, so the six cards stay
+            equal and the colour is spent on the one control that commits.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">6</span> Five dots are a receipt</h4>
+          <p>Goal, Feel, Players, Devices, Steps is what Forge intends to know before it writes a plan, in
+            the order it will ask. The strip in the canvas foot is the user's view of that list, and it is
+            not a progress bar: <em>0 of 5</em> is not a score, it is a statement of what has not been
+            said yet.</p>
+          <p>It is also the reason the interview can be trusted to end. A user who can see five questions
+            will answer five questions; a quiz with no visible end is the thing people abandon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= State 2: three answers in ======================= -->
+  <section class="sec">
+    <h2>State 2 &mdash; three answers in</h2>
+    <p>
+      Three taps later. Every answer is a card in the transcript with an Edit beside it, Forge reads the
+      brief back in its own words before it builds anything, and the plan arrives in the same column the
+      user has been reading - the same game type, the same kind of device list and the same five build
+      steps as the other two directions, so the difference being judged is where it lives, not what it is.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 2 &middot; three answers in</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen">
+            <div class="talk">
+
+              <!-- Question 1, the one the page opened on, now part of the record and editable. -->
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <span class="ln w90"></span>
+                  <span class="ln w60"></span>
+                  <div class="who"><span>Goal &middot; question 1</span><span class="edit">Edit</span><span class="mk">7</span></div>
+                  <p class="qline">What should a player be doing in the first 30 seconds?</p>
+                </div>
+              </div>
+
+              <div class="turn user">
+                <div class="card decision">
+                  <div class="card-head"><span class="t">Run and hide</span><span class="edit">Edit</span><span class="mk">8</span></div>
+                  <p class="why">Props scatter and hide during the countdown; the hunters come in after 30 seconds.</p>
+                </div>
+              </div>
+
+              <!-- Questions 2 and 3, same shape, one line each: the transcript stays readable at length. -->
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <div class="who"><span>Feel &middot; question 2</span><span class="edit">Edit</span></div>
+                  <p class="qline">Spooky, silly or tense?</p>
+                </div>
+              </div>
+
+              <div class="turn user">
+                <div class="card decision">
+                  <div class="card-head"><span class="t">Spooky, but nothing that jumps out at you</span><span class="edit">Edit</span></div>
+                </div>
+              </div>
+
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <div class="who"><span>Players &middot; question 3</span><span class="edit">Edit</span></div>
+                  <p class="qline">How many players, and how long is a round?</p>
+                </div>
+              </div>
+
+              <div class="turn user">
+                <div class="card decision">
+                  <div class="card-head"><span class="t">4 players, 10-minute rounds</span><span class="edit">Edit</span></div>
+                  <p class="why">Two rounds a match, and props get teleported back when a round starts.</p>
+                </div>
+              </div>
+
+              <!-- The read-back, before anything is built. -->
+              <div class="card">
+                <div class="card-head"><span class="t">Here&rsquo;s what I heard</span><span class="btn">Fix this</span><span class="mk">9</span></div>
+                <p class="heard">A spooky prop hunt for four players: 30 seconds of scrambling to hide, then
+                  ten minutes of being hunted. You did not say the hunt moves, so I have given the props
+                  legs - if hiding should be a spot you pick and not a move you make, say so and I will
+                  drop the Prop Mover.</p>
+              </div>
+
+              <!-- The deliverable, in the transcript, the same shape as the other two directions. -->
+              <div class="card">
+                <div class="card-head"><span class="t">Your plan</span><span class="state">Draft</span><span class="mk">10</span></div>
+                <p class="why">Hide as a prop, hunt as a player - four players, ten-minute rounds, two rounds a match.</p>
+                <div class="slot"><span class="k">Game type</span><span>Prop Hunt &mdash; Draft</span></div>
+                <div class="slot"><span class="k">Devices</span><span>Prop Manipulator &middot; Prop Mover &middot; Round Settings Device</span></div>
+                <div class="step"><span class="n on">1</span><span>Place a Player Spawn Pad at each end of the hotel and give the hunters the lobby.</span></div>
+                <div class="step"><span class="n on">2</span><span>Round Settings Device: 10-minute rounds, two rounds a match, props teleported back at round start.</span></div>
+                <div class="step"><span class="n">3</span><span>Prop Manipulator: register the prop set a player can become, and the damage rule that means a caught prop is out.</span></div>
+                <div class="step"><span class="n">4</span><span>Prop Mover: give the props legs, so hiding is a move a player makes and not a spot they picked.</span></div>
+                <div class="step"><span class="n">5</span><span>HUD Message Device: &ldquo;Hide now - 30 seconds&rdquo; at round start, and a caught message when a hunter tags a prop.</span></div>
+                <div class="plan-foot">
+                  <span class="btn primary">Build in UEFN</span>
+                  <span class="btn">Refine in chat</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="composer quiet">
+              <span class="ph">Or type it your own way&hellip; <span class="caret"></span></span>
+              <span class="send" aria-hidden="true">
+                <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="mk">11</span>
+            </div>
+
+            <div class="brief-strip">
+              <span class="brief-lab">Brief</span>
+              <span class="bl on"><span class="dot on"></span>Goal</span>
+              <span class="bl on"><span class="dot on"></span>Feel</span>
+              <span class="bl on"><span class="dot on"></span>Players</span>
+              <span class="bl"><span class="dot"></span>Devices</span>
+              <span class="bl"><span class="dot"></span>Steps</span>
+              <span class="count">3 of 5</span>
+              <span class="mk">12</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">7</span> This is a transcript, not a wizard</h4>
+          <p>This is the line between Interview and the question wizard already in the product
+            (<em>questions-1</em> to <em>questions-9</em>). A wizard replaces the screen and forgets:
+            answer 1 is gone when question 2 appears, and a wrong tap can only be undone by going back.
+            Here every turn stays on screen with an Edit beside it, the user can argue in prose at any
+            point, and Forge is allowed to deviate from the five slots when the game needs it.</p>
+          <p>The cost is honesty about state. A wizard always knows which step it is on; a conversation
+            has to keep its own record, and that record is exactly two things - the editable cards, and
+            the strip at the foot. The Edit beside a question is the same affordance pointed the other
+            way: it means &ldquo;ask me something else&rdquo;, which a fixed script cannot offer.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">8</span> A tap becomes a decision, in words</h4>
+          <p>The card is not the tap. It is Forge's reading of the tap, written out, and putting it in
+            words is what makes it correctable: &ldquo;Run and hide&rdquo; alone cannot be argued with,
+            &ldquo;the hunters come in after 30 seconds&rdquo; can.</p>
+          <p>This is also what keeps the record worth keeping. After three taps the user has three
+            sentences they can point at, rather than a wizard's memory of three clicks.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">9</span> It says what it heard before it builds</h4>
+          <p>One card, in Forge's own words, sitting between the last answer and the plan.
+            <em>Fix this</em> is the whole correction path and it lives on the card, not in a menu,
+            because if the reading is wrong here then everything after it is wrong - and this is the last
+            cheap moment to find out.</p>
+          <p>The card also shows its hand: the props move because the user never said they should not.
+            An inference stated out loud is one the user can refuse.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">10</span> The plan is the same deliverable as the other two</h4>
+          <p>Game type, the UEFN devices, five build steps: all three wireframes differ in
+            <em>where</em> this lands, not in what it is. The first two steps are filled because they are
+            fixed once the answers are in; the last three are the ones a user is most likely to change.</p>
+          <p>Read the card against the strip and the difference is deliberate. The plan names the three
+            devices it leans on, and its steps also need a Player Spawn Pad and a HUD Message Device,
+            while the strip still shows Devices and Steps dim. The strip counts what the <em>user</em>
+            has said; the device list is a proposal to accept or argue with. Two doors out of the card
+            and both are live - <em>Build in UEFN</em> takes the draft, <em>Refine in chat</em> keeps the
+            argument going.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">11</span> The risk, in the two places it shows</h4>
+          <p>First, it reads as a quiz if the tapping never ends. Five questions of six cards is a form
+            wearing a conversation's clothes, and the interview has to be willing to stop early and write
+            a plan out of what it has.</p>
+          <p>Second, the free-text path is one quiet line under the cards. A user who already knows what
+            they want has to notice it before the taps carry them along - which is why the composer is on
+            this state too, and why the link in state 1 stays visible instead of being folded behind a
+            &ldquo;something else&rdquo; card.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">12</span> Three of five, and the two that are not</h4>
+          <p>Goal, Feel and Players are filled because the user answered them. Devices and Steps stay dim
+            because Forge proposed them and nobody has agreed yet. Keeping that distinction visible is
+            the strip's whole job, and it is what stops <em>3 of 5</em> from being decorative progress.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= On a phone ======================= -->
+  <section class="sec">
+    <h2>On a phone</h2>
+    <p>
+      The first turn only, because at 400px the three directions are easiest to tell apart. This is the
+      one that gets better on a phone rather than worse: the question is the first screen, the answers are
+      full-width thumb targets, and the keyboard never has to open.
+    </p>
+
+    <div class="row2">
+      <div class="phones">
+        <div class="phone">
+          <div class="frame-label"><span>First turn &middot; 400px</span></div>
+          <div class="canvas">
+            <div class="appbar">
+              <span class="appmark"></span>
+              <span class="appname">Forge</span>
+              <span class="soon">Coming soon</span>
+            </div>
+            <div class="screen">
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <p>Let&rsquo;s find your game. You don&rsquo;t have to know the answer yet.</p>
+                </div>
+              </div>
+
+              <p class="q">What should a player be doing in the first 30 seconds?</p>
+              <div class="taprow">
+                <span class="tapcard">Run and hide</span>
+                <span class="tapcard">Fight something</span>
+                <span class="tapcard">Build and farm</span>
+                <span class="tapcard">Explore</span>
+                <span class="tapcard">Race</span>
+                <span class="tapcard">Solve puzzles</span>
+                <span class="mk">13</span>
+              </div>
+
+              <div class="askrow">
+                <span class="chip">Not sure &mdash; surprise me</span>
+                <span class="skiplink">Skip &mdash; I&rsquo;ll type it</span>
+              </div>
+
+              <div class="composer quiet">
+                <span class="ph">Or type it your own way&hellip;</span>
+                <span class="send" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" width="11" height="11"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+
+              <div class="brief-strip mini">
+                <span class="brief-lab">Brief</span>
+                <span class="dot" title="Goal"></span>
+                <span class="dot" title="Feel"></span>
+                <span class="dot" title="Players"></span>
+                <span class="dot" title="Devices"></span>
+                <span class="dot" title="Steps"></span>
+                <span class="count">0 of 5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">13</span> Better on a phone, not worse</h4>
+          <p>Every other structure in this set has to solve the phone. This one is native to it: six
+            full-width cards, one thumb, the question as the first screen and no keyboard over the top of
+            the conversation.</p>
+          <p>Two things change at 400px and neither is a loss. The brief strip drops its labels and keeps
+            its five dots - five dots still read as &ldquo;five questions to go&rdquo; - and the composer
+            stays one line instead of growing a row of buttons it does not need.</p>
+          <p>The one thing to watch: <em>Skip &mdash; I&rsquo;ll type it</em> has to stay above the fold.
+            It is the only way out of a question a user cannot answer, and here it is competing with six
+            large targets for the same thumb.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= What this bets on ======================= -->
+  <section class="sec">
+    <h2>What this direction bets on</h2>
+    <p>
+      Each direction in this set is a bet about which failure the chat page has to solve first. This one
+      bets that the failure is the user rather than the box: people do not lack ideas, they lack a first
+      move. It pays for that bet by putting words in the user's mouth, which is only safe while every one
+      of those words can be edited.
+    </p>
+    <div class="bets">
+      <div class="bet">
+        <h3>Good at</h3>
+        <ul>
+          <li>Getting a first answer out of someone who has no idea what to make: one question with six words under it is a task anyone can finish.</li>
+          <li>Being fast on a phone, where taps beat typing and the answers are the whole screen.</li>
+          <li>Leaving a record. Every tap becomes a written decision in the transcript, so the brief exists in words the user can argue with later.</li>
+          <li>Teaching the domain by asking about it - &ldquo;run and hide&rdquo; is a game type's first 30 seconds, and the vocabulary is learned by using it.</li>
+          <li>Costing one screen to learn, against a shelf of prompts or a second panel to watch.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>Risks</h3>
+        <ul>
+          <li>It reads as a quiz if the tapping never ends. The interview has to stop and write a plan while the user still wants to answer.</li>
+          <li>A quiet free-text path is a dead end for the user who already knows what they want - and the more polished the cards get, the easier that link is to miss.</li>
+          <li>Six taps only cover the shapes the library already knows: anything genuinely new has to survive being forced into one of six words.</li>
+          <li>Forge writes the user's answer for them on every card, and one wrong reading in a row costs the trust the taps were meant to earn.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>What to instrument</h3>
+        <ul>
+          <li>Taps per session before a plan appears, and where people stop tapping: the sixth question is where the quiz feeling starts.</li>
+          <li>How often decision cards are edited, and which of the six answers gets corrected most - that is the reading Forge gets wrong.</li>
+          <li>&ldquo;Surprise me&rdquo; against &ldquo;Skip &mdash; I&rsquo;ll type it&rdquo;. A screen where surprise me dominates is a screen whose questions are wrong.</li>
+          <li>Whether a tapped brief reaches <em>Build in UEFN</em> more often than a typed one, and whether the plan built from taps gets refined straight away.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="siblings">
+      <a href="../chat-1-launchpad/index.html">Wireframe 1 - Launchpad: example prompts and theme chips above a centred chat box &rarr;</a>
+      <a href="../chat-2-workbench/index.html">Wireframe 2 - Workbench: the chat as process, a live design panel as product &rarr;</a>
+      <a href="../../mockups/index.html">All mockups &rarr;</a>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Wireframe 3 - Interview</div>
+</body>
+</html>

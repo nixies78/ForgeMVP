@@ -1,0 +1,754 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - AI chat wireframe 2 - Workbench</title>
+<link rel="icon" href="../../assets/logo.svg">
+<style>
+  /* ------------------------------------------------------------------------------------------------
+   * Wireframe 2 - Workbench.
+   *
+   * The opposite structure to Launchpad, drawn from the same parts. The canvas is two columns: the
+   * conversation on the left, "Your design" on the right, filling in as the conversation goes. Nothing
+   * about the chat itself changes - the same box, the same follow-ups - but its output has a home that
+   * is visible while you talk, so the plan is a thing on the screen rather than the residue of a scroll.
+   *
+   * This file is wireframe 2 of 3 for the AI chat page. The three share one notation and one CSS kit,
+   * recorded in support/chat-wireframes-brief.md; the kit is copied verbatim below so the pages can be
+   * compared like for like, and only the last block of this stylesheet is this page's own.
+   * ------------------------------------------------------------------------------------------------ */
+
+  /* ============================== shared kit (from the brief) ============================== */
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  :root {
+    --page: #0E0F12;        /* the concept page's own ground */
+    --panel: #15181C;       /* bezels, notes */
+    --rule: #2C3036;        /* page hairlines */
+    --ink: #E9EAEC;         /* page text */
+    --dim: #9BA0A7;         /* page secondary text */
+    --paper: #F2F3F5;       /* wireframe canvas */
+    --wf-ink: #23262B;      /* wireframe text */
+    --wf-dim: #767D85;      /* wireframe secondary text */
+    --wf-line: #C9CDD3;     /* wireframe hairline */
+    --wf-line-2: #9AA0A7;   /* wireframe solid edge */
+    --wf-dash: #B4BAC1;     /* empty state */
+    --wf-fill: #FFFFFF;     /* wireframe surface */
+    --wf-fill-2: #E4E7EA;   /* wireframe filled surface */
+    --accent: #33BFFF;      /* the one live colour */
+    --accent-ink: #0A2633;
+    --note: #F9A91F;        /* annotations */
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--page); color: var(--ink); font: 400 1rem/1.6 var(--body); }
+  main.wrap { padding-block: 40px 88px; }
+  h1 { font: 800 clamp(2rem, 4.6vw, 3rem)/1.04 var(--body); letter-spacing: -.025em; margin: 0 0 .5rem; }
+  .eyebrow { font: 700 .75rem/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 0 0 14px; }
+  .lede { color: var(--ink); margin: 0 0 14px; max-width: 62ch; font-size: 1.05rem; }
+  .legend { color: var(--dim); font-size: .82rem; margin: 0; max-width: 78ch; }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .sec { margin-top: 60px; }
+  .sec > h2 { font: 800 1.4rem/1.2 var(--body); letter-spacing: -.015em; margin: 0 0 10px; }
+  .sec > p { margin: 0 0 18px; color: var(--dim); max-width: 74ch; }
+  .cap { color: var(--dim); font-size: .82rem; margin: 12px 2px 0; }
+
+  /* one frame and its notes: 812px of canvas beside a 296px note column inside the 1136px column */
+  .row2 { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 28px; align-items: start; margin-top: 22px; }
+  .frame { background: var(--panel); border: 1px solid var(--rule); border-radius: 18px; padding: 12px; }
+  .frame-label { display: flex; justify-content: space-between; gap: 12px; padding: 2px 4px 10px;
+    font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .canvas { background: var(--paper); color: var(--wf-ink); border-radius: 10px; padding: 1.1em; font-size: 14px; line-height: 1.45; }
+
+  /* in-canvas chrome: the app bar, then the screen */
+  .appbar { display: flex; align-items: center; gap: .7em; padding-bottom: .9em; border-bottom: 1px solid var(--wf-line); }
+  .appmark { width: 1.6em; height: 1.6em; border-radius: .35em; background: var(--wf-line-2); flex: none; }
+  .appname { font: 800 .82em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
+  .appnav { display: flex; gap: .5em; margin-left: 1em; }
+  .appnav i { display: block; width: 3.6em; height: .5em; border-radius: 1em; background: var(--wf-line); }
+  .soon { margin-left: auto; border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .25em .7em;
+    font: 700 .68em/1.3 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .screen { padding-top: 1.5em; }
+  .h3 { font: 700 1.25em/1.25 var(--body); letter-spacing: -.01em; margin: 0 0 .5em; }
+  .ln { display: block; height: .5em; border-radius: .4em; background: var(--wf-line); margin: .5em 0; }
+  .w90 { width: 90%; } .w75 { width: 75%; } .w60 { width: 60%; } .w40 { width: 40%; }
+
+  /* the composer, wherever it sits */
+  .composer { border: 1.5px dashed var(--wf-dash); border-radius: .7em; background: var(--wf-fill); padding: .85em .9em; }
+  .composer .ph { color: var(--wf-dim); font-size: .95em; }
+  .caret { display: inline-block; width: 1.5px; height: 1em; background: var(--wf-line-2); vertical-align: -.15em; }
+  .composer-foot { display: flex; align-items: center; gap: .6em; margin-top: 1.1em; font-size: .78em; color: var(--wf-dim); }
+  .composer-foot .spacer { margin-left: auto; }
+  .send { width: 2.1em; height: 2.1em; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+    display: grid; place-items: center; flex: none; }
+  .alt { margin-left: auto; font-size: .78em; color: var(--wf-dim); }
+
+  /* starter shelf: eyebrow, prompt rows, chips, and the brief tray */
+  .wf-eyebrow { font: 700 .76em/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--wf-dim); margin: 0 0 .8em; }
+  .prow { display: flex; align-items: center; gap: .6em; background: var(--wf-fill); border: 1px solid var(--wf-line);
+    border-radius: .5em; padding: .6em .8em; margin-bottom: .45em; font-size: .95em; }
+  .prow .cue { color: var(--wf-dim); }
+  .prow .go { margin-left: auto; font: 700 .72em/1 var(--body); color: var(--wf-dim); border: 1px solid var(--wf-line);
+    border-radius: .4em; padding: .3em .55em; white-space: nowrap; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4em; }
+  .chip { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .3em .8em; font-size: .85em; background: var(--wf-fill); white-space: nowrap; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
+  .tray { display: flex; align-items: center; flex-wrap: wrap; gap: .5em; border: 1px dashed var(--wf-dash);
+    border-radius: .6em; padding: .7em .8em; background: var(--wf-fill); margin-top: 1.1em; font-size: .9em; }
+  .tray .lab { font: 700 .72em/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .brief-line { color: var(--wf-ink); }
+  .btn { display: inline-flex; align-items: center; gap: .45em; border-radius: .45em; padding: .5em .9em;
+    font: 700 .85em/1 var(--body); border: 1px solid var(--wf-line-2); background: var(--wf-fill); color: var(--wf-ink); white-space: nowrap; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn[aria-disabled="true"] { background: var(--wf-fill-2); color: var(--wf-dim); border-color: var(--wf-line); }
+
+  /* the conversation */
+  .turn { display: flex; gap: .6em; margin-bottom: .8em; }
+  .turn.user { justify-content: flex-end; }
+  .avatar { width: 1.7em; height: 1.7em; border-radius: .4em; background: var(--wf-line-2); flex: none; }
+  .bub { max-width: 78%; border-radius: .8em; padding: .7em .85em; font-size: .92em; }
+  .bub.ai { background: var(--wf-fill); border: 1px solid var(--wf-line-2); }
+  .bub.user { background: var(--wf-fill-2); border: 1px solid var(--wf-line); }
+  .taprow { display: flex; flex-wrap: wrap; gap: .4em; margin-top: .7em; }
+  .tapcard { border: 1.5px solid var(--wf-line-2); border-radius: .6em; padding: .6em .8em; background: var(--wf-fill);
+    font-size: .9em; font-weight: 600; }
+  .card { border: 1px solid var(--wf-line-2); border-radius: .7em; background: var(--wf-fill); padding: .9em; font-size: .9em; }
+  .card + .card { margin-top: .8em; }
+  .card-head { display: flex; align-items: center; gap: .5em; margin-bottom: .7em; }
+  .card-head .t { font: 700 .95em/1.2 var(--body); }
+  .state { border: 1px solid var(--wf-line-2); border-radius: 1em; padding: .2em .6em; font-size: .72em; font-weight: 700; color: var(--wf-dim); }
+  .slot { display: flex; align-items: baseline; gap: .6em; padding: .45em 0; border-top: 1px dashed var(--wf-line); font-size: .92em; }
+  .slot .k { min-width: 7.5em; color: var(--wf-dim); font-size: .82em; }
+  .slot .v.empty { color: var(--wf-dim); }
+  .dot { width: .55em; height: .55em; border-radius: 50%; border: 1.5px solid var(--wf-line-2); display: inline-block; }
+  .dot.on { background: var(--accent); border-color: var(--accent); }
+  .step { display: flex; align-items: center; gap: .6em; padding: .38em 0; border-top: 1px dashed var(--wf-line); font-size: .9em; }
+  .step .n { width: 1.5em; height: 1.5em; border-radius: .3em; background: var(--wf-fill-2); display: grid; place-items: center;
+    font: 700 .75em/1 var(--body); color: var(--wf-dim); flex: none; }
+  .step .n.on { background: var(--accent); color: var(--accent-ink); }
+  .mk { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 .7em/1 var(--body); vertical-align: .2em; margin-left: .35em; flex: none; }
+
+  /* the notes panel: commentary beside the frame, never inside it */
+  .notes { display: grid; gap: 14px; align-content: start; }
+  .notes > .nh { font: 700 .72rem/1.3 var(--body); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 0; }
+  .note { background: var(--panel); border: 1px solid var(--rule); border-left: 3px solid var(--note); border-radius: 10px; padding: 12px 14px; }
+  .note h4 { margin: 0 0 6px; font: 700 13px/1.35 var(--body); display: flex; gap: 8px; align-items: center; }
+  .note h4 .n { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--note);
+    color: #241a03; font: 700 11px/1 var(--body); flex: none; }
+  .note p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--dim); }
+  .note p + p { margin-top: 6px; }
+
+  /* phone frames: the same kit at a smaller canvas size - everything inside is in em */
+  .phones { display: flex; flex-wrap: wrap; gap: 22px; margin-top: 22px; }
+  .phone { width: 296px; background: var(--panel); border: 1px solid var(--rule); border-radius: 24px; padding: 10px; }
+  .phone .canvas { font-size: 11.5px; border-radius: 16px; padding: 1em; }
+
+  /* closing blocks */
+  .bets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+  .bet { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; }
+  .bet h3 { margin: 0 0 10px; font: 700 14px/1.3 var(--body); }
+  .bet ul { margin: 0; padding-left: 18px; color: var(--dim); font-size: 13.5px; line-height: 1.6; }
+  .siblings { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+  .siblings a { color: var(--accent); font-size: .9rem; font-weight: 600; text-decoration: none; border-bottom: 1px solid transparent; }
+  .siblings a:hover { border-bottom-color: currentColor; }
+  .tag { position: fixed; left: 14px; bottom: 14px; z-index: 9; background: var(--panel); border: 1px solid var(--rule);
+    border-radius: 999px; padding: 6px 12px; font: 600 11px/1.3 var(--mono); letter-spacing: .06em; color: var(--dim); }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+  @media (max-width: 1080px) {
+    .row2 { grid-template-columns: minmax(0, 1fr); }
+    .bets { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 520px) {
+    .canvas { font-size: 12.5px; }
+    .phone { width: 100%; }
+    .top-right { display: none; }
+  }
+
+  /* ============================== this page's own rules ==============================
+   * Everything above is the set's; everything below is the Workbench's structure. */
+
+  /* The 72px bar: height and the mark are the shared frame's, everything else is this page's. */
+  .top { height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--rule); }
+  .top-right { font: 600 11px/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+
+  /* The split. The panel column is a fixed 17.5em and the conversation takes what is left, rather than
+     the other way round: a plan whose width depends on how long the last message was is not a plan, and
+     the device rows in the panel are the longest fixed strings on the canvas.
+     Both columns are flex columns with the composer pushed to the foot, so the two columns end level
+     however unequal the transcript and the plan are - which is usually, and is the direction's own
+     argument: the conversation stops growing while the design keeps filling in. */
+  .wb { display: grid; grid-template-columns: minmax(0, 1fr) 17.5em; gap: 1.4em; align-items: stretch; }
+  .wb-col { display: flex; flex-direction: column; min-width: 0; }
+  .wb-foot { margin-top: auto; padding-top: 1.4em; }
+
+  /* Below 700px the frame is a narrow frame rather than a desktop one, so the split stacks instead of
+     squeezing the conversation into a gutter. This is about the frame's width, not the device's: at
+     400px the phone frame below shows what the panel really does on a phone. */
+  @media (max-width: 700px) {
+    .wb { grid-template-columns: minmax(0, 1fr); }
+    .wb-foot { padding-top: 1em; }
+  }
+
+  /* Left column: the three lines that stand in for a hero. They are a numbered list rather than a
+     paragraph because the third line is a promise about the output, and promises want a shape. */
+  .how { list-style: none; margin: 0 0 1.5em; padding: 0; }
+  .how li { display: flex; gap: .6em; font-size: .94em; padding: .28em 0; }
+  .how .n { flex: none; font: 700 .8em/1.7 var(--mono); color: var(--wf-dim); }
+  .how b { font-weight: 700; }
+
+  /* The prompt rows carry a sentence each; the text is the shrinkable part so a long example wraps
+     inside the row instead of pushing the "Use this" cue off the edge. */
+  .prow .txt { min-width: 0; }
+
+  /* The gap between the groups in that column. The kit's eyebrow has no top margin - on the Launchpad
+     the shelves carry their own spacing - so the Workbench's second and third groups ask for it here. */
+  .grp { margin-top: 1.5em; }
+
+  /* The one line in an assistant bubble that is being judged: the follow-up question, in ink, under the
+     grey bars that stand for the prose around it. Only the question and the taps are written out. */
+  .bub .ask { margin: .7em 0 0; }
+
+  /* The panel. Real chrome, dashed contents: the frame is built from the first second, which is the
+     whole difference between this direction and a chat that shows nothing until it is asked. */
+  .panel { display: flex; flex-direction: column; border: 1px solid var(--wf-line-2); border-radius: .7em;
+    background: var(--wf-fill); padding: .9em; }
+  .panel-head { display: flex; align-items: center; gap: .5em; margin-bottom: .7em; }
+  .panel-head .t { font: 700 .95em/1.2 var(--body); }
+
+  /* The hint sits at the panel's foot: five empty rows are scanned before anything is read, so the one
+     instruction on the cold canvas is where the eye lands after the scan, not above it. */
+  .panel-hint { margin-top: auto; padding-top: .8em; border-top: 1px dashed var(--wf-line);
+    font-size: .88em; color: var(--wf-dim); }
+
+  /* Counts and their bars. The bar is the accent because it is progress being filled, which is the one
+     thing blue is allowed to mean besides the action itself. */
+  .pbar { height: .38em; border-radius: 1em; background: var(--wf-fill-2); overflow: hidden; margin: .1em 0 .5em; }
+  .pbar > i { display: block; height: 100%; background: var(--accent); }
+  .fill-5of6 { width: 83%; }
+  .fill-2of5 { width: 40%; }
+
+  /* The device list. Chosen devices get the accent dot; "considered" ones get an outline and a label,
+     because a device the AI is weighing is not a device the user has agreed to. */
+  .devs { margin: 0 0 .2em; }
+  .dev { display: flex; align-items: baseline; gap: .5em; padding: .3em 0; border-top: 1px dashed var(--wf-line); font-size: .86em; }
+  .dev .nm { min-width: 0; }
+  .dev .dot { flex: none; }
+  .dev.consider .nm { color: var(--wf-dim); }
+  .dev .tag2 { margin-left: auto; color: var(--wf-dim); font-size: .86em; font-style: italic; }
+  .dev.empty .nm { color: var(--wf-dim); }
+
+  /* Open questions: the panel's to-do list for the conversation, and every row is a route back into it. */
+  .oq { margin-top: .9em; padding-top: .7em; border-top: 1px solid var(--wf-line); }
+  .oq .h { display: flex; align-items: center; margin: 0 0 .3em; font: 700 .76em/1.3 var(--body);
+    letter-spacing: .1em; text-transform: uppercase; color: var(--wf-dim); }
+  .oq-row { display: flex; align-items: baseline; gap: .5em; padding: .32em 0; font-size: .88em; }
+  .oq-row .mini { margin-left: auto; }
+  .mini { font: 700 .76em/1 var(--body); color: var(--wf-ink); border: 1px solid var(--wf-line);
+    border-radius: .4em; padding: .28em .5em; white-space: nowrap; }
+
+  /* The action row. The primary action lives in the panel because the panel is the product being
+     built; it is disabled because the plan is not finished, and it says what it is waiting for. */
+  .panel-actions { display: flex; align-items: center; gap: .6em; margin-top: auto; padding-top: .9em; }
+  .panel-actions .why { font-size: .78em; color: var(--wf-dim); }
+
+  /* The line above the composer that closes the loop: what the panel is missing, said where it can be
+     answered. */
+  .tie { margin: 0 0 .6em; font-size: .82em; color: var(--wf-dim); }
+
+  /* Phone: the panel as a tab and a sheet. The tab row is the swap, the sheet is the panel, and the
+     composer stays the last row of the canvas in both tabs. */
+  .ph-tabs { display: flex; align-items: center; gap: .3em; border: 1px solid var(--wf-line-2);
+    border-radius: .6em; padding: .25em; margin-bottom: .9em; }
+  .ph-tab { flex: 1 1 0; text-align: center; font: 700 .85em/1.9 var(--body); border-radius: .4em; color: var(--wf-dim); }
+  .ph-tab.on { background: var(--accent); color: var(--accent-ink); }
+  .sheet { border: 1px solid var(--wf-line-2); border-radius: .9em .9em .4em .4em; background: var(--wf-fill);
+    padding: .8em; box-shadow: 0 -.5em 1em rgba(35, 38, 43, .09); }
+  .grab { display: block; width: 2.4em; height: .28em; border-radius: 1em; background: var(--wf-line); margin: 0 auto .7em; }
+  .sheet .panel-head { margin-bottom: .3em; }
+
+  /* The phone frame sits in the same frame/notes grid as the desktop ones, so the note column lines up
+     down the page instead of jumping. */
+  .row2 > .phones { margin-top: 0; }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css">
+</head>
+<body>
+
+<header class="top wrap">
+  <a class="logo-lockup" href="../../mockups/index.html" title="All mockups">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <span class="top-right">AI chat &middot; wireframe 2 of 3 &middot; Workbench</span>
+</header>
+
+<main class="wrap">
+  <p class="eyebrow">AI chat page &middot; wireframe 2 of 3</p>
+  <h1>Workbench</h1>
+  <p class="lede">
+    The chat is the process, the design is the product: a live design panel fills in beside the
+    conversation. The box stays where it is, in the left column, and everything the conversation
+    produces - the game type, the UEFN devices, the five build steps - lands in a panel on the right
+    while the user is still talking.
+  </p>
+  <p class="legend">
+    <b>Notation.</b> Dashed outline = empty or not built yet. Solid hairline = real chrome. Grey bar =
+    body copy nobody is judging. Blue = the one live action on the canvas. Amber number = a note in the
+    panel beside the frame, which is commentary and not part of the UI. No art and no brand colour
+    anywhere: this is a wireframe, not a mockup.
+  </p>
+
+  <!-- ======================= State 1: the cold canvas ======================= -->
+  <section class="sec">
+    <h2>State 1 &mdash; the cold canvas</h2>
+    <p>
+      Nothing sent yet. The whole screen is one state, side by side: the left column does what the chat
+      page does today and does it quietly - three lines of instruction, three example prompts, six quick
+      picks, the box - and the right column is the bet, an empty <em>Your design</em> that names the five
+      things Forge is going to fill in before it knows a single one of them.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 1 &middot; nothing sent yet</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen wb">
+            <div class="wb-col">
+              <p class="wf-eyebrow">How this works<span class="mk">1</span></p>
+              <ul class="how">
+                <li><span class="n">1</span><span><b>Describe it.</b> One sentence is enough - a mode, a place, a number of players.</span></li>
+                <li><span class="n">2</span><span><b>Forge asks.</b> Two or three questions, answered by tapping or typing.</span></li>
+                <li><span class="n">3</span><span><b>You get a plan.</b> The game type, the devices it needs, and five build steps.</span></li>
+              </ul>
+
+              <p class="wf-eyebrow">Try one of these<span class="mk">2</span></p>
+              <div class="prow"><span class="cue">&rsaquo;</span><span class="txt">A prop hunt in a drained hotel, four players, ten-minute rounds</span><span class="go">Use this</span></div>
+              <div class="prow"><span class="cue">&rsaquo;</span><span class="txt">A co-op escape room for two people, no combat</span><span class="go">Use this</span></div>
+              <div class="prow"><span class="cue">&rsaquo;</span><span class="txt">A boss fight on a moving train - is that buildable?</span><span class="go">Use this</span></div>
+
+              <p class="wf-eyebrow grp">Quick picks<span class="mk">3</span></p>
+              <div class="chips">
+                <span class="chip">Prop Hunt</span><span class="chip">Four players</span><span class="chip">Ten-minute rounds</span>
+                <span class="chip">Co-op</span><span class="chip">Spooky</span><span class="chip">No weapons</span>
+              </div>
+
+              <div class="wb-foot">
+                <div class="composer">
+                  <div class="ph">Describe the game - a mode, a place, a game you liked&hellip; <span class="caret"></span></div>
+                  <div class="composer-foot">
+                    <span>Enter to send &middot; Shift + Enter for a new line</span>
+                    <span class="spacer"></span>
+                    <span class="send" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="t">Your design</span>
+                <span class="state">Empty</span>
+                <span class="mk">4</span>
+              </div>
+              <div class="slot"><span class="k">Game type</span><span class="v empty">Not decided</span></div>
+              <div class="slot"><span class="k">Brand</span><span class="v empty">Not set</span></div>
+              <div class="slot"><span class="k">Players</span><span class="v empty">Not decided</span></div>
+              <div class="slot"><span class="k">Devices</span><span class="v empty">0 of 6</span></div>
+              <div class="slot"><span class="k">Build steps</span><span class="v empty">0 of 5</span></div>
+              <div class="panel-hint">
+                Answer in the chat, or click a slot to be asked about it.<span class="mk">5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">1</span> Three lines instead of a hero</h4>
+          <p>The cold canvas here is quieter than Launchpad's on purpose. The panel is doing the teaching
+            - it names the five questions Forge will ask - so the chat side only has to say what to type,
+            that questions follow, and what comes out. The third line is the promise, and it is stated
+            before anything is typed: the game type, the devices, five build steps.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">2</span> Three rows, not twelve</h4>
+          <p>Examples earn their space by covering the three ways someone arrives: a place and a mode, a
+            mode on its own, and a rewrite of something they already have. Anything longer belongs in the
+            panel's column, which is the trade this direction makes. The cost is real - a beginner gets
+            less vocabulary here than on the Launchpad - and the quick picks are what pay it back.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">3</span> Quick picks sit on the composer</h4>
+          <p>They are the last thing above the box because they are a way into the box, and they are read
+            in the order a brief is actually built: the mode, then the players, then how long a round
+            runs, then the mood. Tapping one writes the phrase into the composer and leaves the caret
+            there, so a pick is an edit and never a blind send.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">4</span> The panel names what it will ask for</h4>
+          <p>Five slots, all empty, all dashed, from the first second. Naming them turns "what is this
+            thing going to ask me?" into a list the user can read before committing to anything, and the
+            counts - <em>0 of 6</em>, <em>0 of 5</em> - are a promise that they will move. The panel is
+            drawn in real chrome with dashed contents: the frame is built, the answers are not.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">5</span> One hint, one input</h4>
+          <p>Exactly one instruction on the empty panel, at its foot, after the five empty rows. Clicking
+            a slot routes back into the chat rather than opening a form, so there is one input mechanism
+            with two doors into it. That is deliberate: the moment a slot can be filled in directly, the
+            panel becomes a second form and the conversation stops being the process.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= State 2: after the first exchange ======================= -->
+  <section class="sec">
+    <h2>State 2 &mdash; after the first exchange</h2>
+    <p>
+      One idea, one follow-up answered, and a second turn. The transcript is short and the panel is not:
+      that imbalance is the direction working as designed. The chat never repeats the plan back - the
+      plan is over there, with counts on it and an action under it.
+    </p>
+
+    <div class="row2">
+      <div class="frame">
+        <div class="frame-label"><span>State 2 &middot; the first exchange</span><span>desktop &middot; 1440</span></div>
+        <div class="canvas">
+          <div class="appbar">
+            <span class="appmark"></span>
+            <span class="appname">Forge</span>
+            <span class="appnav"><i></i><i></i><i></i></span>
+            <span class="soon">Chat with AI &middot; coming soon</span>
+          </div>
+
+          <div class="screen wb">
+            <div class="wb-col">
+              <div class="turn user">
+                <div class="bub user">A prop hunt in a drained hotel, four players, ten-minute rounds.</div>
+              </div>
+
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <span class="ln w90"></span>
+                  <span class="ln w60"></span>
+                  <p class="ask"><b>How should a round end?</b></p>
+                  <div class="taprow">
+                    <span class="chip">Clock runs out</span>
+                    <span class="chip">Everyone gets caught</span>
+                    <span class="chip on">Either - first to happen</span>
+                    <span class="mk">6</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="turn user">
+                <div class="bub user">Clock runs out. Ten minutes is the whole round.</div>
+              </div>
+
+              <div class="turn">
+                <span class="avatar"></span>
+                <div class="bub ai">
+                  <span class="ln w75"></span>
+                  <p class="ask"><b>Five devices and steps 1-2 are in Your design.</b> Two things I still need before it is buildable - they are under Open questions.</p>
+                </div>
+              </div>
+
+              <div class="wb-foot">
+                <p class="tie">2 open questions are waiting in <b>Your design</b> - answer them here, or click one to be asked about it.</p>
+                <div class="composer">
+                  <div class="ph">Add to the brief&hellip; <span class="caret"></span></div>
+                  <div class="composer-foot">
+                    <span>Enter to send &middot; Shift + Enter for a new line</span>
+                    <span class="spacer"></span>
+                    <span class="send" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="12" height="12"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="t">Your design</span>
+                <span class="state">Draft</span>
+                <span class="mk">7</span>
+              </div>
+              <div class="slot"><span class="k">Game type</span><span class="v">Prop Hunt - Draft</span></div>
+              <div class="slot"><span class="k">Brand</span><span class="v empty">Not set - optional</span></div>
+              <div class="slot"><span class="k">Players</span><span class="v">4 &middot; ten-minute rounds</span></div>
+
+              <div class="slot"><span class="k">Devices</span><span class="v">5 of 6<span class="mk">8</span></span></div>
+              <div class="pbar"><i class="fill-5of6"></i></div>
+              <div class="devs">
+                <div class="dev"><span class="dot on"></span><span class="nm">Prop Manipulator</span></div>
+                <div class="dev"><span class="dot on"></span><span class="nm">Round Settings Device</span></div>
+                <div class="dev"><span class="dot on"></span><span class="nm">Player Spawn Pad</span></div>
+                <div class="dev consider"><span class="dot"></span><span class="nm">HUD Message Device</span><span class="tag2">considered</span></div>
+                <div class="dev consider"><span class="dot"></span><span class="nm">Prop Mover</span><span class="tag2">considered</span></div>
+                <div class="dev empty"><span class="dot"></span><span class="nm">Sixth device - undecided</span></div>
+              </div>
+
+              <div class="slot"><span class="k">Build steps</span><span class="v">2 of 5</span></div>
+              <div class="pbar"><i class="fill-2of5"></i></div>
+              <div class="steps">
+                <div class="step"><span class="n on">1</span><span>Four Player Spawn Pads, one per hider.</span></div>
+                <div class="step"><span class="n on">2</span><span>Round Settings Device: one round, ten minutes.</span></div>
+                <div class="step"><span class="n">3</span><span>Prop clusters a hider can pass as - one per room.</span></div>
+                <div class="step"><span class="n">4</span><span>HUD Message Device: "Ten minutes. Do not move."</span></div>
+                <div class="step"><span class="n">5</span><span>Test one round with two players, and time it.</span></div>
+              </div>
+
+              <div class="oq">
+                <p class="h">Open questions &middot; 2<span class="mk">9</span></p>
+                <div class="oq-row"><span>Does a caught player spectate, or sit out?</span><span class="mini">Answer</span></div>
+                <div class="oq-row"><span>Do the props stay still once they are placed?</span><span class="mini">Answer</span></div>
+              </div>
+
+              <div class="panel-actions">
+                <span class="btn" aria-disabled="true">Build in UEFN</span>
+                <span class="why">2 open questions<span class="mk">10</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">6</span> A tap answers; the message is the record</h4>
+          <p>The three taps sit inside the question that produced them, so answering costs one click and
+            no typing. What the tap writes is a real user turn in the transcript - "Clock runs out. Ten
+            minutes is the whole round." - which the user can edit like any other sentence, and which the
+            panel then mirrors. The panel never becomes the place where the truth lives: it is a read-out
+            of the conversation, and if the two ever disagree the transcript wins.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">7</span> Draft is a state, not a warning</h4>
+          <p><em>Prop Hunt - Draft</em> matches the app's own vocabulary: game types are live or draft,
+            and a draft resolves to the category's baseline devices until it is researched. Saying so on
+            the slot is the honest version of a plan that is 13 researched types and 74 drafts deep -
+            better than presenting a draft as if it were finished.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">8</span> Five devices, two of them only weighed</h4>
+          <p>The list fills in as the conversation decides things, and it distinguishes a device the plan
+            has chosen from one the AI is only weighing. <em>Considered</em> is a promise that the user
+            can strike it out; printing all five as decided would be the AI claiming a decision it has
+            not been given. The sixth stays empty on purpose - the End Game Device has no built-in win
+            condition, it is wired from whatever ends the round, so it cannot be added until the caught
+            question is answered.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">9</span> Open questions point back into the chat</h4>
+          <p>Two things the AI still needs, named rather than guessed at, each one a route back into the
+            conversation. The panel is a to-do list for the chat and not a second form: the user answers
+            in the composer - or clicks one of these to be asked about it - and the list shortens itself
+            when the answer lands.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">10</span> The action is disabled, and says why</h4>
+          <p><em>Build in UEFN</em> is the reason the panel exists, so it lives at the panel's foot rather
+            than in the transcript. It is greyed while the plan is unfinished and the reason is next to
+            it, in words: two open questions. A disabled button with no reason is a dead end, and this one
+            is two clicks from being enabled, which is why the accent on this canvas is on the composer's
+            send instead - the thing that can actually be done.</p>
+        </div>
+        <div class="note">
+          <h4>The cost of this split &mdash; no marker</h4>
+          <p>Two panes are two places to look. Anyone who only wants a chat has a column of furniture
+            beside them for the whole conversation, and a short exchange leaves the left column visibly
+            emptier than the right. If the plan is finished in ten words, the panel was 280px spent on a
+            summary nobody needed.</p>
+          <p>A panel that is wrong is also worse than prose that is wrong: printing <em>Prop Hunt -
+            Draft</em> with a device count commits the product to a game type the user may have been
+            half-joking about. That is the argument for the counts being small, the state being named, and
+            every device being strikeable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= On a phone ======================= -->
+  <section class="sec">
+    <h2>On a phone</h2>
+    <p>
+      At 400px the split is impossible - two columns of 190px makes both of them useless - so the panel
+      stops being a column and becomes a peer of the chat: a tab, and a sheet that rises from the foot of
+      it. The tab carries the count, so the filling in is visible without opening anything. The composer
+      is the last row of the canvas in both tabs, and that is the rule this state exists to check.
+    </p>
+
+    <div class="row2">
+      <div class="phones">
+        <div class="phone">
+          <div class="frame-label"><span>State 2 &middot; 400px</span><span>design tab</span></div>
+          <div class="canvas">
+            <div class="appbar">
+              <span class="appmark"></span>
+              <span class="appname">Forge</span>
+              <span class="soon">Coming soon</span>
+            </div>
+            <div class="screen">
+              <div class="ph-tabs">
+                <span class="ph-tab">Chat</span>
+                <span class="ph-tab on">Design (5)</span>
+                <span class="mk">11</span>
+              </div>
+
+              <div class="sheet">
+                <span class="grab"></span>
+                <div class="panel-head">
+                  <span class="t">Your design</span>
+                  <span class="state">Draft</span>
+                  <span class="mk">12</span>
+                </div>
+                <div class="slot"><span class="k">Game type</span><span class="v">Prop Hunt - Draft</span></div>
+                <div class="slot"><span class="k">Players</span><span class="v">4 &middot; ten-minute rounds</span></div>
+                <div class="slot"><span class="k">Devices</span><span class="v">5 of 6</span></div>
+                <div class="pbar"><i class="fill-5of6"></i></div>
+                <div class="devs">
+                  <div class="dev"><span class="dot on"></span><span class="nm">Prop Manipulator</span></div>
+                  <div class="dev"><span class="dot on"></span><span class="nm">Round Settings Device</span></div>
+                  <div class="dev"><span class="dot on"></span><span class="nm">Player Spawn Pad</span></div>
+                  <div class="dev consider"><span class="dot"></span><span class="nm">HUD Message Device</span><span class="tag2">considered</span></div>
+                  <div class="dev consider"><span class="dot"></span><span class="nm">Prop Mover</span><span class="tag2">considered</span></div>
+                  <div class="dev empty"><span class="dot"></span><span class="nm">Sixth device - undecided</span></div>
+                </div>
+                <div class="slot"><span class="k">Build steps</span><span class="v">2 of 5</span></div>
+                <div class="pbar"><i class="fill-2of5"></i></div>
+                <div class="oq">
+                  <p class="h">Open questions &middot; 2</p>
+                  <div class="oq-row"><span>Does a caught player spectate, or sit out?</span><span class="mini">Answer</span></div>
+                  <div class="oq-row"><span>Do the props stay still once they are placed?</span><span class="mini">Answer</span></div>
+                </div>
+                <div class="panel-actions">
+                  <span class="btn" aria-disabled="true">Build in UEFN</span>
+                  <span class="why">2 open</span>
+                </div>
+              </div>
+
+              <div class="wb-foot">
+                <p class="tie">2 open questions in <b>Your design</b> &middot; answer them here.</p>
+                <div class="composer">
+                  <div class="ph">Add to the brief&hellip; <span class="caret"></span></div>
+                  <div class="composer-foot">
+                    <span class="spacer"></span>
+                    <span class="send" aria-hidden="true">
+                      <svg viewBox="0 0 12 12" width="11" height="11"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </span>
+                    <span class="mk">13</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notes">
+        <p class="nh">Notes &middot; not part of the UI</p>
+        <div class="note">
+          <h4><span class="n">11</span> At 400px the panel is a tab, not a column</h4>
+          <p>Two panes side by side at 400px is two 190px columns, and a chat bubble at 190px is not
+            readable. So the panel becomes a peer of the chat - one tap away, never beside it - and the
+            tab carries the count it is hiding: <em>Design (5)</em>. Someone who never opens the tab can
+            still see the design filling in, which is the part of the direction worth keeping on a
+            phone.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">12</span> The sheet is a summary, and says so</h4>
+          <p>What survives the move to a phone: the game type and its state, the player count, the device
+            count with the list and its <em>considered</em> rows, the build-step count, the open questions
+            and the disabled action. What does not: the five build steps' wording, collapsed to a count,
+            and the <em>Brand</em> slot, which is optional and is the one slot a phone user is least
+            likely to have an answer for. A sheet that scrolls to three screens is not a sheet, and the
+            steps are the one part of the panel that reads better as a list in the transcript later.</p>
+        </div>
+        <div class="note">
+          <h4><span class="n">13</span> The composer does not move</h4>
+          <p>The whole point of the tab is that the panel is the thing that changes. If opening it pushed
+            the box off the screen or made the user close a sheet to keep talking, this direction would
+            fail at exactly the width where it is most often used. The box is the last row of the canvas
+            in both tabs, and the questions the sheet is holding are answerable from it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= What this bets on ======================= -->
+  <section class="sec">
+    <h2>What this direction bets on</h2>
+    <p>
+      This one bets that the feeling of progress matters as much as the words, and pays for it with half
+      the screen. If the plan is only ever read once, at the end, the panel is 280px of furniture and the
+      transcript was right all along.
+    </p>
+    <div class="bets">
+      <div class="bet">
+        <h3>Good at</h3>
+        <ul>
+          <li>Making the output feel like the product rather than the residue of a conversation - the plan is on screen while it is still being argued about.</li>
+          <li>Answering "what will it ask me?" before it asks: the five slots are the whole interview, named in advance.</li>
+          <li>Showing change without making the user re-read: the device count, the ticked steps and the shortening question list are all one glance.</li>
+          <li>Progress that is a state rather than a scroll position - useful in a chat that can run long.</li>
+          <li>Surviving a long session: the transcript can be scrolled past, and the plan cannot be lost in it.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>Risks</h3>
+        <ul>
+          <li>Two panes are two places to look. The panel is dead weight for anyone who only wants a chat, and there is no version of this direction where it is not.</li>
+          <li>Choosing a game type out loud is a bigger commitment than saying it in a sentence, and the panel is where that commitment becomes visible.</li>
+          <li>The panel can outgrow the conversation, leaving the chat column as blank paper exactly when the user has stopped reading the plan.</li>
+          <li>On a phone the design hides behind a tab, and a tab label that goes stale - <em>Design (5)</em> that never becomes (6) - reads as broken.</li>
+          <li>The device list invites a second form: once "considered" rows can be swapped, someone will want a picker, and a picker for 59 devices is a worse experience than a sentence.</li>
+        </ul>
+      </div>
+      <div class="bet">
+        <h3>What to instrument if it ships</h3>
+        <ul>
+          <li>How often the panel is opened or scrolled, and from which turn. The right column is furniture on the day nobody touches it.</li>
+          <li><em>Considered</em> devices kept, struck out or ignored - the only honest measure of whether the AI's device picks are trusted.</li>
+          <li>Slot clicks against typed answers. If nobody ever clicks a slot, the hint is decoration and the panel is a read-only display.</li>
+          <li>Open questions answered against open questions abandoned: the panel's list is the shortest measurable path to a finished plan.</li>
+          <li>Plans that reach <em>Build in UEFN</em> enabled, and how many of them are draft game types rather than the 13 researched ones.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="siblings">
+      <a href="../chat-1-launchpad/index.html">Wireframe 1 - Launchpad: example prompts and theme chips above a centred chat box &rarr;</a>
+      <a href="../chat-3-interview/index.html">Wireframe 3 - Interview: the AI speaks first and every answer is a tap &rarr;</a>
+      <a href="../../mockups/index.html">All mockups &rarr;</a>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Wireframe 2 - Workbench</div>
+</body>
+</html>

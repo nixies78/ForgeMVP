@@ -84,6 +84,21 @@ Randomiser: R1 Fruit Machine (amber), R2 Quiet Power (blue + indigo), R2b Quiet 
 R3 Broadcast scoreboard, R4 Neon Arcade, R5 Terminal (tool only), R6 Editorial (light, wheel reels),
 R6b Editorial with the wheel on its side.
 
+AI chat: C1 Launchpad (prompts and theme chips above the box - the owner's own suggestion, drawn),
+C2 Workbench (conversation and a live design panel side by side), C3 Interview (the AI speaks first and
+the answers are taps). These three are **wireframes**, not mockups: they share one greyscale notation and
+answer a structural question - where the affordances sit and what the conversation produces - because the
+chat page's problem is not its palette. The brief is `support/chat-wireframes-brief.md`.
+
+## What the chat set deliberately does not settle
+
+The three chat wireframes are the first entry in the set that is about a *mechanism* rather than a
+material, and the first that reads as an app screen rather than a pitch page: no art, no brand gradients,
+no footer, one accent colour, and every block of copy is real. The next chat direction is therefore free
+to take one of these three structures and give it a material - a launcher's surface, paper, a terminal -
+without having to argue the structure again. What must not happen is a fourth structure that is really
+one of these three with the shelf moved.
+
 ## What "different" has to mean
 
 The set already covers dark restraint, arcade colour, neon glow, mono terminal, light editorial and
