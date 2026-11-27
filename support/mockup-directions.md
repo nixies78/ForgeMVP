@@ -122,6 +122,25 @@ panel, saying the plan was ready. It now leaves when nothing is owed, and the pa
 microphone's hover went black: the grey key's hover rule tied with the pressed state on specificity and was
 written later in the file, so a red key turned grey under the pointer it was reached for with.
 
+The pass after that was about time rather than layout. The page now opens with nothing in the conversation -
+"No messages yet.", "Not set" in the panel, no gauges to show, "Answers owed 0" already inert - because a
+tool's unused state is part of what a reviewer is judging, and because the owner asked to see it. The hero no
+longer changes job in one cut on the first message: the resize became one interpolated number, `--engage` =
+`min(1, turns / 8)`, carrying the headline, the intro's padding, the lede's opacity and the deck's height
+from the full two-line pitch to the one-line compact state across the first four inputs and their four
+replies. The first version divided by four and the checker caught it in the numbers - two inputs finished the
+ramp, which is not "the heading resizes as the chat grows, input by input". The short-window media queries
+had to be ramped too, or a fixed padding and headline clamp inside them pinned the pitch on exactly the
+screens with the least room. A scripted walk-through then types four user lines into the box a character at a
+time with Send held down for the whole of it, waits for the reviewer to press it, and steps aside the moment
+they send something of their own; the four lines are the very answers the panel's questions accept, so the
+walk-through and the panel are one conversation and the plan is complete when the script runs out. No
+overlay: the owner wanted the walk-through, not an explanation of it. The panel itself stopped being
+maintained and started being recomputed - one flag per answered question, one `render()` that works out the
+whole panel - so answering in any order, from either bay, cannot leave the two sides disagreeing; and the tap
+chips inside an old message go inert once their question has been settled anywhere else, because a settled
+question is not a question.
+
 ## What the chat set deliberately does not settle
 
 The three chat wireframes are the first entry in the set that is about a *mechanism* rather than a
@@ -133,7 +152,7 @@ for Interview), a full mockup of the phone state of any of them, and any decisio
 conversation does *after* the plan exists - refine, rebuild or fork. What must not happen is a fourth
 structure that is really one of these three with the shelf moved.
 
-Two things C2b raises are now waiting on the owner rather than on work:
+Two things C2b raised were waiting on the owner rather than on work, and one of them has since been built:
 
 - **What an Answer key should actually do.** Today it is a one-click transaction: the panel writes the
   user's answer *and* the bot's reply into the transcript in the same move, which is what makes the loop
@@ -142,6 +161,9 @@ Two things C2b raises are now waiting on the owner rather than on work:
   there is no model), because a panel that does the user's talking is the one thing this direction claims
   not to be. Nothing has been changed in that direction: the misfire that let a click on the question text
   answer it was a plain defect and was fixed, and the shape of the flow is untouched until it is decided.
+  What did change underneath it is that the panel now records that a question was answered and recomputes
+  itself instead of being patched, so moving a question's home from the panel into the chat is a small
+  change rather than a rewrite when the owner decides.
   Two shapes are on the table - Answer moves the question into the chat and the canned answer sends itself
   after a beat, or it moves the question in and pre-fills the composer with the canned answer, unsent, and
   the reviewer presses Send (the second reuses the rule the quick picks already follow). Either way the
@@ -149,15 +171,14 @@ Two things C2b raises are now waiting on the owner rather than on work:
   and free text arriving where the mockup expects one of N options needs a matcher - which the real data
   makes natural, since `public/data/uefn_device_logic.json` already gives each question an id, a prompt and
   options carrying their effects.
-- **The guided demo.** Asked for as a pitch artefact, and deliberately held back until the rest is settled:
-  an overlay explaining that this is a mock and locking the tool until the reviewer starts, canned user
-  messages typed into the box a character at a time with Send dead until the typing stops, the bot's canned
-  reply, and the loop repeating until the script runs out - with the demo starting from *empty* rather than
-  from the mid-flight state the page currently opens on, so the gauges can be watched growing and the open
-  questions disappearing. The page is cheap to demo because it is already a state machine whose reactions
-  exist; what does not exist yet is the sequence, the autotyper and the gate. The open question inside it is
-  whether the demo's starting number of open questions should come from the real per-game-type question
-  lists rather than from a number chosen to look good.
+- **The guided demo is built, minus the pop-up, and one question inside it is still open.** It went in
+  exactly as asked except for the overlay that was going to lock the tool until the reviewer started: the
+  page loads on the empty state instead, the demo types its canned lines with Send dead until the typing
+  stops and never presses Send itself, and the loop ends when the script runs out - with Run again to see it
+  twice and Stop to take the tool back. What is still open is where the questions come from: the three here
+  are hardcoded, while `public/data/uefn_device_logic.json` already gives each of the 13 researched game
+  types its own question list, and starting the walk-through from that real data would make the panel's
+  numbers real in the same move the rest of the page already is.
 
 ## What "different" has to mean
 

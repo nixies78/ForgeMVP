@@ -58,6 +58,17 @@
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
     color-scheme: dark;
   }
+  /* How much the page has given itself over to the conversation, 0 to 1. One number, set from the script
+     as the transcript grows, and everything that reacts to a conversation reads it: the headline's size,
+     the pitch's padding, whether the lede is there, and how tall the conversation is. Registered with
+     @property so it can be *transitioned* - an unregistered custom property changes in one step, and the
+     whole point is that the page resizes as the chat fills rather than the moment the first message lands.
+     Where a browser ignores @property the transition is simply skipped and the values still apply. */
+  @property --engage {
+    syntax: "<number>";
+    inherits: true;
+    initial-value: 0;
+  }
   * { box-sizing: border-box; }
   html { background: var(--bg); }
   body {
@@ -69,6 +80,11 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
+    /* The ramp. Every rule below that reads --engage animates with this transition and nothing else, so
+       the headline, the pitch and the conversation's height can never drift apart. Long enough to read as
+       a resize rather than a redraw, short enough that a reviewer pressing Send does not wait for it. */
+    --engage: 0;
+    transition: --engage .5s var(--ease);
   }
   /* The 1136px column and the logo treatment are chrome.css, linked below this block. The header is the
      app's own 72px bar (public/css/shell.css: .sh-header-inner), the same height every mockup uses. */
@@ -77,8 +93,14 @@
   main { display: block; }
   .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-  /* ---------- The pitch band: Concept 8's hero, sized for a screen rather than a landing page ---------- */
-  .intro { position: relative; padding-block: 36px 26px; text-align: center; }
+  /* ---------- The pitch band: Concept 8's hero, sized for a screen rather than a landing page ----------
+     The band is the part of the page that pays for the conversation. Its ends are exactly what they were
+     before the ramp existed - 36px/26px of padding and a 68px headline with nothing said, 18px/14px and a
+     34px one-line headline once the conversation is under way - and everything between them is
+     interpolated on --engage, so a four-turn conversation spends the pitch over four steps instead of in
+     one cut. The h1's clamps interpolate at both ends and in the middle rather than being scaled by a
+     factor: a multiplier would take a phone's 34px floor down to 17px. */
+  .intro { position: relative; padding-block: calc(36px - 18px * var(--engage)) calc(26px - 12px * var(--engage)); text-align: center; }
   .intro::before { /* blue heart, indigo falloff */
     content: "";
     position: absolute;
@@ -102,13 +124,27 @@
     position: relative;
     font-family: var(--title);
     font-weight: 700;
-    font-size: clamp(34px, 5.4vw, 68px);
+    /* At 0 this is exactly clamp(34px, 5.4vw, 68px) and at 1 exactly clamp(24px, 2.4vw, 34px). */
+    font-size: clamp(calc(34px - 10px * var(--engage)), calc(5.4vw - 3vw * var(--engage)), calc(68px - 34px * var(--engage)));
     line-height: 1;
     letter-spacing: -.035em;
     margin: 0;
   }
+  /* Two lines while the page is still a pitch, one line once the conversation owns the screen. A line
+     count cannot be interpolated, so this is the one step in the ramp: it is taken at the end, where the
+     headline is smallest and the step is one line of 34px rather than one line of 68px. */
   .intro h1 span { display: block; color: var(--dim); }
-  .lede { position: relative; color: var(--muted); font-size: clamp(15px, 1.4vw, 18px); max-width: 40em; margin: 18px auto 0; }
+  body.is-compact .intro h1 span { display: inline; }
+  .lede {
+    position: relative;
+    color: var(--muted);
+    font-size: clamp(15px, 1.4vw, 18px);
+    max-width: 40em;
+    margin: calc(18px - 18px * var(--engage)) auto 0;
+    max-height: calc(9rem * (1 - var(--engage)));
+    opacity: calc(1 - var(--engage));
+    overflow: hidden;
+  }
   .lede strong { color: #fff; font-weight: 600; }
 
   /* ---------- The workspace ---------- */
@@ -119,12 +155,20 @@
   .workspace { padding-block: 28px 0; }
   .ws-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 31%, 348px); gap: 22px; align-items: start; }
   /* The conversation keeps a height of its own, so the composer is on screen when the page loads and
-     stays there. The height is what the viewport has left once the bar and the pitch are paid for - not
-     a percentage, because a percentage of a short window is still too tall for that window. The 420px
-     is that fixed part, measured at 1440x1000 and again at 1440x780 (which is how the first estimate of
-     360 was caught being 40 short): 72px bar, the intro at its tallest, the band's padding and the air
-     under it. The panel's height is its own business beside it - see .rail. */
-  .deck { min-width: 0; display: flex; flex-direction: column; height: clamp(18rem, calc(100vh - 420px), 36rem); }
+     stays there. The height is what the viewport has left once the bar and the pitch are paid for - not a
+     percentage, because a percentage of a short window is still too tall for that window. The 420px is
+     that fixed part with the full pitch on screen, measured at 1440x1000 and again at 1440x780 (which is
+     how the first estimate of 360 was caught being 40 short): 72px bar, the intro at its tallest, the
+     band's padding and the air under it. As the pitch gives that room up, the deck takes it: at --engage 1
+     the same formula reads 220px and clamp(20rem, ..., 46rem), which is what the page measured when the
+     hero was compacted in one step. So both ends are the numbers that were already verified, and the
+     middle is the interpolation that was missing. */
+  .deck {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: clamp(calc(18rem + 2rem * var(--engage)), calc(100vh - (420px - 200px * var(--engage))), calc(36rem + 10rem * var(--engage)));
+  }
 
   /* Bay label: name and count as one line, the count in brackets and dim - 2c's reel labels. */
   .col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
@@ -194,6 +238,10 @@
   .chip:hover { background: rgba(134, 138, 253, .16); border-color: rgba(134, 138, 253, .55); color: #fff; }
   .chip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   .bub .chip { color: #D8D8DA; }
+  /* A chip in an old message is a question that has since been settled, and a settled question is not a
+     question: the script turns these off in every render, so the transcript cannot offer an answer the panel
+     has already taken. pointer-events as well as disabled, because a disabled button still takes :hover. */
+  .chip[disabled] { opacity: .4; cursor: default; pointer-events: none; }
 
   /* Quick picks: the same pills, but these write into the box instead of sending - the wireframe's
      decision, kept. They sit directly above the composer because that is the thing they feed. */
@@ -416,6 +464,10 @@
     padding: 4px 7px;
   }
   .dev.is-undecided .devtag { color: var(--dim); border-color: var(--line-2); }
+  /* Decided: the tag goes, because a device that is in the plan does not need to say so. The script toggles
+     the row between is-undecided and is-on rather than adding and removing the tag, so the same render can
+     run over the same row any number of times and land in the same place. */
+  .dev.is-on .devtag { display: none; }
   .step .n {
     width: 20px; height: 20px; flex: none;
     border-radius: 6px;
@@ -570,36 +622,57 @@
     padding: 7px 11px;
   }
 
-  /* ---------- Once the conversation is under way ---------- */
-  /* The first message from the user is the moment the page changes job: it stops being a pitch with a
-     tool on it and becomes a tool. So the hero gives its height to the transcript - h1 down to one line
-     at 34px, the lede gone, the eyebrow kept so the band is still the same band - and the two pieces of
-     starter chrome retire with it: the "Conversation (n messages)" label, which is bookkeeping the
-     transcript answers by existing, and the quick picks, which only earn their place before the first
-     message.
-     The trigger is the user's first message, not a scroll position: it fires when the user has committed
-     something, it cannot fire while someone is only reading the pitch, and it cannot get stuck
-     half-applied on a page with nothing to scroll. On load nothing moves, which is the point - the page
-     looks the same as it did before this rule until the first Send. The panel and the composer do not
-     move at all; the room goes to the transcript, which is the thing that needed it. */
-  .intro { transition: padding .3s var(--ease); }
-  .intro h1 { transition: font-size .3s var(--ease); }
-  .lede { max-height: 8rem; transition: opacity .22s var(--ease), max-height .3s var(--ease), margin .3s var(--ease); }
+  /* ---------- As the conversation grows ---------- */
+  /* The pitch is what pays for the conversation, and it pays in steps rather than in one cut. Four turns
+     of transcript take the page from "a pitch with a tool under it" to "a tool": the headline shrinks from
+     68px to 34px, the lede fades and closes, the band's padding tightens, and the conversation grows from
+     100vh-420px to 100vh-220px - all of it on one number, --engage, which the script sets to
+     min(1, turns / 4). Because the number is a registered property with a transition, every value that
+     reads it moves together and smoothly; there is no per-rule transition that could fall out of step.
+     Two things stay discrete, because a thing either is or is not there:
+       - the "Conversation" label and the quick picks retire at the first message from the user, which is
+         when the conversation is genuinely under way and when the picks (starter prompts) stop being the
+         most useful thing in the row. Retiring them at the first message rather than at the end also means
+         the empty chat keeps them, which is exactly where they earn their place.
+       - the headline drops from two lines to one at --engage 1, when it is at its smallest: a line count
+         cannot be interpolated, so the step goes where it costs least.
+     The trigger for the ramp is the conversation itself, not a scroll position: scrolling fires while
+     someone is only reading the pitch, and it can leave the page half-applied. */
   .col-label, .picks { transition: opacity .22s var(--ease), max-height .3s var(--ease), margin .3s var(--ease), visibility 0s .3s; }
   .col-label { max-height: 2.5rem; }
   .picks { max-height: 9rem; }
-  .deck { transition: height .3s var(--ease); }
+  body.is-underway .col-label,
+  body.is-underway .picks { opacity: 0; max-height: 0; margin-block: 0; overflow: hidden; visibility: hidden; }
 
-  body.is-engaged .intro { padding-block: 18px 14px; }
-  body.is-engaged .intro h1 { font-size: clamp(24px, 2.4vw, 34px); }
-  body.is-engaged .intro h1 span { display: inline; }
-  body.is-engaged .lede { opacity: 0; max-height: 0; margin-top: 0; overflow: hidden; }
-  body.is-engaged .col-label,
-  body.is-engaged .picks { opacity: 0; max-height: 0; margin-block: 0; overflow: hidden; visibility: hidden; }
-  /* The height the hero gave up, handed to the conversation: 420px of fixed page above the deck becomes
-     220px. Short windows need no separate rule - with the hero compact, the same subtraction fits a
-     780px-tall window and a 1000px-tall one, which the checker measures at both. */
-  body.is-engaged .deck { height: clamp(20rem, calc(100vh - 220px), 46rem); }
+  /* ---------- An empty conversation ---------- */
+  /* The page has to be worth looking at before anything has been said, because that is the state a first
+     visitor arrives in: a heading, one line saying so in the app's own words, the starter picks, the
+     composer and the panel with nothing filled in. The transcript is bottom-anchored like a chat, so the
+     line sits against the composer rather than floating in the middle of a void. */
+  .msgs .empty { margin: 0 2px 8px; font-size: 13.5px; color: var(--dim); }
+
+  /* ---------- The scripted demo ---------- */
+  /* One line, in the row the picks vacate: what the demo is doing, which step of how many, and the one
+     control it needs. It is a status strip rather than a dialogue box - a reviewer who wants to drive the
+     tool themselves should not have to dismiss anything - and the dot is the only thing that moves. */
+  .demo { display: flex; align-items: center; gap: 9px; margin: 12px 2px 0; font-size: 12px; color: var(--dim); }
+  .demo-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+  .demo.is-idle .demo-dot { background: var(--dim); }
+  .demo.is-typing .demo-dot { animation: demo-pulse 1.1s var(--ease) infinite; }
+  .demo b { color: var(--muted); font-weight: 600; }
+  .demo-key {
+    margin-left: auto;
+    font: 600 11.5px/1 var(--body);
+    color: var(--muted);
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid var(--line-2);
+    border-radius: 999px;
+    padding: 6px 11px;
+    cursor: pointer;
+  }
+  .demo-key:hover { color: #fff; border-color: #4A4A50; background: rgba(255, 255, 255, .07); }
+  .demo-key:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  @keyframes demo-pulse { 50% { opacity: .2; } }
 
   /* ---------- Narrower screens ---------- */
   /* Below 1080px the two bays cannot both be read side by side, so the panel moves under the
@@ -608,26 +681,30 @@
   @media (max-width: 1080px) {
     .ws-body { grid-template-columns: minmax(0, 1fr); }
     .rail { position: static; }
-    /* Stacked, the conversation sets its own height from its content - including when engaged, which
-       would otherwise keep the desktop's viewport arithmetic and pin the chat to a fixed height. */
-    .deck, body.is-engaged .deck { height: auto; }
+    /* Stacked, the conversation sets its own height from its content instead of from the viewport. */
+    .deck { height: auto; }
     .msgs { min-height: clamp(16rem, 36vh, 20rem); }
   }
   @media (max-width: 760px) {
-    .intro { padding-block: 26px 20px; }
+    /* Padding and headline still ramp here: a fixed value in a media query would out-rank the ramp's rule
+       and pin the pitch at its full size on every phone, which is the opposite of the point. */
+    .intro { padding-block: calc(26px - 8px * var(--engage)) calc(20px - 6px * var(--engage)); }
     .workspace { padding-block: 22px 0; }
     .turn { max-width: 100%; }
     .composer-foot { flex-wrap: wrap; }
     .close { padding-block: 72px 96px; margin-top: 64px; }
   }
   /* A short window is a laptop, not a desktop: the pitch tightens so the conversation keeps its room
-     rather than the hero keeping its air. The lede keeps every word and loses its leading instead. */
+     rather than the hero keeping its air. The lede keeps every word and loses its leading instead. These
+     are the same ends as the rules above - at --engage 1 both read 18px/14px of padding, a 34px headline
+     and clamp(20rem, 100vh - 220px, 46rem) - so the ramp arrives in the same place from either starting
+     point, which is what the checker measures at 1440x780. */
   @media (max-height: 840px) {
-    .intro { padding-block: 22px 16px; }
-    .intro h1 { font-size: clamp(28px, 4.2vw, 46px); }
-    .lede { margin-top: 12px; font-size: 15px; }
+    .intro { padding-block: calc(22px - 4px * var(--engage)) calc(16px - 2px * var(--engage)); }
+    .intro h1 { font-size: clamp(calc(28px - 4px * var(--engage)), calc(4.2vw - 1.8vw * var(--engage)), calc(46px - 12px * var(--engage))); }
+    .lede { margin-top: calc(12px - 12px * var(--engage)); font-size: 15px; }
     .workspace { padding-block: 18px 0; }
-    .deck { height: clamp(17rem, calc(100vh - 350px), 34rem); }
+    .deck { height: clamp(calc(17rem + 3rem * var(--engage)), calc(100vh - (350px - 130px * var(--engage))), calc(34rem + 12rem * var(--engage))); }
   }
   @media (max-width: 520px) {
     /* A phone has no Enter key, so the keyboard hint is not advice there - it is noise in the foot of
@@ -656,7 +733,7 @@
     <p class="eyebrow">Chat with AI</p>
     <h1>Your design fills in <span>while you talk.</span></h1>
     <p class="lede">
-      Describe your idea. Forge AI bot will ask some follow-ups and turns the conversation into a
+      Describe your idea. Forge AI bot will ask some follow-ups and turn the conversation into a
       buildable plan.
     </p>
   </section>
@@ -666,36 +743,13 @@
 
       <!-- ---------------- the deck: the conversation ---------------- -->
       <div class="deck">
-        <p class="col-label">Conversation <span class="col-count">(<b id="msgCount">4</b> messages)</span></p>
+        <p class="col-label">Conversation</p>
 
+        <!-- The transcript starts empty on purpose: this is a tool, and what a tool looks like before it has
+             been used is part of what a reviewer is judging. Everything in it below is typed by the demo. -->
         <div class="msgs" id="msgs" aria-live="polite" aria-label="Conversation">
           <div class="msgs-in" id="msgsIn">
-
-            <div class="turn me"><div class="bub"><p>A prop hunt in a drained hotel, four players, ten-minute rounds.</p></div></div>
-
-            <div class="turn ai">
-              <img class="mark" src="../../assets/logo.svg" alt="" width="26" height="26">
-              <div class="bub">
-                <p>A drained hotel is a good prop hunt: long sightlines, and about a thousand places to be something else. That is the whole game, so the rest is plumbing.</p>
-                <p class="ask">How should a round end?</p>
-                <div class="taprow">
-                  <button class="chip" type="button" data-say="Clock runs out - ten minutes is the whole round.">Clock runs out</button>
-                  <button class="chip" type="button" data-say="Everyone gets caught.">Everyone gets caught</button>
-                  <button class="chip" type="button" data-say="Either - whichever happens first.">Either - first to happen</button>
-                </div>
-              </div>
-            </div>
-
-            <div class="turn me"><div class="bub"><p>Clock runs out. Ten minutes is the whole round.</p></div></div>
-
-            <div class="turn ai">
-              <img class="mark" src="../../assets/logo.svg" alt="" width="26" height="26">
-              <div class="bub">
-                <p>Then a round is a clock problem rather than a search problem, and the props win by surviving it. Five devices and steps 1-2 are in <strong>Your design</strong>.</p>
-                <p class="ask">Two things I still need before it is buildable - they are under Open questions.</p>
-              </div>
-            </div>
-
+            <p class="empty" id="empty">No messages yet.</p>
           </div>
         </div>
 
@@ -704,6 +758,14 @@
           <button class="chip" type="button" data-fill="Keep it to five devices - I want to build this in one evening.">Five devices only</button>
           <button class="chip" type="button" data-fill="Add a last-prop beacon for the final thirty seconds.">Last-prop beacon</button>
           <button class="chip" type="button" data-fill="Write the five build steps out in the order I should do them.">Order the build steps</button>
+        </div>
+
+        <!-- The strip that runs the scripted walk-through. It types the user's next line and then waits: the
+             demo never presses Send, because the loop this screen is arguing for is a person pressing it. -->
+        <div class="demo is-idle" id="demoBar">
+          <span class="demo-dot" aria-hidden="true"></span>
+          <span class="demo-text" id="demoText" aria-live="polite">Scripted demo - starting</span>
+          <button class="demo-key" id="demoKey" type="button">Stop</button>
         </div>
 
         <!-- The one object on this side of the screen. The textarea starts one line tall and grows with
@@ -718,8 +780,8 @@
             <span class="spacer"></span>
             <!-- The sentence that used to sit under the box lives here now, on hover or keyboard focus. -->
             <span class="owed" id="owedWrap" tabindex="0">
-              Answers owed: <b id="owed">2</b>
-              <span class="owed-body" id="owedBody" role="tooltip">2 open questions are waiting in <b>Your design</b> - they are answerable from here or from the panel.</span>
+              Answers owed: <b id="owed">0</b>
+              <span class="owed-body" id="owedBody" role="tooltip"></span>
             </span>
             <!-- Dictation, in the mockup's sense: the key changes state, nothing records. -->
             <button class="key key-key mic" id="mic" type="button" aria-pressed="false" aria-label="Dictate your message" title="Dictate your message">
@@ -746,20 +808,25 @@
           <span class="state" id="state">Draft</span>
         </div>
 
+        <!-- A panel with nothing in it says so by being empty: the three slots read "Not set", there are no
+             counts to show yet (nothing has been decided to count), and the status line says what the
+             build key is waiting for. Every value here is written by the script's render(). -->
         <dl class="slots">
-          <div class="slot"><dt>Game type</dt><dd>Prop Hunt</dd></div>
-          <div class="slot"><dt>Players</dt><dd>4 &middot; co-op &middot; ten-minute rounds</dd></div>
+          <div class="slot"><dt>Game type</dt><dd class="empty" id="slotGame">Not set</dd></div>
+          <div class="slot"><dt>Players</dt><dd class="empty" id="slotPlayers">Not set</dd></div>
           <div class="slot"><dt>Brand</dt><dd class="empty">Not set - optional</dd></div>
         </dl>
 
-        <!-- Both lists are folded, and the gauge stays on the summary: the count and the bar are the
-             readout, the list is what you open when you want the detail. -->
+        <!-- The counts appear once there is something to count: a gauge before the first device is known is
+             a progress bar for nothing. Both lists are folded and the gauge stays on the summary - the count
+             and the bar are the readout, the list is what you open when you want the detail. -->
+        <div id="counts" hidden>
         <details class="fold" id="devFold">
           <summary>
             <span class="lab">Devices</span>
-            <span class="count"><b id="devCount">5</b> of 6</span>
+            <span class="count"><b id="devCount">0</b> of 6</span>
             <span class="chev" aria-hidden="true"></span>
-            <i class="rail-line"><i id="devBar" style="width:83%"></i></i>
+            <i class="rail-line"><i id="devBar" style="width:0%"></i></i>
           </summary>
           <div class="body">
             <ul class="devs" id="devs">
@@ -776,37 +843,33 @@
         <details class="fold" id="stepFold">
           <summary>
             <span class="lab">Build steps</span>
-            <span class="count"><b id="stepCount">2</b> of 5</span>
+            <span class="count"><b id="stepCount">0</b> of 5</span>
             <span class="chev" aria-hidden="true"></span>
-            <i class="rail-line"><i id="stepBar" style="width:40%"></i></i>
+            <i class="rail-line"><i id="stepBar" style="width:0%"></i></i>
           </summary>
           <div class="body">
             <ol class="steps" id="steps">
-              <li class="step is-done"><span class="n">1</span><span class="txt">Register the props a player can become</span></li>
-              <li class="step is-done"><span class="n">2</span><span class="txt">Set the round timer and the hunter's loadout</span></li>
+              <li class="step" id="step1"><span class="n">1</span><span class="txt">Register the props a player can become</span></li>
+              <li class="step" id="step2"><span class="n">2</span><span class="txt">Set the round timer and the hunter's loadout</span></li>
               <li class="step" id="step3"><span class="n">3</span><span class="txt">Place the hiding spots and the last-prop beacon</span></li>
               <li class="step" id="step4"><span class="n">4</span><span class="txt">Wire the round end to the clock, not to a wipeout</span></li>
               <li class="step is-mine"><span class="n">5</span><span class="txt">Test with four players and tune the round length</span></li>
             </ol>
           </div>
         </details>
+        </div>
 
-        <div class="oq" id="oq">
-          <p class="oq-h">Open questions <span>(<b id="oqCount">2</b> <span id="oqWord">left</span>)</span></p>
-          <div class="oq-row" data-q="props">
-            <p>Do the props stay still once they are placed?</p>
-            <button class="key key-key key-sm" type="button">Answer</button>
-          </div>
-          <div class="oq-row" data-q="caught">
-            <p>Does a caught player spectate, or sit out?</p>
-            <button class="key key-key key-sm" type="button">Answer</button>
-          </div>
+        <!-- The questions are built by the script from whatever is actually unanswered, so the box can never
+             disagree with the count in the composer's foot: they are the same list. -->
+        <div class="oq" id="oq" hidden>
+          <p class="oq-h">Open questions <span>(<b id="oqCount">0</b> <span id="oqWord">left</span>)</span></p>
+          <div id="oqRows"></div>
         </div>
 
         <div class="actions">
           <button class="key key-primary" id="build" type="button" disabled>Build in UEFN</button>
           <button class="key key-key" id="save" type="button">Save draft</button>
-          <p class="status" id="status">Build in UEFN unlocks when both open questions are answered.</p>
+          <p class="status" id="status">Build in UEFN unlocks when the plan has devices.</p>
         </div>
       </aside>
 
@@ -814,7 +877,11 @@
   </section>
 
   <section class="close wrap">
-    <h2>Answer two questions.<br>Leave with a build order.</h2>
+    <!-- It said "Answer two questions", which was true of the first pass and is not true of this one: the
+         mockup asks about the round, then about the props and about being caught. A number here would date
+         again - and the real engine's question count varies by game type - so the heading promises what
+         actually happens instead of a count. -->
+    <h2>Answer what it asks.<br>Leave with a build order.</h2>
     <p>
       Every answer lands in the panel and nowhere else, which is the point of the layout: the
       conversation is where the thinking happens, and the panel is the thing that goes to UEFN.
@@ -832,25 +899,42 @@
   /* The mockup is a working screen rather than a picture of one, because the direction is about what
      happens between the two bays: an answer given in the chat has to visibly change the panel, and an
      answer given in the panel has to visibly enter the chat. Everything below is that loop, plus the
-     composer. It is deliberately small - no model, no network, four canned replies. */
+     composer and the scripted walk-through that types into it. No model, no network: the replies are this
+     file's own strings.
+   *
+   * It owns three things:
+   *   1. the conversation - turns appended to the transcript, one canned reply per question answered;
+   *   2. the panel - recomputed from `chat.answers` on every change rather than patched in place, so the
+   *      same panel comes out whichever way a question was answered and in whatever order, and the panel's
+   *      list of open questions is literally the list the composer's counter reads;
+   *   3. the page's own resize - --engage = min(1, turns / 4), which the CSS interpolates (see "As the
+   *      conversation grows" above). The ramp is the CSS's job; the script only says how far along it is,
+   *      and it says it again on every change.
+   *
+   * The demo types the user's next line and then stops. It never presses Send - the loop this screen argues
+   * for is a person pressing it, one input at a time - and it stands aside the moment the reviewer sends
+   * something of their own. */
   (function () {
     const msgs = document.getElementById('msgs');
     /* Turns are appended to the inner block, which is the part that sits against the composer; #msgs is
        the scrolling window around it. */
     const msgsIn = document.getElementById('msgsIn');
+    const empty = document.getElementById('empty');
     const form = document.getElementById('composer');
     const say = document.getElementById('say');
     const send = document.getElementById('send');
-    const msgCount = document.getElementById('msgCount');
+    const counts = document.getElementById('counts');
     const devCount = document.getElementById('devCount');
     const devBar = document.getElementById('devBar');
+    const devEndGame = document.getElementById('devEndGame');
     const stepCount = document.getElementById('stepCount');
     const stepBar = document.getElementById('stepBar');
+    const oq = document.getElementById('oq');
+    const oqRows = document.getElementById('oqRows');
     const oqCount = document.getElementById('oqCount');
     const oqWord = document.getElementById('oqWord');
-    const oq = document.getElementById('oq');
-    /* "Answers owed" and the sentence behind it. The sentence is the tooltip on the wrapper, the number
-       is the part that changes, so the two are updated separately and neither ever replaces the other. */
+    /* "Answers owed" and the sentence behind it. The sentence is the tooltip on the wrapper, the number is
+       the part that changes, so the two are updated separately and neither ever replaces the other. */
     const owed = document.getElementById('owed');
     const owedWrap = document.getElementById('owedWrap');
     const owedBody = document.getElementById('owedBody');
@@ -858,22 +942,192 @@
     const state = document.getElementById('state');
     const build = document.getElementById('build');
     const status = document.getElementById('status');
+    const slotGame = document.getElementById('slotGame');
+    const slotPlayers = document.getElementById('slotPlayers');
+    const demoBar = document.getElementById('demoBar');
+    const demoText = document.getElementById('demoText');
+    const demoKey = document.getElementById('demoKey');
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    let messages = 4;
-    let devices = 5;
-    let steps = 2;
-    let open = 2;
-    let replies = 0;
+    /* ---------------- the conversation's state ---------------- */
+    /* Three facts, and the panel is derived from the third. `turns` counts both sides, because it is what
+       the page's resize ramps on: a page that gives its room to a conversation should do it as the
+       conversation grows, which includes the bot's half of it. */
+    const chat = { turns: 0, userTurns: 0, answers: { roundEnd: false, props: false, caught: false } };
 
-    const REPLY = [
+    /* How long the pitch takes to hand its room over, in turns of conversation. The CSS's ends are fixed -
+       full pitch with nothing said, one-line headline with the conversation under way - and this is only
+       where along that line the page currently is. */
+    const FULL_RAMP = 8;
+
+    /* What each question is, what answering it says, and what the bot says back. `said` is the sentence an
+       Answer key writes as the user's turn, and it is the same sentence the demo types - so answering from
+       the panel, from a chip inside a message, or from the box all land the conversation in the same place,
+       and the demo can recognise its own step whichever control the reviewer used. */
+    const QUESTIONS = {
+      roundEnd: {
+        prompt: 'How should a round end?',
+        said: 'Clock runs out - ten minutes is the whole round.',
+        reply: 'A round that ends on the clock turns it into a clock problem rather than a search problem, and the props win by surviving it. Five devices and steps 1-2 are in <strong>Your design</strong>.',
+        ask: 'Two things I still need before it is buildable - they are under Open questions.'
+      },
+      props: {
+        prompt: 'Do the props stay still once they are placed?',
+        said: 'Props stay put once they land. Moving props make it a chase, and this is a hunt.',
+        reply: 'Then the hiding spots can be placed as hiding spots rather than as routes, which is what step 3 was waiting for. Nothing new is needed: HUD Message Device carries the last-prop callout at 0:30.'
+      },
+      caught: {
+        prompt: 'Does a caught player spectate, or sit out?',
+        said: 'They spectate. Ten minutes is short enough that waiting is worse than watching.',
+        reply: 'Coherent with a clock round: nobody is eliminated from the game, only from the round, so the End Game Device is wired from the timer. That is 6 of 6 devices.'
+      }
+    };
+    const ORDER = ['roundEnd', 'props', 'caught'];
+
+    /* The three ways to end a round, as chips inside the first reply. The two that differ from the canonical
+       answer carry their own reply: the bot cannot say "it is a clock problem" about a round that ends on a
+       wipeout, and a mockup that says the same thing about three different answers is worse than one that
+       says nothing. */
+    const TAPS = [
+      { label: 'Clock runs out', say: QUESTIONS.roundEnd.said, q: 'roundEnd' },
+      {
+        label: 'Everyone gets caught', say: 'Everyone gets caught.', q: 'roundEnd',
+        reply: "Then the round ends on the last elimination rather than on the clock, so the End Game Device is wired to the hunter's last catch. Five devices and steps 1-2 are in <strong>Your design</strong>.",
+        ask: 'Two things I still need before it is buildable - they are under Open questions.'
+      },
+      {
+        label: 'Either - first to happen', say: 'Either - whichever happens first.', q: 'roundEnd',
+        reply: 'Then the round ends on whichever comes first, which the Round Settings Device carries without extra wiring. Five devices and steps 1-2 are in <strong>Your design</strong>.',
+        ask: 'Two things I still need before it is buildable - they are under Open questions.'
+      }
+    ];
+
+    /* Free text still gets an answer. The mockup has three things it can honestly say about this game and it
+       rotates them rather than pretending to understand something it was never taught. */
+    const SMALL_TALK = [
       'Written into <strong>Your design</strong>. A fair hiding spot is a rule about the map rather than a device, so that one goes in step 3 - and it is the step a tester will argue with first.',
       'Noted, and it comes off the list: five devices is enough for a ten-minute round, so I would leave the beacon for a second pass rather than build it into the first.',
       'That is a constraint rather than a device, so I have folded it into step 2 instead of adding anything. The plan is still five steps.'
     ];
+    let small = 0;
+
+    /* ---------------- what the panel is, derived ---------------- */
+    /* The panel is recomputed, never maintained. Answering the questions out of order, or answering from the
+       panel instead of the box, cannot leave the two bays disagreeing, because there is only one place the
+       truth lives: `chat.answers`. */
+    function openQuestions() {
+      if (!chat.userTurns) return [];                        /* nothing has been said, so nothing is owed */
+      if (!chat.answers.roundEnd) return ['roundEnd'];        /* the round-end question is the one asked first */
+      return ORDER.filter(function (q) { return q !== 'roundEnd' && !chat.answers[q]; });
+    }
+    /* The device list is only knowable once the genre and the round are known: a gauge before then is a
+       progress bar for nothing, which is why the counts appear at the same moment the first question is
+       answered rather than at the top of the conversation. */
+    function counting() { return chat.answers.roundEnd; }
+    function devicesIn() { return counting() ? 5 + (chat.answers.caught ? 1 : 0) : 0; }
+    function stepsIn() { return counting() ? 2 + (chat.answers.props ? 1 : 0) + (chat.answers.caught ? 1 : 0) : 0; }
+
+    function render() {
+      const open = openQuestions();
+      const ready = counting() && open.length === 0;
+      const devices = devicesIn();
+      const stepsDone = stepsIn();
+
+      empty.hidden = chat.turns > 0;
+
+      /* The page's resize, which is the one thing the script does that is not about the conversation's
+         content: --engage, one number between nothing and everything, which the CSS interpolates. Over eight
+         turns rather than four, because a turn is only half a turn - the ramp should be spent over the first
+         four things the user says and the four replies they get, which is the whole of the walk-through and
+         about as long as the pitch deserves to be in the way. Four was the first guess, and it gave itself
+         away after two inputs. */
+      const engage = Math.min(1, chat.turns / FULL_RAMP);
+      document.body.style.setProperty('--engage', engage.toFixed(3));
+      document.body.classList.toggle('is-underway', chat.userTurns > 0);
+      document.body.classList.toggle('is-compact', engage >= 1);
+
+      slotGame.textContent = chat.userTurns ? 'Prop Hunt' : 'Not set';
+      slotGame.classList.toggle('empty', !chat.userTurns);
+      slotPlayers.textContent = chat.userTurns ? '4 \u00b7 co-op \u00b7 ten-minute rounds' : 'Not set';
+      slotPlayers.classList.toggle('empty', !chat.userTurns);
+
+      counts.hidden = !counting();
+      devCount.textContent = String(devices);
+      devBar.style.width = Math.round((devices / 6) * 100) + '%';
+      stepCount.textContent = String(stepsDone);
+      stepBar.style.width = Math.round((stepsDone / 5) * 100) + '%';
+      devEndGame.classList.toggle('is-undecided', !chat.answers.caught);
+      devEndGame.classList.toggle('is-on', chat.answers.caught);
+      const ticked = { step1: counting(), step2: counting(), step3: chat.answers.props, step4: chat.answers.caught };
+      Object.keys(ticked).forEach(function (id) {
+        document.getElementById(id).classList.toggle('is-done', !!ticked[id]);
+      });
+
+      /* The questions themselves, built from the same list the counter reads. */
+      oq.hidden = open.length === 0;
+      oqCount.textContent = String(open.length);
+      oqWord.textContent = open.length ? 'left' : 'left - Build in UEFN is unlocked';
+      oqRows.replaceChildren.apply(oqRows, open.map(rowFor));
+
+      /* Answers owed: the accent while there is something to answer, inert the moment there is not. */
+      owed.textContent = String(open.length);
+      owedWrap.classList.toggle('is-done', open.length === 0);
+      if (open.length) {
+        owedWrap.setAttribute('tabindex', '0');
+        owedBody.innerHTML = open.length === 1
+          ? '1 open question is waiting in <b>Your design</b> - it is answerable from here or from the panel.'
+          : open.length + ' open questions are waiting in <b>Your design</b> - they are answerable from here or from the panel.';
+      } else {
+        owedWrap.removeAttribute('tabindex');
+        owedBody.textContent = '';
+      }
+
+      state.textContent = ready ? 'Ready to build' : 'Draft';
+      state.classList.toggle('is-ready', ready);
+      build.disabled = !ready || chat.sent;
+      build.textContent = chat.sent ? 'Sent to UEFN' : 'Build in UEFN';
+      retireChips();
+      if (chat.sent) {
+        status.innerHTML = 'Sent: <b>6 devices</b>, steps 1-4 written, step 5 waiting on your first playtest.';
+      } else if (ready) {
+        status.innerHTML = 'Ready: <b>6 devices</b>, five steps, one of them yours.';
+      } else if (!chat.userTurns) {
+        status.textContent = 'Build in UEFN unlocks when the plan has devices.';
+      } else if (open.length === 1) {
+        status.textContent = 'Build in UEFN unlocks when the open question is answered.';
+      } else {
+        status.textContent = 'Build in UEFN unlocks when both open questions are answered.';
+      }
+    }
+
+    /* The chips inside old messages answer questions that may since have been settled - by the panel, or by
+       the composer. A settled question is not a question, so the chips go inert rather than sitting there
+       offering an answer the plan has already taken. This is part of every render, because a message's chips
+       and the panel's state can only be kept in step if one function looks at both. */
+    function retireChips() {
+      msgs.querySelectorAll('.chip[data-q]').forEach(function (chip) {
+        const settled = !!chat.answers[chip.dataset.q];
+        chip.disabled = settled;
+        chip.classList.toggle('is-settled', settled);
+      });
+    }
+
+    /* One question row, built rather than patched, so a row can never outlive the question it asks. */
+    function rowFor(q) {
+      const row = document.createElement('div');
+      row.className = 'oq-row';
+      row.dataset.q = q;
+      const p = document.createElement('p');
+      p.textContent = QUESTIONS[q].prompt;
+      const key = document.createElement('button');
+      key.className = 'key key-key key-sm';
+      key.type = 'button';
+      key.textContent = 'Answer';
+      row.append(p, key);
+      return row;
+    }
 
     function scroll() { msgs.scrollTop = msgs.scrollHeight; }
-    function count() { msgCount.textContent = String(messages); }
 
     function bubbleTurn(html, side) {
       const turn = document.createElement('div');
@@ -894,42 +1148,94 @@
       bub.append(p);
       turn.append(bub);
       msgsIn.append(turn);
-      messages += 1;
-      count();
+      chat.turns += 1;
+      render();
       scroll();
       return bub;
     }
 
-    function say_user(text) { engage(); bubbleTurn(escapeText(text), 'me'); }
-
-    /* The first message the user puts into the conversation is the moment the page changes job, so it is
-       also the moment the hero, the count label and the picks hand their room to the transcript (see the
-       .is-engaged rules above). One way in: every path that writes a user turn - the composer, a tap
-       answer on a message, an answer given in the panel - goes through say_user. The re-pin afterwards is
-       for the transcript's own sake: the deck grows under it over 300ms, and a conversation that is at its
-       foot should stay at its foot while that happens. */
-    let engaged = false;
-    function engage() {
-      if (engaged) return;
-      engaged = true;
-      document.body.classList.add('is-engaged');
-      window.setTimeout(function () { if (atFoot()) scroll(); }, 340);
+    /* A user turn is a user turn however it was produced: the composer, a chip inside a message, or an
+       Answer key in the panel. `q` is the question it settles, when it settles one. */
+    function sayUser(text, q) {
+      chat.userTurns += 1;
+      if (q) chat.answers[q] = true;
+      bubbleTurn(escapeText(text), 'me');
+      demoSaw(text, q);
     }
+
     function escapeText(text) {
       const span = document.createElement('span');
       span.textContent = text;
       return span.innerHTML;
     }
 
-    function reply(override) {
+    /* The bot's half. The typing dots are the one piece of theatre in the file, and the reply lands on them
+       after a beat - reduced motion takes the beat away rather than the reply. */
+    function botReply(parts, then) {
       const bub = bubbleTurn('<span class="typing"><i></i><i></i><i></i></span>', 'ai');
       window.setTimeout(function () {
         bub.innerHTML = '';
-        const p = document.createElement('p');
-        p.innerHTML = override || REPLY[replies++ % REPLY.length];
-        bub.append(p);
+        parts.text.forEach(function (html) {
+          const p = document.createElement('p');
+          p.innerHTML = html;
+          bub.append(p);
+        });
+        if (parts.ask) {
+          const ask = document.createElement('p');
+          ask.className = 'ask';
+          ask.textContent = parts.ask;
+          bub.append(ask);
+        }
+        if (parts.taps) {
+          const row = document.createElement('div');
+          row.className = 'taprow';
+          parts.taps.forEach(function (t) {
+            const chip = document.createElement('button');
+            chip.className = 'chip';
+            chip.type = 'button';
+            chip.dataset.say = t.say;
+            chip.dataset.q = t.q;
+            if (t.reply) { chip.dataset.reply = t.reply; chip.dataset.ask = t.ask; }
+            chip.textContent = t.label;
+            row.append(chip);
+          });
+          bub.append(row);
+          /* The reply can arrive after the reviewer has already answered its question from the panel, so the
+             chips are checked against the plan the moment they exist. */
+          retireChips();
+        }
         scroll();
+        if (then) then();
       }, reduce ? 0 : 750);
+    }
+
+    /* What the bot does with a turn. The first turn is its read of the game and its first question; after
+       that the reply belongs to the question the turn settled, or - for something the mockup was never
+       taught - one of the three small replies. */
+    function respond(text, q, overrideReply, overrideAsk) {
+      if (chat.userTurns === 1) {
+        botReply({
+          text: ['A drained hotel is a good prop hunt: long sightlines, and about a thousand places to be something else. That is the whole game, so the rest is plumbing.'],
+          ask: QUESTIONS.roundEnd.prompt,
+          taps: TAPS
+        }, demoContinue);
+        return;
+      }
+      if (q && QUESTIONS[q]) {
+        botReply({
+          text: [overrideReply || QUESTIONS[q].reply],
+          ask: overrideAsk || QUESTIONS[q].ask
+        }, demoContinue);
+        return;
+      }
+      botReply({ text: [SMALL_TALK[small++ % SMALL_TALK.length]] }, demoContinue);
+    }
+
+    /* Free text that happens to be one of the answers - pasted or typed by a reviewer - still answers its
+       question, which is also how the demo's own lines are recognised. */
+    function answerOf(text) {
+      const hit = ORDER.filter(function (q) { return QUESTIONS[q].said === text; })[0];
+      return hit || null;
     }
 
     /* The newest turn is the one on screen. "At the foot" is not an exact figure in a container with a
@@ -954,17 +1260,133 @@
       if (pinned) scroll();
     }
 
+    /* ------------- the scripted walk-through ------------- */
+    /* Four lines, typed into the box one character at a time with Send held down until the typing stops, so
+       the reviewer's only move is the one this screen is about. Then it does nothing at all until they take
+       it - the demo never sends anything, and it steps aside for good the first time the reviewer sends
+       something of their own. */
+    const SCRIPT = [
+      'A prop hunt in a drained hotel, four players, ten-minute rounds.',
+      QUESTIONS.roundEnd.said,
+      QUESTIONS.props.said,
+      QUESTIONS.caught.said
+    ];
+    const demo = { on: true, step: 0, typing: false, timer: 0 };
+
+    function demoState(text, kind, key) {
+      demoText.textContent = text;
+      demoBar.className = 'demo is-' + kind;
+      demoKey.textContent = key;
+    }
+    function demoLabel(what) {
+      return 'Scripted demo - step ' + Math.min(demo.step + 1, SCRIPT.length) + ' of ' + SCRIPT.length + ' \u00b7 ' + what;
+    }
+    function demoWait() {
+      demoState(demoLabel('press Send when you are ready'), 'waiting', 'Stop');
+    }
+
+    function typeLine() {
+      if (!demo.on || demo.step >= SCRIPT.length) return;
+      const line = SCRIPT[demo.step];
+      demo.typing = true;
+      say.value = '';
+      say.style.height = 'auto';
+      send.disabled = true;
+      grow();
+      demoState(demoLabel('typing your line'), 'typing', 'Stop');
+      if (reduce) {
+        say.value = line;
+        demo.typing = false;
+        send.disabled = false;
+        grow();
+        demoWait();
+        return;
+      }
+      let i = 0;
+      function tick() {
+        if (!demo.on) { demo.typing = false; return; }
+        i += 1;
+        say.value = line.slice(0, i);
+        grow();
+        if (i < line.length) demo.timer = window.setTimeout(tick, 22);
+        else {
+          demo.typing = false;
+          send.disabled = false;
+          demoWait();
+        }
+      }
+      demo.timer = window.setTimeout(tick, 380);
+    }
+
+    /* The demo moves forward only when the line it typed has been answered. Anything else is the reviewer
+       taking over, and the strip says so rather than fighting them for the box. */
+    function demoSaw(text, q) {
+      if (!demo.on) return;
+      if (q || text === SCRIPT[demo.step]) demo.step += 1;
+      else stopDemo('the tool is yours');
+    }
+    function demoContinue() {
+      if (!demo.on) return;
+      if (demo.step >= SCRIPT.length) {
+        /* Finished, and off: `on` is what the key switches between running and re-runnable, so a demo that
+           is over must not still be claiming to run. */
+        demo.on = false;
+        demo.typing = false;
+        demoState('Demo finished - all ' + SCRIPT.length + ' lines are in. Run it again, or drive it yourself.', 'done', 'Run again');
+        return;
+      }
+      demoState(demoLabel('waiting for the bot'), 'typing', 'Stop');
+      demo.timer = window.setTimeout(typeLine, 900);
+    }
+    function stopDemo(why) {
+      demo.on = false;
+      demo.typing = false;
+      window.clearTimeout(demo.timer);
+      if (say.value.trim()) send.disabled = false;
+      demoState('Demo stopped - ' + why, 'idle', 'Run again');
+    }
+
+    demoKey.addEventListener('click', function () {
+      if (demo.on) { stopDemo('the tool is yours'); return; }
+      resetChat();
+      demo.on = true;
+      demo.step = 0;
+      demoState('Scripted demo - starting', 'idle', 'Stop');
+      demo.timer = window.setTimeout(typeLine, 900);
+    });
+
+    /* Back to the state the page loads in, which is the one worth seeing: an empty transcript, a panel with
+       nothing in it, and the full pitch. */
+    function resetChat() {
+      window.clearTimeout(demo.timer);
+      chat.turns = 0;
+      chat.userTurns = 0;
+      chat.answers = { roundEnd: false, props: false, caught: false };
+      chat.sent = false;
+      small = 0;
+      msgsIn.replaceChildren(empty);
+      empty.hidden = false;
+      say.value = '';
+      send.disabled = true;
+      document.getElementById('devFold').open = false;
+      document.getElementById('stepFold').open = false;
+      render();
+      grow();
+      scroll();
+    }
+
     /* The composer. Picks write into it and never send, which is the wireframe's decision kept: half of
        what a pick is worth is that it can be edited before it goes. */
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       const text = say.value.trim();
-      if (!text) return;
-      say_user(text);
+      if (!text || demo.typing) return;
+      const q = answerOf(text);
       say.value = '';
       send.disabled = true;
       grow();
-      reply();
+      sayUser(text, q);
+      respond(text, q);
     });
     say.addEventListener('input', function () { send.disabled = say.value.trim() === ''; grow(); });
     say.addEventListener('keydown', function (event) {
@@ -979,7 +1401,7 @@
       if (!chip) return;
       say.value = chip.dataset.fill;
       say.focus();
-      send.disabled = false;
+      if (!demo.typing) send.disabled = false;
       grow();
     });
 
@@ -994,32 +1416,19 @@
       say.focus();
     });
 
-    /* A tap answer on a message is a message. */
+    /* A tap answer on a message is a message, and it carries its own reply when it is not the canonical one. */
     msgs.addEventListener('click', function (event) {
       const chip = event.target.closest('[data-say]');
       if (!chip) return;
-      say_user(chip.dataset.say);
-      reply();
+      const q = chip.dataset.q || null;
+      sayUser(chip.dataset.say, q);
+      respond(chip.dataset.say, q, chip.dataset.reply, chip.dataset.ask);
     });
 
     /* The panel's own loop, which is what this screen is arguing for: answering in the rail writes the
-       answer into the transcript and moves the design on, in one move. Only one of the two answers
-       changes the device list - the round-end rule is what the End Game Device was waiting for, while
-       "props stay put" is a rule about the map and only moves a build step. Inventing a device for a
-       sentence that needs none is exactly what the panel must not do. */
-    const ANSWERS = {
-      props: {
-        said: 'Props stay put once they land. Moving props make it a chase, and this is a hunt.',
-        reply: 'Then the hiding spots can be placed as hiding spots rather than as routes, which is what step 3 was waiting for. Nothing new is needed: HUD Message Device carries the last-prop callout at 0:30.',
-        device: null
-      },
-      caught: {
-        said: 'They spectate. Ten minutes is short enough that waiting is worse than watching.',
-        reply: 'Coherent with a clock round: nobody is eliminated from the game, only from the round, so the End Game Device is wired from the timer. That is 6 of 6 devices.',
-        device: 'End Game Device'
-      }
-    };
-
+       answer into the transcript and moves the design on, in one move. Nothing is mutated here - the answer
+       is recorded and render() works out what that means - so answering in the panel and answering in the
+       box are the same act with the same result. */
     /* Answering is the button's job and only the button's. The handler hangs off the panel and looks for
        the row, which quietly made the question text a second Answer button - any click inside the row
        answered it, so a reader who clicked the question to read it again answered it instead. The
@@ -1028,74 +1437,36 @@
       const button = event.target.closest('.oq-row button');
       if (!button) return;
       const row = button.closest('.oq-row');
-      const answer = ANSWERS[row.dataset.q];
-      if (!answer) return;
-      say_user(answer.said);
-      reply(answer.reply);
-      row.remove();
-      open -= 1;
-      oqCount.textContent = String(open);
-      owed.textContent = String(open);
-
-      if (answer.device) {
-        const li = document.getElementById('devEndGame');
-        li.classList.remove('is-undecided');
-        li.classList.add('is-on');
-        li.querySelector('.devtag').remove();
-        devices += 1;
-        devCount.textContent = String(devices);
-        devBar.style.width = Math.round((devices / 6) * 100) + '%';
-        stepDone('step4');
-      } else {
-        stepDone('step3');
-      }
-
-      if (open === 0) {
-        /* Nothing is owed, so the box goes. The count and the word after it are still updated in place
-           (never rewritten) because the elements stay in the document and are what anything reading this
-           page - the checker included - looks at to know where the panel got to. The box itself is only
-           hidden, not removed: hidden keeps the dashboard's own record of the state while taking the
-           provisional-looking dashed box off the screen entirely. */
-        oq.hidden = true;
-        oqCount.textContent = '0';
-        oqWord.textContent = 'left - Build in UEFN is unlocked';
-        state.textContent = 'Ready to build';
-        state.classList.add('is-ready');
-        build.disabled = false;
-        /* And the composer's counter goes inert rather than blue: its sentence had a referent only while
-           there was a box in the panel to point at. */
-        owedWrap.classList.add('is-done');
-        owedWrap.removeAttribute('tabindex');
-        owedBody.textContent = '';
-        status.innerHTML = 'Ready: <b>6 devices</b>, five steps, one of them yours.';
-      }
+      const q = row && row.dataset.q;
+      if (!q || !QUESTIONS[q] || chat.answers[q]) return;
+      sayUser(QUESTIONS[q].said, q);
+      respond(QUESTIONS[q].said, q);
     });
-
-    function stepDone(id) {
-      const li = document.getElementById(id);
-      if (!li || li.classList.contains('is-done')) return;
-      li.classList.add('is-done');
-      steps += 1;
-      stepCount.textContent = String(steps);
-      stepBar.style.width = Math.round((steps / 5) * 100) + '%';
-    }
 
     build.addEventListener('click', function () {
-      build.disabled = true;
-      build.textContent = 'Sent to UEFN';
-      status.innerHTML = 'Sent: <b>6 devices</b>, steps 1-4 written, step 5 waiting on your first playtest.';
+      if (build.disabled) return;
+      chat.sent = true;
+      render();
     });
     document.getElementById('save').addEventListener('click', function () {
-      status.innerHTML = 'Draft saved. <b>Prop Hunt</b> is in your designs.';
+      status.innerHTML = chat.userTurns
+        ? 'Draft saved. <b>Prop Hunt</b> is in your designs.'
+        : 'Draft saved - there is nothing in it yet.';
     });
 
-    scroll();
+    render();
     grow();
+    scroll();
     /* The webfonts land after the first layout, and Inter is narrower than the fallback - so the
        transcript that fitted a moment ago can be taller than its box a moment later, and the pin has to
        be taken again once the type is real. Both hooks, because either can be the later one. */
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(scroll);
     window.addEventListener('load', scroll);
+    /* And the demo starts on its own, after a pause long enough to take in what the page looks like with
+       nothing in it - which is a state worth seeing, and the reason the transcript starts empty. The strip
+       says what it is about to do rather than sitting there. */
+    demoState('Scripted demo - about to type your first line', 'idle', 'Stop');
+    window.setTimeout(typeLine, reduce ? 0 : 2600);
   })();
 </script>
 </body>

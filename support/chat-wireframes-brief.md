@@ -363,17 +363,42 @@ Rules for a full mockup - the wireframe rules above, with these differences:
   replies - no model, no network. Hovering **Answers owed** is where the sentence about where answers go
   lives (a tooltip, not a line of prose under the box), and a dictation key sits to the left of Send at
   Send's own height, reporting whether it is listening and nothing more.
-- **The page changes job on the first message.** On load nothing moves and the composer is above the fold:
-  the hero does its full two-line pitch and the tool starts where it starts. The first message the user
-  sends (through any path - the composer, a tap answer, the panel) adds `is-engaged` to the body, and the
-  starter chrome hands its room to the transcript: h1 down to one line at 34px, lede gone, eyebrow kept,
-  the "Conversation (n messages)" label and the quick picks retired, and the fixed page above the deck
-  going from 420px to 220px. At 1440x1000 that is 208px off the hero and 243px onto the transcript, and
-  the composer's own edge moves by less than 50px, which is the point - the conversation gains the room,
-  the controls stay where the hand left them. The trigger is deliberate: a scroll position would fire
-  while someone is only reading the pitch and can leave a page half-applied. Everything that retires is
-  hidden with `visibility: hidden` as well as a collapsed height, so no invisible control stays in the tab
-  order.
+- **The panel is recomputed, never patched.** Answering a question sets a flag, and one `render()` works out
+  what the panel is: which questions are open, which of them the composer's counter is counting, which
+  devices and steps are in, whether Build in UEFN is unlocked and what the status line says. So the same
+  panel comes out whichever bay the answer came from and in whatever order the questions were answered, and
+  the panel's count of open questions is literally the list the "Answers owed" number reads. Nothing is
+  added and removed by hand, which is what used to let the two bays disagree. A tap answer inside an old
+  message stops being pressable once its question has been settled anywhere - a settled question is not a
+  question, and the transcript must not go on offering what the panel has already taken.
+- **The pitch is spent over the conversation, not in one cut.** On load nothing has been said and the page
+  is all pitch: full two-line headline, the lede at full opacity, the composer above the fold. The page's
+  whole resize is one number, `--engage`, which the script sets to `min(1, turns / 8)` and the CSS
+  interpolates with `@property` - so headline size, the intro's padding, the lede's opacity and the deck's
+  height move together and cannot drift apart. Eight turns, because a turn is only half a turn: the ramp is
+  spent over the first four things the user says and the four replies they get, which is about as long as
+  the pitch deserves to be in the way. Four was the first guess and it gave itself away after two inputs. The
+  two ends are exactly the states that were checked before the ramp existed (nothing said: 68px over two
+  lines, 36px/26px of padding; conversation under way: one line at 34px, lede gone, 18px/14px), so the ramp
+  is a path between two known screens rather than a third design. Two things stay discrete, because
+  interpolating them would be interpolating a decision rather than a size: `is-underway` retires the
+  "Conversation" label and the quick picks on the first user turn, and `is-compact` turns the second line of
+  the headline into an inline span at `--engage 1`. Both are hidden with `visibility: hidden` as well as a
+  collapsed height, so no invisible control stays in the tab order. The short-window media queries had to be
+  ramped too: a fixed padding or headline clamp inside `@media (max-height: 840px)` pins the pitch on exactly
+  the screens with the least room to spare.
+- **It starts empty, and the empty state is worth judging.** The transcript says "No messages yet.", the
+  panel's slots read "Not set", there are no gauges because nothing has been decided to count, "Answers owed
+  0" is already inert, and Build in UEFN is disabled behind a status line that says what it is waiting for.
+  The counts appear when the first question is answered, not at the top of the conversation: a progress bar
+  before the first device is known is a progress bar for nothing.
+- **A scripted walk-through runs on load, and it never presses Send.** Four lines type themselves into the
+  box one character at a time with Send held down for the whole of it; then the strip waits, because pressing
+  Send is the reviewer's move - that is the loop the screen is arguing for. When the reply lands it types the
+  next line, and it stops for good the moment the reviewer sends anything of their own ("Demo stopped - the
+  tool is yours") or presses Stop. After the fourth line the plan is complete and the key reads Run again,
+  which puts the page back to the state it loaded in. No overlay and no modal: a demo a reviewer cannot
+  escape is a demo that stops them trying the tool.
 - **A finished count is not an affordance.** **Answers owed** wears the accent while answers are owed -
   blue means "there is something here for you" everywhere else on this page - and goes inert at zero: no
   accent, no dotted rule, no help cursor, no tooltip, no place in the tab order. The **Open questions**
