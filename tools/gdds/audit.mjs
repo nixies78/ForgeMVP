@@ -225,6 +225,13 @@ function clip(text) {
  * Duplicating the metric tables here would be a second source of truth that can silently drift, so the
  * writer's `measure` is used — which is why this module can catch a real margin breach instead of
  * reporting whatever its own tables believe.
+ *
+ * The text passed in is the WinAnsi the file actually carries, while `measure`'s tables are indexed on
+ * character codes. That used to be a mismatch for the dashes and is no longer: `pdf.mjs` answers the
+ * same width for `U+2014` and the byte `0x97` it is written as, so a run measured here is measured as
+ * the printer will draw it. Asserted in `tests/gdd.test.mjs` as "measure is idempotent under toWinAnsi",
+ * because the failure mode — the audit and the writer disagreeing about the same run — is exactly the
+ * one this file exists to catch.
  */
 let measureFn = null;
 function approximateWidth(text, fontName, size, charSpace) {

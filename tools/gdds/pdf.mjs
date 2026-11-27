@@ -45,6 +45,10 @@ const METRICS = {
       120: 500, 121: 500, 122: 500, 123: 334, 124: 260, 125: 334, 126: 584, 128: 556, 130: 333,
       131: 556, 132: 500, 133: 1000, 134: 556, 135: 556, 136: 333, 137: 1000, 138: 667, 139: 333,
       140: 1000, 142: 611, 145: 222, 146: 222, 147: 333, 148: 333, 149: 350, 150: 556, 151: 1000,
+      /* 150 is the en dash at 556 and 151 the em dash at 1000, per Helvetica's own metrics. The em dash
+       * was copied in as 556 — the same width as the en dash, which is wrong and was invisible for as
+       * long as nothing measured a dash that was not already WinAnsi-encoded. It mattered immediately
+       * once `measure` had to give the same answer for `U+2014` and the byte `0x97` it is written as. */
       152: 333, 153: 1000, 154: 500, 155: 556, 156: 944, 158: 500, 159: 667, 160: 278, 161: 333,
       162: 556, 163: 556, 164: 556, 165: 556, 166: 260, 167: 556, 168: 333, 169: 737, 170: 370,
       171: 556, 172: 584, 173: 333, 174: 737, 175: 552, 176: 400, 177: 549, 178: 333, 179: 333,
@@ -119,9 +123,41 @@ export const FACES = {
 
 const FACE_ORDER = Object.keys(FACES);
 
-/** Advance width of one character, in 1/1000 em. */
+/**
+ * Width of one character, in 1/1000 em.
+ *
+ * The tables cover codes 32 to 255, so a character outside Latin-1 has no entry and silently takes the
+ * fallback — which is how an em dash came to be measured at 556 units when Helvetica prints it at 1000.
+ * Everything downstream inherited that: a line `wrap` fitted into a 459.28pt box measured 3.5pt wider
+ * when `text` measured the *encoded* line, so `text` re-wrapped a line that had already been wrapped,
+ * and `para`'s third line landed on top of its second. The audit reported an overlap on the cover of the
+ * Sprint Pack that no amount of reading the layout code could explain, because the layout was right.
+ *
+ * Two readings therefore have to agree, and they are handled in one place:
+ *
+ *   `U+2014`  the character a caller writes, outside the table
+ *   `0x97`    the byte it is encoded to, inside the table at Helvetica's width for a control character
+ *
+ * `SPECIAL_WIDTHS` answers for both, keyed on either, and is consulted before the table. A character
+ * that is in neither place keeps its fallback.
+ */
+const SPECIAL_WIDTHS = {
+  /* Helvetica's printed widths for the punctuation this generator uses. Both the character and the
+   * WinAnsi byte are listed so the answer cannot depend on which form the caller passed. */
+  0x2014: 1000, 0x97: 1000, /* em dash */
+  0x2013: 556, 0x96: 556, /* en dash */
+  0x2026: 1000, 0x85: 1000, /* ellipsis */
+  0x2022: 350, 0x95: 350, /* bullet */
+  0x2018: 222, 0x91: 222, /* left single quote */
+  0x2019: 222, 0x92: 222, /* right single quote */
+  0x201c: 333, 0x93: 333, /* left double quote */
+  0x201d: 333, 0x94: 333 /* right double quote */
+};
+
 function glyphWidth(family, code) {
   if (family === 'courier') return COURIER_WIDTH;
+  const special = SPECIAL_WIDTHS[code];
+  if (special !== undefined) return special;
   const table = METRICS[family].widths;
   return table[code] !== undefined ? table[code] : table[63];
 }
@@ -170,22 +206,28 @@ export function descentOf(faceKey, size) {
 /**
  * Text to the bytes a WinAnsi content stream can carry.
  *
- * PDF strings are Latin-1 with a backslash escape, and characters outside it have no glyph in a
- * base-14 font. They are transliterated rather than dropped: a document that silently loses the
- * right-hand side of a word is worse than one that prints a hyphen, and the callers pass through
- * em dashes, curly quotes, arrows and middots everywhere.
+ * PDF strings are Latin-1 with a backslash escape, so *the result must be one byte per character*. Any
+ * code point left above U+00FF is truncated by the `latin1` write that turns this string into the file,
+ * and what survives is the last byte of its UTF-8 sequence — which is how an en dash became byte 0x13,
+ * a control character, and printed as a stray glyph in every document containing one.
+ *
+ * So the special characters are mapped to their WinAnsi code points rather than transliterated to
+ * themselves. WinAnsi is CP1252 in the 0x80-0x9F range: an en dash is 0x96 and an em dash 0x97, not
+ * U+2013 and U+2014. `png.mjs` draws exactly those bytes, because they are what reaches it.
  */
 export function toWinAnsi(text) {
   let out = '';
   for (const ch of String(text === null || text === undefined ? '' : text)) {
     const code = ch.codePointAt(0);
-    if (code === 0x2014 || code === 0x2013) out += code === 0x2014 ? '\u2014' : '\u2013';
+    if (code === 0x2014) out += '\u0097'; /* em dash -> WinAnsi 0x97 */
+    else if (code === 0x2013) out += '\u0096'; /* en dash -> WinAnsi 0x96 */
     else if (code === 0x2018 || code === 0x2019) out += "'";
     else if (code === 0x201c || code === 0x201d) out += '"';
     else if (code === 0x2026) out += '...';
     else if (code === 0x2192) out += '->';
     else if (code === 0x2190) out += '<-';
-    else if (code === 0x00b7 || code === 0x2022) out += code === 0x00b7 ? '\u00b7' : '\u00b7';
+    /* A bullet has no WinAnsi code point of its own, so it is drawn as the middot, which does (0xB7). */
+    else if (code === 0x00b7 || code === 0x2022) out += '\u00b7';
     else if (code === 0x2713) out += 'v';
     else if (code === 0x2717) out += 'x';
     else if (code === 0x2264) out += '<=';
@@ -195,6 +237,8 @@ export function toWinAnsi(text) {
     else if (code === 0x2032) out += "'";
     else if (code === 0x2033) out += '"';
     else if (code <= 0xff) out += ch;
+    /* Anything else has no glyph in a base-14 font. `?` rather than dropping it: a document that loses
+     * the right-hand side of a word is worse than one that shows where it lost something. */
     else out += '?';
   }
   return out;
@@ -568,6 +612,7 @@ function makePageContext(page, index, overflow, notes) {
        * the honest response is to wrap them and let the reader see two tidy lines rather than to spill
        * off the margin. It only kicks in when there *is* a box and the text does not fit, so nothing
        * that currently fits changes shape. */
+
       const boxWidth = edge === null ? null : edge - x;
       const pieces =
         boxWidth !== null && boxWidth > 0 && measure(body, face, size, charSpace) > boxWidth

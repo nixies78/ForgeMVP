@@ -543,15 +543,16 @@ test('every face the structures ask for exists', () => {
 
 test('every character the documents print has real glyph artwork', () => {
   /* The preview draws a visible box for anything it cannot draw, which is the right behaviour for a
-   * viewer and a small lie about the printed page. This is the check that it never happens: every
-   * character that reaches the rasteriser resolves to real artwork, after the writer's WinAnsi pass —
-   * which is where the dashes turned into `\u0013` and `\u0014` and drew as boxes until they were
-   * added, despite the em dash being the commonest punctuation in these documents. */
+   * viewer and a small lie about the printed page. This is the check that it never happens: every byte
+   * that reaches the rasteriser resolves to real artwork.
+   *
+   * "Byte", not "character": the rasteriser reads the finished PDF, so what reaches it is WinAnsi. The
+   * em dash in these documents is 0x97, not U+2014, and keying the font on the Unicode character left
+   * the commonest punctuation in the document drawing as a box while every Unicode-based check passed. */
   const missing = new Set();
   for (const [, result] of built) {
     for (const ch of result.text) {
-      const encoded = toWinAnsi(ch);
-      if (!encoded) continue;
+      const encoded = toWinAnsi(ch) || ch;
       for (const byte of encoded) {
         if (byte === '\n' || byte === ' ') continue;
         if (!hasGlyph(byte)) missing.add(byte);
@@ -563,6 +564,86 @@ test('every character the documents print has real glyph artwork', () => {
     [],
     'the preview has no artwork for these characters'
   );
+});
+
+test('the writer never emits a code point a latin1 string cannot carry', () => {
+  /* The invariant that made the dash bug invisible for as long as it lasted.
+   *
+   * `pdfString` builds the PDF's literal string as a JS string and the file is assembled with a `latin1`
+   * write, so **any code point above U+00FF is truncated to its last UTF-8 byte**. `toWinAnsi` used to
+   * pass an en dash through as U+2013, which wrote as a single byte 0x13 — a control character — and the
+   * document printed a stray glyph where a dash should be. Nothing failed: the PDF was valid, the audit
+   * saw text, and the preview drew a box.
+   *
+   * Asserting it here means the next special character added to the transliterator has to name its
+   * WinAnsi byte rather than hoping. */
+  const offenders = new Map();
+  for (const [, result] of built) {
+    for (const ch of result.text) {
+      const mapped = toWinAnsi(ch);
+      if (!mapped) continue;
+      for (const byte of mapped) {
+        const code = byte.codePointAt(0);
+        if (code > 0xff) {
+          const key = `${JSON.stringify(ch)} U+${ch.codePointAt(0).toString(16).toUpperCase()} -> U+${code.toString(16).toUpperCase()}`;
+          offenders.set(key, (offenders.get(key) || 0) + 1);
+        }
+      }
+    }
+  }
+  assert.deepEqual(
+    [...offenders],
+    [],
+    'these characters would be truncated by the latin1 write, losing all but the last UTF-8 byte'
+  );
+});
+
+test('WinAnsi special characters map to their own code points, not to themselves', () => {
+  /* Spot checks on the ones the documents actually use. Each of these is one byte in WinAnsi and would
+   * be three if left as Unicode. */
+  const singleByte = [
+    ['\u2014', 0x97, 'em dash'],
+    ['\u2013', 0x96, 'en dash'],
+    ['\u00b7', 0xb7, 'middot'],
+    ['\u2019', 0x27, 'right single quote'],
+    ['\u201c', 0x22, 'left double quote'],
+    ['\u201d', 0x22, 'right double quote'],
+    ['\u00a0', 0x20, 'non-breaking space']
+  ];
+  for (const [ch, code, name] of singleByte) {
+    const mapped = toWinAnsi(ch);
+    assert.equal(
+      mapped.length,
+      1,
+      `${name} mapped to ${mapped.length} bytes (${JSON.stringify(mapped)}), wanted one`
+    );
+    assert.equal(
+      mapped.codePointAt(0),
+      code,
+      `${name} mapped to U+${mapped.codePointAt(0).toString(16).toUpperCase()}, wanted U+${code.toString(16).toUpperCase()}`
+    );
+  }
+
+  /* These deliberately expand: there is no base-14 glyph for them, so they become the ASCII sequence
+   * that reads the same. Each byte is still Latin-1, which is the invariant that matters. */
+  const expansions = [
+    ['\u2026', '...', 'ellipsis'],
+    ['\u2192', '->', 'right arrow'],
+    ['\u2190', '<-', 'left arrow'],
+    ['\u2264', '<=', 'less or equal'],
+    ['\u2265', '>=', 'greater or equal']
+  ];
+  for (const [ch, want, name] of expansions) {
+    const mapped = toWinAnsi(ch);
+    assert.equal(mapped, want, `${name} should expand to ${JSON.stringify(want)}`);
+    for (const byte of mapped) {
+      assert.ok(byte.codePointAt(0) <= 0xff, `${name} produced a byte above Latin-1`);
+    }
+  }
+
+  /* And a character with no base-14 glyph at all is marked rather than dropped, so a reader can see
+   * that something was lost. Dropping it silently would leave a word with a hole in it. */
+  assert.equal(toWinAnsi('\u4e2d'), '?', 'an unrepresentable character should be marked, not dropped');
 });
 
 test('the preview font is shaped the way the rasteriser reads it', () => {
@@ -670,6 +751,99 @@ test('a rendered page is not blank, and its ink is where the text is', () => {
   const total = dark + light;
   assert.ok(dark / total > 0.005, `page 2 of the Sprint Pack is ${(dark / total) * 100}% ink — it looks blank`);
   assert.ok(light / total > 0.5, 'a page should still be mostly paper');
+});
+
+test('measure answers the same width for a character and for the byte it is encoded to', () => {
+  /* The single most expensive bug in this generator, and the hardest to see.
+   *
+   * The writer works in two string spaces: callers and `wrap` pass characters, while `text()` measures
+   * the WinAnsi it is about to write. If those two readings of the same run disagree, `wrap` fits a line
+   * into a box and `text` then decides it does not fit and re-wraps it — and because `para` hands each
+   * already-wrapped line to `text` with the box as its right edge, the extra line lands on top of the
+   * previous one.
+   *
+   * An em dash read 556 units as `U+2014` (no table entry, so the fallback) and 1000 as the byte `0x97`
+   * (a control character, which does have one). A line `wrap` measured at 456.7pt measured 460.8pt when
+   * `text` looked again, 460.8 does not fit 459.28, and the cover of the Sprint Pack drew a three-line
+   * paragraph as two lines with the second printed twice. Nothing about the layout was wrong.
+   *
+   * This asserts the invariant that prevents it, for every character the documents actually contain. */
+  for (const [, result] of built) {
+    for (const ch of result.text) {
+      const encoded = toWinAnsi(ch);
+      if (!encoded || encoded === ch) continue;
+      /* Only the one-to-one mappings can be compared: an ellipsis becomes three periods and an arrow
+       * two characters, and those *should* measure differently because they draw differently. */
+      if (encoded.length !== 1) continue;
+      const asChar = measure(ch, 'regular', 10);
+      const asByte = measure(encoded, 'regular', 10);
+      assert.equal(
+        asByte.toFixed(6),
+        asChar.toFixed(6),
+        `${JSON.stringify(ch)} measures ${asChar} but its byte ${JSON.stringify(encoded)} measures ${asByte}`
+      );
+    }
+  }
+});
+
+test('the punctuation the generator relies on has real Helvetica widths', () => {
+  /* The tables only cover codes 32 to 255, so anything outside Latin-1 needs a deliberate width or it
+   * silently takes the fallback. These are Helvetica's printed values, not approximations of them. */
+  const expected = [
+    ['\u2014', 1000, 'em dash'],
+    ['\u2013', 556, 'en dash'],
+    ['\u2026', 1000, 'ellipsis'],
+    ['\u00b7', 278, 'middot'],
+    ['\u2019', 222, 'right single quote'],
+    ['\u201c', 333, 'left double quote']
+  ];
+  for (const [ch, want, name] of expected) {
+    const got = measure(ch, 'regular', 1000);
+    assert.ok(
+      Math.abs(got - want) < 1,
+      `${name} measures ${got} units, wanted ${want} — a fallback in disguise`
+    );
+  }
+
+  /* An em dash and an en dash are different widths. Getting that wrong is invisible until something
+   * measures a dash on its own. */
+  assert.notEqual(
+    measure('\u2014', 'regular', 1000),
+    measure('\u2013', 'regular', 1000),
+    'the em dash and the en dash cannot both be 556 units'
+  );
+});
+
+test('a paragraph never draws two of its lines at the same height', () => {
+  /* The symptom the metric bug produced, asserted directly so it cannot come back through another
+   * route: whatever a paragraph does internally, its lines descend monotonically and never collide. */
+  const { bytes } = buildPdf({
+    title: 'paragraph spacing',
+    pages: [
+      {
+        name: 'p',
+        width: 595.28,
+        height: 841.89,
+        limit: 800,
+        draw(page) {
+          page.para(56, 40, 'Match your mood \u2014 cold blue/green for horror, warm for cozy scenes.', {
+            face: 'regular',
+            size: 7.4,
+            leading: 1.3,
+            colour: '0 0 0',
+            maxWidth: 200,
+            label: 'probe'
+          });
+        }
+      }
+    ]
+  });
+  const runs = extractRuns(bytes)[0];
+  assert.ok(runs.length >= 2, `the probe should wrap to at least two lines, got ${runs.length}`);
+  const pitches = runs.slice(1).map((run, i) => runs[i].yFromBottom - run.yFromBottom);
+  for (const pitch of pitches) {
+    assert.ok(pitch > 4, `two lines of one paragraph are ${pitch.toFixed(2)}pt apart`);
+  }
 });
 
 test('plain text extraction round-trips the document', () => {

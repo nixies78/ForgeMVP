@@ -235,6 +235,13 @@ allowance.
 > means embedding the Adobe standard base-14 tables in `audit.mjs` and asserting them equal to the
 > writer's tables in a test — a guarded second source of truth rather than a silent one. Not done yet;
 > recorded here rather than left implicit.
+>
+> This gap has now cost something concrete, which is the argument for closing it. `measure` answered
+> **556 and 1000** for the em dash depending on whether it was handed the character or the byte, and the
+> audit could not see the inconsistency because it was asking the same function both questions. It
+> reported the five overlaps the inconsistency produced and none of the cause. A test asserting the two
+> readings are equal is now in place (`measure is idempotent under toWinAnsi`), which is the cheap half
+> of the fix; the expensive half is the independent table, and it is still worth doing.
 
 ### The page-boundary check, and why it was dead
 
@@ -270,13 +277,21 @@ Recorded because each one is a shape worth recognising again.
 | **Dashes drawn as missing-glyph boxes** | The commonest punctuation in these documents showed as a `▯`. | WinAnsi encodes an em dash as byte `0x13`, not `U+2014`, so after the writer's encoding pass the rasteriser was handed `\u0013` — a code point the font had no entry for. The glyphs were keyed on the Unicode character, which is not what reaches the renderer. |
 | **Stroke breaking into dashes** | Text read as dotted lines at 6–9pt. | The canvas drew lines with integer Bresenham and a square brush, so nothing could be stroked thinner than a pixel and a rounded brush left gaps in the stems. Replaced with distance-to-segment coverage and anti-aliased blending. |
 | **Page images scaled to illegibility** | The mockup pages were right and the previews were right; the text was unreadable anyway. | Three pages were laid out side by side, scaling a 1191px page into ~260px. A design document is read one page at a time, so the mockup pages now show one per row at 900px with a link to the full-size PNG. |
+| **A dash written as a control character** | The commonest punctuation in the document printed as a stray glyph, and text extraction returned commas in its place. | `toWinAnsi` passed the dashes through as `U+2014` and `U+2013`. Those are two code points, and `pdfString`'s output is written to the file with a `latin1` write, so each was truncated to the **last byte of its UTF-8 sequence** — an en dash became byte `0x13`, which is why the extracted text read `2\u00134` instead of `2–4`. A valid PDF with text in it, so nothing failed. Fixed by mapping the dashes to their WinAnsi code points (`0x96`, `0x97`) like every other special character, and asserted as "the writer never emits a code point a latin1 string cannot carry". |
+| **`measure` was not idempotent under `toWinAnsi`** | The cover of the Sprint Pack drew a two-line paragraph as two lines with the second printed twice, 1pt apart; four more paragraphs in the Sprint Pack and one in the Ledger did the same. The audit reported five text overlaps. | The expensive one. The writer works in two string spaces: `wrap` and the layouts pass characters, `text()` measures the WinAnsi it is about to write. An em dash measured **556 units** as `U+2014` and **1000** as the byte `0x97`, so a line `wrap` fitted into a 459.28pt box measured 3.5pt wider when `text` measured it again — and since it no longer fitted, `text` re-wrapped a line that had already been wrapped. Because `para` hands each line to `text` with the box as its right edge, the third line landed at the same `y` as the second. Fixed by giving both spellings one width in `SPECIAL_WIDTHS`; the tables only covered codes 32–255, so anything outside Latin-1 was silently taking the `?` fallback. **Nothing about the layout was wrong**, which is why reading the layout code for an hour found nothing. |
+| **A callout whose box was the wrong height** | The cover's caveat wrapped to three lines into a box sized for two. | A fixed 42pt box and `maxHeight: 22` agreed with each other and not with the text, whose length depends on the game type's name. The box is now sized from `blockHeight` of the paragraph, so the two numbers cannot disagree. |
 
 The through-line: **the failures that took longest were the ones where the code read as correct** — a
-clamp that looked defensive, a guard that looked like it ran, an operator that looked per-run, a font
-whose comment said "deliberate limitation" where the truth was "inverted axis". Every one of them was
-caught by looking at the output rather than the source — reading the finished bytes, or in the font's
-case by zooming into the rendered page — which is the argument for the audit and the preview existing
-at all.
+clamp that looked defensive, a guard that looked like it ran, an operator that looked per-run, a metric
+table that looked complete, a font whose comment said "deliberate limitation" where the truth was
+"inverted axis". Every one of them was caught by looking at the output rather than the source — reading
+the finished bytes, or in the font's case by zooming into the rendered page — which is the argument for
+the audit and the preview existing at all.
+
+Two of them were found only because a *different* bug was fixed and the output changed. The dash encoding
+exposed the metric gap, and the metric gap exposed the callout's fixed height. That is worth recording on
+its own: a generator with no independent reader of its output would have shipped all three, and the
+second one was invisible until the first was fixed.
 
 ---
 

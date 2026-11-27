@@ -19,7 +19,7 @@
  * it. Everything is tested against `FLOOR` before it is drawn, and nothing is drawn twice.
  */
 
-import { wrap } from '../pdf.mjs';
+import { wrap, blockHeight } from '../pdf.mjs';
 import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, drawMissing, eyebrow } from '../kit.mjs';
 
 export const SPRINT_META = {
@@ -252,22 +252,37 @@ export function renderSprint(model, options = {}) {
         page.line(M.left, y + 11, PAGE.width - M.right, y + 11, palette.rule, 0.5);
       });
 
-      /* and the one caveat that belongs on a cover */
+      /* and the one caveat that belongs on a cover
+       *
+       * The box is sized from the paragraph rather than fixed, because the paragraph's length depends on
+       * the game type's name: a fixed 42pt box with `maxHeight: 22` held two lines, and a caveat that
+       * wrapped to three had its last line placed *on top of* the second. The box's height and the
+       * paragraph's `maxHeight` have to be the same number, and the only number that is right is the one
+       * the text actually needs. */
       y += 28;
-      page.rect(M.left, y, CONTENT_WIDTH, 42, palette.accentSoft);
-      page.rect(M.left, y, 3, 42, palette.accent);
+      const caveat = blockingCaveat(model);
+      const caveatWidth = CONTENT_WIDTH - 24;
+      const caveatHeight = blockHeight(caveat, {
+        face: 'regular',
+        size: 7.8,
+        leading: 1.3,
+        width: caveatWidth
+      }).height;
+      const boxHeight = caveatHeight + 20;
+      page.rect(M.left, y, CONTENT_WIDTH, boxHeight, palette.accentSoft);
+      page.rect(M.left, y, 3, boxHeight, palette.accent);
       page.text(M.left + 11, y + 6, 'BEFORE YOU START', {
         face: 'bold',
         size: 6.2,
         colour: palette.accent,
         charSpace: 0.9
       });
-      page.para(M.left + 11, y + 17, blockingCaveat(model), {
+      page.para(M.left + 11, y + 17, caveat, {
         size: 7.8,
         leading: 1.3,
         colour: palette.ink,
-        maxWidth: CONTENT_WIDTH - 24,
-        maxHeight: 22,
+        maxWidth: caveatWidth,
+        maxHeight: caveatHeight + 1,
         label: 'cover caveat'
       });
 

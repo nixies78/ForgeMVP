@@ -273,11 +273,22 @@ const GLYPHS = {
   '·': [[[240, 340], [320, 340], [320, 260], [240, 260], [240, 340]]],
   '—': [s([0, 300], [560, 300])],
   '–': [s([0, 300], [500, 300])],
-  /* WinAnsi puts the dashes on control code points — an em dash is byte 0x13, not U+2014 — so the
-   * preview is handed `\u0013` and `\u0014` after the writer's encoding pass. Without these entries the
-   * commonest character in these documents drew as a missing-glyph box, which is how they were noticed. */
-  '\u0013': [s([0, 300], [560, 300])],
-  '\u0014': [s([0, 300], [500, 300])],
+  /* The rasteriser is handed bytes from the finished PDF, so the keys that matter are WinAnsi's, not
+   * Unicode's. In the 0x80–0x9F range WinAnsi is CP1252: an em dash is 0x97 and an en dash 0x96.
+   * These entries were previously keyed on U+2014 and U+2013 and were unreachable for exactly that
+   * reason, while the bytes that did arrive fell through to the missing-glyph box. Both spellings are
+   * kept because the Unicode ones are what a human would search for. */
+  '\u0097': [s([0, 300], [560, 300])],
+  '\u0096': [s([0, 300], [500, 300])],
+  '\u2014': [s([0, 300], [560, 300])],
+  '\u2013': [s([0, 300], [500, 300])],
+  '\u0085': [[[60, 25], [110, 25], [110, 0], [60, 0], [60, 25]], [[220, 25], [270, 25], [270, 0], [220, 0], [220, 25]], [[380, 25], [430, 25], [430, 0], [380, 0], [380, 25]]], /* 0x85: ellipsis */
+  '\u0095': [[...oval(255, 250, 105, 105, 7)]], /* 0x95: bullet */
+  '\u0080': [[[240, 320], [320, 320], [320, 240], [240, 240], [240, 320]]],
+  '\u0091': [s([120, C], [120, 520])],
+  '\u0092': [s([120, C], [120, 520])],
+  '\u0093': [s([70, C], [70, 520]), s([220, C], [220, 520])],
+  '\u0094': [s([110, C], [110, 520]), s([260, C], [260, 520])],
   '“': [s([70, C], [70, 520]), s([220, C], [220, 520])],
   '”': [s([110, C], [110, 520]), s([260, C], [260, 520])],
   '‘': [s([120, C], [120, 520])],
