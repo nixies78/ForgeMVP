@@ -179,10 +179,26 @@ export function effectiveLayoutTip(dataset, gameTypeKey) {
 /* --------------------------------- brand helpers --------------------------------- */
 
 export function brandsForGameType(dataset, gameTypeKey) {
-  return dataset.brands.map((brand) => ({
-    ...brand,
-    suitsChosenType: Array.isArray(brand.suggested_game_types) && brand.suggested_game_types.includes(gameTypeKey)
-  }));
+  return (
+    dataset.brands
+      .map((brand) => ({
+        ...brand,
+        suitsChosenType: Array.isArray(brand.suggested_game_types) && brand.suggested_game_types.includes(gameTypeKey)
+      }))
+      /* Alphabetical, because the reader arrives with a brand already in mind and hunts for it by name. The
+       * data file's order is the order the brands were researched in, which meant nothing on screen.
+       *
+       * The one override is the platform's own default (the data file names it, so this is not a hardcoded
+       * id): "Original (No Brand Template)" is not a brand to hunt for, it is the template a reader gets
+       * when they do not want a brand, so it stays first and reads as the plain option rather than as one
+       * of the seven. `sensitivity: 'base'` is what makes LEGO sort before Squid Game rather than after it -
+       * a plain code-unit sort puts every capitalised name ahead of every lowercase one. */
+      .sort((a, b) => {
+        if (a.id === dataset.defaultBrandId) return -1;
+        if (b.id === dataset.defaultBrandId) return 1;
+        return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
+      })
+  );
 }
 
 /** The assets a brand should have, per the convention in the data file's own image spec. */

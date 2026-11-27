@@ -685,6 +685,8 @@ body.g-app {
   flex: 1 1 auto;
   width: 100%;
   padding: var(--fn-space-4) var(--fn-space-3);
+  /* The marker is positioned against the tile rather than laid out inside it. */
+  position: relative;
   background: var(--fn-surface-panel);
   border: 1px solid var(--fn-border);
   border-radius: var(--fn-radius-card);
@@ -709,10 +711,49 @@ body.g-app {
 /* 14px rather than the 16px body size: these are labels on a control, and the one the reader compares
  * brands by, so they sit on the same step as the app's own navigation. */
 .g-brandtile-label { font-weight: 600; font-size: var(--fn-nav-size); line-height: 1.35; }
-/* Only the placement is the tile's own: the pill itself is the wizard's shared `.g-choice-marker`. Pinned
- * to the bottom of the tile, so every label starts at the same height down a row and the marker sits on the
- * baseline of the row rather than floating under a one-line label. */
-.g-brandtile-marker { margin-top: auto; }
+/* The marker is the wizard's own pill (`.g-choice-marker`), drawn as a badge in the tile's corner and
+ * unfolded over the tile when the tile is hovered or focused.
+ *
+ * Positioned rather than laid out. In the flow it stood the tile a badge taller than the things in it, so
+ * choosing a brand grew every row of the strip at once - the reader measured 315px of strip becoming 353px -
+ * and the slack it left behind was the empty band under the labels. Out of the flow it costs the row nothing
+ * in any state, which is exactly how the browser checks it: take the marker out of the DOM and measure the
+ * strip again, and it does not move.
+ *
+ * The words are inside the pill at all times and are only clipped while it is a badge, so what a screen
+ * reader hears never depends on where the mouse happens to be. `aria-pressed` on the tile carries the state
+ * as well, which is the wizard's rule for every selected box. */
+.g-brandtile-marker {
+  position: absolute;
+  top: var(--fn-space-2);
+  right: var(--fn-space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  /* Square padding makes the badge a circle around the tick; the hover state gives it the pill's own
+   * horizontal padding, which is what the unfold grows into. */
+  padding: 4px;
+  transition: padding var(--fn-motion) ease, gap var(--fn-motion) ease;
+}
+.g-brandtile-marker-words {
+  /* Folded by width rather than hidden: the text stays in the accessibility tree, and `12ch` is wider than
+   * the word, so what unfolds is the word's own width and nothing is clipped once it is open.
+   *
+   * `line-height: 1` is what makes the badge a circle rather than a thimble. Folded to nothing, the word is
+   * still a line box, and a 10px font at the inherited line height stood 15px tall - taller than the 12px
+   * tick beside it - so the badge took that height and was 20 wide by 23 tall: narrow, and taller than the
+   * tick it was drawn around. At one line-height the folded word is 10px, the tick's 12px sets the height,
+   * and 12 + 4 + 4 is the same 20px in both directions. */
+  line-height: 1;
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-width var(--fn-motion) ease, opacity var(--fn-motion) ease;
+}
+.g-brandtile:hover .g-brandtile-marker,
+.g-brandtile:focus-visible .g-brandtile-marker { padding: 4px var(--fn-space-3); gap: var(--fn-space-1); }
+.g-brandtile:hover .g-brandtile-marker-words,
+.g-brandtile:focus-visible .g-brandtile-marker-words { max-width: 12ch; opacity: 1; }
 
 .g-brandhero { width: 100%; aspect-ratio: 8 / 3; margin-bottom: var(--fn-space-4); }
 /* The brand preview's own sentence, among the brand screen's other pieces (.g-brandhero, .g-provides,
@@ -1254,6 +1295,9 @@ body.g-app {
 
 @media (prefers-reduced-motion: reduce) {
   .g-toast { animation: none; }
+  /* The badge still unfolds, it just arrives open rather than growing into place. */
+  .g-brandtile-marker,
+  .g-brandtile-marker-words { transition: none; }
 }
 
 @media (max-width: 700px) {
@@ -1589,5 +1633,9 @@ body.g-app {
   .g-panel, .g-device, .g-choice, .g-option, .g-panel-source { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }
   /* The caution keeps its call-out on paper, where its fill would print as a dark slab under dark text. */
   .g-legalnote { background: var(--fn-print-paper); border-left-color: var(--fn-print-ink); }
+  /* And there is no hover on paper, where a badge with no words is a tick nobody can interpret: the marker
+   * goes back into the flow and prints open. */
+  .g-brandtile-marker { position: static; margin-top: var(--fn-space-2); padding: 4px var(--fn-space-3); gap: var(--fn-space-1); }
+  .g-brandtile-marker-words { max-width: none; opacity: 1; }
   .g-main a { color: var(--fn-print-ink); }
 }

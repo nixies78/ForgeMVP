@@ -9,7 +9,7 @@
  * answered, and discovering that a brand's rules do not suit the game is a normal, expected moment.
  */
 
-import { h, frag, plural, richText } from '../dom.js';
+import { h, frag, icon, plural, richText } from '../dom.js';
 import { brandsForGameType, brandAssets } from '../data.js';
 import { UI } from '../content.js';
 import { button, buttonRow, badgeChip, eyebrow, externalLink, imageSlot, lead, pageTitle, panel, paragraph } from '../render/ui.js';
@@ -58,12 +58,19 @@ export function renderBrand(ctx) {
               compact: true
             }),
             h('span', { class: 'g-brandtile-label' }, brand.label),
-            /* The wizard's own marker, not a second one of its own: `.g-choice-marker` is the pill the
-             * category and game-type cards wear, and the tile adds nothing to it but its placement. It is
-             * rendered by the chosen tile and by no other - the copy that used to be rendered everywhere
-             * and hidden with `visibility` held a line open in all eight tiles, so every tile stood a
-             * badge taller than the things in it, chosen or not. */
-            state.brandKey === brand.id ? h('span', { class: 'g-brandtile-marker g-choice-marker' }, '✓ Selected') : null
+            /* The wizard's own marker - `.g-choice-marker` is the pill the category and game-type cards wear
+             * - drawn as a badge in the tile's corner and unfolded over the tile when the tile is hovered or
+             * focused. Only the chosen tile renders it, and it is positioned rather than laid out, so it
+             * costs the strip nothing in any state: a pill in the flow stood the tile a badge taller than
+             * the things in it, and choosing a brand moved the whole strip with it. */
+            state.brandKey === brand.id
+              ? h(
+                  'span',
+                  { class: 'g-brandtile-marker g-choice-marker' },
+                  icon('check', 12),
+                  h('span', { class: 'g-brandtile-marker-words' }, 'Selected')
+                )
+              : null
           )
         );
       })

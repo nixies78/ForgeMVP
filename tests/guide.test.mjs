@@ -1261,7 +1261,9 @@ test('hover repaints an interactive surface by one library step, and controls do
       );
     }
     assert.ok(
-      /border-color|box-shadow|transform|color|opacity|text-decoration|background/.test(block),
+      /* Geometry counts as a change the reader sees: the brand tile's marker unfolds by width and padding,
+       * which is as visible as a repaint even though no colour moves. */
+      /border-color|box-shadow|transform|color|opacity|text-decoration|background|padding|gap|max-width|width|height/.test(block),
       `a hover rule changes nothing visible:\n${block.trim()}`
     );
   }
@@ -1544,19 +1546,19 @@ test('every way back in the wizard says Back, and only Back', async () => {
   assert.ok(!/previous:\s*'Previous'/.test(content), 'the old "Previous" label is gone');
 });
 
-test("a brand tile wears the wizard's own selected marker, and only when it is chosen", async () => {
-  /* Two bugs in one element. The tile reimplemented the pill the cards two screens earlier already have -
-   * `.g-choice-marker` - which let the two drift apart; and it rendered that pill on every tile and hid the
-   * ones that were not chosen with `visibility`, which held a badge's worth of empty line open in all eight
-   * tiles: every tile stood taller than the things inside it, with the same gap above the logo as below the
-   * label. The pill is now the shared one, rendered only by the chosen tile, and `grid-auto-rows: 1fr` is
-   * what keeps the row equal without reserving anything. */
+test("a brand tile wears the wizard's own marker as a badge, and only when it is chosen", async () => {
+  /* The marker is the pill the cards two screens earlier wear (`.g-choice-marker`), drawn as a badge in the
+   * tile's corner and unfolded over the tile on hover or focus. What matters is that it is *positioned*: in
+   * the flow it stood every tile a badge taller than the things in it, and because the rows are equalised,
+   * choosing a brand grew the whole strip at once - the reader measured 315px of strip becoming 353px when
+   * the chosen brand's label ran to two lines. Out of the flow it costs the row nothing in any state. */
   const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'brand.js'), 'utf8');
   assert.match(
     source,
-    /state\.brandKey === brand\.id \? h\('span', \{ class: 'g-brandtile-marker g-choice-marker' \}, '✓ Selected'\) : null/,
-    'only the chosen tile renders the marker, and it is the wizard\'s own'
+    /class: 'g-brandtile-marker g-choice-marker' \},\s*icon\('check', 12\),\s*h\('span', \{ class: 'g-brandtile-marker-words' \}, 'Selected'\)/,
+    "the chosen tile renders the wizard's own pill, with its words still inside it"
   );
+  assert.match(source, /state\.brandKey === brand\.id\s*\n?\s*\?\s*h\(/, 'and only the chosen tile renders it');
   assert.ok(!/is-hidden/.test(source), 'no tile holds a line open for a marker that is not there');
 
   /* Clicking a tile has to choose it, or the marker is unreachable: `chooseBrand` sets the key and leaves
@@ -1571,12 +1573,31 @@ test("a brand tile wears the wizard's own selected marker, and only when it is c
   const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
   assert.match(ruleBody(css, '.g-brandstrip'), /grid-auto-rows:\s*1fr/, 'every row of the strip is the same height');
   assert.match(ruleBody(css, '.g-brandtile'), /flex:\s*1 1 auto/, 'a tile fills its grid cell, not its own content');
-  const marker = ruleBody(css, '.g-brandtile-marker');
-  assert.match(marker, /margin-top:\s*auto/, 'the marker sits on the bottom of the tile');
-  assert.ok(!/background:/.test(marker), 'the tile adds placement to the shared pill and nothing else');
-  assert.ok(!/g-brandtile-marker\.is-hidden/.test(css), 'the rule that held the empty line open is gone');
+  assert.match(ruleBody(css, '.g-brandtile'), /position:\s*relative/, 'the tile is what the badge is placed against');
 
-  /* The chosen tile wears what the chosen card wears: the accent edge, the selected fill, the pill. */
+  const marker = ruleBody(css, '.g-brandtile-marker');
+  assert.match(marker, /position:\s*absolute/, 'the badge is out of the flow, so it cannot change the height');
+  assert.match(marker, /top:\s*var\(--fn-space-2\)/, 'it sits in the tile\'s top corner');
+  assert.match(marker, /right:\s*var\(--fn-space-2\)/, 'and its own width never pushes the tile wider');
+  assert.ok(!/margin-top:\s*auto/.test(marker), 'nothing pins it into the tile\'s height any more');
+  assert.match(ruleBody(css, '.g-brandtile-marker-words'), /max-width:\s*0/, 'its words are folded away at rest');
+  assert.match(
+    css,
+    /\.g-brandtile:hover \.g-brandtile-marker-words,\s*\.g-brandtile:focus-visible \.g-brandtile-marker-words \{ max-width:\s*12ch/,
+    'and unfold over the tile when it is hovered - or focused, so a keyboard sees the same thing'
+  );
+  assert.match(
+    css,
+    /@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\.g-brandtile-marker-words \{ transition:\s*none/,
+    'reduced motion gets the unfold without the growth'
+  );
+  assert.match(
+    css,
+    /@media print \{[\s\S]*?\.g-brandtile-marker \{ position:\s*static/,
+    'and paper has no hover, so the badge prints open rather than as a tick with no words'
+  );
+
+  /* The chosen tile wears what the chosen card wears: the accent edge, the selected fill, the marker. */
   assert.match(ruleBody(css, '.g-brandtile.is-chosen'), /border-color:\s*var\(--fn-action\)/, 'the chosen tile takes the accent edge');
   assert.match(ruleBody(css, '.g-brandtile.is-chosen'), /background:\s*var\(--fn-selected\)/, 'and the selected fill');
   assert.match(
@@ -1588,6 +1609,27 @@ test("a brand tile wears the wizard's own selected marker, and only when it is c
     ruleBody(css, '.g-brandtile-label'),
     /font-size:\s*var\(--fn-nav-size\)/,
     'the tile label is set at the navigation size rather than the body size'
+  );
+});
+
+test('the brand strip is alphabetical, with the platform default first', () => {
+  /* The reader arrives with a brand already in mind and hunts for it by name, so the strip is alphabetical.
+   * The data file's order is the order the brands were researched in, which said nothing on screen; the one
+   * override is the data file's own default, because "Original (No Brand Template)" is the template for
+   * wanting no brand rather than one of the seven to hunt for. */
+  const ordered = brandsForGameType(data, 'combat_elimination_deathmatch');
+  assert.equal(ordered.length, data.brands.length, 'every brand is still on the screen');
+  assert.equal(ordered[0].id, data.defaultBrandId, 'the no-brand template stays first');
+  const labels = ordered.slice(1).map((brand) => brand.label);
+  assert.deepEqual(
+    labels,
+    [...labels].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' })),
+    `the rest is alphabetical: ${labels.join(' | ')}`
+  );
+  assert.notEqual(labels[0], data.brands[0].label, 'and the strip is not simply the data file in its own order');
+  assert.ok(
+    ordered.every((brand) => typeof brand.suitsChosenType === 'boolean'),
+    'the per-type fit is still computed for every brand'
   );
 });
 
