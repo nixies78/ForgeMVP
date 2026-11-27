@@ -20,7 +20,7 @@
  */
 
 import { wrap, blockHeight } from '../pdf.mjs';
-import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, drawMissing, eyebrow } from '../kit.mjs';
+import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, drawMissing, heading, eyebrow } from '../kit.mjs';
 
 export const SPRINT_META = {
   id: 'sprint',
@@ -304,7 +304,7 @@ export function renderSprint(model, options = {}) {
       limit: PAGE_LIMIT,
       draw(page) {
         let y = M.top;
-        eyebrow(page, M.left, y, index === 0 ? 'The modules' : 'The modules (continued)', palette);
+        heading(page, M.left, y, index === 0 ? 'The modules' : 'The modules (continued)', palette);
         page.text(PAGE.width - M.right, y, 'in the order you place them', {
           face: 'regular',
           size: 7.2,
@@ -394,7 +394,7 @@ export function renderSprint(model, options = {}) {
       limit: PAGE_LIMIT,
       draw(page) {
         let y = M.top;
-        eyebrow(page, M.left, y, index === 0 ? 'Settings ledger' : 'Settings ledger (continued)', palette);
+        heading(page, M.left, y, index === 0 ? 'Settings ledger' : 'Settings ledger (continued)', palette);
         page.text(PAGE.width - M.right, y, 'set these in order, with the Details panel open', {
           face: 'regular',
           size: 7.2,
@@ -437,7 +437,7 @@ export function renderSprint(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Decisions', palette);
+      heading(page, M.left, y, 'Decisions', palette);
       page.text(PAGE.width - M.right, y, 'every answer, and what it changed', {
         face: 'regular',
         size: 7.2,
@@ -546,7 +546,7 @@ export function renderSprint(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Before you place anything', palette);
+      heading(page, M.left, y, 'Before you place anything', palette);
       page.text(PAGE.width - M.right, y, `${model.notes.length} notes from the device data`, {
         face: 'regular',
         size: 7.2,
@@ -628,7 +628,7 @@ export function renderSprint(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Build order', palette);
+      heading(page, M.left, y, 'Build order', palette);
       page.text(PAGE.width - M.right, y, 'the steps, and what each one leaves behind', {
         face: 'regular',
         size: 7.2,
@@ -729,7 +729,7 @@ export function renderSprint(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Open items', palette);
+      heading(page, M.left, y, 'Open items', palette);
       page.text(PAGE.width - M.right, y, 'what this pack does not cover', {
         face: 'regular',
         size: 7.2,

@@ -152,7 +152,17 @@ const GLYPHS = {
   6: [[...arc([400, 700], [80, 380], [80, 240], 10)], [...oval(250, 240, 195, 250, 10)]],
   7: [s([60, C], [470, C]), s([470, C], [180, 0])],
   8: [[...oval(255, 520, 175, 190, 9)], [...oval(255, 240, 205, 235, 10)]],
-  9: [[...arc([90, 90], [420, 260], [420, 430], 10)], [...oval(255, 440, 190, 250, 10)]],
+  /* The 9 must be the 6 turned over, and it was not.
+   *
+   * As drawn it was an oval with its centre at y=440 — as tall as the `0`'s, which runs 0..600 — plus a
+   * right-hand stroke stopping at y=90. So it had no tail: at 7.4pt, where a stem is most of a pixel and
+   * a counter is two or three, the bowl and the stroke merged into one blob and the glyph was a `0`. A
+   * footer reading "2 / 9" was read as "2 / 0" on every page of a nine-page document.
+   *
+   * The `6` was always right: a quarter arc for the tail and a bowl in the lower half. This is that
+   * mirrored — bowl in the upper half, tail falling to the baseline — with the tail's x reaching the
+   * left edge so it is visible even when the counters close up. */
+  9: [[...oval(255, 400, 185, 200, 10)], [...arc([420, 510], [180, 40], [90, -40], 10)]],
 
   /* ---- uppercase ---- */
   A: [s([125, 0], [270, C]), s([270, C], [415, 0]), s([70, 230], [470, 230])],
@@ -373,22 +383,36 @@ export function glyphPolylines(ch, x, advance, baselineY, size) {
 /**
  * The stem weight to stroke a glyph with, in canvas pixels.
  *
- * Taken from the face's real stem-to-size ratio rather than a constant, so a bold run reads as bolder
- * than a regular one in the preview — which matters, because half these structures' hierarchy is
- * carried by weight alone.
+ * Two constraints pull in opposite directions, and the numbers below are a compromise between them:
  *
- * The ratios are deliberately a little above Helvetica's real ones (about 0.055 of the size for a
- * regular stem at text weights). A stroke narrower than a pixel never reaches full coverage, so a glyph
- * drawn at 7.4pt over a 456pt measure came out as grey-on-white rather than ink-on-paper: every stem was
- * a soft edge with no core, and a page of it read as though the raster were at half the resolution it
- * actually was. That is the "still low res" the previews were reported as. Matching the metric exactly
- * is the wrong target here — the target is that a stem has a solid middle at the size the text is set.
+ *   **Too thin** and a stem never reaches full coverage. At 7.4pt a stroke of `size * 0.062` is 0.46pt
+ *   — under half a pixel — so every glyph is a soft grey edge with no core, and a page of it reads as
+ *   though the raster were at half the resolution it actually is.
+ *
+ *   **Too thick** and a counter closes. A monoline outline has one stroke width, so a heavy weight eats
+ *   the white inside a 9, an 8, an e, an a. At 7.4pt a `size * 0.125` stem filled the bowl of a `9`
+ *   solid and it read as a `0` — a page number of "2 / 9" that a reviewer sees as "2 / 0".
+ *
+ * So the weight is not a constant ratio: it is chosen per size, and the ratio *falls* as the size falls,
+ * because a fixed fraction of a small size is a stem too thin to print and a fixed fraction of nothing
+ * is no stroke at all. The floor is what keeps a 6.4pt caption from disappearing.
+ *
+ * This is a preview-only concern. The PDF embeds no font here; these numbers never reach the document.
  */
 export function strokeWeight(faceFamily, faceStyle, size) {
   const bold = faceStyle === 'bold' || faceStyle === 'boldItalic';
-  if (faceFamily === 'courier') return bold ? Math.max(1.1, size * 0.13) : Math.max(1, size * 0.09);
-  if (faceFamily === 'times') return bold ? Math.max(1.1, size * 0.115) : Math.max(1, size * 0.07);
-  return bold ? Math.max(1.3, size * 0.125) : Math.max(1, size * 0.085);
+  /* Below roughly 12pt a glyph has counters measured in single pixels, so the stem has to give way. */
+  const small = size <= 12;
+  if (faceFamily === 'courier') {
+    if (bold) return Math.max(1, size * (small ? 0.085 : 0.115));
+    return Math.max(0.9, size * (small ? 0.06 : 0.08));
+  }
+  if (faceFamily === 'times') {
+    if (bold) return Math.max(0.95, size * (small ? 0.075 : 0.105));
+    return Math.max(0.85, size * (small ? 0.048 : 0.065));
+  }
+  if (bold) return Math.max(0.95, size * (small ? 0.078 : 0.115));
+  return Math.max(0.85, size * (small ? 0.055 : 0.075));
 }
 
 /** How many characters this font can draw. Used by the tests. */

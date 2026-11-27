@@ -22,7 +22,7 @@
  * one-page document that silently becomes two is this structure's characteristic failure.
  */
 
-import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, eyebrow } from '../kit.mjs';
+import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, heading, eyebrow } from '../kit.mjs';
 
 export const BRIEF_META = {
   id: 'brief',
@@ -180,12 +180,12 @@ export function renderBrief(model, options = {}) {
 
         /* ------------------------------- the loop · 298 → 348 · 50pt ------------------------------- */
         y = 298;
-        eyebrow(page, M.left, y, 'How a run goes', palette);
+        heading(page, M.left, y, 'How a run goes', palette);
         y = drawLoopRail(page, model, palette, y + 14);
 
         /* ----------------------------- what it takes · 364 → 424 · 60pt ----------------------------- */
         y = 364;
-        eyebrow(page, M.left, y, 'What it takes', palette);
+        heading(page, M.left, y, 'What it takes', palette);
         page.para(
           M.left,
           y + 14,

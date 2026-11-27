@@ -213,6 +213,56 @@ export function eyebrow(page, x, y, text, palette, options = {}) {
   });
 }
 
+/**
+ * A section heading: the size that makes a reader stop scrolling and start reading again.
+ *
+ * Every section in every structure used to be an `eyebrow` — 7.6pt, the same size as the small tracked
+ * labels inside the cards, and under a point above the 8.6pt body text. So a page had one text size and
+ * a reader had to find the section boundaries by reading for them. The tell was that the structure was
+ * legible in the abstract and tiring in the hand.
+ *
+ * The printed type scale is roughly:
+ *
+ *   masthead         26pt   the game's name
+ *   section           13pt   this
+ *   card title         9pt   the device or setting name
+ *   eyebrow          7.6pt   a label inside a card
+ *   body             8.6pt   the prose
+ *   caption / footer  7.4pt   provenance, page numbers
+ *
+ * `eyebrow` deliberately keeps its old size and stays in use for card labels and sub-labels, which is
+ * what it was always for. The difference between the two is the whole point: on a page with panels and
+ * prose, 13pt against 7.6pt reads as a hierarchy and 7.6pt against 7.6pt does not.
+ *
+ * `lead` is the gap from the heading's baseline to whatever comes next. Callers that lay out below a
+ * heading use the return value, so the air that a larger size needs travels with it.
+ */
+export function heading(page, x, y, text, palette, options = {}) {
+  const size = options.size || 13;
+  const colour = options.colour || palette.ink;
+  const baseline = page.text(x, y, String(text), {
+    face: options.face || 'bold',
+    size,
+    colour,
+    charSpace: options.charSpace === undefined ? -0.1 : options.charSpace,
+    maxWidth: options.maxWidth === undefined ? CONTENT_WIDTH : options.maxWidth
+  });
+  /* Returned rather than assumed: a caller that hardcodes the old 7.6pt lead would draw the next line
+   * through the descenders of the heading. */
+  return baseline + (options.lead === undefined ? size * 0.34 : options.lead);
+}
+
+/**
+ * A section heading with a rule under it, which is how most sections here are introduced.
+ * Returns the y of the first free line below the rule.
+ */
+export function headingRule(page, x, y, text, palette, options = {}) {
+  const after = heading(page, x, y, text, palette, options);
+  const ruleY = after + (options.gap === undefined ? 5 : options.gap);
+  rule(page, ruleY, palette, { weight: options.weight || 0.8, x, x2: options.x2 });
+  return ruleY + (options.after === undefined ? 9 : options.after);
+}
+
 /** A full-width rule with a little air above it. */
 export function rule(page, y, palette, options = {}) {
   page.line(options.x || M.left, y, options.x2 || PAGE.width - M.right, y, palette.rule, options.weight || 0.6);

@@ -23,7 +23,7 @@
  */
 
 import { wrap } from '../pdf.mjs';
-import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, drawMissing, eyebrow } from '../kit.mjs';
+import { M, PAGE, CONTENT_WIDTH, PALETTES, PAGE_LIMIT, drawFooter, drawMissing, heading, eyebrow } from '../kit.mjs';
 
 export const LEDGER_META = {
   id: 'ledger',
@@ -234,7 +234,7 @@ export function renderLedger(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Verification sheet', palette, { colour: palette.ink });
+      heading(page, M.left, y, 'Verification sheet', palette, { colour: palette.ink });
       page.text(PAGE.width - M.right, y, 'check these against your island', {
         face: 'serifItalic',
         size: 8,
@@ -355,7 +355,7 @@ export function renderLedger(model, options = {}) {
       limit: PAGE_LIMIT,
       draw(page) {
         let y = M.top;
-        eyebrow(page, M.left, y, index === 0 ? 'The systems' : 'The systems (continued)', palette, {
+        heading(page, M.left, y, index === 0 ? 'The systems' : 'The systems (continued)', palette, {
           colour: palette.ink
         });
         page.text(PAGE.width - M.right, y, `${model.counts.devices} devices · by role`, {
@@ -408,7 +408,7 @@ export function renderLedger(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Decision traceability', palette, { colour: palette.ink });
+      heading(page, M.left, y, 'Decision traceability', palette, { colour: palette.ink });
       page.text(PAGE.width - M.right, y, 'answer → effect → device', {
         face: 'serifItalic',
         size: 8,
@@ -520,7 +520,7 @@ export function renderLedger(model, options = {}) {
     limit: PAGE_LIMIT,
     draw(page) {
       let y = M.top;
-      eyebrow(page, M.left, y, 'Open items', palette, { colour: palette.ink });
+      heading(page, M.left, y, 'Open items', palette, { colour: palette.ink });
       page.text(PAGE.width - M.right, y, 'stated, not omitted', {
         face: 'serifItalic',
         size: 8,
