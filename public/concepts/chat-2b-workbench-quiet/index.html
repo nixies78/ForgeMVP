@@ -153,14 +153,13 @@
   /* Turns: Concept 8's message shapes with the asymmetric corner, one step larger for a real screen. */
   .turn { display: flex; gap: 10px; max-width: 92%; }
   .turn.me { justify-content: flex-end; align-self: flex-end; }
-  .turn.ai { align-self: flex-start; }
-  .mark {
-    width: 26px; height: 26px; flex: none;
-    border-radius: 8px;
-    background: linear-gradient(140deg, var(--accent) 0%, var(--accent-2) 100%);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 6px -2px rgba(51, 191, 255, .5);
-    margin-top: 2px;
-  }
+  .turn.ai { align-self: flex-start; align-items: flex-end; }
+  /* The mark is the app's own icon (public/assets/logo.svg - a flame on its own tile), sitting on the
+     bubble's last line rather than over its first: the speaker is identified where the eye finishes, and
+     a long answer with tap chips under it keeps one alignment instead of two. It used to be a blue
+     square standing in for the bot; there is a real mark in the repo, so it is used. */
+  .mark { width: 26px; height: 26px; flex: none; display: block; margin-bottom: 2px; }
+  .turn.ai .mark { align-self: flex-end; }
   .bub { padding: 11px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.55; }
   .turn.ai .bub { background: rgba(16, 16, 20, .72); border: 1px solid rgba(255, 255, 255, .12); border-bottom-left-radius: 4px; }
   .turn.me .bub { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .06); border-bottom-right-radius: 4px; }
@@ -240,6 +239,16 @@
   .composer-foot { display: flex; align-items: center; gap: 12px; margin-top: 10px; padding: 0 2px 0 4px; }
   .composer-foot .spacer { margin-left: auto; }
   .composer-foot .hint { font-size: 11.5px; color: var(--dim); }
+  /* Send is a moulded key, at the size of the page's default button rather than the panel's keys: it is
+     the one thing on this side you press, so it gets the depth - the same depth the panel's keys have.
+     Its label was off-centre for a reason worth writing down: .key sizes its svg (1.05em, flex: none) and
+     .btn did not, so the arrow's box was the browser's default 300x150 and pushed "Send" off to the left.
+     Using the key class fixes it by giving the arrow a size it can be centred with. */
+  .composer-foot .send {
+    font-size: 15px;
+    padding: 13px 22px;
+    gap: 10px;
+  }
   /* "Answers owed" carries, as a tooltip, the sentence that used to sit under the chat box. The plain
      hint says the numbers; the sentence that explains where the answers go is there when asked for. */
   .owed {
@@ -481,8 +490,6 @@
     -webkit-backdrop-filter: blur(10px);
   }
   .btn-glass:hover { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
-  /* Nothing typed yet: Send is unavailable and says so quietly. */
-  .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; box-shadow: none; }
   .btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
 
   /* Close */
@@ -582,7 +589,7 @@
             <div class="turn me"><div class="bub"><p>A prop hunt in a drained hotel, four players, ten-minute rounds.</p></div></div>
 
             <div class="turn ai">
-              <span class="mark" aria-hidden="true"></span>
+              <img class="mark" src="../../assets/logo.svg" alt="" width="26" height="26">
               <div class="bub">
                 <p>A drained hotel is a good prop hunt: long sightlines, and about a thousand places to be something else. That is the whole game, so the rest is plumbing.</p>
                 <p class="ask">How should a round end?</p>
@@ -597,7 +604,7 @@
             <div class="turn me"><div class="bub"><p>Clock runs out. Ten minutes is the whole round.</p></div></div>
 
             <div class="turn ai">
-              <span class="mark" aria-hidden="true"></span>
+              <img class="mark" src="../../assets/logo.svg" alt="" width="26" height="26">
               <div class="bub">
                 <p>Then a round is a clock problem rather than a search problem, and the props win by surviving it. Five devices and steps 1-2 are in <strong>Your design</strong>.</p>
                 <p class="ask">Two things I still need before it is buildable - they are under Open questions.</p>
@@ -629,7 +636,7 @@
               Answers owed: <b id="owed">2</b>
               <span class="owed-body" id="owedBody" role="tooltip">2 open questions are waiting in <b>Your design</b> - they are answerable from here or from the panel.</span>
             </span>
-            <button class="btn btn-primary" id="send" type="submit" disabled>
+            <button class="key key-primary send" id="send" type="submit" disabled>
               Send
               <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
@@ -776,9 +783,12 @@
       const turn = document.createElement('div');
       turn.className = 'turn ' + side;
       if (side === 'ai') {
-        const mark = document.createElement('span');
+        const mark = document.createElement('img');
         mark.className = 'mark';
-        mark.setAttribute('aria-hidden', 'true');
+        mark.src = '../../assets/logo.svg';
+        mark.alt = '';
+        mark.width = 26;
+        mark.height = 26;
         turn.append(mark);
       }
       const bub = document.createElement('div');
@@ -820,11 +830,17 @@
     /* The box grows with the typing and never with the emptiness: height is measured from the content
        after every change, so one line is one line and six lines get six. The CSS max-height is the
        ceiling, past which the box scrolls instead of eating the transcript. A growing box takes its room
-       from the transcript, so without the re-pin the newest turn would sink out of sight as you write. */
+       from the transcript, so without the re-pin the newest turn would sink out of sight as you write.
+       The +1 is measured too: set to exactly scrollHeight, the box sits one pixel inside its own content
+       and Chrome draws scroll controls in the corner of a two-line message box. Past the ceiling the
+       height stops growing, the overflow is real, and the scrollbar is the point. */
     function grow() {
       const pinned = atFoot();
       say.style.height = 'auto';
-      say.style.height = say.scrollHeight + 'px';
+      const wanted = say.scrollHeight + 1;
+      const ceiling = 120; /* 7.5rem, the CSS max-height */
+      say.style.height = Math.min(wanted, ceiling) + 'px';
+      say.style.overflowY = wanted > ceiling ? 'auto' : 'hidden';
       if (pinned) scroll();
     }
 
@@ -883,9 +899,14 @@
       }
     };
 
+    /* Answering is the button's job and only the button's. The handler hangs off the panel and looks for
+       the row, which quietly made the question text a second Answer button - any click inside the row
+       answered it, so a reader who clicked the question to read it again answered it instead. The
+       selector now goes all the way to the control. */
     oq.addEventListener('click', function (event) {
-      const row = event.target.closest('.oq-row');
-      if (!row) return;
+      const button = event.target.closest('.oq-row button');
+      if (!button) return;
+      const row = button.closest('.oq-row');
       const answer = ANSWERS[row.dataset.q];
       if (!answer) return;
       say_user(answer.said);
