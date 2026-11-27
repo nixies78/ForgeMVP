@@ -45,7 +45,7 @@ no dependencies, using `zlib.deflateSync` for content streams. It writes the fil
 | **No hyperlinks or bookmarks** | The writer emits one content stream per page and a plain page tree. | A 9-page pack has no clickable contents. The contents list carries printed page numbers, which is the paper answer. |
 | **Line-based text placement** | Every text run is `1 0 0 1 x y Tm` on its own line, one operator per line. | Content streams are larger than they need to be (a 9-page pack is 19 KB, so this is not a practical problem) — and it means the audit and the PNG painter can read a run's position by splitting lines, which is what makes independent verification cheap. |
 | **Two-pass render for page totals** | A footer saying `3 / 9` needs the total, which is only known after the whole document is built. | Every structure renders twice. Deterministic and fast enough (the full set renders in well under a second), but it does mean the renderer must be pure. |
-| **The preview is not a facsimile** | `tools/gdds/png.mjs` draws glyphs as 5×7 bitmap approximations while taking advances from the real font metrics. | Boxes, line breaks and positions in the PNG are the printed ones; the letterforms are schematic. It is a proofing view. |
+| **The preview is a proof, not a facsimile** | `tools/gdds/png.mjs` draws text with a monoline vector font (`tools/gdds/font.mjs`) while taking advances from the real font metrics. | Letterforms are simplified and lighter than the printed page; **positions, line breaks and run lengths are exactly the printed ones**, which is what makes it usable for reviewing layout. It is not a substitute for opening the PDF. |
 
 ### Should there be a preview before saving?
 
@@ -188,6 +188,7 @@ tools/gdds/
   pdf.mjs             the writer: metrics, wrapping, page context, buildPdf
   kit.mjs             page geometry, three palettes, footer, missing-sections block, table
   model.mjs           the document model: resolved plan -> everything the document can say
+  font.mjs            a monoline vector font, for the preview only — never in the PDF
   structures/
     brief.mjs         1 page
     sprint.mjs        9 pages
@@ -265,11 +266,17 @@ Recorded because each one is a shape worth recognising again.
 | **Unanchored audit regex** | 800pt "right margin breaches" for text that was on the page. | `0.1 0.14 0.18 rg` matched as a `Td`. Fixed by parsing line-by-line with anchored patterns — which is why the writer emits one operator per line. |
 | **Double-encoded UTF-8** | Em dashes and arrows mangled across three files. | PowerShell `Get-Content -Raw` + `Set-Content -Encoding UTF8`. Never edit these files that way; use the editor tools or `[System.IO.File]` with an explicit `UTF8Encoding($false)`. |
 | **Dead boundary check** | A guard that could never fire. | Tested the page *name* for being a number. See above. |
+| **Unreadable preview text** | Every glyph drew as a blobby box; the page had to be zoomed 3× to see that the letters were not letters. | The 5×7 bitmap font's rows ran top-down while the drawing code treated row 0 as the top of the ascent, so each glyph's shapes landed in the wrong half of the em — a lowercase `a` came out as an `o`-like box. Replaced with a monoline vector font on the text space's own axes, where there is no convention to invert. |
+| **Dashes drawn as missing-glyph boxes** | The commonest punctuation in these documents showed as a `▯`. | WinAnsi encodes an em dash as byte `0x13`, not `U+2014`, so after the writer's encoding pass the rasteriser was handed `\u0013` — a code point the font had no entry for. The glyphs were keyed on the Unicode character, which is not what reaches the renderer. |
+| **Stroke breaking into dashes** | Text read as dotted lines at 6–9pt. | The canvas drew lines with integer Bresenham and a square brush, so nothing could be stroked thinner than a pixel and a rounded brush left gaps in the stems. Replaced with distance-to-segment coverage and anti-aliased blending. |
+| **Page images scaled to illegibility** | The mockup pages were right and the previews were right; the text was unreadable anyway. | Three pages were laid out side by side, scaling a 1191px page into ~260px. A design document is read one page at a time, so the mockup pages now show one per row at 900px with a link to the full-size PNG. |
 
 The through-line: **the failures that took longest were the ones where the code read as correct** — a
-clamp that looked defensive, a guard that looked like it ran, an operator that looked per-run. Every one
-of them was caught by reading the finished bytes rather than the source, which is the argument for the
-audit existing at all.
+clamp that looked defensive, a guard that looked like it ran, an operator that looked per-run, a font
+whose comment said "deliberate limitation" where the truth was "inverted axis". Every one of them was
+caught by looking at the output rather than the source — reading the finished bytes, or in the font's
+case by zooming into the rendered page — which is the argument for the audit and the preview existing
+at all.
 
 ---
 

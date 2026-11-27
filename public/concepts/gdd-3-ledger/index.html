@@ -29,10 +29,15 @@
     .meta dt { font: 700 11px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #787678; margin-bottom: 7px; }
     .meta dd { margin: 0; font-weight: 700; font-size: 17px; }
     .sheet { margin: 0 0 34px; }
+    .sheet a { display: block; }
     .sheet img { display: block; width: 100%; height: auto; border: 1px solid #303034; border-radius: 10px; background: #fff; }
     .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
     .sheet figcaption b { color: #fff; }
-    .spread { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
+    /* One page per row, big enough to read. Side by side, a 1191px page was scaled into about 260px
+     * and every caption became illegible: the preview was fine and the page showing it was not. */
+    .sheet { max-width: 900px; }
+    .sheet .full { display: inline-block; margin-top: 7px; font-size: 13px; font-weight: 700; }
+    .spread { display: block; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
     .box p { margin: 0; color: #C9C9CC; font-size: 15px; }
@@ -78,16 +83,16 @@
     <h2>The pages</h2>
     <div class="spread">
       <figure class="sheet">
-        <img src="media/03-ledger-p1.png" alt="Page 1: title in serif with a provenance block, and a contents list." />
-        <figcaption><b>Page 1.</b> Serif and monospace rather than sans, because a record reads differently from a pitch. The provenance block sits on the cover, not in an appendix.</figcaption>
+        <a href="media/03-ledger-p1.png"><img src="media/03-ledger-p1.png" alt="Page 1: title in serif with a provenance block, and a contents list." /></a>
+        <figcaption><b>Page 1.</b> Serif and monospace rather than sans, because a record reads differently from a pitch. The provenance block sits on the cover, not in an appendix. <a class="full" href="media/03-ledger-p1.png">Open full size &rarr;</a></figcaption>
       </figure>
       <figure class="sheet">
-        <img src="media/03-ledger-p2.png" alt="Page 2: a verification sheet of computed checks, each showing a count that can be checked against the island." />
-        <figcaption><b>Page 2.</b> The verification sheet. Seven checks, each one computed from the model rather than written into the template.</figcaption>
+        <a href="media/03-ledger-p2.png"><img src="media/03-ledger-p2.png" alt="Page 2: a verification sheet of computed checks, each showing a count that can be checked against the island." /></a>
+        <figcaption><b>Page 2.</b> The verification sheet. Seven checks, each one computed from the model rather than written into the template. <a class="full" href="media/03-ledger-p2.png">Open full size &rarr;</a></figcaption>
       </figure>
       <figure class="sheet">
-        <img src="media/03-ledger-p3.png" alt="Page 3: one card per device, with the source that asked for it, the catalogue advice and the options." />
-        <figcaption><b>Page 3.</b> One card per device. The role is the catalogue's grouping; the source line is the answer or the game type that asked for it &mdash; the line to quote when somebody questions a device.</figcaption>
+        <a href="media/03-ledger-p3.png"><img src="media/03-ledger-p3.png" alt="Page 3: one card per device, with the source that asked for it, the catalogue advice and the options." /></a>
+        <figcaption><b>Page 3.</b> One card per device. The role is the catalogue's grouping; the source line is the answer or the game type that asked for it &mdash; the line to quote when somebody questions a device. <a class="full" href="media/03-ledger-p3.png">Open full size &rarr;</a></figcaption>
       </figure>
     </div>
 

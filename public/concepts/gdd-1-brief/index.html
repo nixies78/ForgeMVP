@@ -29,10 +29,13 @@
     .meta dt { font: 700 11px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #787678; margin-bottom: 7px; }
     .meta dd { margin: 0; font-weight: 700; font-size: 17px; }
     .sheet { margin: 0 0 34px; }
+    .sheet a { display: block; }
     .sheet img { display: block; width: 100%; height: auto; border: 1px solid #303034; border-radius: 10px; background: #fff; }
     .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
     .sheet figcaption b { color: #fff; }
-    .solo { max-width: 760px; }
+    /* Wide enough to read. The whole point of showing a page is that its text can be read on it. */
+    .solo { max-width: 900px; }
+    .sheet .full { display: inline-block; margin-top: 7px; font-size: 13px; font-weight: 700; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
     .box p { margin: 0; color: #C9C9CC; font-size: 15px; }
@@ -70,8 +73,8 @@
     <h2>The page</h2>
     <div class="solo">
       <figure class="sheet">
-        <img src="media/01-brief-p1.png" alt="Page 1: the pitch in bold on a dark band, the facts in a row of three, the core loop as a rail, the build order, the layout tip, and a closing block naming what the tool cannot tell you." />
-        <figcaption><b>Page 1 of 1.</b> Generated from the Horror Chase plan: 13 devices, 36 settings, 3 notes from the device data.</figcaption>
+        <a href="media/01-brief-p1.png"><img src="media/01-brief-p1.png" alt="Page 1: the pitch in bold on a dark band, the facts in a row of three, the core loop as a rail, the build order, the layout tip, and a closing block naming what the tool cannot tell you." /></a>
+        <figcaption><b>Page 1 of 1.</b> Generated from the Horror Chase plan: 13 devices, 36 settings, 3 notes from the device data. <a class="full" href="media/01-brief-p1.png">Open full size &rarr;</a></figcaption>
       </figure>
     </div>
 

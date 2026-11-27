@@ -17,7 +17,8 @@
  */
 
 import zlib from 'node:zlib';
-import { measure, ascentOf } from './pdf.mjs';
+import { measure, FACES } from './pdf.mjs';
+import { glyphPolylines, strokeWeight } from './font.mjs';
 
 /** Immutable-ish character grid covering one page, in a scale chosen by the caller. */
 export function renderPdfPageToPng(bytes, pageIndex, options = {}) {
@@ -211,44 +212,35 @@ function cubicAt(p0, p1, p2, p3, t) {
 /**
  * Draw a text run.
  *
- * Glyph shapes come from a 5x7 bitmap defined below, scaled to the requested size. That is a
- * deliberate limitation: this is a proofing view for reviewing *layout* — where the text sits, how much
- * room it takes, whether it collides — and a stretched bitmap says all of that. It is not a
- * facsimile of the printed page and does not pretend to be; the advance widths come from the real font
- * metrics, so the boxes are exactly the printed ones even though the letterforms are schematic.
+ * Glyph shapes come from `font.mjs`, a monoline vector font drawn on the text space's own axes, and are
+ * stroked as polylines. Advances come from the real base-14 metrics, so a run ends exactly where the
+ * printed run ends — which is what makes this view usable for reviewing layout rather than only for
+ * looking at.
+ *
+ * This used to draw a 5x7 bitmap, and that was a mistake worth recording: the bitmap's rows ran
+ * top-down while this function placed row 0 at the top of the ascent, so every glyph's shapes ended up
+ * in the wrong half of the em and the letters were unrecognisable — a lowercase `a` drew as a blobby
+ * box. At the 6 to 9pt sizes these structures set, the preview was unreadable rather than merely
+ * coarse. Strokes on real axes have no convention to invert, and a caller can see what the page says.
  */
 function drawText(canvas, text, matrix, fontName, size, charSpace, colour, box, scale) {
   const faceKey = FACE_BY_NAME[fontName] || 'regular';
+  const face = FACES[faceKey] || FACES.regular;
   const baselineY = (box.h - matrix.y) * scale;
-  const ascent = Math.max(5, ascentOf(faceKey, size) * scale);
+  const points = size * scale;
+  const weight = strokeWeight(face.family, face.style, points);
   let penX = matrix.x * scale;
 
   for (const ch of text) {
-    /* The advance comes from the real metrics, so the run ends exactly where the printed run ends —
-     * that is what makes this view usable for reviewing layout rather than just for looking at. */
+    /* The advance comes from the real metrics, so the run ends exactly where the printed run ends. */
     const advance = (measure(ch, faceKey, size) + charSpace) * scale;
-    const bitmap = ch === ' ' ? null : GLYPHS[ch] || GLYPHS[ch.toUpperCase()] || GLYPHS['?'];
-    if (bitmap) {
-      const rows = bitmap.length;
-      const cols = bitmap[0].length;
-      /* Glyphs are drawn at a fixed ink height and *centred* in their advance rather than stretched to
-       * fill it: stretching makes a full stop as wide as an M, which is precisely the kind of thing
-       * this view exists to reveal. */
-      const cellH = ascent / 7;
-      const cellW = cellH * 0.86;
-      const inkWidth = cols * cellW;
-      const offset = Math.max(0, (advance - inkWidth) / 2);
-      for (let r = 0; r < rows; r += 1) {
-        for (let c = 0; c < cols; c += 1) {
-          if (bitmap[r][c] !== '#') continue;
-          canvas.fillRect(
-            penX + offset + c * cellW,
-            baselineY - ascent + r * cellH,
-            Math.max(1, cellW + 0.7),
-            Math.max(1, cellH + 0.7),
-            colour
-          );
+    if (ch !== ' ') {
+      for (const line of glyphPolylines(ch, penX, advance, baselineY, points)) {
+        for (let i = 1; i < line.length; i += 1) {
+          canvas.line(line[i - 1][0], line[i - 1][1], line[i][0], line[i][1], colour, weight);
         }
+        /* A single-point stroke (a dot) has nothing to join, so it is stamped. */
+        if (line.length === 1) canvas.dot(line[0][0], line[0][1], colour, weight);
       }
     }
     penX += advance;
@@ -286,22 +278,51 @@ class Canvas {
   }
 
   set(x, y, colour) {
-    const px = Math.round(x);
-    const py = Math.round(y);
-    if (px < 0 || py < 0 || px >= this.width || py >= this.height) return;
-    const i = (py * this.width + px) * 3;
-    this.pixels[i] = Math.round(colour[0] * 255);
-    this.pixels[i + 1] = Math.round(colour[1] * 255);
-    this.pixels[i + 2] = Math.round(colour[2] * 255);
+    this.blend(Math.round(x), Math.round(y), colour, 1);
   }
 
+  /**
+   * Composite `colour` over one pixel at `coverage` (0..1).
+   *
+   * Anti-aliasing is not cosmetic here. A text glyph is drawn as polylines of a stroke about a pixel
+   * wide, and at the 6 to 9pt sizes these structures set, a rounded brush that lands on whole pixels
+   * leaves gaps in the stems: the text reads as dashes rather than letters. Coverage blending turns
+   * those gaps into grey, which is what the eye reads as a stroke.
+   */
+  blend(px, py, colour, coverage) {
+    if (px < 0 || py < 0 || px >= this.width || py >= this.height) return;
+    if (coverage <= 0) return;
+    const a = Math.min(1, coverage);
+    const i = (py * this.width + px) * 3;
+    for (let c = 0; c < 3; c += 1) {
+      const dst = this.pixels[i + c];
+      const src = colour[c] * 255;
+      this.pixels[i + c] = dst + (src - dst) * a;
+    }
+  }
+
+  /**
+   * An axis-aligned rectangle with fractional edges, anti-aliased on all four.
+   *
+   * This is the primitive everything filled goes through — text strokes, rules, panels — so the
+   * coverage maths lives here once rather than in each caller. A rectangle whose edges land on pixel
+   * boundaries costs the same as before, because every coverage comes out as exactly 1.
+   */
   fillRect(x, y, w, h, colour) {
+    if (!colour || w <= 0 || h <= 0) return;
     const x0 = Math.max(0, Math.floor(x));
     const y0 = Math.max(0, Math.floor(y));
     const x1 = Math.min(this.width, Math.ceil(x + w));
     const y1 = Math.min(this.height, Math.ceil(y + h));
     for (let py = y0; py < y1; py += 1) {
-      for (let px = x0; px < x1; px += 1) this.set(px, py, colour);
+      /* Vertical coverage: the overlap of [y, y+h) with this pixel's row. */
+      const cy = Math.min(y + h, py + 1) - Math.max(y, py);
+      if (cy <= 0) continue;
+      for (let px = x0; px < x1; px += 1) {
+        const cx = Math.min(x + w, px + 1) - Math.max(x, px);
+        if (cx <= 0) continue;
+        this.blend(px, py, colour, cx * cy);
+      }
     }
   }
 
@@ -312,31 +333,48 @@ class Canvas {
     this.fillRect(x + w - thickness, y, thickness, h, colour);
   }
 
-  /** Bresenham, with a square brush of the requested thickness. */
+  /** A dot, for a single-point stroke such as the `i` tittle in `font.mjs`. */
+  dot(cx, cy, colour, thickness) {
+    this.line(cx - 0.01, cy, cx + 0.01, cy, colour, thickness);
+  }
+
+  /**
+   * A line of the given width, anti-aliased.
+   *
+   * Coverage is the pixel's distance to the segment, which is what makes a one-pixel-wide stroke come
+   * out as a stroke rather than a staircase of blocks. Bresenham with an integer square brush was the
+   * previous implementation and it is the wrong tool for this: it cannot draw a stroke thinner than a
+   * pixel, so every glyph at 6pt was drawn at roughly double its intended stem weight and broke into
+   * dashes where a rounded brush left gaps.
+   *
+   * The distance test is done over the segment's bounding box only, so the cost is proportional to the
+   * stroke's own area rather than to the page.
+   */
   line(x0, y0, x1, y1, colour, thickness) {
     if (!colour) return;
-    let x = Math.round(x0);
-    let y = Math.round(y0);
-    const xe = Math.round(x1);
-    const ye = Math.round(y1);
-    const dx = Math.abs(xe - x);
-    const dy = -Math.abs(ye - y);
-    const sx = x < xe ? 1 : -1;
-    const sy = y < ye ? 1 : -1;
-    let err = dx + dy;
-    const half = Math.max(0, Math.floor(thickness / 2));
-    for (;;) {
-      if (half === 0) this.set(x, y, colour);
-      else this.fillRect(x - half, y - half, half * 2 + 1, half * 2 + 1, colour);
-      if (x === xe && y === ye) break;
-      const e2 = 2 * err;
-      if (e2 >= dy) {
-        err += dy;
-        x += sx;
-      }
-      if (e2 <= dx) {
-        err += dx;
-        y += sy;
+    const half = Math.max(0.35, thickness / 2);
+    const minX = Math.max(0, Math.floor(Math.min(x0, x1) - half - 1));
+    const maxX = Math.min(this.width - 1, Math.ceil(Math.max(x0, x1) + half + 1));
+    const minY = Math.max(0, Math.floor(Math.min(y0, y1) - half - 1));
+    const maxY = Math.min(this.height - 1, Math.ceil(Math.max(y0, y1) + half + 1));
+
+    const vx = x1 - x0;
+    const vy = y1 - y0;
+    const lenSq = vx * vx + vy * vy;
+
+    for (let py = minY; py <= maxY; py += 1) {
+      const cy = py + 0.5;
+      for (let px = minX; px <= maxX; px += 1) {
+        const cx = px + 0.5;
+        /* Distance from the pixel centre to the segment, clamped to the segment's ends. */
+        let t = lenSq > 0 ? ((cx - x0) * vx + (cy - y0) * vy) / lenSq : 0;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const dx = cx - (x0 + t * vx);
+        const dy = cy - (y0 + t * vy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        /* Coverage falls off over one pixel at the stroke's edge. */
+        const coverage = half + 0.5 - dist;
+        if (coverage > 0) this.blend(px, py, colour, Math.min(1, coverage));
       }
     }
   }
@@ -388,105 +426,3 @@ function crc32(buf) {
   for (let i = 0; i < buf.length; i += 1) c = CRC_TABLE[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
   return c ^ 0xffffffff;
 }
-
-/* ------------------------------------ glyphs ------------------------------------
- * A 5x7 uppercase bitmap set, plus the lowercase and punctuation the three structures actually use.
- * Schematic on purpose — see the note on `drawText`.
- */
-const GLYPHS = {
-  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
-  B: ['####.', '#...#', '####.', '#...#', '#...#', '#...#', '####.'],
-  C: ['.###.', '#...#', '#....', '#....', '#....', '#...#', '.###.'],
-  D: ['####.', '#...#', '#...#', '#...#', '#...#', '#...#', '####.'],
-  E: ['#####', '#....', '####.', '#....', '#....', '#....', '#####'],
-  F: ['#####', '#....', '####.', '#....', '#....', '#....', '#....'],
-  G: ['.###.', '#...#', '#....', '#.###', '#...#', '#...#', '.###.'],
-  H: ['#...#', '#...#', '#####', '#...#', '#...#', '#...#', '#...#'],
-  I: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '#####'],
-  J: ['..###', '...#.', '...#.', '...#.', '...#.', '#..#.', '.##..'],
-  K: ['#...#', '#..#.', '#.#..', '##...', '#.#..', '#..#.', '#...#'],
-  L: ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
-  M: ['#...#', '##.##', '#.#.#', '#...#', '#...#', '#...#', '#...#'],
-  N: ['#...#', '##..#', '#.#.#', '#..##', '#...#', '#...#', '#...#'],
-  O: ['.###.', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
-  P: ['####.', '#...#', '#...#', '####.', '#....', '#....', '#....'],
-  Q: ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
-  R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
-  S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
-  T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
-  U: ['#...#', '#...#', '#...#', '#...#', '#...#', '#...#', '.###.'],
-  V: ['#...#', '#...#', '#...#', '#...#', '#...#', '.#.#.', '..#..'],
-  W: ['#...#', '#...#', '#...#', '#.#.#', '#.#.#', '##.##', '#...#'],
-  X: ['#...#', '#...#', '.#.#.', '..#..', '.#.#.', '#...#', '#...#'],
-  Y: ['#...#', '#...#', '.#.#.', '..#..', '..#..', '..#..', '..#..'],
-  Z: ['#####', '....#', '...#.', '..#..', '.#...', '#....', '#####'],
-  a: ['.###.', '....#', '.####', '#...#', '#...#', '#..##', '.##.#'],
-  b: ['#....', '#....', '####.', '#...#', '#...#', '#...#', '####.'],
-  c: ['.###.', '#...#', '#....', '#....', '#...#', '.###.', '.....'],
-  d: ['....#', '....#', '.####', '#...#', '#...#', '#...#', '.####'],
-  e: ['.###.', '#...#', '#####', '#....', '#...#', '.###.', '.....'],
-  f: ['..##.', '.#...', '####.', '.#...', '.#...', '.#...', '.#...'],
-  g: ['.####', '#...#', '#...#', '.####', '....#', '....#', '.###.'],
-  h: ['#....', '#....', '####.', '#...#', '#...#', '#...#', '#...#'],
-  i: ['..#..', '.....', '.##..', '..#..', '..#..', '..#..', '.###.'],
-  j: ['...#.', '.....', '..##.', '...#.', '...#.', '#..#.', '.##..'],
-  k: ['#....', '#....', '#..#.', '#.#..', '##...', '#.#..', '#..#.'],
-  l: ['.##..', '..#..', '..#..', '..#..', '..#..', '..#..', '.###.'],
-  m: ['.....', '.....', '##.#.', '#.#.#', '#.#.#', '#...#', '#...#'],
-  n: ['.....', '.....', '####.', '#...#', '#...#', '#...#', '#...#'],
-  o: ['.....', '.....', '.###.', '#...#', '#...#', '#...#', '.###.'],
-  p: ['.....', '.....', '####.', '#...#', '####.', '#....', '#....'],
-  q: ['.....', '.....', '.####', '#...#', '.####', '....#', '....#'],
-  r: ['.....', '.....', '#.##.', '##..#', '#....', '#....', '#....'],
-  s: ['.....', '.....', '.####', '#....', '.###.', '....#', '####.'],
-  t: ['.#...', '.#...', '####.', '.#...', '.#...', '.#..#', '..##.'],
-  u: ['.....', '.....', '#...#', '#...#', '#...#', '#...#', '.###.'],
-  v: ['.....', '.....', '#...#', '#...#', '#...#', '.#.#.', '..#..'],
-  w: ['.....', '.....', '#...#', '#...#', '#.#.#', '#.#.#', '.#.#.'],
-  x: ['.....', '.....', '#...#', '.#.#.', '..#..', '.#.#.', '#...#'],
-  y: ['.....', '.....', '#...#', '#...#', '.####', '....#', '.###.'],
-  z: ['.....', '.....', '#####', '...#.', '..#..', '.#...', '#####'],
-  0: ['.###.', '#...#', '#..##', '#.#.#', '##..#', '#...#', '.###.'],
-  1: ['..#..', '.##..', '..#..', '..#..', '..#..', '..#..', '.###.'],
-  2: ['.###.', '#...#', '....#', '...#.', '..#..', '.#...', '#####'],
-  3: ['####.', '....#', '....#', '.###.', '....#', '....#', '####.'],
-  4: ['...#.', '..##.', '.#.#.', '#..#.', '#####', '...#.', '...#.'],
-  5: ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
-  6: ['.###.', '#....', '#....', '####.', '#...#', '#...#', '.###.'],
-  7: ['#####', '....#', '...#.', '..#..', '..#..', '..#..', '..#..'],
-  8: ['.###.', '#...#', '#...#', '.###.', '#...#', '#...#', '.###.'],
-  9: ['.###.', '#...#', '#...#', '.####', '....#', '....#', '.###.'],
-  '.': ['.....', '.....', '.....', '.....', '.....', '.##..', '.##..'],
-  ',': ['.....', '.....', '.....', '.....', '.##..', '.##..', '.#...'],
-  ':': ['.....', '.##..', '.##..', '.....', '.##..', '.##..', '.....'],
-  ';': ['.....', '.##..', '.##..', '.....', '.##..', '.##..', '.#...'],
-  '-': ['.....', '.....', '.....', '#####', '.....', '.....', '.....'],
-  '—': ['.....', '.....', '.....', '#####', '.....', '.....', '.....'],
-  '–': ['.....', '.....', '.....', '.###.', '.....', '.....', '.....'],
-  '·': ['.....', '.....', '.##..', '.##..', '.....', '.....', '.....'],
-  '+': ['.....', '..#..', '..#..', '#####', '..#..', '..#..', '.....'],
-  '=': ['.....', '.....', '#####', '.....', '#####', '.....', '.....'],
-  '/': ['....#', '...#.', '..#..', '..#..', '.#...', '#....', '#....'],
-  '\\': ['#....', '.#...', '..#..', '..#..', '...#.', '....#', '....#'],
-  '(': ['..#..', '.#...', '#....', '#....', '#....', '.#...', '..#..'],
-  ')': ['..#..', '...#.', '....#', '....#', '....#', '...#.', '..#..'],
-  "'": ['..#..', '..#..', '.....', '.....', '.....', '.....', '.....'],
-  '"': ['.#.#.', '.#.#.', '.....', '.....', '.....', '.....', '.....'],
-  '!': ['..#..', '..#..', '..#..', '..#..', '..#..', '.....', '..#..'],
-  '?': ['.###.', '#...#', '....#', '...#.', '..#..', '.....', '..#..'],
-  '%': ['##..#', '##.#.', '..#..', '.#...', '#..##', '..###', '.....'],
-  '#': ['.#.#.', '#####', '.#.#.', '.#.#.', '#####', '.#.#.', '.....'],
-  '&': ['.##..', '#..#.', '#.#..', '.#...', '#.#.#', '#..#.', '.##.#'],
-  '©': ['.###.', '#...#', '#.##.', '#.#..', '#.##.', '#...#', '.###.'],
-  '&': ['.##..', '#..#.', '#.#..', '.#...', '#.#.#', '#..#.', '.##.#'],
-  '*': ['.....', '#.#.#', '.###.', '#####', '.###.', '#.#.#', '.....'],
-  '<': ['...#.', '..#..', '.#...', '#....', '.#...', '..#..', '...#.'],
-  '>': ['.#...', '..#..', '...#.', '....#', '...#.', '..#..', '.#...'],
-  '[': ['.###.', '.#...', '.#...', '.#...', '.#...', '.#...', '.###.'],
-  ']': ['.###.', '...#.', '...#.', '...#.', '...#.', '...#.', '.###.'],
-  '_': ['.....', '.....', '.....', '.....', '.....', '.....', '#####'],
-  '↑': ['..#..', '.###.', '#.#.#', '..#..', '..#..', '..#..', '..#..'],
-  '→': ['.....', '..#..', '...#.', '#####', '...#.', '..#..', '.....'],
-  '×': ['.....', '#...#', '.#.#.', '..#..', '.#.#.', '#...#', '.....'],
-  '◆': ['..#..', '.###.', '#####', '.###.', '..#..', '.....', '.....']
-};

@@ -16,8 +16,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import zlib from 'node:zlib';
 
-import { measure, wrap, blockHeight, FACES, buildPdf } from '../tools/gdds/pdf.mjs';
+import { measure, wrap, blockHeight, FACES, toWinAnsi, buildPdf } from '../tools/gdds/pdf.mjs';
+import { glyphPolylines, strokeWeight, hasGlyph, glyphCount } from '../tools/gdds/font.mjs';
+import { renderPdfPageToPng } from '../tools/gdds/png.mjs';
 import { validatePdf, pdfPlainText } from '../tools/gdds/validate.mjs';
 import { extractRuns, auditPdf, useMetrics } from '../tools/gdds/audit.mjs';
 import { PAGE, M, CONTENT_WIDTH, PALETTES } from '../tools/gdds/kit.mjs';
@@ -532,6 +535,141 @@ test('every face the structures ask for exists', () => {
       }
     }
   }
+});
+
+/* -------------------------------------------------------------------------------------------- */
+/* The preview rasteriser                                                                        */
+/* -------------------------------------------------------------------------------------------- */
+
+test('every character the documents print has real glyph artwork', () => {
+  /* The preview draws a visible box for anything it cannot draw, which is the right behaviour for a
+   * viewer and a small lie about the printed page. This is the check that it never happens: every
+   * character that reaches the rasteriser resolves to real artwork, after the writer's WinAnsi pass —
+   * which is where the dashes turned into `\u0013` and `\u0014` and drew as boxes until they were
+   * added, despite the em dash being the commonest punctuation in these documents. */
+  const missing = new Set();
+  for (const [, result] of built) {
+    for (const ch of result.text) {
+      const encoded = toWinAnsi(ch);
+      if (!encoded) continue;
+      for (const byte of encoded) {
+        if (byte === '\n' || byte === ' ') continue;
+        if (!hasGlyph(byte)) missing.add(byte);
+      }
+    }
+  }
+  assert.deepEqual(
+    [...missing].map((c) => `${JSON.stringify(c)} U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`),
+    [],
+    'the preview has no artwork for these characters'
+  );
+});
+
+test('the preview font is shaped the way the rasteriser reads it', () => {
+  /* A glyph is a list of strands, and a strand is a list of `[x, y]` pairs. One level of nesting too
+   * few throws inside a `for...of` the first time that character is drawn — which happened three times
+   * while the font was written, each time as a render-time crash naming a line rather than a glyph.
+   * `font.mjs` validates at import, so importing it is the assertion; these calls then prove the
+   * accessors work on every character the documents use. */
+  assert.ok(glyphCount() > 90, `the font defines only ${glyphCount()} glyphs`);
+  for (const [, result] of built) {
+    for (const ch of result.text) {
+      const encoded = toWinAnsi(ch) || ch;
+      const byte = encoded[0];
+      if (byte === '\n' || byte === ' ') continue;
+      const polylines = glyphPolylines(byte, 0, 10, 20, 12);
+      assert.ok(Array.isArray(polylines), `${JSON.stringify(byte)} did not return polylines`);
+      for (const line of polylines) {
+        for (const point of line) {
+          assert.ok(
+            Array.isArray(point) && point.length === 2 && point.every(Number.isFinite),
+            `${JSON.stringify(byte)} produced a malformed point ${JSON.stringify(point)}`
+          );
+        }
+      }
+    }
+  }
+});
+
+test('glyphs are drawn the right way up', () => {
+  /* The bug this replaces put every glyph's shapes in the wrong half of the em, because the bitmap it
+   * came from ran rows top-down while the drawing code treated row 0 as the top of the ascent. Text
+   * space here is `y` up from the baseline, so an uppercase letter must have ink *above* the baseline
+   * and a `g` or `p` must have ink below it. Both are asserted in canvas space, where `y` grows down. */
+  const size = 100;
+  const baselineY = 400;
+  const inkRange = (ch) => {
+    const polylines = glyphPolylines(ch, 0, 100, baselineY, size);
+    const ys = polylines.flat().map(([, y]) => y);
+    return { top: Math.min(...ys), bottom: Math.max(...ys) };
+  };
+
+  for (const ch of ['A', 'B', 'H', 'T', 'X']) {
+    const { top, bottom } = inkRange(ch);
+    assert.ok(top < baselineY - size * 0.5, `${ch} has no ink above the baseline (top ${top})`);
+    assert.ok(bottom <= baselineY + 1, `${ch} descends below the baseline (bottom ${bottom})`);
+  }
+
+  /* A descender really is a descender. */
+  for (const ch of ['g', 'p', 'q', 'y']) {
+    const { bottom } = inkRange(ch);
+    assert.ok(bottom > baselineY + size * 0.08, `${ch} does not descend (bottom ${bottom})`);
+  }
+
+  /* An x-height letter is shorter than a cap-height one, which is the single easiest thing for a
+   * font like this to get wrong in a way that still looks like text. */
+  const capTop = inkRange('H').top;
+  const xTop = inkRange('n').top;
+  assert.ok(xTop > capTop + size * 0.1, `n (${xTop}) is not shorter than H (${capTop})`);
+});
+
+test('bold runs are stroked heavier than regular ones', () => {
+  /* Half these structures' hierarchy is carried by weight alone, so the preview has to show it. */
+  const regular = strokeWeight('helvetica', 'normal', 10);
+  const bold = strokeWeight('helvetica', 'bold', 10);
+  assert.ok(bold > regular, `bold ${bold} is not heavier than regular ${regular}`);
+  assert.ok(regular >= 0.5, `a regular stem of ${regular}px would be invisible`);
+});
+
+test('a rendered page is a valid PNG of the expected size', () => {
+  const [, brief] = built[0];
+  for (const scale of [1, 2]) {
+    const png = renderPdfPageToPng(brief.bytes, 0, { scale });
+    assert.equal(png.subarray(0, 8).toString('hex'), '89504e470d0a1a0a', 'not a PNG');
+    assert.equal(png.subarray(12, 16).toString('latin1'), 'IHDR');
+    assert.equal(
+      png.readUInt32BE(16),
+      Math.round(PAGE.width * scale),
+      `width at scale ${scale}`
+    );
+    assert.equal(
+      png.readUInt32BE(20),
+      Math.round(PAGE.height * scale),
+      `height at scale ${scale}`
+    );
+  }
+});
+
+test('a rendered page is not blank, and its ink is where the text is', () => {
+  /* The check that the rasteriser actually drew something. A page of a real document that came back
+   * uniformly background would be the worst failure mode of all: a preview that silently shows nothing
+   * while every other test passes. */
+  const [, sprint] = built[1];
+  const png = renderPdfPageToPng(sprint.bytes, 1, { scale: 1 });
+  const inflated = zlib.inflateSync(png.subarray(png.indexOf('IDAT') + 4, png.lastIndexOf('IEND') - 4));
+  let dark = 0;
+  let light = 0;
+  for (let row = 0; row < PAGE.height; row += 1) {
+    for (let col = 0; col < PAGE.width; col += 1) {
+      const i = row * (PAGE.width * 3 + 1) + 1 + col * 3;
+      const luma = (inflated[i] + inflated[i + 1] + inflated[i + 2]) / 3;
+      if (luma < 128) dark += 1;
+      else light += 1;
+    }
+  }
+  const total = dark + light;
+  assert.ok(dark / total > 0.005, `page 2 of the Sprint Pack is ${(dark / total) * 100}% ink — it looks blank`);
+  assert.ok(light / total > 0.5, 'a page should still be mostly paper');
 });
 
 test('plain text extraction round-trips the document', () => {
