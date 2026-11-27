@@ -1,0 +1,337 @@
+{
+  "template": "forge-gdd",
+  "version": "1.0.0",
+  "about": [
+    "A design document as a contract between three kinds of content, rather than a layout with prose in it.",
+    "",
+    "Every slot below names its `source`. That word is doing the real work: it is what lets one template",
+    "produce three different documents and still be checkable.",
+    "",
+    "  derived  The tool computes it from the catalogue and the answers. Deterministic, reproducible, and",
+    "           the only content a reader can hold the tool responsible for. Never generated.",
+    "  authored The tool cannot know it and neither can the model: the reader's own taste, market, budget,",
+    "           team. The document poses the question and leaves the space. Never generated, only asked.",
+    "  proposed The model writes a first draft from the wizard's answers, and the document marks it as a",
+    "           draft. This is the category that did not exist before there was a model, and it is the",
+    "           one that needs the most structure around it.",
+    "",
+    "The temptation, once a model can write, is to call every slot `proposed` and ship a document that",
+    "reads beautifully and is wrong in ways nobody can see. The schema exists to make that hard."
+  ],
+
+  "sources": {
+    "derived": {
+      "note": "Reproducible from the dataset and the answers. If two runs differ, that is a bug.",
+      "review": "none",
+      "provenance": "required"
+    },
+    "authored": {
+      "note": "The reader's to write. The document asks, in the second person, and leaves room.",
+      "review": "required",
+      "provenance": "not-applicable"
+    },
+    "proposed": {
+      "note": "Model-drafted. Must carry what it was drafted from and must be marked in the document.",
+      "review": "required",
+      "provenance": "required"
+    }
+  },
+
+  "rules": [
+    "A derived slot may never be generated, and a proposed slot may never be presented as derived.",
+    "Every proposed slot carries `because`: the answers and catalogue entries it was drafted from.",
+    "Every proposed slot is marked in the printed document, not only in the export.",
+    "The document states which slots are drafts on its own first or last page, not in a footnote.",
+    "A slot that the model cannot support from its inputs is left as authored. An empty question is",
+    "  honest; an invented answer is not.",
+    "Counts are always derived. Prose is never allowed to state a number a derived slot already holds,",
+    "  because the two will eventually disagree and the prose will win with the reader."
+  ],
+
+  "slots": [
+    {
+      "id": "identity.name",
+      "label": "Game name",
+      "source": "derived",
+      "from": "wizard.project_name"
+    },
+    {
+      "id": "identity.strapline",
+      "label": "Strapline",
+      "source": "derived",
+      "from": "wizard.project_name + catalogue.game_type"
+    },
+    {
+      "id": "identity.facts",
+      "label": "The facts strip",
+      "source": "derived",
+      "from": "catalogue.<game_type>.facts",
+      "note": "Verb, players, count, setting, session length. Positional, and one row per game type."
+    },
+
+    {
+      "id": "pitch.what_it_is",
+      "label": "What it is",
+      "source": "derived",
+      "from": "catalogue.<game_type>.description",
+      "maxWords": 60
+    },
+    {
+      "id": "pitch.hook",
+      "label": "Why anyone plays it",
+      "source": "proposed",
+      "inputs": ["pitch.what_it_is", "identity.facts", "answers"],
+      "because": "The catalogue holds what the game type *is*, not why this instance of it is worth an evening. Those are different claims and only the second one needs the answers.",
+      "maxWords": 45,
+      "review": "required",
+      "tone": "concrete",
+      "mustNot": ["compare to other games by name", "claim sales or audience figures", "use the word 'fun'"],
+      "fallback": "authored",
+      "example": {
+        "good": "Ten minutes of quiet, then a shape at the end of the corridor that is already closer than it was.",
+        "bad": "An innovative and immersive horror experience that pushes the boundaries of the genre.",
+        "why": "The first says what a minute of play is like and can be checked against the loop below it. The second cannot be checked against anything."
+      }
+    },
+
+    {
+      "id": "loop.entry",
+      "label": "How a run starts",
+      "source": "proposed",
+      "inputs": ["catalogue.<game_type>.entry", "answers.spawn_style"],
+      "because": "The catalogue names the entry condition; the answer decides how the player arrives.",
+      "maxWords": 12,
+      "review": "required"
+    },
+    {
+      "id": "loop.steps",
+      "label": "The repeating steps",
+      "source": "derived",
+      "from": "catalogue.<game_type>.loop",
+      "maxItems": 4
+    },
+    {
+      "id": "loop.outcomes",
+      "label": "Win and lose",
+      "source": "derived",
+      "from": "catalogue.<game_type>.outcomes + answers.round_end"
+    },
+
+    {
+      "id": "plan.devices",
+      "label": "The device plan",
+      "source": "derived",
+      "from": "resolution(wizard.answers, catalogue)",
+      "note": "The heart of the tool. Every device here is traceable to the answer or the game type that put it there."
+    },
+    {
+      "id": "plan.settings",
+      "label": "The settings and their values",
+      "source": "derived",
+      "from": "resolution(wizard.answers, catalogue)"
+    },
+    {
+      "id": "plan.phases",
+      "label": "The order to build it in",
+      "source": "derived",
+      "from": "catalogue.phase + resolution",
+      "note": "Sequence is a property of the catalogue, not of the game. The model has no business reordering it."
+    },
+
+    {
+      "id": "direction.art",
+      "label": "Art direction and references",
+      "source": "proposed",
+      "inputs": ["catalogue.<game_type>.description", "answers.mood", "pitch.what_it_is"],
+      "because": "The tool has no images and no taste model, but the mood answer plus the genre is a real constraint, and a first draft of 'cold, low contrast, one warm light source' is more useful than a blank field.",
+      "maxWords": 120,
+      "review": "required",
+      "mustNot": ["name a specific artist or studio", "promise asset counts"],
+      "severity": "draft-prose",
+      "note": "Must be labelled as a suggestion in the printed document."
+    },
+    {
+      "id": "direction.type_and_colour",
+      "label": "Type and colour in use",
+      "source": "authored",
+      "because": "There is no right answer to infer. A model asked for one would invent a palette that looks like every other palette, and the reader would paste it in.",
+      "prompt": "Which faces and which three colours, and where does each one appear?"
+    },
+    {
+      "id": "direction.audio",
+      "label": "Audio and sound design",
+      "source": "proposed",
+      "inputs": ["answers.mood", "catalogue.<game_type>.description"],
+      "because": "Mood and genre are real constraints on a soundscape — dread wants silence with one recurring cue, a arena wants a bed — and the tool has no audio in it at all. A first draft that names the recurring cue is worth more than a blank field, as long as it is marked.",
+      "maxWords": 90,
+      "review": "required",
+      "severity": "draft-prose"
+    },
+
+    {
+      "id": "level.design",
+      "label": "Level design and pacing",
+      "source": "proposed",
+      "inputs": ["answers.map_size", "answers.player_count", "answers.zone", "loop.steps"],
+      "because": "The answers constrain this more than any other prose slot: a shrinking zone, four players and rooms-and-corridors already decide a great deal about pacing, and the model's job is to say it out loud.",
+      "maxWords": 200,
+      "review": "required",
+      "severity": "draft-prose",
+      "mustNot": ["describe a specific map layout as decided"]
+    },
+    {
+      "id": "level.tip",
+      "label": "The one layout tip",
+      "source": "derived",
+      "from": "catalogue.<game_type>.layout_tip"
+    },
+
+    {
+      "id": "market.audience",
+      "label": "Market, audience and monetisation",
+      "source": "authored",
+      "because": "This is the reader's business, their platform, and their call. A model that answers it is writing fiction that will be quoted in a meeting.",
+      "prompt": "Who is this for, on which platform, and how does it make money — or not?"
+    },
+    {
+      "id": "scope.budget",
+      "label": "Build time and scope budget",
+      "source": "authored",
+      "because": "Depends on who is building it, which the tool does not know and must not guess at.",
+      "prompt": "How long, with how many people, and what gets cut first?"
+    },
+
+    {
+      "id": "provenance.answer_trace",
+      "label": "Which answer put which device here",
+      "source": "derived",
+      "from": "resolution trace",
+      "note": "The Ledger's whole reason to exist. Becomes more important, not less, once prose is in the document: it is the only part a reader can audit."
+    },
+    {
+      "id": "provenance.draft_marker",
+      "label": "Which sections are drafts",
+      "source": "derived",
+      "from": "the set of slots whose source is 'proposed'",
+      "note": "Computed from the template, so it cannot fall out of date the way a hand-maintained list would."
+    }
+  ],
+
+  "structures": {
+    "brief": {
+      "pages": 1,
+      "axis": "persuasion",
+      "includes": [
+        "identity.*",
+        "pitch.what_it_is",
+        "pitch.hook",
+        "loop.*",
+        "plan.devices",
+        "plan.phases",
+        "level.tip",
+        "provenance.draft_marker"
+      ],
+      "excludes": ["plan.settings", "provenance.answer_trace"],
+      "note": "One page to get a yes. Only two proposed slots appear, which is why it stays a page."
+    },
+    "sprint": {
+      "pages": 9,
+      "axis": "sequence",
+      "includes": ["identity.*", "pitch.*", "loop.*", "plan.*", "direction.*", "level.*", "provenance.draft_marker"],
+      "excludes": ["market.*", "scope.*", "provenance.answer_trace"],
+      "note": "Everything needed to build, in the order it is built. The AI slots that appear here are the ones that help a builder place a device."
+    },
+    "ledger": {
+      "pages": 7,
+      "axis": "provenance",
+      "includes": ["identity.*", "pitch.*", "loop.*", "plan.*", "provenance.*", "direction.type_and_colour", "market.*", "scope.*"],
+      "excludes": [],
+      "note": "Every slot, plus who said so. With a model in the loop this stops being the audit view and becomes the default one."
+    }
+  },
+
+  "generation": {
+    "order": "derived first, then proposed",
+    "why": [
+      "The derived slots are the model's context, and generating a hook before the device plan exists means",
+      "writing a hook about a game whose shape is not yet known. It also means the numbers in the prose",
+      "cannot be checked against anything.",
+      "Passing the resolved plan in as context is what makes the prose specific. It is the difference",
+      "between 'a tense chase' and 'ten minutes of quiet, then a shape at the end of a corridor'."
+    ],
+    "contextPerSlot": ["identity.*", "pitch.what_it_is", "identity.facts", "answers", "counts"],
+    "onFailure": "leave the slot authored and print the question",
+    "temperature": "low",
+    "whyLow": "The invented sentence is the failure mode, and every step up in temperature buys fluency with plausibility."
+  },
+
+  "gates": [
+    {
+      "id": "no-numbers-in-prose",
+      "check": "A proposed slot's text contains no digit that a derived slot already states.",
+      "because": "Two sources of truth for one number will disagree, and the prose is the one a reader remembers."
+    },
+    {
+      "id": "provenance-present",
+      "check": "Every proposed slot has a non-empty `because` naming the slots and answers it used.",
+      "because": "An unattributable paragraph is the thing this template exists to prevent."
+    },
+    {
+      "id": "draft-marked",
+      "check": "Every proposed slot appears in provenance.draft_marker, and the marker is rendered.",
+      "because": "A reader who cannot tell a draft from a decision will treat it as a decision."
+    },
+    {
+      "id": "word-budget",
+      "check": "Every proposed slot is within maxWords, or reports its overflow.",
+      "because": "A model asked for 45 words writes 90. A page that overflows is a layout bug the model caused."
+    },
+    {
+      "id": "must-not",
+      "check": "No proposed slot contains a phrase from its mustNot list.",
+      "because": "Cheap, blunt, and catches the specific claims that are most damaging — a named competitor, an invented figure, a promised asset count."
+    },
+    {
+      "id": "authored-untouched",
+      "check": "No authored slot has content unless a human put it there.",
+      "because": "The one gate that has to be absolute. An authored slot filled by the model is a person's opinion being written for them."
+    }
+  ],
+
+  "worked_example": {
+    "inputs": {
+      "game_type": "horror_chase",
+      "project_name": "Closing Time",
+      "answers": {
+        "player_count": "2-4",
+        "map_size": "rooms-and-corridors",
+        "round_end": "survive-until-timer",
+        "mood": "dread"
+      }
+    },
+    "slots": {
+      "pitch.what_it_is": {
+        "source": "derived",
+        "text": "Atmosphere-driven survival: a hunting threat stalks players while they try to escape or hold out."
+      },
+      "pitch.hook": {
+        "source": "proposed",
+        "text": "Ten minutes of quiet, then a shape at the end of the corridor that is already closer than it was.",
+        "because": ["catalogue.horror_chase.description", "answers.mood=dread", "loop.steps"],
+        "state": "draft"
+      },
+      "direction.type_and_colour": {
+        "source": "authored",
+        "text": null,
+        "prompt": "Which faces and which three colours, and where does each one appear?",
+        "state": "awaiting-you"
+      },
+      "market.audience": {
+        "source": "authored",
+        "text": null,
+        "prompt": "Who is this for, on which platform, and how does it make money — or not?",
+        "state": "awaiting-you"
+      }
+    }
+  }
+}
