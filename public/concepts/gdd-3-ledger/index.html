@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design document · C — The Ledger · Forge mockup</title>
+  <link rel="icon" href="../../assets/logo.svg" />
+  <link rel="stylesheet" href="../_shared/chrome.css" />
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { color-scheme: dark; --accent: #8A8A93; --accent2: #E8E8EA; --ink: #101014; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--ink); color: #fff; font: 16px/1.6 "Inter", system-ui, sans-serif; }
+    a { color: #33BFFF; }
+    h1 { font-size: clamp(26px, 4.6vw, 40px); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 6px; }
+    h2 { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #ACACAD; margin: 44px 0 12px; border-bottom: 1px solid #303034; padding-bottom: 8px; }
+    h3 { font-size: 15px; margin: 0 0 4px; }
+    p { margin: 0 0 14px; max-width: 74ch; }
+    .lede { color: #C9C9CC; font-size: 17px; }
+    .kicker { font: 700 12px/1 "Inter", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 14px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1px solid transparent; }
+    .btn-primary { background: var(--accent2); color: var(--ink); }
+    .btn-primary:hover { background: #fff; }
+    .btn-ghost { border-color: #4A4A50; color: #fff; }
+    .btn-ghost:hover { border-color: #fff; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 28px 0 0; }
+    .meta div { padding: 14px 16px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .meta dt { font: 700 11px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #787678; margin-bottom: 7px; }
+    .meta dd { margin: 0; font-weight: 700; font-size: 17px; }
+    .sheet { margin: 0 0 34px; }
+    .sheet img { display: block; width: 100%; height: auto; border: 1px solid #303034; border-radius: 10px; background: #fff; }
+    .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
+    .sheet figcaption b { color: #fff; }
+    .spread { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .box p { margin: 0; color: #C9C9CC; font-size: 15px; }
+    .box.y { border-left: 3px solid var(--accent2); }
+    .box.r { border-left: 3px solid #E2263D; }
+    ul { max-width: 74ch; padding-left: 20px; color: #C9C9CC; }
+    li { margin-bottom: 9px; }
+    code { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; font-size: 13px; background: #202024; padding: 2px 6px; border-radius: 5px; color: #fff; }
+    .checks { display: grid; gap: 0; max-width: 680px; border: 1px solid #303034; border-radius: 12px; overflow: hidden; }
+    .checks div { display: grid; grid-template-columns: 1fr auto; gap: 14px; padding: 13px 18px; border-bottom: 1px solid #26262A; font-size: 15px; background: #18181C; }
+    .checks div:last-child { border-bottom: 0; }
+    .checks em { color: #ACACAD; font-style: normal; font-size: 14px; }
+    .checks b { color: #AAE755; font-variant-numeric: tabular-nums; }
+    .note { margin-top: 46px; padding: 18px 20px; border: 1px dashed #4A4A50; border-radius: 12px; color: #ACACAD; font-size: 14px; max-width: 80ch; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header style="margin-top:32px">
+      <a class="logo-lockup" href="../../index.html" title="Back to the Forge home page"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span><span class="logo-word">Forge</span></a>
+    </header>
+
+    <p class="kicker" style="margin-top:28px">Design document &middot; Structure C</p>
+    <h1>The Ledger</h1>
+    <p class="lede">Seven pages, for getting it defended. Every line says where it came from, and the document offers you a way to check it.</p>
+
+    <div class="acts">
+      <a class="btn btn-primary" href="gdd-3-ledger.pdf">Open the PDF &rarr;</a>
+      <a class="btn btn-ghost" href="../gdd-1-brief/index.html">Structure A &middot; Brief</a>
+      <a class="btn btn-ghost" href="../gdd-2-sprint-pack/index.html">Structure B &middot; Sprint Pack</a>
+    </div>
+
+    <dl class="meta">
+      <div><dt>Length</dt><dd>7 pages</dd></div>
+      <div><dt>Reader</dt><dd>Whoever has to defend the plan later</dd></div>
+      <div><dt>Organising axis</dt><dd>Provenance</dd></div>
+      <div><dt>Weight</dt><dd>14 KB</dd></div>
+    </dl>
+
+    <h2>Why this one exists</h2>
+    <p>The other two answer &ldquo;should we?&rdquo; and &ldquo;how?&rdquo;. Neither answers the question that arrives later and usually from somebody else: <em>says who?</em> A plan assembled out of recommendations should be able to show the recommendation, and should be able to show which parts of it you decided rather than accepted.</p>
+
+    <h2>The pages</h2>
+    <div class="spread">
+      <figure class="sheet">
+        <img src="media/03-ledger-p1.png" alt="Page 1: title in serif with a provenance block, and a contents list." />
+        <figcaption><b>Page 1.</b> Serif and monospace rather than sans, because a record reads differently from a pitch. The provenance block sits on the cover, not in an appendix.</figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="media/03-ledger-p2.png" alt="Page 2: a verification sheet of computed checks, each showing a count that can be checked against the island." />
+        <figcaption><b>Page 2.</b> The verification sheet. Seven checks, each one computed from the model rather than written into the template.</figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="media/03-ledger-p3.png" alt="Page 3: one card per device, with the source that asked for it, the catalogue advice and the options." />
+        <figcaption><b>Page 3.</b> One card per device. The role is the catalogue's grouping; the source line is the answer or the game type that asked for it &mdash; the line to quote when somebody questions a device.</figcaption>
+      </figure>
+    </div>
+
+    <h2>The verification sheet</h2>
+    <p>This is the part that makes the structure worth its pages. It is not a checklist of things for you to assert; it is seven counts the document performs on itself, so a reader can open their island and confirm or refute each one.</p>
+    <div class="checks">
+      <div><span>Every device in the plan appears on exactly one card <em>13 cards, 13 devices</em></span><b>13 = 13</b></div>
+      <div><span>Every setting named is in the catalogue version the plan resolves against</span><b>36 = 36</b></div>
+      <div><span>Every setting an answer changed is listed in the decision trace</span><b>0 = 0</b></div>
+      <div><span>Every device has at least one source &mdash; game type, answer or randomiser</span><b>13 of 13</b></div>
+      <div><span>Every build step leaves the player able to reach the next one</span><b>5 of 5</b></div>
+      <div><span>Every catalogue note against a chosen device is carried into Gotchas</span><b>3 of 3</b></div>
+      <div><span>Sections a full design document has that this cannot derive are listed</span><b>6 named</b></div>
+    </div>
+    <p style="margin-top:14px">The sample design has no answers that changed a setting, so the third row reads <code>0 = 0</code>. That is the honest result for this plan rather than a placeholder, and it is also the reason a second sample design with a real change would show the traceability page doing its job.</p>
+
+    <h2>What this structure is bad at</h2>
+    <div class="grid">
+      <div class="box r">
+        <h3>It is a terrible first document</h3>
+        <p>Seven pages of serif provenance is not how you get somebody excited. Hand this to a friend before the Brief and you have made their decision harder.</p>
+      </div>
+      <div class="box r">
+        <h3>Provenance is verbose</h3>
+        <p>Saying where every line came from roughly doubles the length for the same information. If nothing is ever questioned, most of that is waste.</p>
+      </div>
+      <div class="box r">
+        <h3>It can only be as honest as the model</h3>
+        <p>The verification sheet is worth nothing if the counts are decorative. Every one of them is computed from the model, and a check that cannot fail would be worse than no check at all.</p>
+      </div>
+    </div>
+
+    <h2>How it is made</h2>
+    <p>Generated by <code>tools/gdds/render.mjs ledger</code> from the same document model as A and B. The device cards are paginated by a measuring pass, and the traceability and verification pages are built by walking the model rather than by formatting a string, so a count cannot drift away from the plan it describes.</p>
+
+    <p class="note">These are mockups: nothing here is wired into the app yet. The PDF is a real file, generated by <code>node tools/gdds/render.mjs ledger</code>.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <a class="logo-lockup" href="../../index.html" aria-label="Forge home">
+        <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span>
+        <span class="logo-word">Forge</span>
+      </a>
+      <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="../index.html#gdd">&larr; All mockups</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

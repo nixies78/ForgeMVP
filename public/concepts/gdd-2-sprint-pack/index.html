@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design document · B — The Sprint Pack · Forge mockup</title>
+  <link rel="icon" href="../../assets/logo.svg" />
+  <link rel="stylesheet" href="../_shared/chrome.css" />
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { color-scheme: dark; --accent: #176B73; --accent2: #44D5BF; --ink: #101014; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--ink); color: #fff; font: 16px/1.6 "Inter", system-ui, sans-serif; }
+    a { color: #33BFFF; }
+    h1 { font-size: clamp(26px, 4.6vw, 40px); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 6px; }
+    h2 { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #ACACAD; margin: 44px 0 12px; border-bottom: 1px solid #303034; padding-bottom: 8px; }
+    h3 { font-size: 15px; margin: 0 0 4px; }
+    p { margin: 0 0 14px; max-width: 74ch; }
+    .lede { color: #C9C9CC; font-size: 17px; }
+    .kicker { font: 700 12px/1 "Inter", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--accent2); margin-bottom: 14px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1px solid transparent; }
+    .btn-primary { background: var(--accent2); color: var(--ink); }
+    .btn-primary:hover { background: #7EE7D5; }
+    .btn-ghost { border-color: #4A4A50; color: #fff; }
+    .btn-ghost:hover { border-color: #fff; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 28px 0 0; }
+    .meta div { padding: 14px 16px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .meta dt { font: 700 11px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #787678; margin-bottom: 7px; }
+    .meta dd { margin: 0; font-weight: 700; font-size: 17px; }
+    .sheet { margin: 0 0 34px; }
+    .sheet img { display: block; width: 100%; height: auto; border: 1px solid #303034; border-radius: 10px; background: #fff; }
+    .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
+    .sheet figcaption b { color: #fff; }
+    .spread { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 22px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .box p { margin: 0; color: #C9C9CC; font-size: 15px; }
+    .box.y { border-left: 3px solid var(--accent2); }
+    .box.r { border-left: 3px solid #E2263D; }
+    ul { max-width: 74ch; padding-left: 20px; color: #C9C9CC; }
+    li { margin-bottom: 9px; }
+    code { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; font-size: 13px; background: #202024; padding: 2px 6px; border-radius: 5px; color: #fff; }
+    .toc { display: grid; gap: 8px; max-width: 640px; }
+    .toc div { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: baseline; padding: 9px 0; border-bottom: 1px solid #26262A; font-size: 15px; }
+    .toc b { color: var(--accent2); font-variant-numeric: tabular-nums; }
+    .toc span:last-child { color: #787678; font-size: 14px; }
+    .note { margin-top: 46px; padding: 18px 20px; border: 1px dashed #4A4A50; border-radius: 12px; color: #ACACAD; font-size: 14px; max-width: 80ch; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header style="margin-top:32px">
+      <a class="logo-lockup" href="../../index.html" title="Back to the Forge home page"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span><span class="logo-word">Forge</span></a>
+    </header>
+
+    <p class="kicker" style="margin-top:28px">Design document &middot; Structure B</p>
+    <h1>The Sprint Pack</h1>
+    <p class="lede">Nine pages, for getting it built. Organised by the order you work in rather than by topic, so the page you need is the page you are on.</p>
+
+    <div class="acts">
+      <a class="btn btn-primary" href="gdd-2-sprint-pack.pdf">Open the PDF &rarr;</a>
+      <a class="btn btn-ghost" href="../gdd-1-brief/index.html">Structure A &middot; Brief</a>
+      <a class="btn btn-ghost" href="../gdd-3-ledger/index.html">Structure C &middot; Ledger</a>
+    </div>
+
+    <dl class="meta">
+      <div><dt>Length</dt><dd>9 pages</dd></div>
+      <div><dt>Reader</dt><dd>You, on a Tuesday, four weeks in</dd></div>
+      <div><dt>Organising axis</dt><dd>Sequence</dd></div>
+      <div><dt>Weight</dt><dd>19 KB</dd></div>
+    </dl>
+
+    <h2>What is in it</h2>
+    <div class="toc">
+      <div><b>1</b><span>Cover and contents</span><span>the four numbers the pack is held to</span></div>
+      <div><b>2&ndash;5</b><span>The modules, grouped by build phase</span><span>13 devices in three columns</span></div>
+      <div><b>6&ndash;8</b><span>The settings ledger</span><span>36 settings, every one with the catalogue's advice</span></div>
+      <div><b>&nbsp;</b><span>Decisions</span><span>every answer and what it changed</span></div>
+      <div><b>&nbsp;</b><span>Gotchas</span><span>the 3 notes the device data records</span></div>
+      <div><b>&nbsp;</b><span>Build order</span><span>five steps, and what each leaves behind</span></div>
+      <div><b>9</b><span>Open items and the publish check</span><span>what this pack does not cover</span></div>
+    </div>
+
+    <h2>The pages</h2>
+    <div class="spread">
+      <figure class="sheet">
+        <img src="media/02-sprint-pack-p1.png" alt="Page 1: the cover, with the game name, the four numbers the pack is held to, and a contents list with real page numbers." />
+        <figcaption><b>Page 1.</b> The contents list carries the real page numbers, which means the pack is rendered twice &mdash; once to count the pages, once to write the footers.</figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="media/02-sprint-pack-p2.png" alt="Page 2: module cards grouped by build phase in three columns, each card showing the device, its purpose and a source line." />
+        <figcaption><b>Page 2.</b> Modules by build phase: Foundation, The loop, Opposition and hazards, Feedback. Each card is <em>Why &middot; When</em>, the device's purpose, and where it came from.</figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="media/02-sprint-pack-p3.png" alt="Page 3: a paginated ledger of every setting, with the catalogue advice on the left and a tinted column for settings an answer changed." />
+        <figcaption><b>Page 3.</b> The settings ledger. The right-hand block is tinted wherever one of your answers changed a setting, so the twenty settings you can leave alone are visibly leaveable.</figcaption>
+      </figure>
+      <figure class="sheet">
+        <img src="media/02-sprint-pack-p9.png" alt="Page 9: open items listing what the pack does not cover, and a publish check." />
+        <figcaption><b>Page 9.</b> What the pack does not cover, and a publish check. Structurally the same ending as the other two structures: name what is missing.</figcaption>
+      </figure>
+    </div>
+
+    <h2>Why it is laid out this way</h2>
+    <ul>
+      <li><b>Order of work, not order of importance.</b> A build plan read top to bottom should not require skipping. Phases come from the roles the device catalogue already assigns, and the pack groups by those rather than inventing an order.</li>
+      <li><b>The ledger is the middle of the document, not an appendix.</b> Settings are what actually take the time, so they get the most pages &mdash; and the ones an answer changed are tinted, which turns a 36-row wall into a short list plus background.</li>
+      <li><b>Cards carry their own provenance.</b> Each module says which source asked for it, so a device that came from a randomiser rather than from the game type is visibly optional.</li>
+      <li><b>Every break is measured.</b> Card height and row height are computed by the same function that draws them, so a card cannot be measured onto one page and drawn on the next.</li>
+    </ul>
+
+    <h2>What this structure is bad at</h2>
+    <div class="grid">
+      <div class="box r">
+        <h3>It is not persuasive</h3>
+        <p>Nine pages is a bad way to ask for a yes. There is no pitch, no single sentence to quote, and page 1 assumes you have already decided.</p>
+      </div>
+      <div class="box r">
+        <h3>It is not checkable</h3>
+        <p>It tells you what to do. It does not offer any way to confirm the plan is internally consistent &mdash; no totals, no traceability.</p>
+      </div>
+      <div class="box r">
+        <h3>The tinted column is load-bearing</h3>
+        <p>If a future question changes forty settings rather than four, the ledger stops being scannable and the whole structure needs rethinking.</p>
+      </div>
+    </div>
+
+    <h2>How it is made</h2>
+    <p>Generated by <code>tools/gdds/render.mjs</code> from the same document model as the other two, using base&#8209;14 fonts and a dependency&#8209;free PDF writer. Pagination is measured, not guessed: the renderer runs once to count pages and once more so the footers can say <code>3 / 9</code>.</p>
+
+    <p class="note">These are mockups: nothing here is wired into the app yet. The PDF is a real file, generated by <code>node tools/gdds/render.mjs sprint</code>.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <a class="logo-lockup" href="../../index.html" aria-label="Forge home">
+        <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span>
+        <span class="logo-word">Forge</span>
+      </a>
+      <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="../index.html#gdd">&larr; All mockups</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

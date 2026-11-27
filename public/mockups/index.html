@@ -52,6 +52,7 @@
       <button class="tab" role="tab" id="tab-questions" aria-controls="panel-questions" aria-selected="false" tabindex="-1" data-tab="questions">Question page <span class="count">9</span></button>
       <button class="tab" role="tab" id="tab-lessons" aria-controls="panel-lessons" aria-selected="false" tabindex="-1" data-tab="lessons">Lesson page <span class="count">9</span></button>
       <button class="tab" role="tab" id="tab-chat" aria-controls="panel-chat" aria-selected="false" tabindex="-1" data-tab="chat">AI chat page <span class="count">4</span></button>
+      <button class="tab" role="tab" id="tab-gdd" aria-controls="panel-gdd" aria-selected="false" tabindex="-1" data-tab="gdd">Design document <span class="count">3</span></button>
     </div>
 
     <section class="panel" role="tabpanel" id="panel-landing" aria-labelledby="tab-landing">
@@ -135,6 +136,18 @@
         <li><a class="card" href="../concepts/chat-2-workbench/index.html" style="--c:#44D5BF;--c2:#AAE755"><span class="num">C2</span><span><span class="name">Workbench</span><br><span class="desc">The chat is the process, the design is the product: the conversation runs in the left column while a live design panel fills in on the right - game type, devices, the five build steps and the questions still open. On a phone the panel becomes a bottom sheet behind a Chat / Design switch.</span></span><span class="go">Open &rarr;</span></a></li>
         <li><a class="card" href="../concepts/chat-3-interview/index.html" style="--c:#F9A91F;--c2:#E166B6"><span class="num">C3</span><span><span class="name">Interview</span><br><span class="desc">No blank box: the page opens as the first turn of a conversation, the AI asks one answerable question and the answers are taps - with typing always one link away. Every answer lands in the transcript as an editable decision card, and the brief being assembled is visible as a five-dot strip.</span></span><span class="go">Open &rarr;</span></a></li>
       </ol>
+    </section>
+
+    <section class="panel" role="tabpanel" id="panel-gdd" aria-labelledby="tab-gdd" hidden>
+      <h2>Three structures for the exported design document</h2>
+      <p class="lede">The reference document &mdash; <em>Closing Time</em> &mdash; is one answer to &ldquo;what is a game design document&rdquo;: eight numbered chapters, each a different kind of content, read front to back. It is a good document and it is not the only shape, because a design document has at least three jobs and they do not want the same layout. All three below are generated from the same resolved design by <code>tools/gdds/</code>, and each opens as a real PDF you can print.</p>
+      <ol>
+        <li><a class="card" href="../concepts/gdd-1-brief/index.html" style="--c:#E2263D;--c2:#F2C230"><span class="num">A</span><span><span class="name">The Brief</span><br><span class="desc">One page, for getting a yes. The pitch first, the facts in a row, the core loop as a rail, the build order as a short list &mdash; and a closing block that names what the tool cannot know. Flip it over and you can lose the argument in ten seconds.</span></span><span class="go">Open &rarr;</span></a></li>
+        <li><a class="card" href="../concepts/gdd-2-sprint-pack/index.html" style="--c:#176B73;--c2:#44D5BF"><span class="num">B</span><span><span class="name">The Sprint Pack</span><br><span class="desc">Nine pages, for getting it built. Organised by the order you work in rather than by topic: modules grouped by build phase, then a paginated ledger of every setting, the decisions, the gotchas, and the five steps with what each one leaves behind. Sits open beside the editor.</span></span><span class="go">Open &rarr;</span></a></li>
+        <li><a class="card" href="../concepts/gdd-3-ledger/index.html" style="--c:#2E2E33;--c2:#8A8A93"><span class="num">C</span><span><span class="name">The Ledger</span><br><span class="desc">Seven pages, for getting it defended. Every device carries the source that asked for it, every setting says whether it is the catalogue default or a change you made, and the document ends with a verification sheet you can check against your island &mdash; because a plan that can be checked should offer to be.</span></span><span class="go">Open &rarr;</span></a></li>
+      </ol>
+      <h2>The shared decision behind all three</h2>
+      <p class="lede">The questionnaire can honestly supply a pitch, a device plan and the provenance of each answer. It cannot supply art direction, level layout, audio, market or a build estimate &mdash; so none of the three invents them. Each ends by listing those sections as <strong>outstanding</strong>. A document that claims to know your art direction after four device questions is not one you would trust with the four answers it did get.</p>
     </section>
 
   </main>

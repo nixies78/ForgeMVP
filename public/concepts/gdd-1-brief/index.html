@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Design document · A — The Brief · Forge mockup</title>
+  <link rel="icon" href="../../assets/logo.svg" />
+  <link rel="stylesheet" href="../_shared/chrome.css" />
+  <style>
+    @font-face { font-family: "Inter"; src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+    :root { color-scheme: dark; --accent: #E2263D; --accent2: #F2C230; --ink: #101014; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--ink); color: #fff; font: 16px/1.6 "Inter", system-ui, sans-serif; }
+    a { color: #33BFFF; }
+    h1 { font-size: clamp(26px, 4.6vw, 40px); line-height: 1.08; letter-spacing: -.02em; margin: 0 0 6px; }
+    h2 { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #ACACAD; margin: 44px 0 12px; border-bottom: 1px solid #303034; padding-bottom: 8px; }
+    h3 { font-size: 15px; margin: 0 0 4px; }
+    p { margin: 0 0 14px; max-width: 74ch; }
+    .lede { color: #C9C9CC; font-size: 17px; }
+    .kicker { font: 700 12px/1 "Inter", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border-radius: 10px; font-weight: 700; font-size: 15px; text-decoration: none; border: 1px solid transparent; }
+    .btn-primary { background: var(--accent2); color: var(--ink); }
+    .btn-primary:hover { background: #FFD84D; }
+    .btn-ghost { border-color: #4A4A50; color: #fff; }
+    .btn-ghost:hover { border-color: #fff; }
+    .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin: 28px 0 0; }
+    .meta div { padding: 14px 16px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .meta dt { font: 700 11px/1 "Inter", sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #787678; margin-bottom: 7px; }
+    .meta dd { margin: 0; font-weight: 700; font-size: 17px; }
+    .sheet { margin: 0 0 34px; }
+    .sheet img { display: block; width: 100%; height: auto; border: 1px solid #303034; border-radius: 10px; background: #fff; }
+    .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
+    .sheet figcaption b { color: #fff; }
+    .solo { max-width: 760px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }
+    .box p { margin: 0; color: #C9C9CC; font-size: 15px; }
+    .box.y { border-left: 3px solid var(--accent2); }
+    .box.r { border-left: 3px solid var(--accent); }
+    ul { max-width: 74ch; padding-left: 20px; color: #C9C9CC; }
+    li { margin-bottom: 9px; }
+    code { font-family: ui-monospace, "Cascadia Mono", Menlo, monospace; font-size: 13px; background: #202024; padding: 2px 6px; border-radius: 5px; color: #fff; }
+    .note { margin-top: 46px; padding: 18px 20px; border: 1px dashed #4A4A50; border-radius: 12px; color: #ACACAD; font-size: 14px; max-width: 80ch; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header style="margin-top:32px">
+      <a class="logo-lockup" href="../../index.html" title="Back to the Forge home page"><span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span><span class="logo-word">Forge</span></a>
+    </header>
+
+    <p class="kicker" style="margin-top:28px">Design document &middot; Structure A</p>
+    <h1>The Brief</h1>
+    <p class="lede">One page, for getting a yes. Everything a person deciding needs and nothing they do not &mdash; and a last block that says out loud what the tool cannot know.</p>
+
+    <div class="acts">
+      <a class="btn btn-primary" href="gdd-1-brief.pdf">Open the PDF &rarr;</a>
+      <a class="btn btn-ghost" href="../gdd-2-sprint-pack/index.html">Structure B &middot; Sprint Pack</a>
+      <a class="btn btn-ghost" href="../gdd-3-ledger/index.html">Structure C &middot; Ledger</a>
+    </div>
+
+    <dl class="meta">
+      <div><dt>Length</dt><dd>1 page</dd></div>
+      <div><dt>Reader</dt><dd>A friend, a collaborator, past you</dd></div>
+      <div><dt>Organising axis</dt><dd>Persuasion</dd></div>
+      <div><dt>Weight</dt><dd>4 KB</dd></div>
+    </dl>
+
+    <h2>The page</h2>
+    <div class="solo">
+      <figure class="sheet">
+        <img src="media/01-brief-p1.png" alt="Page 1: the pitch in bold on a dark band, the facts in a row of three, the core loop as a rail, the build order, the layout tip, and a closing block naming what the tool cannot tell you." />
+        <figcaption><b>Page 1 of 1.</b> Generated from the Horror Chase plan: 13 devices, 36 settings, 3 notes from the device data.</figcaption>
+      </figure>
+    </div>
+
+    <h2>Why it is laid out this way</h2>
+    <ul>
+      <li><b>The pitch is the hero.</b> 18pt bold, under a dark band with the device count reversed out of it. If somebody reads one thing on this page, it is that sentence.</li>
+      <li><b>The facts are a row of three, not five.</b> Five cells fitted only if every value was short. Three wide cells fit the real values, and merging <em>who you play with</em> with <em>how long that lasts</em> is also how it is said out loud.</li>
+      <li><b>The core loop is a rail, not a list.</b> Entry, loop, outcomes &mdash; left to right, with the win and lose cards at the end. A loop drawn as bullet points stops looking like a loop.</li>
+      <li><b>The build order is short on purpose.</b> One line per phase. Anybody who wants the twenty steps behind it is the reader of Structure B, not this one.</li>
+      <li><b>It ends with a confession.</b> Six sections belong in a design document and are not derivable from a device questionnaire, so the page names them rather than padding them.</li>
+    </ul>
+
+    <h2>What this structure is bad at</h2>
+    <div class="grid">
+      <div class="box r">
+        <h3>No build detail</h3>
+        <p>There is no room for a device's settings. A reader who wants to start building has to go to Structure B.</p>
+      </div>
+      <div class="box r">
+        <h3>Nothing to audit</h3>
+        <p>It says the plan has 13 devices and never shows them. If the number is wrong, the page cannot tell you &mdash; that is Structure C's job.</p>
+      </div>
+      <div class="box r">
+        <h3>It dates badly</h3>
+        <p>A persuasive page is written for a decision that happens once. Three weeks later it is the least useful of the three.</p>
+      </div>
+    </div>
+
+    <h2>How it is made</h2>
+    <p>Every structure in this set is generated by <code>tools/gdds/</code> from the same resolved design &mdash; one document model, three layouts. The PDF is written directly, with base&#8209;14 fonts and a hand&#8209;written writer (<code>pdf.mjs</code>), so the export has no runtime dependency and the layout is deterministic. Every block declares the height it is allowed; a block that does not fit fails the build instead of silently losing its last line.</p>
+    <p>Type in the printed document is Helvetica and its base&#8209;14 relatives rather than Forge's own Inter, because embedding a brand face in a PDF means shipping a TTF subsetter. That is the main cosmetic trade&#8209;off in this set and it is a deliberate one.</p>
+
+    <p class="note">These are mockups: nothing here is wired into the app yet, and the Summary screen does not export anything today. The three PDFs are real files, generated by <code>node tools/gdds/render.mjs</code>.</p>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-inner">
+      <a class="logo-lockup" href="../../index.html" aria-label="Forge home">
+        <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44" /></span>
+        <span class="logo-word">Forge</span>
+      </a>
+      <span class="foot-slogan">Design in Forge. Build in UEFN. Play in Fortnite.</span>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="../index.html#gdd">&larr; All mockups</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
