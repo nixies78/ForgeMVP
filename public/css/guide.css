@@ -1307,6 +1307,32 @@ body.g-app {
   color: var(--fn-text-muted);
   margin-bottom: var(--fn-space-2);
 }
+
+/* ---------- the plan and the recap, two columns ----------
+ * "Every choice" on the left, "Your plan" on the right: the decisions first, the plan derived from them
+ * second, which is the direction the questionnaire itself ran in. Each panel is short on its own, so one
+ * row of two columns costs the taller panel rather than the sum of both — the page is that much shorter,
+ * and everything under it comes up with it.
+ *
+ * Equal columns, because neither panel is the main one on a page you scan; an uneven split would make one
+ * of them read as a footnote to the other. `align-items: start` leaves the shorter panel at the top rather
+ * than stretching it, which would leave its last row floating in space. The panels keep their own
+ * `margin-bottom`, so the row is followed by the same 24px the stacked panels used to leave. */
+.g-planrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--fn-space-5);
+  align-items: start;
+}
+.g-planrow > * { min-width: 0; }
+
+/* Below the width where two columns fit, they are read one after the other again — recap first, which is
+ * the order they are already in in the markup. The gap goes to zero because the panels' own bottom margin
+ * is what separates them when they are stacked. */
+@media (max-width: 900px) {
+  .g-planrow { grid-template-columns: minmax(0, 1fr); gap: 0; }
+}
+
 .g-input {
   width: 100%;
   max-width: 420px;

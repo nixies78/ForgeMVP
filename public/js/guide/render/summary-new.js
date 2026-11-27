@@ -32,7 +32,7 @@ import { buildPitch, factsLine } from '../pitch.js';
 import { button, eyebrow, noticeBox, pageTitle, panel, paragraph } from './ui.js';
 import { renderCoreLoop } from './loop.js';
 import { loopLegend } from './loop-legend.js';
-import { backRow, nameAndStart, planPanel, recapPanel, walkthroughNote } from './summary-parts.js';
+import { backRow, nameAndStart, planColumns, walkthroughNote } from './summary-parts.js';
 
 export function renderSummaryNew(ctx) {
   const { data, state, actions } = ctx;
@@ -73,9 +73,7 @@ export function renderSummaryNew(ctx) {
           ]
     }),
 
-    panel(planPanel(ctx)),
-
-    panel(recapPanel(ctx)),
+    planColumns(ctx),
 
     walkthroughNote(),
 

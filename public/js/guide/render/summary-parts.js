@@ -15,7 +15,7 @@ import { h, frag, plural, richText } from '../dom.js';
 import { effectiveLayoutTip } from '../data.js';
 import { rebuildDevices } from '../resolve.js';
 import { UI, WALKTHROUGH_STEPS } from '../content.js';
-import { button, buttonRow, paragraph } from './ui.js';
+import { button, buttonRow, panel, paragraph } from './ui.js';
 import { planSummary } from './devices.js';
 
 /** One row of the recap: a term, its value, and the control that goes back and changes it. */
@@ -175,6 +175,32 @@ export function walkthroughNote() {
     { class: 'g-meta-line g-small' },
     `Walkthrough: ${plural(WALKTHROUGH_STEPS.length, 'step')} (${plural(WALKTHROUGH_STEPS.length - 1, 'step')} unless you are a complete beginner).`
   );
+}
+
+/**
+ * "Every choice" and "Your plan", side by side, the recap on the left.
+ *
+ * **Every choice comes first** because it is the input and the plan is the output. You read what you
+ * decided, then what was derived from it — the same direction as the questionnaire that produced both,
+ * and the same order as the two questions a reader arrives with: "did it get me right?" is asked before
+ * "how many devices is that?". The recap is also the longer of the two, so the left-hand column is where
+ * the eye starts and where the most rows are.
+ *
+ * **Side by side** because they are the two halves of one answer and both are short: a single row costs
+ * the taller panel rather than the sum of the two, and the page is that much shorter for it. The columns
+ * are equal because neither panel is the main one — this is a page you scan, and an uneven split would
+ * make one of them read as a footnote to the other. `align-items: start` keeps the shorter panel at the
+ * top instead of stretching it to match, which would leave its last row floating in space.
+ *
+ * Below 900px — the breakpoint this page stacks at — they are read one after the other again, recap
+ * first. That is also the order they are in the markup, so a screen reader meets them in the order the
+ * two columns put them in.
+ *
+ * Both panels are built here and placed by the caller, like the rest of this module: the classic layout
+ * still stacks them, and it says so in one line of its own file.
+ */
+export function planColumns(ctx) {
+  return h('div', { class: 'g-planrow' }, panel(recapPanel(ctx)), panel(planPanel(ctx)));
 }
 
 /** The way back to the last step before the plan is committed (architecture spec v2). */
