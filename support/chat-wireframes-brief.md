@@ -336,23 +336,37 @@ depth, colour and type.
 
 | page | direction | styling |
 | --- | --- | --- |
-| `chat-2b-workbench-quiet` | Workbench, as a real screen | The page is **Concept 8 (Quiet Power)**: `#101014`, hairlines instead of boxes, Inter Tight with negative tracking, `#33BFFF` for the one action and `#868AFD` for what a machine says about itself. The workspace is **Randomiser 2c (Portrait reels)**: one moulded case, a recessed window under glass, and keys that stand up off the surface and press down onto their skirt. |
+| `chat-2b-workbench-quiet` | Workbench, as a real screen | The page is **Concept 8 (Quiet Power)**: `#101014`, hairlines instead of boxes, Inter Tight with negative tracking, `#33BFFF` for the one action and `#868AFD` for what a machine says about itself. The two things you touch are **Randomiser 2c (Portrait reels)**: a moulded case - a lit top edge, a dark bottom edge, one recessed well - plus keys that stand up off the surface and press down onto their skirt. |
 
 Rules for a full mockup - the wireframe rules above, with these differences:
 
 - **It is a screen, not a diagram.** No `.mk`/`.note` annotation layer, no greyscale, no dashed
   placeholders left as the subject of the page. Annotations come back only if a decision needs arguing.
-- **The canvas is the case.** The conversation lives in the case's recessed window (messages sit at its
-  foot against the composer, the way a real transcript does), the composer is the key row under it, and
-  the design panel is the second bay of the same case. Two columns on a desktop; at 1080px and below the
-  rail moves under the deck and never above the composer.
-- **It must work, not just look right.** The interactions are the argument: a quick pick writes into the
-  composer without sending, a tap answer on a message becomes a turn, an **Answer** key in the panel
-  writes that answer into the transcript, ticks its build step, decides its device, moves both gauges and
-  the state chip, and unlocks **Build in UEFN** only when nothing is owed. `Build in UEFN` then reports
-  what it sent. Keep it to one small `<script>` with canned replies - no model, no network.
-- **Every number is real**, and the mockup may quote the set's own: 13 researched game types, 74 drafts,
-  59 devices. The one stat that must not appear is an invented one.
+- **One object per side, not a frame around both.** The conversation sits on the page itself; the only
+  moulded thing under it is the composer, and the design panel is its own object beside it. The first
+  pass wrapped both bays in a single case and the chat became a window inside a panel inside a page -
+  three frames saying one thing, and the heaviest part of the screen was the part you only read. Depth
+  belongs to what you press and to what reports progress, and to nothing else.
+- **The panel never pushes the conversation.** It is `position: sticky` with a height of its own, so the
+  composer is above the fold when the page loads at 1440x1000 *and* at 1440x780, and the panel floats
+  along as the conversation grows. Test the fold at two window heights: at 62vh the composer's bottom
+  edge was 20px past it, and at a laptop height the short-window media query is what buys the transcript
+  its room back. Both lists in the panel (Devices, Build steps) are folded behind a `<details>` summary
+  that keeps the count and the gauge visible while shut, because a panel that grows to 1100px is not a
+  readout you can leave on screen. On one column the panel stops floating; a sticky panel under the thing
+  it describes is a panel nobody scrolls back to.
+- **It must work, not just look right.** The interactions are the argument: the box starts one line tall
+  and grows with what is typed, a quick pick writes into it without sending, a tap answer on a message
+  becomes a turn, an **Answer** key in the panel writes that answer into the transcript, ticks its build
+  step, decides its device, moves both gauges and the state chip, and unlocks **Build in UEFN** only when
+  nothing is owed. `Build in UEFN` then reports what it sent. Keep it to one small `<script>` with canned
+  replies - no model, no network. Hovering **Answers owed** is where the sentence about where answers go
+  lives (a tooltip, not a line of prose under the box).
+- **Numbers are real, and the mockup shows them only where they are the point.** The stat strip a
+  landing page would carry (13 researched game types, 74 drafts, 59 devices) is not on this page: the
+  screen's job is the conversation and the panel, and a strip of totals between the pitch and the tool
+  pushed the composer towards the fold. The rule that survives is the negative one - no invented number
+  anywhere, and the panel's counts (5 of 6, 2 of 5) must be the ones the interactions actually produce.
 - **The app-screen rule still holds**: no `<footer>`, one 44px mark in the 72px header, no root-relative
   paths, works at 400px with no horizontal scroll. A hero glow wider than the viewport (`120vw`) is the
   trap here: at 400px it pushes the layout viewport out with it and every fixed element moves with it.

@@ -91,12 +91,22 @@ answer a structural question - where the affordances sit and what the conversati
 chat page's problem is not its palette. The brief is `support/chat-wireframes-brief.md`.
 
 AI chat, in colour: C2b Workbench (Quiet Power) - the first full mockup of a chat direction. Workbench's
-structure, given a material: Concept 8's dark page (hairlines, Inter Tight, blue action, indigo detail)
-wrapped around Randomiser 2c's moulded case, with the transcript in the recessed window, the composer as
-the key row and the design panel as the second bay. It is a working screen rather than a picture of one -
-answering an open question in the panel writes it into the transcript, ticks its build step, decides its
-device and unlocks Build in UEFN - because the direction's whole claim (one workspace, not two windows)
-can only be judged in motion.
+structure, given a material: Concept 8's dark page (hairlines, Inter Tight, blue action, indigo detail),
+with Randomiser 2c's moulding spent on exactly two objects - the composer under the conversation and the
+design panel beside it. It is a working screen rather than a picture of one - answering an open question
+in the panel writes it into the transcript, ticks its build step, decides its device and unlocks Build in
+UEFN - because the direction's whole claim (one workspace, not two windows) can only be judged in motion.
+
+C2b was then revised against that claim, and the revision is the interesting part. The case came off: with
+both bays inside one moulded box the chat read as a window inside a panel inside a page, so the transcript
+now sits on the page, only the composer is moulded, and the page's own flat pill is what sends. The
+composer's box starts one line tall and grows with the typing; the note that used to sit under it became a
+tooltip on **Answers owed**; the panel stopped being a grid column of equal height (it was setting the
+conversation's height and pushing the composer past the fold) and became a sticky readout with Devices and
+Build steps folded behind a summary that keeps their gauges visible. Three things were only found by
+measuring rather than looking: a gradient surface read as lighter than its recess until the pixels were
+sampled, the composer's bottom landed 20px past the fold at a laptop height, and the transcript opened on
+the oldest turn rather than the newest because Inter loads after the first layout.
 
 ## What the chat set deliberately does not settle
 
