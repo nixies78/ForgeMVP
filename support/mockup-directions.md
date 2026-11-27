@@ -139,7 +139,13 @@ overlay: the owner wanted the walk-through, not an explanation of it. The panel 
 maintained and started being recomputed - one flag per answered question, one `render()` that works out the
 whole panel - so answering in any order, from either bay, cannot leave the two sides disagreeing; and the tap
 chips inside an old message go inert once their question has been settled anywhere else, because a settled
-question is not a question.
+question is not a question. The owner then had one more look at the empty state and said what a reviewer's
+eye says: the box should not start at the foot of a tall empty column, because every other chat tool puts it
+in the middle of the page before there is anything to read. So the deck's own height ramps with everything
+else, 20rem to 46rem, and its empty end is a measurement rather than a taste: the panel is 323px tall and
+starts on the same line, so 20rem lands the composer's lower edge 3px inside the panel's foot at both window
+heights. The box then comes down 208px over the four inputs, which is exactly the room the headline above
+gives up - the descent is the same animation seen from the other end.
 
 ## What the chat set deliberately does not settle
 

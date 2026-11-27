@@ -392,6 +392,14 @@ Rules for a full mockup - the wireframe rules above, with these differences:
   0" is already inert, and Build in UEFN is disabled behind a status line that says what it is waiting for.
   The counts appear when the first question is answered, not at the top of the conversation: a progress bar
   before the first device is known is a progress bar for nothing.
+- **And on load the box sits level with the panel.** The deck's height ramps 20rem -> 46rem along with
+  everything else, and its empty end is measured rather than chosen: the panel is 323px tall and starts on
+  the same line as the deck, so 20rem puts the composer's lower edge 3px inside the panel's foot, at
+  1440x1000 and at 1440x780 alike. An empty transcript is not worth 576px of somebody's screen, and a box
+  sitting in the middle of the page is what every other chat tool does before there is anything to read -
+  the empty screen should look like a tool waiting, not like a page with a hole cut in it. The descent is
+  the same animation seen from the other end: the composer's edge comes down 208px over the four inputs,
+  which is the room the headline above handed over, no more.
 - **A scripted walk-through runs on load, and it never presses Send.** Four lines type themselves into the
   box one character at a time with Send held down for the whole of it; then the strip waits, because pressing
   Send is the reviewer's move - that is the loop the screen is arguing for. When the reply lands it types the

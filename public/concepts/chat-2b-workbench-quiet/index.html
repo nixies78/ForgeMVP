@@ -154,20 +154,27 @@
      you actually touch are objects: the composer under the conversation, and the design panel beside it. */
   .workspace { padding-block: 28px 0; }
   .ws-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 31%, 348px); gap: 22px; align-items: start; }
-  /* The conversation keeps a height of its own, so the composer is on screen when the page loads and
-     stays there. The height is what the viewport has left once the bar and the pitch are paid for - not a
-     percentage, because a percentage of a short window is still too tall for that window. The 420px is
-     that fixed part with the full pitch on screen, measured at 1440x1000 and again at 1440x780 (which is
-     how the first estimate of 360 was caught being 40 short): 72px bar, the intro at its tallest, the
-     band's padding and the air under it. As the pitch gives that room up, the deck takes it: at --engage 1
-     the same formula reads 220px and clamp(20rem, ..., 46rem), which is what the page measured when the
-     hero was compacted in one step. So both ends are the numbers that were already verified, and the
-     middle is the interpolation that was missing. */
+  /* The conversation keeps a height of its own, so the composer is on screen when the page loads and stays
+     there. With nothing said that height is deliberately short - 320px, about the height of the panel beside
+     it - because an empty transcript is not worth 576px of somebody's screen: with nothing to read, the box
+     should end its descent level with the foot of the design panel, which is where every other chat tool
+     puts its box before there is anything in it, and the empty chat stops looking like a page with a hole
+     cut in it. The number is measured rather than chosen: at 1440x1000 the panel is 323px tall and starts on
+     the same line as the deck, so 20rem puts the composer's lower edge 3px inside the panel's foot. Then the
+     box comes down the page as the conversation grows, by the same amount the pitch above gives up: the
+     upper bound of the clamp ramps 20rem -> 46rem while the intro's padding and headline come down, so at
+     --engage 1 the deck is the 736px it measured when the hero was compacted in one step, and the composer's
+     own edge has moved 200px down the page - the descent is the room the headline handed over, and no more.
+     The middle term is what the viewport has left once the bar and the pitch are paid for, not a percentage,
+     because a percentage of a short window is still too tall for that window: the 420px is that fixed part
+     with the full pitch on screen, measured at 1440x1000 and again at 1440x780 (which is how the first
+     estimate of 360 was caught being 40 short) - 72px bar, the intro at its tallest, the padding and the air
+     under it. */
   .deck {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: clamp(calc(18rem + 2rem * var(--engage)), calc(100vh - (420px - 200px * var(--engage))), calc(36rem + 10rem * var(--engage)));
+    height: clamp(calc(18rem + 2rem * var(--engage)), calc(100vh - (420px - 200px * var(--engage))), calc(20rem + 26rem * var(--engage)));
   }
 
   /* Bay label: name and count as one line, the count in brackets and dim - 2c's reel labels. */
@@ -698,13 +705,15 @@
      rather than the hero keeping its air. The lede keeps every word and loses its leading instead. These
      are the same ends as the rules above - at --engage 1 both read 18px/14px of padding, a 34px headline
      and clamp(20rem, 100vh - 220px, 46rem) - so the ramp arrives in the same place from either starting
-     point, which is what the checker measures at 1440x780. */
+     point, which is what the checker measures at 1440x780. The empty end is the same 20rem as the rule
+     above, because the panel the box lines up with is the same height at either window; what this query
+     changes is how much room is left over once the pitch has taken its share. */
   @media (max-height: 840px) {
     .intro { padding-block: calc(22px - 4px * var(--engage)) calc(16px - 2px * var(--engage)); }
     .intro h1 { font-size: clamp(calc(28px - 4px * var(--engage)), calc(4.2vw - 1.8vw * var(--engage)), calc(46px - 12px * var(--engage))); }
     .lede { margin-top: calc(12px - 12px * var(--engage)); font-size: 15px; }
     .workspace { padding-block: 18px 0; }
-    .deck { height: clamp(calc(17rem + 3rem * var(--engage)), calc(100vh - (350px - 130px * var(--engage))), calc(34rem + 12rem * var(--engage))); }
+    .deck { height: clamp(calc(17rem + 3rem * var(--engage)), calc(100vh - (350px - 130px * var(--engage))), calc(20rem + 26rem * var(--engage))); }
   }
   @media (max-width: 520px) {
     /* A phone has no Enter key, so the keyboard hint is not advice there - it is noise in the foot of
