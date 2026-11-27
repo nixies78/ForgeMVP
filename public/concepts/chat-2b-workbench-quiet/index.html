@@ -46,6 +46,11 @@
        about itself (a tag, a falloff, the far end of a progress rail). */
     --accent: #33BFFF;
     --accent-2: #868AFD;
+    /* Recording red: --color-palette-red-300 from the same Epic palette the rest of the set draws on,
+       the value the blueprint page stamps with. It is the only red on this page and it belongs to the
+       microphone alone, because "this is listening" has to read as a state rather than as another
+       action competing with Send. */
+    --rec: #BA4545;
     --ease: cubic-bezier(.2, .7, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -249,6 +254,29 @@
     padding: 13px 22px;
     gap: 10px;
   }
+  /* The microphone stands to the left of Send at exactly its height, and it is a state rather than an
+     action: pressed, the key turns red-300 and the capsule becomes a stop square, because a key that
+     only changes shape when it is listening is a key nobody notices listening. Nothing is recorded -
+     this is a mockup - so the key reports its own state and stops there.
+     Two measurements are baked into the numbers below, both from the checker rather than from the eye: a
+     17px glyph is the size a microphone reads at in a 44px key, and 12.5px of padding - not 13 - is what
+     makes the key exactly as tall as Send, whose own 1.05em arrow rounds its line box up to 16px. */
+  .composer-foot .mic { font-size: 15px; padding: 12.5px; }
+  .composer-foot .mic svg { width: 17px; height: 17px; }
+  .composer-foot .mic[aria-pressed="true"] {
+    color: #2A0C0C;
+    text-shadow: none;
+    border-color: #7A3030;
+    background: linear-gradient(180deg, #D76A6A 0%, var(--rec) 52%, #9C3A3A 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .5),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #6E2A2A,
+      0 7px 12px -2px rgba(186, 69, 69, .4);
+  }
+  .composer-foot .mic .ico-stop { display: none; }
+  .composer-foot .mic[aria-pressed="true"] .ico-mic { display: none; }
+  .composer-foot .mic[aria-pressed="true"] .ico-stop { display: block; }
   /* "Answers owed" carries, as a tooltip, the sentence that used to sit under the chat box. The plain
      hint says the numbers; the sentence that explains where the answers go is there when asked for. */
   .owed {
@@ -636,6 +664,16 @@
               Answers owed: <b id="owed">2</b>
               <span class="owed-body" id="owedBody" role="tooltip">2 open questions are waiting in <b>Your design</b> - they are answerable from here or from the panel.</span>
             </span>
+            <!-- Dictation, in the mockup's sense: the key changes state, nothing records. -->
+            <button class="key key-key mic" id="mic" type="button" aria-pressed="false" aria-label="Dictate your message" title="Dictate your message">
+              <svg class="ico-mic" viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M6 1.5a1.55 1.55 0 0 1 1.55 1.55v2.6a1.55 1.55 0 0 1-3.1 0v-2.6A1.55 1.55 0 0 1 6 1.5Z" fill="none" stroke="currentColor" stroke-width="1.25"/>
+                <path d="M2.9 5.75a3.1 3.1 0 0 0 6.2 0M6 8.85v1.65" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+              </svg>
+              <svg class="ico-stop" viewBox="0 0 12 12" aria-hidden="true">
+                <rect x="2.7" y="2.7" width="6.6" height="6.6" rx="1.5" fill="currentColor"/>
+              </svg>
+            </button>
             <button class="key key-primary send" id="send" type="submit" disabled>
               Send
               <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -759,6 +797,7 @@
     const owed = document.getElementById('owed');
     const owedWrap = document.getElementById('owedWrap');
     const owedBody = document.getElementById('owedBody');
+    const mic = document.getElementById('mic');
     const state = document.getElementById('state');
     const build = document.getElementById('build');
     const status = document.getElementById('status');
@@ -871,6 +910,17 @@
       say.focus();
       send.disabled = false;
       grow();
+    });
+
+    /* The microphone. It reports being on - red key, stop square, its own accessible name - and does
+       nothing else, because there is nothing behind it in a mockup. What it must not do is pretend:
+       no transcript turn, no listening text, no fake waveform. */
+    mic.addEventListener('click', function () {
+      const listening = mic.getAttribute('aria-pressed') === 'true';
+      mic.setAttribute('aria-pressed', listening ? 'false' : 'true');
+      mic.setAttribute('aria-label', listening ? 'Dictate your message' : 'Stop dictating');
+      mic.title = listening ? 'Dictate your message' : 'Stop dictating';
+      say.focus();
     });
 
     /* A tap answer on a message is a message. */
