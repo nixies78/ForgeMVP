@@ -35,7 +35,9 @@
     .sheet figcaption b { color: #fff; }
     /* One page per row, big enough to read. Side by side, a 1191px page was scaled into about 260px
      * and every caption became illegible: the preview was fine and the page showing it was not. */
-    .sheet { max-width: 900px; }
+    /* Fills the shared `.wrap` column, which is 1136px, so the 1191px raster is shown at very nearly one
+     * image pixel per screen pixel. A page of 7pt text shown at 900px was legible but soft. */
+    .sheet { max-width: none; }
     .sheet .full { display: inline-block; margin-top: 7px; font-size: 13px; font-weight: 700; }
     .spread { display: block; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }

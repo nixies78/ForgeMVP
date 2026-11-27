@@ -98,7 +98,12 @@ export function ledgerRowHeight(row) {
 
 export function renderSprint(model, options = {}) {
   const palette = PALETTES.sprint;
-  const footer = (page, total) => drawFooter(page, model, palette, { total, label: 'Sprint Pack' });
+  /* The page total arrives on the renderer's second pass. It used to be shadowed further down by
+   * `const total = sequence.length`, which is the number of rows in the cover's contents table and not
+   * the number of pages — so the footer read "2 / 0" on every page of a nine-page document. It looked
+   * like a rendering fault and was a variable named for one thing and holding another. */
+  const { total = null } = options;
+  const footer = (page) => drawFooter(page, model, palette, { total, label: 'Sprint Pack' });
 
   /* ============================== plan the page sequence ==============================
    * The sequence is decided before any page object exists, because the cover prints a contents table
@@ -146,7 +151,6 @@ export function renderSprint(model, options = {}) {
     { id: 'order', title: 'Build order', note: `${model.steps.length} steps`, page: afterLedger + 2 },
     { id: 'gaps', title: 'Open items', note: 'what this pack does not cover', page: afterLedger + 3 }
   ];
-  const total = sequence.length;
 
   const pages = [];
 
@@ -286,7 +290,7 @@ export function renderSprint(model, options = {}) {
         label: 'cover caveat'
       });
 
-      footer(page, total);
+      footer(page);
     }
   });
 
@@ -375,7 +379,7 @@ export function renderSprint(model, options = {}) {
           }
         });
 
-        footer(page, total);
+        footer(page);
       }
     });
   });
@@ -419,7 +423,7 @@ export function renderSprint(model, options = {}) {
         }
         y += 10;
         drawLedgerSlice(page, slice, palette, y);
-        footer(page, total);
+        footer(page);
       }
     });
   });
@@ -529,7 +533,7 @@ export function renderSprint(model, options = {}) {
         });
       }
 
-      footer(page, total);
+      footer(page);
     }
   });
 
@@ -611,7 +615,7 @@ export function renderSprint(model, options = {}) {
         colY[target] += height + 10;
       });
 
-      footer(page, total);
+      footer(page);
     }
   });
 
@@ -712,7 +716,7 @@ export function renderSprint(model, options = {}) {
         });
       });
 
-      footer(page, total);
+      footer(page);
     }
   });
 
@@ -759,7 +763,7 @@ export function renderSprint(model, options = {}) {
         }
       );
 
-      footer(page, total);
+      footer(page);
     }
   });
 

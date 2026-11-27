@@ -20,9 +20,15 @@ import zlib from 'node:zlib';
 import { measure, FACES } from './pdf.mjs';
 import { glyphPolylines, strokeWeight } from './font.mjs';
 
-/** Immutable-ish character grid covering one page, in a scale chosen by the caller. */
+/**
+ * One page of a PDF as a PNG.
+ *
+ * `background` is paper: three floats in 0..1, matching a PDF `rg` operator. It defaults to white,
+ * which is what an A4 sheet is and what every page here assumes — the structures draw dark rules and
+ * dark text and never paint a page background, so the paper is whatever the viewer provides.
+ */
 export function renderPdfPageToPng(bytes, pageIndex, options = {}) {
-  const { scale = 2, background = [255, 255, 255] } = options;
+  const { scale = 2, background = [1, 1, 1] } = options;
   const s = bytes.toString('latin1');
 
   /* ---- page box ---- */
@@ -158,14 +164,48 @@ function interpret(content, canvas, box, scale) {
 
 /* ----------------------------------- painting ----------------------------------- */
 
-function paintPath(canvas, path, fill, stroke, lineWidth, box, scale) {
+/**
+ * Flatten a path into a polyline in canvas space, cursor-following and all.
+ *
+ * Shared by the filler and the stroker so a shape's outline and its interior cannot disagree — which is
+ * the class of bug that produced a hollow rounded rectangle where a filled one was drawn.
+ */
+function flattenPath(path, box, scale) {
   const toScreenX = (x) => x * scale;
   const toScreenY = (y) => (box.h - y) * scale;
+  const points = [];
+  let cursor = null;
 
+  for (const seg of path) {
+    if (seg.op === 'm') {
+      cursor = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
+      points.push(cursor);
+    } else if (seg.op === 'l' && cursor) {
+      cursor = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
+      points.push(cursor);
+    } else if (seg.op === 'c' && cursor) {
+      /* Flattened into 12 straight segments. At 3x on an A4 page a corner is under four pixels wide, so
+       * the difference between this and a true cubic is not visible. */
+      const c1 = { x: toScreenX(seg.x1), y: toScreenY(seg.y1) };
+      const c2 = { x: toScreenX(seg.x2), y: toScreenY(seg.y2) };
+      const to = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
+      let prev = cursor;
+      for (let i = 1; i <= 12; i += 1) {
+        const pt = cubicAt(cursor, c1, c2, to, i / 12);
+        points.push(pt);
+        prev = pt;
+      }
+      cursor = to;
+    }
+  }
+  return points;
+}
+
+function paintPath(canvas, path, fill, stroke, lineWidth, box, scale) {
   if (path.length === 1 && path[0].op === 're') {
     const r = path[0];
-    const x0 = toScreenX(r.x);
-    const y0 = toScreenY(r.y + r.h);
+    const x0 = r.x * scale;
+    const y0 = (box.h - (r.y + r.h)) * scale;
     const w = r.w * scale;
     const h = r.h * scale;
     if (fill) canvas.fillRect(x0, y0, w, h, fill);
@@ -173,30 +213,15 @@ function paintPath(canvas, path, fill, stroke, lineWidth, box, scale) {
     return;
   }
 
-  /* Everything else is a polyline of line segments and cubics, which covers the rules, the connectors
-   * and the rounded rectangles the three structures draw. */
-  let cursor = null;
-  for (const seg of path) {
-    if (seg.op === 'm') {
-      cursor = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
-    } else if (seg.op === 'l' && cursor) {
-      const to = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
-      canvas.line(cursor.x, cursor.y, to.x, to.y, stroke || fill, Math.max(1, lineWidth * scale));
-      cursor = to;
-    } else if (seg.op === 'c' && cursor) {
-      /* Flattened into 12 straight segments. At 2x on an A4 page a corner is under three pixels wide,
-       * so the difference between this and a true cubic is not visible. */
-      const c1 = { x: toScreenX(seg.x1), y: toScreenY(seg.y1) };
-      const c2 = { x: toScreenX(seg.x2), y: toScreenY(seg.y2) };
-      const to = { x: toScreenX(seg.x), y: toScreenY(seg.y) };
-      let prev = cursor;
-      for (let i = 1; i <= 12; i += 1) {
-        const t = i / 12;
-        const pt = cubicAt(cursor, c1, c2, to, t);
-        canvas.line(prev.x, prev.y, pt.x, pt.y, stroke || fill, Math.max(1, lineWidth * scale));
-        prev = pt;
-      }
-      cursor = to;
+  /* Everything else is a polyline of line segments and cubics: the rules, the connectors, the arrows,
+   * and the rounded rectangles. Those last ones carry both a fill and a stroke, so both are honoured
+   * here rather than only the stroke. */
+  const points = flattenPath(path, box, scale);
+
+  if (fill && points.length >= 3) canvas.fillPolygon(points, fill);
+  if (stroke) {
+    for (let i = 0; i + 1 < points.length; i += 1) {
+      canvas.line(points[i].x, points[i].y, points[i + 1].x, points[i + 1].y, stroke, Math.max(1, lineWidth * scale));
     }
   }
 }
@@ -264,8 +289,23 @@ const FACE_BY_NAME = {
 
 /* ------------------------------------- canvas ------------------------------------- */
 
-class Canvas {
-  constructor(width, height, background) {
+/**
+ * A page raster: a flat RGB buffer, `width * height * 3` bytes, with the paper already laid down.
+ *
+ * Exported so a test can assert the paper colour reaches the pixels, which is not a hypothetical: every
+ * preview was reviewed for a while with the page rendering on **near-black instead of white**.
+ *
+ * The colours here are the writer's own: three floats in 0..1, the same form as a PDF `rg` operator and
+ * the same form `blend` takes. They used to be 0..255 while the constructor scaled them as though they
+ * were 0..1, so white arrived as `255 * 255 = 65025` and a `Buffer` — which truncates rather than
+ * clamping — stored byte `1`. The paper was `rgb(1,1,1)`, the text was drawn over it in white and dark
+ * greys, and the pages read as black with faint light lettering. Nothing failed, because a very dark
+ * grey is a perfectly valid raster.
+ *
+ * One unit for the whole module now, and it is the unit the content stream already uses.
+ */
+export class Canvas {
+  constructor(width, height, background = [1, 1, 1]) {
     this.width = width;
     this.height = height;
     this.pixels = Buffer.alloc(width * height * 3);
@@ -279,6 +319,62 @@ class Canvas {
 
   set(x, y, colour) {
     this.blend(Math.round(x), Math.round(y), colour, 1);
+  }
+
+  /**
+   * Fill a closed polygon, anti-aliased, by sampling each pixel's centre against the shape.
+   *
+   * This exists because `paintPath` only ever *filled* a bare `re`. Everything with a corner radius —
+   * `roundRect`, which the brief's loop-entry box and the sprint pack's phase chips use — arrives as
+   * moveto/lineto/curveto, and for those the old code took the `stroke || fill` branch and stroked the
+   * outline instead. The result was a hollow box where the design called for a filled dark one, drawn in
+   * the fill colour at a default line width. It looked like a deliberate white panel with a dark border,
+   * which is exactly why it survived a review.
+   *
+   * Winding by crossing count, which is correct for the simple convex shapes drawn here and costs one
+   * pass over the segments per row.
+   */
+  fillPolygon(points, colour) {
+    if (points.length < 3) return;
+    let minY = Infinity;
+    let maxY = -Infinity;
+    for (const p of points) {
+      if (p.y < minY) minY = p.y;
+      if (p.y > maxY) maxY = p.y;
+    }
+    const y0 = Math.max(0, Math.floor(minY));
+    const y1 = Math.min(this.height - 1, Math.ceil(maxY));
+
+    for (let py = y0; py <= y1; py += 1) {
+      const cy = py + 0.5;
+      const crossings = [];
+      for (let i = 0; i < points.length; i += 1) {
+        const a = points[i];
+        const b = points[(i + 1) % points.length];
+        if (a.y === b.y) continue;
+        const lo = a.y < b.y ? a : b;
+        const hi = a.y < b.y ? b : a;
+        if (cy < lo.y || cy >= hi.y) continue;
+        /* Horizontal position where this edge crosses the sample row. */
+        crossings.push(lo.x + ((cy - lo.y) / (hi.y - lo.y)) * (hi.x - lo.x));
+      }
+      if (!crossings.length) continue;
+      crossings.sort((m, n) => m - n);
+
+      for (let i = 0; i + 1 < crossings.length; i += 2) {
+        /* Span between a pair of crossings, with the ends anti-aliased over one pixel. */
+        const spanFrom = crossings[i];
+        const spanTo = crossings[i + 1];
+        const first = Math.max(0, Math.floor(spanFrom));
+        const last = Math.min(this.width - 1, Math.ceil(spanTo) - 1);
+        for (let px = first; px <= last; px += 1) {
+          const left = Math.max(px, spanFrom);
+          const right = Math.min(px + 1, spanTo);
+          const coverage = right - left;
+          if (coverage > 0) this.blend(px, py, colour, coverage);
+        }
+      }
+    }
   }
 
   /**

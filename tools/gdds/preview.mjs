@@ -52,6 +52,8 @@ function main() {
       : [0];
   const outIndex = args.indexOf('--out');
   const outDir = outIndex >= 0 ? args[outIndex + 1] : path.join(ROOT, '.scratch', 'gdd', 'preview');
+  const scaleIndex = args.indexOf('--scale');
+  const scale = scaleIndex >= 0 ? Number.parseFloat(args[scaleIndex + 1]) : 3;
 
   useMetrics(measure);
   mkdirSync(outDir, { recursive: true });
@@ -95,7 +97,7 @@ function main() {
       const prefix = FILE_PREFIX[result.id] || result.id;
       for (const pageIndex of wantedPages) {
         if (pageIndex >= result.pages) continue;
-        const png = renderPdfPageToPng(result.bytes, pageIndex, { scale: 2 });
+        const png = renderPdfPageToPng(result.bytes, pageIndex, { scale });
         const file = path.join(outDir, `${prefix}-p${pageIndex + 1}.png`);
         writeFileSync(file, png);
         console.log(`  image: ${path.relative(ROOT, file)} (${(png.length / 1024).toFixed(0)} KB)`);

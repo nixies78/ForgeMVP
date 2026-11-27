@@ -34,7 +34,10 @@
     .sheet figcaption { margin-top: 9px; color: #ACACAD; font-size: 14px; }
     .sheet figcaption b { color: #fff; }
     /* Wide enough to read. The whole point of showing a page is that its text can be read on it. */
-    .solo { max-width: 900px; }
+    /* Fills the shared `.wrap` column, which is 1136px, so the 1191px raster is shown at very nearly
+     * one image pixel per screen pixel. A page of 7pt text shown at 900px was legible but soft, and the
+     * whole point of showing a page is that its text can be read on it. */
+    .solo { max-width: none; }
     .sheet .full { display: inline-block; margin-top: 7px; font-size: 13px; font-weight: 700; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
     .box { padding: 18px 20px; background: #18181C; border: 1px solid #303034; border-radius: 12px; }

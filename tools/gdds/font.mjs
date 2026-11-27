@@ -376,12 +376,19 @@ export function glyphPolylines(ch, x, advance, baselineY, size) {
  * Taken from the face's real stem-to-size ratio rather than a constant, so a bold run reads as bolder
  * than a regular one in the preview — which matters, because half these structures' hierarchy is
  * carried by weight alone.
+ *
+ * The ratios are deliberately a little above Helvetica's real ones (about 0.055 of the size for a
+ * regular stem at text weights). A stroke narrower than a pixel never reaches full coverage, so a glyph
+ * drawn at 7.4pt over a 456pt measure came out as grey-on-white rather than ink-on-paper: every stem was
+ * a soft edge with no core, and a page of it read as though the raster were at half the resolution it
+ * actually was. That is the "still low res" the previews were reported as. Matching the metric exactly
+ * is the wrong target here — the target is that a stem has a solid middle at the size the text is set.
  */
 export function strokeWeight(faceFamily, faceStyle, size) {
   const bold = faceStyle === 'bold' || faceStyle === 'boldItalic';
-  if (faceFamily === 'courier') return bold ? Math.max(1, size * 0.115) : Math.max(1, size * 0.075);
-  if (faceFamily === 'times') return bold ? Math.max(1, size * 0.1) : Math.max(0.9, size * 0.055);
-  return bold ? Math.max(1.1, size * 0.105) : Math.max(1, size * 0.062);
+  if (faceFamily === 'courier') return bold ? Math.max(1.1, size * 0.13) : Math.max(1, size * 0.09);
+  if (faceFamily === 'times') return bold ? Math.max(1.1, size * 0.115) : Math.max(1, size * 0.07);
+  return bold ? Math.max(1.3, size * 0.125) : Math.max(1, size * 0.085);
 }
 
 /** How many characters this font can draw. Used by the tests. */

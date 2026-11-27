@@ -20,7 +20,7 @@ import zlib from 'node:zlib';
 
 import { measure, wrap, blockHeight, FACES, toWinAnsi, buildPdf } from '../tools/gdds/pdf.mjs';
 import { glyphPolylines, strokeWeight, hasGlyph, glyphCount } from '../tools/gdds/font.mjs';
-import { renderPdfPageToPng } from '../tools/gdds/png.mjs';
+import { renderPdfPageToPng, Canvas } from '../tools/gdds/png.mjs';
 import { validatePdf, pdfPlainText } from '../tools/gdds/validate.mjs';
 import { extractRuns, auditPdf, useMetrics } from '../tools/gdds/audit.mjs';
 import { PAGE, M, CONTENT_WIDTH, PALETTES } from '../tools/gdds/kit.mjs';
@@ -46,6 +46,20 @@ const model = createDocModel({ dataset, ...SAMPLE_DESIGN });
 const built = STRUCTURES.map((structure) => [structure, buildStructure(structure, model)]);
 
 const digest = (bytes) => createHash('sha256').update(bytes).digest('hex');
+
+/**
+ * One pixel of a rendered page, as `[r, g, b]`.
+ *
+ * The previews went a long way with every page drawn on near-black paper and no test that looked at a
+ * single pixel, so these assertions read the raster rather than the code that produced it.
+ */
+const decodePixel = (png, x, y) => {
+  const ihdr = png.indexOf('IHDR');
+  const width = png.readUInt32BE(ihdr + 4);
+  const raw = zlib.inflateSync(png.subarray(png.indexOf('IDAT') + 4, png.lastIndexOf('IEND') - 4));
+  const i = y * (width * 3 + 1) + 1 + x * 3;
+  return [raw[i], raw[i + 1], raw[i + 2]];
+};
 
 /* -------------------------------------------------------------------------------------------- */
 /* Metrics                                                                                       */
@@ -734,23 +748,32 @@ test('a rendered page is a valid PNG of the expected size', () => {
 test('a rendered page is not blank, and its ink is where the text is', () => {
   /* The check that the rasteriser actually drew something. A page of a real document that came back
    * uniformly background would be the worst failure mode of all: a preview that silently shows nothing
-   * while every other test passes. */
+   * while every other test passes.
+   *
+   * The threshold is low because dense text still covers well under one per cent of an A4 page, and the
+   * figures here moved by a factor of twenty when the paper was fixed — every pixel used to count as
+   * ink, because the "paper" was rgb(1,1,1). "Dark" meant "not the background" only by accident. */
   const [, sprint] = built[1];
   const png = renderPdfPageToPng(sprint.bytes, 1, { scale: 1 });
   const inflated = zlib.inflateSync(png.subarray(png.indexOf('IDAT') + 4, png.lastIndexOf('IEND') - 4));
   let dark = 0;
   let light = 0;
+  let darkest = 255;
   for (let row = 0; row < PAGE.height; row += 1) {
     for (let col = 0; col < PAGE.width; col += 1) {
       const i = row * (PAGE.width * 3 + 1) + 1 + col * 3;
       const luma = (inflated[i] + inflated[i + 1] + inflated[i + 2]) / 3;
+      if (luma < darkest) darkest = luma;
       if (luma < 128) dark += 1;
       else light += 1;
     }
   }
   const total = dark + light;
-  assert.ok(dark / total > 0.005, `page 2 of the Sprint Pack is ${(dark / total) * 100}% ink — it looks blank`);
-  assert.ok(light / total > 0.5, 'a page should still be mostly paper');
+  assert.ok(dark / total > 0.0005, `page 2 of the Sprint Pack is ${((dark / total) * 100).toFixed(2)}% ink — it looks blank`);
+  assert.ok(light / total > 0.9, `a page should be mostly paper, it is ${((light / total) * 100).toFixed(0)}% light`);
+  /* And the ink reaches real ink: a stem with a solid middle, not a grey smudge. Sampled many times
+   * over, so this is the minimum, which is what "does any glyph reach full weight" asks. */
+  assert.ok(darkest < 90, `the darkest pixel on the page is luma ${darkest} — the text never reaches ink`);
 });
 
 test('measure answers the same width for a character and for the byte it is encoded to', () => {
@@ -888,6 +911,98 @@ test('the Brief reads the pitch facts as facts, not as one comma-joined string',
     model.pitch.facts.length,
     'the joined line should carry every fact'
   );
+});
+
+test('the paper is white, in the unit the painter actually uses', () => {
+  /* Every preview was reviewed for a while with the page rendering on near-black instead of white. The
+   * canvas took colours as 0..1 — the same form as a PDF `rg` — but its callers passed 0..255, so white
+   * arrived as 255 * 255 = 65025 and a `Buffer`, which truncates rather than clamping, stored byte 1.
+   * The paper was rgb(1,1,1) and the text was drawn over it in white and dark greys.
+   *
+   * Nothing failed, because a very dark grey is a perfectly valid raster, and no assertion anywhere
+   * looked at a pixel. This one does. */
+  const paper = new Canvas(4, 3);
+  assert.deepEqual([...paper.pixels], new Array(4 * 3 * 3).fill(255), 'the default paper is not white');
+
+  const explicit = new Canvas(2, 1, [1, 1, 1]);
+  assert.deepEqual([...explicit.pixels], [255, 255, 255, 255, 255, 255]);
+
+  /* And the same through the public entry point, because that is where the wrong unit was passed. */
+  const { bytes } = buildPdf({
+    title: 'paper',
+    pages: [{ name: 'p', width: 40, height: 30, limit: 20, draw: (p) => p.text(2, 2, '.', { face: 'regular', size: 3, colour: '0 0 0' }) }]
+  });
+  const png = renderPdfPageToPng(bytes, 0, { scale: 1 });
+  const corner = decodePixel(png, 0, 0);
+  assert.deepEqual(corner, [255, 255, 255], `a blank corner came out rgb(${corner.join(',')})`);
+});
+
+test('a filled shape with curved corners is filled, not just outlined', () => {
+  /* `paintPath` only ever filled a bare `re`. A `roundRect` arrives as moveto/lineto/curveto, so it took
+   * the stroke branch and drew its outline in the fill colour at a default line width — a hollow box
+   * where the design called for a solid dark one, which reads as a deliberate white panel and therefore
+   * survived a review. */
+  const canvas = new Canvas(40, 20, [1, 1, 1]);
+  canvas.fillPolygon(
+    [
+      { x: 5, y: 5 },
+      { x: 35, y: 5 },
+      { x: 35, y: 15 },
+      { x: 5, y: 15 }
+    ],
+    [0, 0, 0]
+  );
+  let black = 0;
+  for (let i = 0; i < canvas.pixels.length; i += 3) if (canvas.pixels[i] === 0) black += 1;
+  /* Pixel centres from 5.5 to 34.5 across and 5.5 to 14.5 down: 30 by 10. */
+  assert.equal(black, 300, `the interior is ${black} pixels, expected the whole 30x10 span`);
+
+  /* Through the real path: a rounded rectangle comes out darker in the middle than at an unfilled spot. */
+  const { bytes } = buildPdf({
+    title: 'roundrect',
+    pages: [
+      {
+        name: 'p',
+        width: 200,
+        height: 120,
+        limit: 110,
+        draw(p) {
+          p.roundRect(20, 40, 120, 34, 4, { fill: '0.1 0.14 0.18' });
+          p.text(24, 46, 'Spawn In', { face: 'bold', size: 8, colour: '1 1 1' });
+        }
+      }
+    ]
+  });
+  const png = renderPdfPageToPng(bytes, 0, { scale: 1 });
+  /* Sampled in the middle of the shape rather than near an edge, so the rounded corners and the
+   * anti-aliased boundary are both out of the way: the box is 20..140 across and, on screen,
+   * 46..80 down, but the point of the test is the interior, not the boundary. */
+  const inside = decodePixel(png, 80, 63);
+  const outside = decodePixel(png, 180, 63);
+  assert.ok(inside[0] < 100, `the box interior is rgb(${inside.join(',')}) — it was not filled`);
+  assert.deepEqual(outside, [255, 255, 255], 'the space beside the box should be bare paper');
+});
+
+test('every page says how many pages there are', () => {
+  /* The Sprint Pack's footer read "2 / 0" on every page. The total is passed in on the renderer's
+   * second pass, but a `const total = sequence.length` further down the function shadowed it — the
+   * number of rows in the cover's contents table, and 0 for a document whose cover has no table yet.
+   * A variable named for one thing and holding another, presented as a rendering fault. */
+  for (const [structure, result] of built) {
+    const numbers = result.text.split('\n').filter((line) => /^\d+ \/ \d+$/.test(line));
+    assert.equal(
+      numbers.length,
+      result.pages,
+      `${structure.meta.name} prints ${numbers.length} page numbers across ${result.pages} pages`
+    );
+    for (const [i, label] of numbers.entries()) {
+      assert.equal(
+        label,
+        `${i + 1} / ${result.pages}`,
+        `${structure.meta.name} page ${i + 1} says ${JSON.stringify(label)}`
+      );
+    }
+  }
 });
 
 test('plain text extraction round-trips the document', () => {

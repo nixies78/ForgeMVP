@@ -39,7 +39,9 @@
      * 260px and made every caption illegible — the preview was fine and the page showing it was not.
      * A design document is read one page at a time, so the layout now does that: full column width, and
      * a link to the PNG at its own size for anything still too small. */
-    .sheet { max-width: 900px; }
+    /* Fills the shared `.wrap` column, which is 1136px, so the 1191px raster is shown at very nearly one
+     * image pixel per screen pixel. A page of 7pt text shown at 900px was legible but soft. */
+    .sheet { max-width: none; }
     .sheet .full { display: inline-block; margin-top: 7px; font-size: 13px; font-weight: 700; }
     .spread { display: block; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
