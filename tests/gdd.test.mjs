@@ -846,6 +846,50 @@ test('a paragraph never draws two of its lines at the same height', () => {
   }
 });
 
+test('the Brief reads the pitch facts as facts, not as one comma-joined string', () => {
+  /* `model.pitch.facts` is an **array**. The Brief passed it through `String()` before splitting it on
+   * the middle dot the model uses, so `['Surviving', 'Together against the game', …]` became
+   * `"Surviving,Together against the game,…"`, the split found nothing, the whole row came back as one
+   * element, and every positional read was wrong. The page said:
+   *
+   *   PLAYERS · SESSION   "Surviving, Together against the game, 2–4, Rooms and corridors, 15–45 minutes"
+   *
+   * which wrapped to two lines and read as five unrelated things. Asserted on the label/value pairs the
+   * page actually prints, because the bug was invisible in the source and visible instantly on the page. */
+  /* The text comes back from the finished PDF as WinAnsi, so the en dash in the expected strings is the
+   * byte `0x96` and not `U+2013`. Comparing in the encoded space keeps the test reading the document
+   * rather than reading its own expectations. */
+  const brief = built[0][1].text;
+  const want = (s) => toWinAnsi(s);
+  assert.ok(
+    !/Surviving,/.test(brief),
+    'the facts were joined with commas and then split on the wrong character'
+  );
+
+  for (const expected of [
+    'PLAYERS',
+    'Together against the game · 2–4',
+    'SESSION',
+    '15–45 minutes',
+    'WHERE IT HAPPENS',
+    'Rooms and corridors',
+    'THE PLAN'
+  ]) {
+    assert.ok(
+      brief.includes(want(expected)),
+      `the Brief never prints ${JSON.stringify(expected)}`
+    );
+  }
+
+  /* And the model's own joined line is what the structure reads, so the two cannot drift. */
+  assert.ok(model.pitchFacts.includes(' · '), 'the model should join the facts with a middle dot');
+  assert.equal(
+    model.pitchFacts.split(' · ').length,
+    model.pitch.facts.length,
+    'the joined line should carry every fact'
+  );
+});
+
 test('plain text extraction round-trips the document', () => {
   /* `built` is a list of `[structure, result]` pairs, so the Sprint Pack's result is the second element
    * of the second pair — `[, sprint]` would destructure the first pair instead, and then `sprint.bytes`

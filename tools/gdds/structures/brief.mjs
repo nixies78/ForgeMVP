@@ -35,7 +35,6 @@ export const BRIEF_META = {
 export function renderBrief(model, options = {}) {
   const palette = PALETTES.brief;
   const { total = 1 } = options;
-  const P = model.pitch;
 
   return [
     {
@@ -131,7 +130,7 @@ export function renderBrief(model, options = {}) {
          * panel, because three wide cells separated by hairlines read as a data row and a filled box
          * reads as a card. */
         const stripTop = 232;
-        const factCells = buildFactCells(P, model);
+        const factCells = buildFactCells(model.pitchFacts, model);
         const cellWidth = CONTENT_WIDTH / factCells.length;
         const stripHeight = 48;
         page.line(M.left, stripTop, PAGE.width - M.right, stripTop, palette.ink, 1);
@@ -393,8 +392,8 @@ function drawLoopRail(page, model, palette, y) {
  * Never more than three cells: each is a column of 483/n points, and at four or five the longest values
  * in the catalogue stop fitting on one line and eat the strip's height budget.
  */
-function buildFactCells(P, model) {
-  const list = factList(P);
+function buildFactCells(pitchFacts, model) {
+  const list = factList(pitchFacts);
   const session = list.length ? list[list.length - 1] : '';
   const where = list.length >= 2 ? list[list.length - 2] : '';
   const players = list.length >= 2 ? list[1] : '';
@@ -412,18 +411,28 @@ function buildFactCells(P, model) {
   return cells;
 }
 
-function factList(P) {
-  return String((P && P.facts) || '')
+/**
+ * The pitch facts as a list.
+ *
+ * Read from `model.pitchFacts` — the middle-dot joined line the model already builds — rather than from
+ * `model.pitch.facts`. That array was being run through `String()` here, which joins with **commas**:
+ * `['Surviving', 'Together against the game', '2–4', …]` became
+ * `"Surviving,Together against the game,2–4,…"`. The `split('·')` that followed then found nothing to
+ * split, the whole row came back as one element, and every positional read was wrong:
+ *
+ *   `PLAYERS · SESSION`   "Surviving, Together against the game, 2–4, Rooms and corridors, 15–45 minutes"
+ *
+ * which wrapped to two lines and read as a list of five unrelated things. It was the worst line on the
+ * page for as long as it existed, and it was one `String()` call on a value that was already an array.
+ *
+ * Going through `pitchFacts` puts the string/list decision where the rest of the model's formatting
+ * lives, and means this function only has one shape to handle.
+ */
+function factList(pitchFacts) {
+  return String(pitchFacts || '')
     .split('·')
     .map((s) => s.trim())
     .filter(Boolean);
-}
-
-function factAt(facts, index) {
-  const list = String(facts || '')
-    .split('·')
-    .map((s) => s.trim());
-  return list[index] || '—';
 }
 
 function lowerFirst(text) {
