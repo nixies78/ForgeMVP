@@ -361,7 +361,27 @@ Rules for a full mockup - the wireframe rules above, with these differences:
   step, decides its device, moves both gauges and the state chip, and unlocks **Build in UEFN** only when
   nothing is owed. `Build in UEFN` then reports what it sent. Keep it to one small `<script>` with canned
   replies - no model, no network. Hovering **Answers owed** is where the sentence about where answers go
-  lives (a tooltip, not a line of prose under the box).
+  lives (a tooltip, not a line of prose under the box), and a dictation key sits to the left of Send at
+  Send's own height, reporting whether it is listening and nothing more.
+- **The page changes job on the first message.** On load nothing moves and the composer is above the fold:
+  the hero does its full two-line pitch and the tool starts where it starts. The first message the user
+  sends (through any path - the composer, a tap answer, the panel) adds `is-engaged` to the body, and the
+  starter chrome hands its room to the transcript: h1 down to one line at 34px, lede gone, eyebrow kept,
+  the "Conversation (n messages)" label and the quick picks retired, and the fixed page above the deck
+  going from 420px to 220px. At 1440x1000 that is 208px off the hero and 243px onto the transcript, and
+  the composer's own edge moves by less than 50px, which is the point - the conversation gains the room,
+  the controls stay where the hand left them. The trigger is deliberate: a scroll position would fire
+  while someone is only reading the pitch and can leave a page half-applied. Everything that retires is
+  hidden with `visibility: hidden` as well as a collapsed height, so no invisible control stays in the tab
+  order.
+- **A finished count is not an affordance.** **Answers owed** wears the accent while answers are owed -
+  blue means "there is something here for you" everywhere else on this page - and goes inert at zero: no
+  accent, no dotted rule, no help cursor, no tooltip, no place in the tab order. The **Open questions**
+  box leaves the panel entirely when nothing is owed, because it is the one dashed, provisional-looking
+  thing in the panel and cannot also be the thing that says the plan is ready; the state chip, the two
+  gauges, the lit Build in UEFN key and its status line say it, and a fifth statement in a box that still
+  looks unfinished is a receipt. The panel drops from 667px to 436px when the box goes, which is what
+  "the panel is the thing that goes to UEFN" should look like at the end.
 - **Numbers are real, and the mockup shows them only where they are the point.** The stat strip a
   landing page would carry (13 researched game types, 74 drafts, 59 devices) is not on this page: the
   screen's job is the conversation and the panel, and a strip of totals between the pitch and the tool

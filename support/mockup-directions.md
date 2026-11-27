@@ -108,6 +108,20 @@ measuring rather than looking: a gradient surface read as lighter than its reces
 sampled, the composer's bottom landed 20px past the fold at a laptop height, and the transcript opened on
 the oldest turn rather than the newest because Inter loads after the first layout.
 
+A later pass answered a different complaint - the tool was accurate but cramped, and too much of the screen
+was scaffolding rather than work. The page now changes job on the user's first message: the hero gives up
+208px (h1 to one line, lede gone), the "Conversation (n messages)" label and the quick picks retire, and
+the height goes to the transcript, which more than doubles at laptop height. On load nothing moves, and the
+trigger is the first message rather than a scroll position, so the pitch is never cut short mid-read and
+the state cannot stick half-applied. Two smaller corrections came with it, both of them the same mistake in
+different clothes: a control that reports work owed was wearing the accent when the work was *finished*
+(now blue while answers are owed, inert at zero, with no tooltip and no tab stop), and the Open questions
+box stayed on screen after the questions were answered - the one dashed, provisional-looking element in the
+panel, saying the plan was ready. It now leaves when nothing is owed, and the panel drops from 667px to
+436px, which is what the finished state should look like. The same pass found that the listening
+microphone's hover went black: the grey key's hover rule tied with the pressed state on specificity and was
+written later in the file, so a red key turned grey under the pointer it was reached for with.
+
 ## What the chat set deliberately does not settle
 
 The three chat wireframes are the first entry in the set that is about a *mechanism* rather than a
@@ -118,6 +132,32 @@ open for the chat page is a material for C1 or C3 (a launcher's surface for Laun
 for Interview), a full mockup of the phone state of any of them, and any decision at all about what the
 conversation does *after* the plan exists - refine, rebuild or fork. What must not happen is a fourth
 structure that is really one of these three with the shelf moved.
+
+Two things C2b raises are now waiting on the owner rather than on work:
+
+- **What an Answer key should actually do.** Today it is a one-click transaction: the panel writes the
+  user's answer *and* the bot's reply into the transcript in the same move, which is what makes the loop
+  visible in a single click for review. The owner's reading is that this is wrong - pressing Answer should
+  move the question *into the chat*, with the bot asking it and the user answering (a canned answer while
+  there is no model), because a panel that does the user's talking is the one thing this direction claims
+  not to be. Nothing has been changed in that direction: the misfire that let a click on the question text
+  answer it was a plain defect and was fixed, and the shape of the flow is untouched until it is decided.
+  Two shapes are on the table - Answer moves the question into the chat and the canned answer sends itself
+  after a beat, or it moves the question in and pre-fills the composer with the canned answer, unsent, and
+  the reviewer presses Send (the second reuses the rule the quick picks already follow). Either way the
+  panel's "owed" count and the question waiting in the transcript have to become one fact rather than two,
+  and free text arriving where the mockup expects one of N options needs a matcher - which the real data
+  makes natural, since `public/data/uefn_device_logic.json` already gives each question an id, a prompt and
+  options carrying their effects.
+- **The guided demo.** Asked for as a pitch artefact, and deliberately held back until the rest is settled:
+  an overlay explaining that this is a mock and locking the tool until the reviewer starts, canned user
+  messages typed into the box a character at a time with Send dead until the typing stops, the bot's canned
+  reply, and the loop repeating until the script runs out - with the demo starting from *empty* rather than
+  from the mid-flight state the page currently opens on, so the gauges can be watched growing and the open
+  questions disappearing. The page is cheap to demo because it is already a state machine whose reactions
+  exist; what does not exist yet is the sequence, the autotyper and the gate. The open question inside it is
+  whether the demo's starting number of open questions should come from the real per-game-type question
+  lists rather than from a number chosen to look good.
 
 ## What "different" has to mean
 

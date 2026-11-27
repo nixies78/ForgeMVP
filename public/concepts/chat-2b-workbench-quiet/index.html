@@ -49,8 +49,10 @@
     /* Recording red: --color-palette-red-300 from the same Epic palette the rest of the set draws on,
        the value the blueprint page stamps with. It is the only red on this page and it belongs to the
        microphone alone, because "this is listening" has to read as a state rather than as another
-       action competing with Send. */
+       action competing with Send. The lift is the next step up the same palette (red-400), used for the
+       key's hover face the way the blue key goes from #33BFFF to #47C6FF under the pointer. */
     --rec: #BA4545;
+    --rec-lift: #FD5E5E;
     --ease: cubic-bezier(.2, .7, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -277,17 +279,25 @@
   .composer-foot .mic .ico-stop { display: none; }
   .composer-foot .mic[aria-pressed="true"] .ico-mic { display: none; }
   .composer-foot .mic[aria-pressed="true"] .ico-stop { display: block; }
-  /* "Answers owed" carries, as a tooltip, the sentence that used to sit under the chat box. The plain
-     hint says the numbers; the sentence that explains where the answers go is there when asked for. */
+  /* "Answers owed" carries, as a tooltip, the sentence that used to sit under the chat box. It is a count
+     of work outstanding, so it wears the accent while there is work outstanding - blue means "there is
+     something here for you" everywhere else on this page - and it goes inert the moment the count is
+     zero: no accent, no dotted rule, no help cursor, no tooltip and no place in the tab order. Giving a
+     finished count the accent (as an earlier pass did) said "act here" about nothing left to act on. */
   .owed {
     position: relative;
     font-size: 12px;
-    color: var(--muted);
+    color: var(--accent);
     cursor: help;
     padding-bottom: 1px;
-    border-bottom: 1px dotted rgba(255, 255, 255, .22);
+    border-bottom: 1px dotted rgba(51, 191, 255, .45);
   }
   .owed b { color: #fff; font-weight: 700; }
+  /* "border-bottom: 0", not a transparent colour: the finished count has no rule under it rather than an
+     invisible one, which is what "no longer an affordance" has to mean. */
+  .owed.is-done { color: var(--dim); cursor: default; border-bottom: 0; }
+  .owed.is-done b { color: var(--muted); }
+  .owed.is-done .owed-body { display: none; }
   .owed .owed-body {
     position: absolute;
     right: 0; bottom: calc(100% + 10px);
@@ -310,7 +320,6 @@
   }
   .owed:hover .owed-body, .owed:focus-visible .owed-body { opacity: 1; visibility: visible; transform: translateY(0); }
   .owed:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 4px; }
-  .owed.is-clear { color: var(--accent); border-bottom-color: rgba(51, 191, 255, .5); }
 
   /* ---------- The rail: the design, floating beside the conversation ---------- */
   /* Sticky, not stretched. As a grid column of equal height it set the height of the conversation and
@@ -421,15 +430,16 @@
   .step.is-done .txt { color: #fff; }
   .step.is-mine .n { border-style: dashed; }
 
+  /* The questions box is left out entirely once nothing is owed - the script sets [hidden] on it. It is
+     the one dashed, provisional-looking thing in the panel, so it cannot also be the thing that says the
+     plan is finished; the state chip, the two gauges and the Build in UEFN status line all say that, and
+     a fifth statement in a box that still looks unfinished is a receipt rather than a readout. */
   .oq { border: 1px dashed rgba(255, 255, 255, .2); border-radius: 12px; padding: 12px; background: rgba(255, 255, 255, .02); }
   .oq-h { margin: 0 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .oq-h span { color: var(--dim); font-weight: 400; letter-spacing: .02em; text-transform: none; }
   .oq-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 8px; }
   .oq-row + .oq-row { border-top: 1px solid var(--line); margin-top: 8px; }
   .oq-row p { margin: 0; font-size: 13.5px; color: #C9C9CC; }
-  .oq.is-clear { border-color: rgba(51, 191, 255, .5); background: rgba(51, 191, 255, .07); }
-  .oq.is-clear .oq-h { color: var(--accent); }
-  .oq-empty { margin: 0; font-size: 13.5px; color: var(--muted); }
 
   .actions { margin-top: auto; display: grid; gap: 10px; }
   .status { margin: 0; font-size: 12.5px; color: var(--muted); }
@@ -483,6 +493,20 @@
       0 7px 12px -2px rgba(0, 0, 0, .7);
   }
   .key-key:hover:not(:disabled) { color: #fff; background: linear-gradient(180deg, #3E3E48 0%, #2C2C34 52%, #24242B 100%); }
+  /* The listening microphone under the pointer. Without this rule it went black on hover: .key-key:hover
+     is written for the grey key and has the same specificity as the pressed state, so the later rule in
+     this file won and a listening key turned grey when reached for. The lift is a step brighter than the
+     pressed face - red-400 over red-300 - because a key with no brighter state under the pointer reads as
+     broken, which is the same reason the blue key lifts to #47C6FF. Placed before .key:active so that
+     pressing it still sinks the key onto its skirt. */
+  .composer-foot .mic[aria-pressed="true"]:hover:not(:disabled) {
+    background: linear-gradient(180deg, #FF9A9A 0%, var(--rec-lift) 52%, #D95050 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .6),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #7F3030,
+      0 7px 12px -2px rgba(253, 94, 94, .45);
+  }
   /* Pressed: the key sits on the case with no skirt left to fall. */
   .key:active:not(:disabled) { transform: translateY(3px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .45), inset 0 -1px 0 rgba(255, 255, 255, .12), 0 1px 0 rgba(0, 0, 0, .8); }
   /* Unavailable: it fades and keeps its face. A moulded key that flattens under the pointer reads as
@@ -546,6 +570,37 @@
     padding: 7px 11px;
   }
 
+  /* ---------- Once the conversation is under way ---------- */
+  /* The first message from the user is the moment the page changes job: it stops being a pitch with a
+     tool on it and becomes a tool. So the hero gives its height to the transcript - h1 down to one line
+     at 34px, the lede gone, the eyebrow kept so the band is still the same band - and the two pieces of
+     starter chrome retire with it: the "Conversation (n messages)" label, which is bookkeeping the
+     transcript answers by existing, and the quick picks, which only earn their place before the first
+     message.
+     The trigger is the user's first message, not a scroll position: it fires when the user has committed
+     something, it cannot fire while someone is only reading the pitch, and it cannot get stuck
+     half-applied on a page with nothing to scroll. On load nothing moves, which is the point - the page
+     looks the same as it did before this rule until the first Send. The panel and the composer do not
+     move at all; the room goes to the transcript, which is the thing that needed it. */
+  .intro { transition: padding .3s var(--ease); }
+  .intro h1 { transition: font-size .3s var(--ease); }
+  .lede { max-height: 8rem; transition: opacity .22s var(--ease), max-height .3s var(--ease), margin .3s var(--ease); }
+  .col-label, .picks { transition: opacity .22s var(--ease), max-height .3s var(--ease), margin .3s var(--ease), visibility 0s .3s; }
+  .col-label { max-height: 2.5rem; }
+  .picks { max-height: 9rem; }
+  .deck { transition: height .3s var(--ease); }
+
+  body.is-engaged .intro { padding-block: 18px 14px; }
+  body.is-engaged .intro h1 { font-size: clamp(24px, 2.4vw, 34px); }
+  body.is-engaged .intro h1 span { display: inline; }
+  body.is-engaged .lede { opacity: 0; max-height: 0; margin-top: 0; overflow: hidden; }
+  body.is-engaged .col-label,
+  body.is-engaged .picks { opacity: 0; max-height: 0; margin-block: 0; overflow: hidden; visibility: hidden; }
+  /* The height the hero gave up, handed to the conversation: 420px of fixed page above the deck becomes
+     220px. Short windows need no separate rule - with the hero compact, the same subtraction fits a
+     780px-tall window and a 1000px-tall one, which the checker measures at both. */
+  body.is-engaged .deck { height: clamp(20rem, calc(100vh - 220px), 46rem); }
+
   /* ---------- Narrower screens ---------- */
   /* Below 1080px the two bays cannot both be read side by side, so the panel moves under the
      conversation and stops floating. It never moves above the composer: the box is the one thing that
@@ -553,7 +608,9 @@
   @media (max-width: 1080px) {
     .ws-body { grid-template-columns: minmax(0, 1fr); }
     .rail { position: static; }
-    .deck { height: auto; }
+    /* Stacked, the conversation sets its own height from its content - including when engaged, which
+       would otherwise keep the desktop's viewport arithmetic and pin the chat to a fixed height. */
+    .deck, body.is-engaged .deck { height: auto; }
     .msgs { min-height: clamp(16rem, 36vh, 20rem); }
   }
   @media (max-width: 760px) {
@@ -597,7 +654,7 @@
 <main>
   <section class="intro wrap">
     <p class="eyebrow">Chat with AI</p>
-    <h1>Your design fills in<span>while you talk.</span></h1>
+    <h1>Your design fills in <span>while you talk.</span></h1>
     <p class="lede">
       Describe your idea. Forge AI bot will ask some follow-ups and turns the conversation into a
       buildable plan.
@@ -843,7 +900,21 @@
       return bub;
     }
 
-    function say_user(text) { bubbleTurn(escapeText(text), 'me'); }
+    function say_user(text) { engage(); bubbleTurn(escapeText(text), 'me'); }
+
+    /* The first message the user puts into the conversation is the moment the page changes job, so it is
+       also the moment the hero, the count label and the picks hand their room to the transcript (see the
+       .is-engaged rules above). One way in: every path that writes a user turn - the composer, a tap
+       answer on a message, an answer given in the panel - goes through say_user. The re-pin afterwards is
+       for the transcript's own sake: the deck grows under it over 300ms, and a conversation that is at its
+       foot should stay at its foot while that happens. */
+    let engaged = false;
+    function engage() {
+      if (engaged) return;
+      engaged = true;
+      document.body.classList.add('is-engaged');
+      window.setTimeout(function () { if (atFoot()) scroll(); }, 340);
+    }
     function escapeText(text) {
       const span = document.createElement('span');
       span.textContent = text;
@@ -980,21 +1051,22 @@
       }
 
       if (open === 0) {
-        /* The count and the word after it are updated in place rather than rewritten. Replacing the
-           paragraph's HTML would take the #oqCount element out of the document with it, and anything
-           reading the count afterwards - this page included - would find nothing there. */
-        oq.classList.add('is-clear');
+        /* Nothing is owed, so the box goes. The count and the word after it are still updated in place
+           (never rewritten) because the elements stay in the document and are what anything reading this
+           page - the checker included - looks at to know where the panel got to. The box itself is only
+           hidden, not removed: hidden keeps the dashboard's own record of the state while taking the
+           provisional-looking dashed box off the screen entirely. */
+        oq.hidden = true;
         oqCount.textContent = '0';
         oqWord.textContent = 'left - Build in UEFN is unlocked';
-        const note = document.createElement('p');
-        note.className = 'oq-empty';
-        note.textContent = 'Both answers are in the transcript, the devices and the steps.';
-        oq.append(note);
         state.textContent = 'Ready to build';
         state.classList.add('is-ready');
         build.disabled = false;
-        owedWrap.classList.add('is-clear');
-        owedBody.textContent = 'Nothing is owed - Build in UEFN takes the plan as it stands.';
+        /* And the composer's counter goes inert rather than blue: its sentence had a referent only while
+           there was a box in the panel to point at. */
+        owedWrap.classList.add('is-done');
+        owedWrap.removeAttribute('tabindex');
+        owedBody.textContent = '';
         status.innerHTML = 'Ready: <b>6 devices</b>, five steps, one of them yours.';
       }
     });
