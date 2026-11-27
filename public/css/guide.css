@@ -983,6 +983,13 @@ body.g-app {
   border-bottom: 1px solid var(--fn-border);
   color: var(--fn-text);
 }
+/* The rule is what separates one row from the next, so the last row has nothing to separate it from: left
+ * on, it draws a line under the bottom row with nothing under it, which reads as a row that failed to
+ * render. Its matching padding-bottom goes too - that space exists to hold the rule away from the next
+ * term, and with no next term it is just a gap, which would make the panel 12px deeper at the bottom than
+ * at the top. The last row of the list is the last child of the <dl>: every row is a <dt> and its <dd>,
+ * and the Edit button lives inside the <dd>, so the pair cannot be followed by anything else. */
+.g-recap-value:last-child { border-bottom: 0; padding-bottom: 0; }
 .g-recap-value .g-btn { min-height: 32px; padding: 0 var(--fn-space-3); font-size: 13px; }
 
 /* ---------- the layout comparison bar (temporary) ----------
