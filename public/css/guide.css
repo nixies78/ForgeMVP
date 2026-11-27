@@ -699,29 +699,20 @@ body.g-app {
   transform: translateY(calc(var(--fn-lift) * -1));
   box-shadow: var(--fn-shadow-hover-tight);
 }
-.g-brandtile.is-previewing { border-color: var(--fn-text); }
-/* 1.2.2: 1px, like every other chosen box (see .g-choice.is-selected). */
-.g-brandtile.is-chosen { border-color: var(--fn-action); border-width: 1px; }
+/* The preview edge is a browsing cue, not the selection. It used to be the text colour - the brightest
+ * thing on the screen - so the tile the reader had merely clicked looked chosen while nothing was. */
+.g-brandtile.is-previewing { border-color: var(--fn-border-strong); }
+/* 1.2.2: 1px, like every other chosen box (see .g-choice.is-selected). The accent, the fill and the marker
+ * are what carry the state, exactly as they do on the cards two screens earlier. */
+.g-brandtile.is-chosen { border-color: var(--fn-action); border-width: 1px; background: var(--fn-selected); }
 .g-brandlogo { width: 64px; height: 64px; border-radius: 8px; }
 /* 14px rather than the 16px body size: these are labels on a control, and the one the reader compares
  * brands by, so they sit on the same step as the app's own navigation. */
 .g-brandtile-label { font-weight: 600; font-size: var(--fn-nav-size); line-height: 1.35; }
-.g-brandtile-marker {
-  font-size: var(--fn-meta-size);
-  letter-spacing: var(--fn-meta-tracking);
-  text-transform: uppercase;
-  font-weight: 700;
-  background: var(--fn-action);
-  color: var(--fn-on-action);
-  border-radius: 999px;
-  padding: 2px 8px;
-  /* Pinned to the bottom of the tile, so every label starts at the same height down the row and the
-   * marker sits on the baseline of the row rather than floating under a one-line label. */
-  margin-top: auto;
-}
-/* The tile that is not chosen keeps the marker's line, empty: `visibility` holds the space and takes the
- * words out of the accessibility tree, where removing the element would have grown the tile instead. */
-.g-brandtile-marker.is-hidden { visibility: hidden; }
+/* Only the placement is the tile's own: the pill itself is the wizard's shared `.g-choice-marker`. Pinned
+ * to the bottom of the tile, so every label starts at the same height down a row and the marker sits on the
+ * baseline of the row rather than floating under a one-line label. */
+.g-brandtile-marker { margin-top: auto; }
 
 .g-brandhero { width: 100%; aspect-ratio: 8 / 3; margin-bottom: var(--fn-space-4); }
 /* The brand preview's own sentence, among the brand screen's other pieces (.g-brandhero, .g-provides,

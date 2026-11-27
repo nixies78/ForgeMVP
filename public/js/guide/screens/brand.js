@@ -58,16 +58,12 @@ export function renderBrand(ctx) {
               compact: true
             }),
             h('span', { class: 'g-brandtile-label' }, brand.label),
-            /* The marker is always rendered and hidden with `visibility`, rather than left out when the
-             * tile is not chosen: it used to appear only on the chosen tile, so picking a brand grew that
-             * one tile by a badge's height and re-ragged the whole row around it. `visibility: hidden`
-             * also keeps it out of the accessibility tree, so a reader is never told about a marker that
-             * is not shown. */
-            h(
-              'span',
-              { class: `g-brandtile-marker${state.brandKey === brand.id ? '' : ' is-hidden'}` },
-              '✓ Chosen'
-            )
+            /* The wizard's own marker, not a second one of its own: `.g-choice-marker` is the pill the
+             * category and game-type cards wear, and the tile adds nothing to it but its placement. It is
+             * rendered by the chosen tile and by no other - the copy that used to be rendered everywhere
+             * and hidden with `visibility` held a line open in all eight tiles, so every tile stood a
+             * badge taller than the things in it, chosen or not. */
+            state.brandKey === brand.id ? h('span', { class: 'g-brandtile-marker g-choice-marker' }, '✓ Selected') : null
           )
         );
       })

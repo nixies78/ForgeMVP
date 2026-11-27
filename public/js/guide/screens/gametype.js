@@ -74,9 +74,13 @@ export function renderGameType(ctx) {
 function typeBadges(type) {
   if (type.is_custom) {
     return [
+      /* Dashed and unfilled, which is what its two siblings wear: "Basics only" on the category screen and
+       * "Draft — core devices only" a few lines below on this one. It used the accent fill, so the one
+       * chip on the screen that says "this entry is thinner than the others" was also the only blue chip
+       * beside the "✓ Selected" pill. */
       badgeChip({
         text: 'Essentials only',
-        tone: 'accent',
+        tone: 'warn',
         title: 'The essential devices for this category, with no game-type-specific advice.'
       })
     ];
@@ -90,7 +94,11 @@ function typeBadges(type) {
       })
     ];
   }
-  const badges = [badgeChip({ text: 'Researched', tone: 'accent', title: 'Devices, settings and questions are all researched for this type.' })];
+  /* Neutral, like the "N researched" count on the category screen and for the same reason: the accent is
+   * what the selected card wears, and a blue "Researched" chip beside a blue "✓ Selected" pill asks the
+   * reader to tell two identical pills apart. The word carries it, which is what the honesty badges have
+   * always done. */
+  const badges = [badgeChip({ text: 'Researched', tone: 'neutral', title: 'Devices, settings and questions are all researched for this type.' })];
   if (!type.inherits_baseline) badges.push(badgeChip({ text: 'Own device set', tone: 'neutral' }));
   return badges;
 }

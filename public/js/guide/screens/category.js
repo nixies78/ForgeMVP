@@ -67,7 +67,11 @@ export function renderCategory(ctx) {
 
 function categoryBadges(cat) {
   const badges = [];
-  if (cat.researched) badges.push(badgeChip({ text: `${cat.researched} researched`, tone: 'accent' }));
+  /* How much of a category is researched is provenance, not a call to action, so it is stated at the same
+   * weight as the drafts it is counted against. It used to take the accent fill - the one blue the wizard
+   * spends on actions and on the selected card - and sat on that same card beside the "✓ Selected" pill,
+   * where two identical blue pills competed over which of them the reader had chosen. */
+  if (cat.researched) badges.push(badgeChip({ text: `${cat.researched} researched`, tone: 'neutral' }));
   if (cat.baselineOnly) {
     badges.push(
       badgeChip({

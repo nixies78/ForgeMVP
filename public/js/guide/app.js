@@ -371,8 +371,14 @@ function createActions(ctx) {
       navigate(ctx, { screen: 'question', qId });
     },
 
+    /* Clicking a tile chooses the brand, and stays on the screen. It used to only preview it, so the tile
+     * the reader had just clicked wore the preview edge while the wizard's own selected pill never
+     * appeared - and `chooseBrand` sets the key and leaves for the gate in the same statement, so the pill
+     * was unreachable in practice. Selecting on click is what the two screens before this one do; staying
+     * put is what this one does, because the panel below is the reason the reader clicked at all. */
     previewBrand(brandId) {
       state.previewBrandKey = brandId;
+      state.brandKey = brandId;
       renderScreen(ctx);
     },
 

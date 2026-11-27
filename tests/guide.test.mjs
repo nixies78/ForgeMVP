@@ -1544,27 +1544,67 @@ test('every way back in the wizard says Back, and only Back', async () => {
   assert.ok(!/previous:\s*'Previous'/.test(content), 'the old "Previous" label is gone');
 });
 
-test('a brand tile holds the line for its marker whether or not it is the chosen one', async () => {
-  /* The bug: the chosen marker was only rendered on the chosen tile, so picking a brand grew that one tile
-   * by a badge and re-ragged the row around it. Every tile renders the marker, and the ones that are not
-   * chosen keep its space with `visibility`, which also keeps the words out of the accessibility tree. */
+test("a brand tile wears the wizard's own selected marker, and only when it is chosen", async () => {
+  /* Two bugs in one element. The tile reimplemented the pill the cards two screens earlier already have -
+   * `.g-choice-marker` - which let the two drift apart; and it rendered that pill on every tile and hid the
+   * ones that were not chosen with `visibility`, which held a badge's worth of empty line open in all eight
+   * tiles: every tile stood taller than the things inside it, with the same gap above the logo as below the
+   * label. The pill is now the shared one, rendered only by the chosen tile, and `grid-auto-rows: 1fr` is
+   * what keeps the row equal without reserving anything. */
   const source = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'brand.js'), 'utf8');
   assert.match(
     source,
-    /g-brandtile-marker\$\{state\.brandKey === brand\.id \? '' : ' is-hidden'\}/,
-    'the marker is rendered on every tile and hidden on the others'
+    /state\.brandKey === brand\.id \? h\('span', \{ class: 'g-brandtile-marker g-choice-marker' \}, '✓ Selected'\) : null/,
+    'only the chosen tile renders the marker, and it is the wizard\'s own'
+  );
+  assert.ok(!/is-hidden/.test(source), 'no tile holds a line open for a marker that is not there');
+
+  /* Clicking a tile has to choose it, or the marker is unreachable: `chooseBrand` sets the key and leaves
+   * for the gate in the same statement. */
+  const app = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'app.js'), 'utf8');
+  assert.match(
+    app,
+    /previewBrand\(brandId\) \{\s*state\.previewBrandKey = brandId;\s*state\.brandKey = brandId;/,
+    'clicking a tile chooses the brand as well as showing its detail'
   );
 
   const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
   assert.match(ruleBody(css, '.g-brandstrip'), /grid-auto-rows:\s*1fr/, 'every row of the strip is the same height');
   assert.match(ruleBody(css, '.g-brandtile'), /flex:\s*1 1 auto/, 'a tile fills its grid cell, not its own content');
-  assert.match(ruleBody(css, '.g-brandtile-marker'), /margin-top:\s*auto/, 'the marker sits on the bottom of the tile');
-  assert.match(ruleBody(css, '.g-brandtile-marker.is-hidden'), /visibility:\s*hidden/, 'a hidden marker keeps its space');
+  const marker = ruleBody(css, '.g-brandtile-marker');
+  assert.match(marker, /margin-top:\s*auto/, 'the marker sits on the bottom of the tile');
+  assert.ok(!/background:/.test(marker), 'the tile adds placement to the shared pill and nothing else');
+  assert.ok(!/g-brandtile-marker\.is-hidden/.test(css), 'the rule that held the empty line open is gone');
+
+  /* The chosen tile wears what the chosen card wears: the accent edge, the selected fill, the pill. */
+  assert.match(ruleBody(css, '.g-brandtile.is-chosen'), /border-color:\s*var\(--fn-action\)/, 'the chosen tile takes the accent edge');
+  assert.match(ruleBody(css, '.g-brandtile.is-chosen'), /background:\s*var\(--fn-selected\)/, 'and the selected fill');
+  assert.match(
+    ruleBody(css, '.g-brandtile.is-previewing'),
+    /border-color:\s*var\(--fn-border-strong\)/,
+    'the preview edge is a browsing cue, not the selection'
+  );
   assert.match(
     ruleBody(css, '.g-brandtile-label'),
     /font-size:\s*var\(--fn-nav-size\)/,
     'the tile label is set at the navigation size rather than the body size'
   );
+});
+
+test('the honesty counts do not wear the colour of selection', async () => {
+  /* Blue is what the wizard spends on actions and on the selected card. "4 researched", "Researched" and
+   * "Essentials only" all used that fill, on the same card, beside the "✓ Selected" pill - so two identical
+   * blue pills competed over which of them the reader had chosen, when one of them is only provenance. They
+   * now sit at the weight of the drafts they are counted against, and the word carries the difference,
+   * which is what the honesty badges have always done. */
+  const category = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'category.js'), 'utf8');
+  const gametype = await readFile(path.join(PUBLIC_DIR, 'js', 'guide', 'screens', 'gametype.js'), 'utf8');
+  assert.match(category, /badgeChip\(\{ text: `\$\{cat\.researched\} researched`, tone: 'neutral' \}\)/, 'the researched count is a count');
+  assert.match(category, /badgeChip\(\{ text: `\$\{cat\.drafts\} drafts`, tone: 'neutral' \}\)/, 'and so is the drafts count beside it');
+  assert.match(gametype, /badgeChip\(\{ text: 'Researched', tone: 'neutral'/, 'and so is the researched badge on a game type');
+  assert.match(gametype, /text: 'Essentials only',\s*tone: 'warn'/, 'and "Essentials only" wears what its two siblings wear');
+  assert.ok(!/tone: 'accent'/.test(category), 'nothing on the category screen claims the accent');
+  assert.ok(!/tone: 'accent'/.test(gametype), 'nor on the game-type screen');
 });
 
 test('the gate collapses its panels and indexes them from a rail that cannot navigate', async () => {
