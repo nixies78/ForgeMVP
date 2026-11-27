@@ -326,6 +326,38 @@ lost and nothing is hidden behind a wizard.
   the tapping never ends, and a hidden free-text path is a dead end for the user who already knows what
   they want.
 
+## The full mockup that follows the wireframes
+
+Once the owner picks a structure, the next artefact is that structure at full fidelity. The first one is
+Workbench, because its argument (the chat is the process, the design is the product) is the one that a
+greyscale wireframe can only half make: the whole question is whether a live panel beside a conversation
+reads as one workspace or as two windows that happen to be adjacent, and that cannot be judged without
+depth, colour and type.
+
+| page | direction | styling |
+| --- | --- | --- |
+| `chat-2b-workbench-quiet` | Workbench, as a real screen | The page is **Concept 8 (Quiet Power)**: `#101014`, hairlines instead of boxes, Inter Tight with negative tracking, `#33BFFF` for the one action and `#868AFD` for what a machine says about itself. The workspace is **Randomiser 2c (Portrait reels)**: one moulded case, a recessed window under glass, and keys that stand up off the surface and press down onto their skirt. |
+
+Rules for a full mockup - the wireframe rules above, with these differences:
+
+- **It is a screen, not a diagram.** No `.mk`/`.note` annotation layer, no greyscale, no dashed
+  placeholders left as the subject of the page. Annotations come back only if a decision needs arguing.
+- **The canvas is the case.** The conversation lives in the case's recessed window (messages sit at its
+  foot against the composer, the way a real transcript does), the composer is the key row under it, and
+  the design panel is the second bay of the same case. Two columns on a desktop; at 1080px and below the
+  rail moves under the deck and never above the composer.
+- **It must work, not just look right.** The interactions are the argument: a quick pick writes into the
+  composer without sending, a tap answer on a message becomes a turn, an **Answer** key in the panel
+  writes that answer into the transcript, ticks its build step, decides its device, moves both gauges and
+  the state chip, and unlocks **Build in UEFN** only when nothing is owed. `Build in UEFN` then reports
+  what it sent. Keep it to one small `<script>` with canned replies - no model, no network.
+- **Every number is real**, and the mockup may quote the set's own: 13 researched game types, 74 drafts,
+  59 devices. The one stat that must not appear is an invented one.
+- **The app-screen rule still holds**: no `<footer>`, one 44px mark in the 72px header, no root-relative
+  paths, works at 400px with no horizontal scroll. A hero glow wider than the viewport (`120vw`) is the
+  trap here: at 400px it pushes the layout viewport out with it and every fixed element moves with it.
+  Use `min(880px, 100vw)`.
+
 ## Rules for each page
 
 - One self-contained page: `public/concepts/<slug>/index.html`, CSS inline in a `<style>` block.

@@ -1,0 +1,880 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge - Chat 2b - Workbench (Quiet Power)</title>
+<link rel="icon" href="../../assets/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("../../assets/fonts/inter-latin-variable.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+  /* Chat 2b - Workbench, as a full mockup.
+   *
+   * The wireframe (public/concepts/chat-2-workbench/) argued one thing: the chat is the process and the
+   * design is the product, so the conversation runs in one column and a live panel fills in beside it.
+   * This page is that screen at full fidelity, so the argument can be judged with the colours and the
+   * depth the rest of the set uses rather than in greyscale.
+   *
+   * The styling is the owner's two references, composed rather than blended:
+   *
+   *   - Concept 8 (Quiet Power, blue + indigo) is the page: #101014 ground, hairlines instead of boxes,
+   *     Inter Tight titles with negative tracking, #33BFFF for the one action, #868AFD for detail, pill
+   *     buttons, a stat strip with real numbers, and a hero glow that falls off from blue to indigo.
+   *   - Randomiser 2c (Portrait reels) is the workspace: one moulded case, a recessed window with glass
+   *     over it, and keys that stand up off the surface and press down onto their skirt. Nothing on
+   *     this page is a picture of a machine; the depth is drawn out of shadows and highlights.
+   *
+   * So the chat is not a card on a page here, it is the object: the transcript sits in the case's window,
+   * the composer is the key row under it, and the design panel is the second bay of the same case. */
+  :root {
+    --bg: #101014;
+    --tile: #18181C;
+    --line: #28282C;
+    --line-2: #303034;
+    --muted: #ACACAD;
+    --dim: #787678;
+    /* Main accent: --color-palette-blue-400. Secondary: --color-palette-indigo-400 - the mapping
+       Concept 8 and Randomiser 2 use. Blue is the action and the focus; indigo is what a machine says
+       about itself (a tag, a falloff, the far end of a progress rail). */
+    --accent: #33BFFF;
+    --accent-2: #868AFD;
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    --title: "Inter Tight", "Inter", system-ui, sans-serif;
+    --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* The case: one lip measurement, used for the window's frame, the key row's padding and the gap
+       between two bays - the way 2c's machine uses its own --lid. */
+    --lid: 12px;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--bg); }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* The 1136px column and the logo treatment are chrome.css, linked below this block. The header is the
+     app's own 72px bar (public/css/shell.css: .sh-header-inner), the same height every mockup uses. */
+  header.wrap { display: flex; align-items: center; gap: 16px; height: 72px; }
+  .bar-label { margin-left: auto; font: 700 11px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  main { display: block; }
+  .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* ---------- The pitch band: Concept 8's hero, sized for a screen rather than a landing page ---------- */
+  .intro { position: relative; padding-block: 40px 30px; text-align: center; }
+  .intro::before { /* blue heart, indigo falloff */
+    content: "";
+    position: absolute;
+    left: 50%; top: -140px;
+    /* 100vw, not the reference's 120vw: at 400px a glow wider than the viewport pushes the layout
+       viewport out with it, and every fixed element on the page moves to where the glow went. */
+    width: min(880px, 100vw); height: 380px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(51, 191, 255, .10), rgba(134, 138, 253, .06) 58%, transparent);
+    pointer-events: none;
+  }
+  .eyebrow {
+    position: relative;
+    margin: 0 0 14px;
+    font: 700 12px/1 var(--body);
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+  }
+  .intro h1 {
+    position: relative;
+    font-family: var(--title);
+    font-weight: 700;
+    font-size: clamp(34px, 5.4vw, 68px);
+    line-height: 1;
+    letter-spacing: -.035em;
+    margin: 0;
+  }
+  .intro h1 span { display: block; color: var(--dim); }
+  .lede { position: relative; color: var(--muted); font-size: clamp(15px, 1.4vw, 18px); max-width: 44em; margin: 20px auto 0; }
+  .lede strong { color: #fff; font-weight: 600; }
+
+  /* Real numbers, from the app's own data: 13 game types with a researched device list, 74 drafts, and
+     59 devices in the library (public/data/uefn_device_logic.json). A mockup that invents a stat is
+     the one thing these pages must not do. */
+  .stats { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); border-block: 1px solid var(--line); margin-top: 34px; }
+  .stat { padding: 20px 8px; text-align: center; }
+  .stat + .stat { border-left: 1px solid var(--line); }
+  .stat b { display: block; font-family: var(--title); font-weight: 700; font-size: clamp(24px, 2.6vw, 34px); line-height: 1; letter-spacing: -.03em; }
+  .stat span { color: var(--muted); font-size: 13px; }
+
+  /* ---------- The machine ---------- */
+  /* One case, two bays. The deck (chat) is the wide bay, the rail (design) the narrow one, and the whole
+     thing is narrower than the 1136px column so it reads as an object on the page. */
+  .machine { padding-block: 40px 0; }
+  .rig {
+    border: 1px solid #050507;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #23242B 0%, #1B1C22 26%, #17181D 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .07),
+      inset 0 -1px 0 rgba(0, 0, 0, .8),
+      0 18px 34px -12px rgba(0, 0, 0, .7);
+  }
+  .rig-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(300px, 32%, 356px);
+    gap: 20px;
+    align-items: stretch;
+    padding: 22px;
+  }
+  .deck { min-width: 0; display: flex; flex-direction: column; }
+
+  /* Bay label: name and count as one line, the count in brackets and dim - 2c's reel labels. */
+  .col-label { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .col-count { font-weight: 400; letter-spacing: .02em; color: var(--dim); }
+  .col-count b { font-weight: 700; color: #fff; }
+
+  /* The window: the recess. Its ground is lighter than the case, so the transcript sits in its own pool
+     of light, and the lip catches the highlight while the top and bottom shade what is passing under
+     them. That shading is also what tells the eye the conversation continues past the frame.
+     It takes whatever height the bay has left once the composer is placed, so the two bays of the case
+     end together instead of leaving a pool of empty case under the chat. */
+  .window {
+    position: relative;
+    flex: 1;
+    display: flex;
+    padding: var(--lid);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #2A2D38 0%, #1E212A 42%, #171A21 100%);
+    box-shadow:
+      inset 0 3px 6px rgba(0, 0, 0, .95),
+      inset 0 -3px 6px rgba(0, 0, 0, .9),
+      0 1px 0 rgba(255, 255, 255, .06);
+  }
+  .window::after {
+    content: "";
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    inset: var(--lid);
+    border-radius: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .06) 0%, rgba(255, 255, 255, .015) 18%, rgba(255, 255, 255, 0) 44%);
+    box-shadow:
+      inset 0 13px 16px -13px rgba(0, 0, 0, .95),
+      inset 0 -13px 16px -13px rgba(0, 0, 0, .95),
+      inset 0 0 0 1px rgba(255, 255, 255, .05);
+  }
+  .msgs {
+    flex: 1;
+    /* The floor, not the height: the window takes the bay's leftover height, and this is the smallest
+       the transcript is allowed to get when the rail beside it is short. */
+    min-height: clamp(19rem, 40vh, 25rem);
+    min-width: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    padding: 4px 6px 4px 2px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .18) transparent;
+  }
+  /* The turns sit at the foot of the window, against the composer, which is where a conversation
+     leaves off. margin-top: auto is what does it: while the turns are shorter than the window it takes
+     up the slack above them, and the moment they are taller it collapses to nothing, so the first turn
+     is still reachable by scrolling. (justify-content: flex-end would have done the same and then eaten
+     the top of the transcript - a scroll container cannot scroll past its own start edge.) */
+  .msgs-in { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
+  .msgs::-webkit-scrollbar { width: 8px; }
+  .msgs::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16); border-radius: 999px; }
+
+  /* Turns: Concept 8's message shapes with the asymmetric corner, one step larger for a real screen. */
+  .turn { display: flex; gap: 10px; max-width: 92%; }
+  .turn.me { justify-content: flex-end; align-self: flex-end; }
+  .turn.ai { align-self: flex-start; }
+  .mark {
+    width: 26px; height: 26px; flex: none;
+    border-radius: 8px;
+    background: linear-gradient(140deg, var(--accent) 0%, var(--accent-2) 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 2px 6px -2px rgba(51, 191, 255, .5);
+    margin-top: 2px;
+  }
+  .bub { padding: 11px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.55; }
+  .turn.ai .bub { background: rgba(16, 16, 20, .72); border: 1px solid rgba(255, 255, 255, .12); border-bottom-left-radius: 4px; }
+  .turn.me .bub { background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .06); border-bottom-right-radius: 4px; }
+  .bub p { margin: 0; }
+  .bub p + p { margin-top: 8px; }
+  .bub .ask { margin-top: 10px; font-weight: 600; color: #fff; }
+  .typing { display: inline-flex; gap: 4px; padding-block: 3px; }
+  .typing i { width: 6px; height: 6px; border-radius: 50%; background: #D8D8DA; animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .2s; }
+  .typing i:nth-child(3) { animation-delay: .4s; }
+  @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+
+  /* A tap answer: the same pill the page uses, on the message it answers. */
+  .taprow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .chip {
+    font: 600 12.5px/1 var(--body);
+    color: #E4E4E7;
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 999px;
+    padding: 8px 13px;
+    cursor: pointer;
+    transition: background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease);
+  }
+  .chip:hover { background: rgba(134, 138, 253, .16); border-color: rgba(134, 138, 253, .55); color: #fff; }
+  .chip:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  .bub .chip { color: #D8D8DA; }
+
+  /* Quick picks: the same pills, but these write into the box instead of sending - the wireframe's
+     decision, kept. They sit directly above the composer because that is the thing they feed. */
+  .picks { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 2px 12px; }
+  .picks .chip { background: rgba(255, 255, 255, .04); }
+  .picks .chip::before { content: "+"; margin-right: 7px; color: var(--dim); font-weight: 700; }
+
+  /* The composer: a recessed well and a moulded key, so typing is the one thing on the case you press. */
+  .composer { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+  .well {
+    border: 1px solid #0A0A0D;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #131317 0%, #0E0E12 100%);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, .85), inset 0 -1px 0 rgba(255, 255, 255, .05);
+    padding: 10px 12px 8px;
+  }
+  .well textarea {
+    display: block;
+    width: 100%;
+    min-height: 3.4rem;
+    max-height: 8rem;
+    resize: none;
+    border: 0;
+    background: none;
+    color: #fff;
+    font: 400 14.5px/1.55 var(--body);
+    outline: none;
+  }
+  .well textarea::placeholder { color: var(--dim); }
+  .well-foot { display: flex; align-items: center; gap: 10px; margin-top: 6px; font-size: 11.5px; color: var(--dim); }
+  .well-foot .spacer { margin-left: auto; }
+  /* The tie line back to the panel, in the deck's own words: the panel is where the answers are owed,
+     and this is the sentence that says so without making the user look away from the conversation. */
+  .tie { margin: 12px 2px 0; font-size: 12.5px; color: var(--muted); }
+  .tie b { color: #fff; font-weight: 600; }
+  .tie.is-clear { color: var(--accent); }
+
+  /* ---------- The rail: the design, in the second bay of the same case ---------- */
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid #0A0A0D;
+    border-radius: 16px;
+    background: linear-gradient(180deg, #1F2027 0%, #191A1F 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 10px 24px -16px rgba(0, 0, 0, .9);
+  }
+  .panel-head { display: flex; align-items: center; gap: 10px; }
+  .panel-head .t { font-family: var(--title); font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+  .state {
+    margin-left: auto;
+    font: 700 10.5px/1 var(--body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(51, 191, 255, .45);
+    background: rgba(51, 191, 255, .1);
+    border-radius: 999px;
+    padding: 5px 9px;
+    white-space: nowrap;
+  }
+  .state.is-ready { color: #101014; background: var(--accent); border-color: var(--accent); }
+
+  .slots { margin: 0; padding: 0; }
+  .slot { display: flex; align-items: baseline; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+  /* Nowrap, and wide enough for the longest label: "GAME TYPE" broke onto two lines at 5.4em, which put
+     one row's value out of line with the two under it. */
+  .slot dt { flex: none; width: 6.8em; white-space: nowrap; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .slot dd { margin: 0; font-size: 14px; }
+  .slot dd.empty { color: var(--dim); }
+
+  .gauge { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 10px; }
+  .gauge .lab { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .gauge .count { font-size: 12px; color: var(--muted); }
+  .gauge .count b { color: #fff; }
+  /* The progress rail: indigo to blue along its length, which is the one place the two accents meet. */
+  .rail-line { display: block; grid-column: 1 / -1; height: 3px; border-radius: 999px; background: rgba(255, 255, 255, .12); overflow: hidden; }
+  .rail-line i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent-2), var(--accent)); transition: width .45s var(--ease); }
+
+  .devs, .steps { list-style: none; margin: 0; padding: 0; }
+  .dev, .step { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-top: 1px solid var(--line); font-size: 13.5px; }
+  .dev .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; border: 1.5px solid var(--line-2); }
+  .dev.is-on .dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px -1px rgba(51, 191, 255, .8); }
+  .dev.is-open { color: var(--dim); }
+  .dev.is-open .nm { text-decoration: underline dotted; }
+  .dev .devtag { /* indigo is what a machine says about itself */
+    margin-left: auto;
+    font: 700 10px/1 var(--body);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    border: 1px solid rgba(134, 138, 253, .4);
+    border-radius: 999px;
+    padding: 4px 7px;
+  }
+  .dev.is-undecided .devtag { color: var(--dim); border-color: var(--line-2); }
+  .step .n {
+    width: 20px; height: 20px; flex: none;
+    border-radius: 6px;
+    display: grid; place-items: center;
+    font: 700 11px/1 var(--body);
+    color: var(--dim);
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid var(--line-2);
+  }
+  .step.is-done .n { color: #101014; background: var(--accent); border-color: var(--accent); }
+  .step .txt { color: #C9C9CC; }
+  .step.is-done .txt { color: #fff; }
+  .step.is-mine .n { border-style: dashed; }
+
+  .oq { border: 1px dashed rgba(255, 255, 255, .2); border-radius: 12px; padding: 12px; background: rgba(255, 255, 255, .02); }
+  .oq-h { margin: 0 0 8px; font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .oq-h span { color: var(--dim); font-weight: 400; letter-spacing: .02em; text-transform: none; }
+  .oq-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-top: 8px; }
+  .oq-row + .oq-row { border-top: 1px solid var(--line); margin-top: 8px; }
+  .oq-row p { margin: 0; font-size: 13.5px; color: #C9C9CC; }
+  .oq.is-clear { border-color: rgba(51, 191, 255, .5); background: rgba(51, 191, 255, .07); }
+  .oq.is-clear .oq-h { color: var(--accent); }
+  .oq-empty { margin: 0; font-size: 13.5px; color: var(--muted); }
+
+  .actions { margin-top: auto; display: grid; gap: 10px; }
+  .status { margin: 0; font-size: 12.5px; color: var(--muted); }
+  .status b { color: #fff; font-weight: 600; }
+
+  /* ---------- Keys: Randomiser 2c's moulding, in this page's two colours ---------- */
+  /* A lit top edge, a darker bottom edge, a short skirt under the key and the shadow it casts on the
+     case; pressed, the key travels down onto the skirt. The rail on the machine and the send key under
+     the composer are the same object, so they are one rule. */
+  .key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    font: 700 14px/1 var(--body);
+    padding: 12px 18px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform .09s ease, box-shadow .09s ease, background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
+  }
+  .key svg { width: 1.05em; height: 1.05em; flex: none; }
+  .key-primary {
+    color: #07131B;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
+    border-color: #0B5C82;
+    background: linear-gradient(180deg, #7BDAFF 0%, var(--accent) 52%, #219ED6 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .65),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #106A94,
+      0 7px 12px -2px rgba(51, 191, 255, .35);
+  }
+  .key-primary:hover:not(:disabled) {
+    background: linear-gradient(180deg, #9AE4FF 0%, #47C6FF 52%, #2AA8E0 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .7),
+      inset 0 -2px 0 rgba(0, 0, 0, .22),
+      0 4px 0 #106A94,
+      0 7px 14px -2px rgba(51, 191, 255, .5);
+  }
+  .key-key {
+    color: #D5D5DA;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .7);
+    border-color: #08080B;
+    background: linear-gradient(180deg, #35353D 0%, #26262C 52%, #1F1F24 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .14),
+      inset 0 -2px 0 rgba(0, 0, 0, .55),
+      0 4px 0 #0A0A0D,
+      0 7px 12px -2px rgba(0, 0, 0, .7);
+  }
+  .key-key:hover:not(:disabled) { color: #fff; background: linear-gradient(180deg, #3E3E48 0%, #2C2C34 52%, #24242B 100%); }
+  /* Pressed: the key sits on the case with no skirt left to fall. */
+  .key:active:not(:disabled) { transform: translateY(3px); box-shadow: inset 0 2px 4px rgba(0, 0, 0, .45), inset 0 -1px 0 rgba(255, 255, 255, .12), 0 1px 0 rgba(0, 0, 0, .8); }
+  /* Unavailable: it fades and keeps its face. A moulded key that flattens under the pointer reads as
+     broken, and Build in UEFN is unavailable for the first minutes of every visit. */
+  .key:disabled { opacity: .45; transform: none; cursor: default; }
+  .key:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .key-sm { font-size: 11.5px; padding: 8px 11px; border-radius: 9px; box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 3px 0 #0A0A0D; }
+  .deck .key-primary { padding: 14px 20px; align-self: stretch; }
+
+  /* ---------- The page's own buttons: Concept 8's flat pill ---------- */
+  /* Only the workspace is moulded. The buttons that belong to the page stay flat, so the depth reads as
+     one object rather than as a treatment applied to everything. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font: 700 15px/1 var(--body);
+    text-decoration: none;
+    padding: 14px 24px;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: transform .3s var(--ease), box-shadow .3s var(--ease), background .3s, border-color .3s, color .3s;
+  }
+  .btn-primary { background: var(--accent); color: #101014; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(51, 191, 255, .3); }
+  .btn-glass {
+    color: #fff;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .btn-glass:hover { background: rgba(134, 138, 253, .14); border-color: rgba(134, 138, 253, .55); }
+  .btn:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+
+  /* Close */
+  .close { padding-block: 96px 120px; text-align: center; border-top: 1px solid var(--line); margin-top: 88px; }
+  .close h2 {
+    font-family: var(--title);
+    font-weight: 700;
+    font-size: clamp(30px, 4.4vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -.03em;
+    margin: 0 0 16px;
+  }
+  .close p { color: var(--muted); max-width: 40em; margin: 0 auto 32px; }
+  .close-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+
+  .tag {
+    position: fixed;
+    right: 12px; bottom: 12px;
+    z-index: 10;
+    font: 600 11px/1 var(--body);
+    letter-spacing: .04em;
+    color: var(--muted);
+    background: rgba(24, 24, 28, .9);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 11px;
+  }
+
+  /* ---------- Narrower screens ---------- */
+  /* Below 1080px the two bays cannot both be read, so the rail moves under the deck. It never moves
+     above the composer: the box is the one thing that has to stay where the thumb expects it. */
+  @media (max-width: 1080px) {
+    .rig-body { grid-template-columns: minmax(0, 1fr); }
+    .msgs { min-height: clamp(17rem, 38vh, 21rem); }
+  }
+  @media (max-width: 760px) {
+    .intro { padding-block: 28px 22px; }
+    .stats { grid-template-columns: 1fr; border-block: 0; }
+    .stat { padding: 14px 4px; }
+    .stat + .stat { border-left: 0; border-top: 1px solid var(--line); }
+    .machine { padding-block: 26px 0; }
+    .rig { border-radius: 18px; }
+    .rig-body { padding: 14px; gap: 14px; }
+    .turn { max-width: 100%; }
+    .composer { grid-template-columns: minmax(0, 1fr); }
+    .deck .key-primary { padding: 13px 18px; }
+    .close { padding-block: 72px 96px; margin-top: 64px; }
+  }
+  @media (max-width: 520px) {
+    /* A phone has no Enter key, so the keyboard hint is not advice there - it is noise in the foot of
+       the one control the screen is built around. */
+    .well-foot .kbd { display: none; }
+    .well-foot { justify-content: flex-end; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+<link rel="stylesheet" href="../_shared/chrome.css" />
+</head>
+<body>
+
+<header class="wrap">
+  <a class="logo-lockup" href="../../mockups/index.html" title="All mockups">
+    <span class="logo-wrap"><img class="logo-img" src="../../assets/logo_epic.svg" alt="Epic Games" width="44" height="44"></span>
+    <span class="logo-word">Forge</span>
+  </a>
+  <span class="bar-label">AI chat &middot; workbench</span>
+</header>
+
+<main>
+  <section class="intro wrap">
+    <p class="eyebrow">Chat with AI</p>
+    <h1>Your design fills in<span>while you talk.</span></h1>
+    <p class="lede">
+      Describe the game in one sentence. Forge asks two or three questions, and the game type, the UEFN
+      devices and the five build steps are written down <strong>in the panel beside you</strong> as you
+      go - not buried in a scroll you have to hunt through afterwards.
+    </p>
+    <div class="stats">
+      <div class="stat"><b>13</b><span>game types researched device by device</span></div>
+      <div class="stat"><b>74</b><span>drafts waiting for their first question</span></div>
+      <div class="stat"><b>59</b><span>UEFN devices it can name</span></div>
+    </div>
+  </section>
+
+  <section class="machine wrap">
+    <div class="rig">
+      <div class="rig-body">
+
+        <!-- ---------------- the deck: the conversation ---------------- -->
+        <div class="deck">
+          <p class="col-label">Conversation <span class="col-count">(<b id="msgCount">4</b> messages)</span></p>
+
+          <div class="window">
+            <div class="msgs" id="msgs" aria-live="polite" aria-label="Conversation">
+              <div class="msgs-in" id="msgsIn">
+
+                <div class="turn me"><div class="bub"><p>A prop hunt in a drained hotel, four players, ten-minute rounds.</p></div></div>
+
+                <div class="turn ai">
+                  <span class="mark" aria-hidden="true"></span>
+                  <div class="bub">
+                    <p>A drained hotel is a good prop hunt: long sightlines, and about a thousand places to be something else. That is the whole game, so the rest is plumbing.</p>
+                    <p class="ask">How should a round end?</p>
+                    <div class="taprow">
+                      <button class="chip" type="button" data-say="Clock runs out - ten minutes is the whole round.">Clock runs out</button>
+                      <button class="chip" type="button" data-say="Everyone gets caught.">Everyone gets caught</button>
+                      <button class="chip" type="button" data-say="Either - whichever happens first.">Either - first to happen</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="turn me"><div class="bub"><p>Clock runs out. Ten minutes is the whole round.</p></div></div>
+
+                <div class="turn ai">
+                  <span class="mark" aria-hidden="true"></span>
+                  <div class="bub">
+                    <p>Then a round is a clock problem rather than a search problem, and the props win by surviving it. Five devices and steps 1-2 are in <strong>Your design</strong>.</p>
+                    <p class="ask">Two things I still need before it is buildable - they are under Open questions.</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <div class="picks" id="picks">
+            <button class="chip" type="button" data-fill="Make the hiding spots fair - no prop should be able to sit in one place for the whole round.">Fair hiding spots</button>
+            <button class="chip" type="button" data-fill="Keep it to five devices - I want to build this in one evening.">Five devices only</button>
+            <button class="chip" type="button" data-fill="Add a last-prop beacon for the final thirty seconds.">Last-prop beacon</button>
+            <button class="chip" type="button" data-fill="Write the five build steps out in the order I should do them.">Order the build steps</button>
+          </div>
+
+          <form class="composer" id="composer">
+            <div class="well">
+              <label class="sr" for="say">Your message</label>
+              <textarea id="say" rows="2" placeholder="Ask for a change - &quot;no custom props, keep it simple&quot;&hellip;"></textarea>
+              <div class="well-foot">
+                <span class="kbd">Enter sends &middot; Shift + Enter for a new line</span>
+                <span class="spacer"></span>
+                <span id="tip">Answers owed: <b>2</b></span>
+              </div>
+            </div>
+            <button class="key key-primary" id="send" type="submit" disabled>
+              Send
+              <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M1 6h9M6.4 1.9 10.5 6l-4.1 4.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </form>
+
+          <p class="tie" id="tie">2 open questions are waiting in <b>Your design</b> - they are answerable from here or from the panel.</p>
+        </div>
+
+        <!-- ---------------- the rail: the design ---------------- -->
+        <aside class="rail" aria-label="Your design">
+          <div class="panel-head">
+            <span class="t">Your design</span>
+            <span class="state" id="state">Draft</span>
+          </div>
+
+          <dl class="slots">
+            <div class="slot"><dt>Game type</dt><dd>Prop Hunt</dd></div>
+            <div class="slot"><dt>Players</dt><dd>4 &middot; co-op &middot; ten-minute rounds</dd></div>
+            <div class="slot"><dt>Brand</dt><dd class="empty">Not set - optional</dd></div>
+          </dl>
+
+          <div class="gauge">
+            <span class="lab">Devices</span>
+            <span class="count"><b id="devCount">5</b> of 6</span>
+            <i class="rail-line"><i id="devBar" style="width:83%"></i></i>
+          </div>
+
+          <ul class="devs" id="devs">
+            <li class="dev is-on" data-device="Prop Manipulator"><span class="dot" aria-hidden="true"></span><span class="nm">Prop Manipulator</span></li>
+            <li class="dev is-on" data-device="Prop Mover"><span class="dot" aria-hidden="true"></span><span class="nm">Prop Mover</span></li>
+            <li class="dev is-on" data-device="Round Settings Device"><span class="dot" aria-hidden="true"></span><span class="nm">Round Settings Device</span></li>
+            <li class="dev is-on" data-device="Player Spawn Pad"><span class="dot" aria-hidden="true"></span><span class="nm">Player Spawn Pad</span></li>
+            <li class="dev is-on" data-device="HUD Message Device"><span class="dot" aria-hidden="true"></span><span class="nm">HUD Message Device</span></li>
+            <li class="dev is-undecided" data-device="End Game Device" id="devEndGame"><span class="dot" aria-hidden="true"></span><span class="nm">End Game Device</span><span class="devtag">undecided</span></li>
+          </ul>
+
+          <div class="gauge">
+            <span class="lab">Build steps</span>
+            <span class="count"><b id="stepCount">2</b> of 5</span>
+            <i class="rail-line"><i id="stepBar" style="width:40%"></i></i>
+          </div>
+
+          <ol class="steps" id="steps">
+            <li class="step is-done"><span class="n">1</span><span class="txt">Register the props a player can become</span></li>
+            <li class="step is-done"><span class="n">2</span><span class="txt">Set the round timer and the hunter's loadout</span></li>
+            <li class="step" id="step3"><span class="n">3</span><span class="txt">Place the hiding spots and the last-prop beacon</span></li>
+            <li class="step" id="step4"><span class="n">4</span><span class="txt">Wire the round end to the clock, not to a wipeout</span></li>
+            <li class="step is-mine"><span class="n">5</span><span class="txt">Test with four players and tune the round length</span></li>
+          </ol>
+
+          <div class="oq" id="oq">
+            <p class="oq-h">Open questions <span>(<b id="oqCount">2</b> <span id="oqWord">left</span>)</span></p>
+            <div class="oq-row" data-q="props">
+              <p>Do the props stay still once they are placed?</p>
+              <button class="key key-key key-sm" type="button">Answer</button>
+            </div>
+            <div class="oq-row" data-q="caught">
+              <p>Does a caught player spectate, or sit out?</p>
+              <button class="key key-key key-sm" type="button">Answer</button>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="key key-primary" id="build" type="button" disabled aria-describedby="tie">Build in UEFN</button>
+            <button class="key key-key" id="save" type="button">Save draft</button>
+            <p class="status" id="status">Build in UEFN unlocks when both open questions are answered.</p>
+          </div>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="close wrap">
+    <h2>Answer two questions.<br>Leave with a build order.</h2>
+    <p>
+      Every answer lands in the panel and nowhere else, which is the point of the layout: the
+      conversation is where the thinking happens, and the panel is the thing that goes to UEFN.
+    </p>
+    <div class="close-actions">
+      <a class="btn btn-primary" href="../chat-2-workbench/index.html">See the wireframe this came from</a>
+      <a class="btn btn-glass" href="../../mockups/index.html#chat">All AI chat designs</a>
+    </div>
+  </section>
+</main>
+
+<div class="tag">Chat 2b &middot; Workbench</div>
+
+<script>
+  /* The mockup is a working screen rather than a picture of one, because the direction is about what
+     happens between the two bays: an answer given in the chat has to visibly change the panel, and an
+     answer given in the panel has to visibly enter the chat. Everything below is that loop, plus the
+     composer. It is deliberately small - no model, no network, four canned replies. */
+  (function () {
+    const msgs = document.getElementById('msgs');
+    /* Turns are appended to the inner block, which is the part that sits against the composer; #msgs is
+       the scrolling window around it. */
+    const msgsIn = document.getElementById('msgsIn');
+    const form = document.getElementById('composer');
+    const say = document.getElementById('say');
+    const send = document.getElementById('send');
+    const msgCount = document.getElementById('msgCount');
+    const devCount = document.getElementById('devCount');
+    const devBar = document.getElementById('devBar');
+    const stepCount = document.getElementById('stepCount');
+    const stepBar = document.getElementById('stepBar');
+    const oqCount = document.getElementById('oqCount');
+    const oqWord = document.getElementById('oqWord');
+    const oq = document.getElementById('oq');
+    const tip = document.getElementById('tip');
+    const tie = document.getElementById('tie');
+    const state = document.getElementById('state');
+    const build = document.getElementById('build');
+    const status = document.getElementById('status');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let messages = 4;
+    let devices = 5;
+    let steps = 2;
+    let open = 2;
+    let replies = 0;
+
+    const REPLY = [
+      'Written into <strong>Your design</strong>. A fair hiding spot is a rule about the map rather than a device, so that one goes in step 3 - and it is the step a tester will argue with first.',
+      'Noted, and it comes off the list: five devices is enough for a ten-minute round, so I would leave the beacon for a second pass rather than build it into the first.',
+      'That is a constraint rather than a device, so I have folded it into step 2 instead of adding anything. The plan is still five steps.'
+    ];
+
+    function scroll() { msgs.scrollTop = msgs.scrollHeight; }
+    function count() { msgCount.textContent = String(messages); }
+
+    function bubbleTurn(html, side) {
+      const turn = document.createElement('div');
+      turn.className = 'turn ' + side;
+      if (side === 'ai') {
+        const mark = document.createElement('span');
+        mark.className = 'mark';
+        mark.setAttribute('aria-hidden', 'true');
+        turn.append(mark);
+      }
+      const bub = document.createElement('div');
+      bub.className = 'bub';
+      const p = document.createElement('p');
+      p.innerHTML = html; /* the canned replies are this file's own strings, never the user's */
+      bub.append(p);
+      turn.append(bub);
+      msgsIn.append(turn);
+      messages += 1;
+      count();
+      scroll();
+      return bub;
+    }
+
+    function say_user(text) { bubbleTurn(escapeText(text), 'me'); }
+    function escapeText(text) {
+      const span = document.createElement('span');
+      span.textContent = text;
+      return span.innerHTML;
+    }
+
+    function reply(override) {
+      const bub = bubbleTurn('<span class="typing"><i></i><i></i><i></i></span>', 'ai');
+      window.setTimeout(function () {
+        bub.innerHTML = '';
+        const p = document.createElement('p');
+        p.innerHTML = override || REPLY[replies++ % REPLY.length];
+        bub.append(p);
+        scroll();
+      }, reduce ? 0 : 750);
+    }
+
+    /* The composer. Picks write into it and never send, which is the wireframe's decision kept: half of
+       what a pick is worth is that it can be edited before it goes. */
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const text = say.value.trim();
+      if (!text) return;
+      say_user(text);
+      say.value = '';
+      send.disabled = true;
+      reply();
+    });
+    say.addEventListener('input', function () { send.disabled = say.value.trim() === ''; });
+    say.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        if (say.value.trim()) form.requestSubmit();
+      }
+    });
+
+    document.getElementById('picks').addEventListener('click', function (event) {
+      const chip = event.target.closest('[data-fill]');
+      if (!chip) return;
+      say.value = chip.dataset.fill;
+      say.focus();
+      send.disabled = false;
+    });
+
+    /* A tap answer on a message is a message. */
+    msgs.addEventListener('click', function (event) {
+      const chip = event.target.closest('[data-say]');
+      if (!chip) return;
+      say_user(chip.dataset.say);
+      reply();
+    });
+
+    /* The panel's own loop, which is what this screen is arguing for: answering in the rail writes the
+       answer into the transcript and moves the design on, in one move. Only one of the two answers
+       changes the device list - the round-end rule is what the End Game Device was waiting for, while
+       "props stay put" is a rule about the map and only moves a build step. Inventing a device for a
+       sentence that needs none is exactly what the panel must not do. */
+    const ANSWERS = {
+      props: {
+        said: 'Props stay put once they land. Moving props make it a chase, and this is a hunt.',
+        reply: 'Then the hiding spots can be placed as hiding spots rather than as routes, which is what step 3 was waiting for. Nothing new is needed: HUD Message Device carries the last-prop callout at 0:30.',
+        device: null
+      },
+      caught: {
+        said: 'They spectate. Ten minutes is short enough that waiting is worse than watching.',
+        reply: 'Coherent with a clock round: nobody is eliminated from the game, only from the round, so the End Game Device is wired from the timer. That is 6 of 6 devices.',
+        device: 'End Game Device'
+      }
+    };
+
+    oq.addEventListener('click', function (event) {
+      const row = event.target.closest('.oq-row');
+      if (!row) return;
+      const answer = ANSWERS[row.dataset.q];
+      if (!answer) return;
+      say_user(answer.said);
+      reply(answer.reply);
+      row.remove();
+      open -= 1;
+      oqCount.textContent = String(open);
+      tip.innerHTML = 'Answers owed: <b>' + open + '</b>';
+
+      if (answer.device) {
+        const li = document.getElementById('devEndGame');
+        li.classList.remove('is-undecided');
+        li.classList.add('is-on');
+        li.querySelector('.devtag').remove();
+        devices += 1;
+        devCount.textContent = String(devices);
+        devBar.style.width = Math.round((devices / 6) * 100) + '%';
+        stepDone('step4');
+      } else {
+        stepDone('step3');
+      }
+
+      if (open === 0) {
+        /* The count and the word after it are updated in place rather than rewritten. Replacing the
+           paragraph's HTML would take the #oqCount element out of the document with it, and anything
+           reading the count afterwards - this page included - would find nothing there. */
+        oq.classList.add('is-clear');
+        oqCount.textContent = '0';
+        oqWord.textContent = 'left - Build in UEFN is unlocked';
+        const note = document.createElement('p');
+        note.className = 'oq-empty';
+        note.textContent = 'Both answers are in the transcript, the devices and the steps.';
+        oq.append(note);
+        state.textContent = 'Ready to build';
+        state.classList.add('is-ready');
+        build.disabled = false;
+        tie.classList.add('is-clear');
+        tie.innerHTML = 'Nothing is owed. <b>Build in UEFN</b> takes the plan as it stands.';
+        status.innerHTML = 'Ready: <b>6 devices</b>, five steps, one of them yours.';
+      }
+    });
+
+    function stepDone(id) {
+      const li = document.getElementById(id);
+      if (!li || li.classList.contains('is-done')) return;
+      li.classList.add('is-done');
+      steps += 1;
+      stepCount.textContent = String(steps);
+      stepBar.style.width = Math.round((steps / 5) * 100) + '%';
+    }
+
+    build.addEventListener('click', function () {
+      build.disabled = true;
+      build.textContent = 'Sent to UEFN';
+      status.innerHTML = 'Sent: <b>6 devices</b>, steps 1-4 written, step 5 waiting on your first playtest.';
+    });
+    document.getElementById('save').addEventListener('click', function () {
+      status.innerHTML = 'Draft saved. <b>Prop Hunt</b> is in your designs.';
+    });
+
+    scroll();
+  })();
+</script>
+</body>
+</html>

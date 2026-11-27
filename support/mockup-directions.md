@@ -90,14 +90,24 @@ the answers are taps). These three are **wireframes**, not mockups: they share o
 answer a structural question - where the affordances sit and what the conversation produces - because the
 chat page's problem is not its palette. The brief is `support/chat-wireframes-brief.md`.
 
+AI chat, in colour: C2b Workbench (Quiet Power) - the first full mockup of a chat direction. Workbench's
+structure, given a material: Concept 8's dark page (hairlines, Inter Tight, blue action, indigo detail)
+wrapped around Randomiser 2c's moulded case, with the transcript in the recessed window, the composer as
+the key row and the design panel as the second bay. It is a working screen rather than a picture of one -
+answering an open question in the panel writes it into the transcript, ticks its build step, decides its
+device and unlocks Build in UEFN - because the direction's whole claim (one workspace, not two windows)
+can only be judged in motion.
+
 ## What the chat set deliberately does not settle
 
 The three chat wireframes are the first entry in the set that is about a *mechanism* rather than a
 material, and the first that reads as an app screen rather than a pitch page: no art, no brand gradients,
-no footer, one accent colour, and every block of copy is real. The next chat direction is therefore free
-to take one of these three structures and give it a material - a launcher's surface, paper, a terminal -
-without having to argue the structure again. What must not happen is a fourth structure that is really
-one of these three with the shelf moved.
+no footer, one accent colour, and every block of copy is real. C2b then took one of the three structures
+and gave it a material, which is the order the set wants: structure first, material second. What is still
+open for the chat page is a material for C1 or C3 (a launcher's surface for Launchpad, something card-like
+for Interview), a full mockup of the phone state of any of them, and any decision at all about what the
+conversation does *after* the plan exists - refine, rebuild or fork. What must not happen is a fourth
+structure that is really one of these three with the shelf moved.
 
 ## What "different" has to mean
 
