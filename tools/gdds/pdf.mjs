@@ -319,6 +319,19 @@ export function blockHeight(text, { face = 'regular', size = 10, leading = 1.35,
  * document that has outgrown its template fails a build instead of shipping with a paragraph missing
  * its last line.
  */
+/**
+ * Build a PDF from a spec.
+ *
+ * `creationDate` defaults to the wall clock, which is right for a document a person exported and wrong
+ * for one a program generates: two builds of the same content then differ in bytes, and a byte
+ * difference that means nothing makes every real difference harder to see. It is an explicit input so
+ * the renderer can pass something stable — the document's own date — and a determinism test can exist
+ * without racing a clock.
+ *
+ * This was found by exactly that race: the test asserting identical bytes passed alone and failed about
+ * one run in five under the full suite, because the two builds in the test straddled a second boundary.
+ * The failure looked like flakiness and was the writer embedding the time.
+ */
 export function buildPdf(spec) {
   const {
     title = 'Untitled',
@@ -326,6 +339,7 @@ export function buildPdf(spec) {
     subject = '',
     keywords = '',
     creator = 'Forge',
+    creationDate = new Date(),
     pages = []
   } = spec || {};
 
@@ -395,7 +409,7 @@ export function buildPdf(spec) {
   objects[infoNum - 1] =
     `<< /Title ${pdfString(title)} /Author ${pdfString(author)} /Subject ${pdfString(subject)} ` +
     `/Keywords ${pdfString(keywords)} /Creator ${pdfString(creator)} ` +
-    `/Producer ${pdfString(creator)} /CreationDate ${pdfString(pdfDate(new Date()))} >>`;
+    `/Producer ${pdfString(creator)} /CreationDate ${pdfString(pdfDate(creationDate))} >>`;
 
   /* ---- serialise, recording each object's byte offset for the xref ---- */
   const chunks = [];

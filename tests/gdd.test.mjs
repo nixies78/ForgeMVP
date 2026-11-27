@@ -30,6 +30,7 @@ import {
   SAMPLE_DESIGN
 } from '../tools/gdds/model.mjs';
 import { loadDataset, buildStructure, STRUCTURES } from '../tools/gdds/render.mjs';
+import { loadTemplate, slotsForStructure, checkDraft, GATES } from '../tools/gdds/template.mjs';
 
 /* -------------------------------------------------------------------------------------------- */
 /* Shared fixtures                                                                               */
@@ -1002,6 +1003,79 @@ test('every page says how many pages there are', () => {
         `${structure.meta.name} page ${i + 1} says ${JSON.stringify(label)}`
       );
     }
+  }
+});
+
+test('the AI template is consistent and every gate can fail', () => {
+  /* `support/gdd-template.json` is the contract for handing a draft to a model, and a contract that is
+   * only prose is a wish. The part that has to hold is the gate list: with a model in the loop the
+   * failure mode is not a bad sentence, it is a document that reads well and is wrong in three places
+   * with no way for a reader to tell which three.
+   *
+   * A gate that cannot fail is worse than no gate, because it looks like coverage. Two of these cases
+   * were silently testing nothing when they were written by hand — one put a forbidden phrase in a slot
+   * with no `mustNot` list, one put digits in prose that did not collide with any derived number — so
+   * the cases are derived from the template and every gate is required to have one. */
+  const template = loadTemplate();
+  const sources = new Set(Object.keys(template.sources));
+
+  for (const slot of template.slots) {
+    assert.ok(sources.has(slot.source), `${slot.id} names an unknown source ${JSON.stringify(slot.source)}`);
+    if (slot.source === 'proposed') {
+      assert.ok(slot.because, `${slot.id} is proposed but does not say why it is proposed`);
+    }
+    if (slot.source === 'authored') {
+      assert.ok(slot.prompt, `${slot.id} is the reader's to write but poses no question`);
+    }
+  }
+  assert.equal(new Set(template.slots.map((s) => s.id)).size, template.slots.length, 'slot ids must be unique');
+
+  /* Every structure resolves to a real set of slots, and each one leans on the three sources differently
+   * — which is the point: the structures differ by how much of the document a reader should trust. */
+  for (const id of Object.keys(template.structures)) {
+    const slots = slotsForStructure(template, id);
+    assert.ok(slots.length > 0, `structure ${id} resolves to no slots`);
+    assert.ok(slots.some((s) => s.source === 'derived'), `structure ${id} has no derived content to stand on`);
+  }
+
+  assert.deepEqual(checkDraft(template, template.worked_example), [], 'the worked example must pass every gate');
+
+  /* Each gate fires on a draft built to trip it. */
+  const proposed = template.slots.filter((s) => s.source === 'proposed');
+  const first = proposed[0];
+  const withMustNot = template.slots.find((s) => s.mustNot && s.mustNot.length);
+  const authored = template.slots.find((s) => s.source === 'authored');
+  const budgeted = proposed.find((s) => s.maxWords);
+  assert.ok(first && withMustNot && authored && budgeted, 'the template no longer has a slot to build a case from');
+
+  const canFire = {
+    'authored-untouched': { slots: { [authored.id]: { state: 'draft', text: 'Written by something else.' } } },
+    'no-numbers-in-prose': {
+      slots: { [first.id]: { state: 'draft', because: ['x'], text: 'It takes 13 minutes.' } },
+      counts: { devices: 13 }
+    },
+    'provenance-present': { slots: { [first.id]: { state: 'draft', text: 'Something creeps.' } } },
+    'draft-marked': { slots: { [first.id]: { state: 'final', text: 'Something creeps.', because: ['x'] } } },
+    'word-budget': {
+      slots: {
+        [budgeted.id]: {
+          state: 'draft',
+          because: ['x'],
+          text: Array.from({ length: budgeted.maxWords + 20 }, () => 'word').join(' ')
+        }
+      }
+    },
+    'must-not': { slots: { [withMustNot.id]: { state: 'draft', because: ['x'], text: `It is ${withMustNot.mustNot[0]}.` } } }
+  };
+
+  assert.equal(
+    Object.keys(canFire).length,
+    GATES.length,
+    'every gate needs a case that trips it, or a gate can rot unnoticed'
+  );
+  for (const [gate, draft] of Object.entries(canFire)) {
+    const fired = checkDraft(template, { slots: {}, ...draft }).some((p) => p.gate === gate);
+    assert.ok(fired, `the ${gate} gate does not fire on a draft that breaks it`);
   }
 });
 

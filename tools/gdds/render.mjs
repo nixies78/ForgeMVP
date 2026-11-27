@@ -76,6 +76,11 @@ export function buildStructure(structure, model) {
     subject: `${model.typeLabel} game design document`,
     keywords: `UEFN, game design document, ${model.typeLabel}, ${model.categoryLabel}`,
     creator: 'Forge — GDD export',
+    /* The document's own date, not the clock. `model.date` is an ISO day (`2026-11-17`) and the writer
+     * wants a Date, so it is anchored at UTC midnight — the footer already prints this day, and
+     * embedding a different instant was both inconsistent with the page and a source of byte
+     * differences between two builds of the same content. */
+    creationDate: new Date(`${model.date}T00:00:00Z`),
     pages
   });
 
