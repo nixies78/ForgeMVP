@@ -267,6 +267,12 @@ export function renderRestriction(ctx) {
     eyebrow('Before you commit'),
     pageTitle(`${brand.label} comes with some usage rules.`),
     lead('Read these once. If they do not suit the game you are designing, go back — nothing is committed yet.'),
+    /* The game type belongs here, under the title it belongs to. It is the context the rules are read in -
+     * the brand changes what you may build with, not which devices the game needs - and at the foot of the
+     * page, after the panels, it read as a stray footnote to a screen the reader had already finished. */
+    type
+      ? paragraph(`Chosen game type: ${type.label}. The brand affects the assets you build with, not the device list.`)
+      : null,
 
     /* The rail comes first in the markup as well as on the page. Markup order is what a screen reader and
      * a Tab key follow, and navigation belongs before the sections it names - it is also the order this
@@ -294,8 +300,6 @@ export function renderRestriction(ctx) {
         sourcePanel
       )
     ),
-
-    type ? paragraph(`Chosen game type: ${type.label}. The brand affects the assets you build with, not the device list.`) : null,
 
     buttonRow(
       [

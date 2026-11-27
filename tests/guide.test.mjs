@@ -1692,6 +1692,54 @@ test("the research note names the page whose address it quotes", async () => {
   assert.ok(!/richText\(data\.brandRulesNote\)/.test(screen), 'and not printed as one flat string');
 });
 
+test('every control that holds a sentence wraps it', async () => {
+  /* The UA stylesheet sets a form control's own white-space, so a button holding a sentence runs out of its
+   * box unless it is told otherwise. The rail entry is a button, and it was missing from this list: its
+   * titles ran over the panels beside it and its hover fill stopped short of its own text, which is how the
+   * rail came to look like a fixed-width column with text spilling out of it. */
+  const css = (await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = css.match(/([^{}]+)\{\s*white-space:\s*normal;\s*\}/);
+  assert.ok(rule, 'the rule that makes a control wrap its own copy is still there');
+  const selectors = rule[1].split(',').map((s) => s.trim());
+  for (const name of [
+    '.g-choice',
+    '.g-option',
+    '.g-brandtile',
+    '.g-btn',
+    '.g-gaterail-link',
+    '.g-linkbtn',
+    '.g-tracker-link',
+    '.g-settings-summary'
+  ]) {
+    assert.ok(selectors.includes(name), `${name} holds a sentence, so it wraps it`);
+  }
+});
+
+test('the caution is drawn as a caution, and the small print as a box of its own', async () => {
+  /* Three things a reader has to be able to tell apart at a glance on the gate: the sections, the rules a
+   * licence adds on top of them, and the citations. The caution was drawn as a dashed line - which reads as
+   * a placeholder - and the citations as nothing at all, so the panel that says where the rules come from
+   * looked like the tail of the panel above it. */
+  const css = await readFile(path.join(PUBLIC_DIR, 'css', 'guide.css'), 'utf8');
+  const note = ruleBody(css, '.g-legalnote');
+  assert.match(note, /background:\s*var\(--fn-warning-surface\)/, 'the standing-rules note is filled with the warning tint');
+  assert.match(note, /border-left:\s*4px solid var\(--fn-warning\)/, 'and carries the warning down its edge');
+  assert.ok(!/dashed/.test(note), 'the dashed placeholder edge is gone');
+  assert.match(note, /color:\s*var\(--fn-text\)/, 'the words on the warning keep full contrast: it is the thing to read');
+
+  const source = ruleBody(css, '.g-panel-source');
+  assert.match(source, /background:\s*var\(--fn-canvas-inset\)/, 'the citations panel is an inset well');
+  assert.match(source, /border-style:\s*solid/, 'with an edge of its own, not a dashed hint of one');
+
+  const tokens = await readFile(path.join(PUBLIC_DIR, 'css', 'tokens.css'), 'utf8');
+  assert.match(tokens, /--fn-warning:\s*var\(--ue-warning\)/, "the warning is the palette's own hue, not a new one");
+  assert.match(
+    tokens,
+    /--fn-warning-surface:\s*color-mix\(in srgb, var\(--ue-warning\) 10%, var\(--fn-canvas\)\)/,
+    'and its fill is a 10% tint of it over the canvas, so the text on it stays readable'
+  );
+});
+
 test('the rail is the left column, and the small print is headed like everything else', async () => {
   /* Two things a reader meets before they read a word of the rules: which side the navigation is on, and
    * whether the fourth panel is a panel. The rail takes the narrow first column, as this app's other
@@ -1712,8 +1760,7 @@ test('the rail is the left column, and the small print is headed like everything
   assert.ok(!/space-between/.test(cols), 'the two columns sit together, with the leftover width after them');
 
   const smallPrint = ruleBody(css, '.g-panel-source');
-  assert.match(smallPrint, /background:\s*none/, 'the citations panel drops the panel fill');
-  assert.match(smallPrint, /border-style:\s*dashed/, 'and takes the same edge the standing-rules note uses');
+  assert.match(smallPrint, /background:\s*var\(--fn-canvas-inset\)/, 'the citations panel is an inset well of its own');
 });
 
 test('every asset the page promises is on disk', async () => {

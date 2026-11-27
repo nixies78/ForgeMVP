@@ -146,6 +146,17 @@
   --fn-border-strong: var(--ue-border-strong);         /* anything that carries meaning, and a card on hover */
   --fn-border-strong-hover: var(--ue-border-strong-hover);
 
+  /* The caution, for the one box in the guide that carries one: the standing rules a brand's licence adds on
+   * top of the brand's own rules.
+   *
+   * A caution needs a fill as well as an edge - a bright rule with the plain canvas behind it reads as an
+   * underline rather than as a box, and nothing about it says "read me before you click" - and the fill has
+   * to stay a tint. At 10% of the palette's yellow over the canvas it is a drab olive the body text still
+   * clears easily; past that the yellow starts costing the text its contrast, which is the line a warning
+   * must never cross, since the warning is the thing that has to be read. */
+  --fn-warning: var(--ue-warning);
+  --fn-warning-surface: color-mix(in srgb, var(--ue-warning) 10%, var(--fn-canvas));
+
   /* [deliberate exception] The layout comparison bar. Temporary, and deleted with the switcher.
    *
    * It is the one colour in the app that is not the library's, and that is the point rather than an

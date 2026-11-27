@@ -62,6 +62,7 @@ body.g-app {
 .g-option,
 .g-brandtile,
 .g-btn,
+.g-gaterail-link,
 .g-linkbtn,
 .g-tracker-link,
 .g-settings-summary { white-space: normal; }
@@ -894,21 +895,30 @@ body.g-app {
   font-size: inherit;
   color: var(--fn-text);
 }
+/* The standing rules a licence adds on top of a brand's own, and the one place in the guide that carries a
+ * caution. It is not a panel - it is something to notice - so it is filled with the palette's warning tint
+ * and carries the warning down its left edge, which is the traffic light the reader already reads everywhere
+ * else: the words say what it is, and the colour says it before they get to the words. */
 .g-legalnote {
-  border: 1px dashed var(--fn-border-strong);
-  border-radius: var(--fn-radius-card);
+  background: var(--fn-warning-surface);
+  border: 0;
+  border-left: 4px solid var(--fn-warning);
+  border-radius: var(--fn-radius-button);
   padding: var(--fn-space-4) var(--fn-space-5);
   margin-bottom: var(--fn-space-5);
-  color: var(--fn-text-secondary);
+  color: var(--fn-text);
 }
 .g-legalnote p { margin: 0; max-width: var(--fn-measure); }
 
-/* The citations are small print, and the panel says so with its material rather than with its heading: no
- * panel fill, the same dashed edge the standing-rules note above it uses, and 13px text throughout, so a
- * link in the list is the same size as the sentence introducing it. */
+/* Small print with a box around it. It was drawn as a dashed edge with no fill at all, and on this canvas a
+ * 1px dashed line is not a box: the reader could not see where the citations began, or that "Where this comes
+ * from" was a thing of its own rather than the tail of the panel above. The palette's inset well separates it
+ * from the panels - they are lighter than the canvas, this is darker - and the 13px text still says "fine
+ * print", which is now the panel's whole job. */
 .g-panel-source {
-  background: none;
-  border-style: dashed;
+  background: var(--fn-canvas-inset);
+  border-style: solid;
+  border-color: var(--fn-border);
 }
 
 /* ============================== summary ============================== */
@@ -1559,6 +1569,8 @@ body.g-app {
   .g-disclosure::details-content { content-visibility: visible; }
   .g-disclosure > .g-disclosure-head::before { display: none; }
   body.g-app { background: var(--fn-print-paper); color: var(--fn-print-ink); }
-  .g-panel, .g-device, .g-choice, .g-option { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }
+  .g-panel, .g-device, .g-choice, .g-option, .g-panel-source { border-color: var(--fn-print-rule); background: var(--fn-print-paper); }
+  /* The caution keeps its call-out on paper, where its fill would print as a dark slab under dark text. */
+  .g-legalnote { background: var(--fn-print-paper); border-left-color: var(--fn-print-ink); }
   .g-main a { color: var(--fn-print-ink); }
 }
