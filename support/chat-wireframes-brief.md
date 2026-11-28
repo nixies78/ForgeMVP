@@ -403,10 +403,19 @@ Rules for a full mockup - the wireframe rules above, with these differences:
 - **A scripted walk-through runs on load, and it never presses Send.** Four lines type themselves into the
   box one character at a time with Send held down for the whole of it; then the strip waits, because pressing
   Send is the reviewer's move - that is the loop the screen is arguing for. When the reply lands it types the
-  next line, and it stops for good the moment the reviewer sends anything of their own ("Demo stopped - the
-  tool is yours") or presses Stop. After the fourth line the plan is complete and the key reads Run again,
-  which puts the page back to the state it loaded in. No overlay and no modal: a demo a reviewer cannot
-  escape is a demo that stops them trying the tool.
+  next line, and it stops for good the moment the reviewer sends anything of their own (the band reports
+  "stopped - the tool is yours") or presses Stop. After the fourth line the plan is complete and the key
+  reads Run again, which puts the page back to the state it loaded in. No overlay and no modal: a demo a
+  reviewer cannot escape is a demo that stops them trying the tool.
+- **Its strip is mock-only chrome, and it lives above the header.** A full-bleed band on a ground darker
+  than the page, labelled DEMO in the indigo that means "a machine says this about itself", closed by a
+  **dashed** rule - the wireframe set's mark for placeholder, which is what the band is. It used to sit in
+  the row the quick picks vacate, between the picks and the box at the size and shape of the app's own
+  pills: the one place on the screen where scaffolding could honestly be mistaken for a control of the page,
+  and a row taken out of the deck, which is the column the whole layout argument is made of. The band is
+  never hidden - it is the only way to stop the walk-through - and it is paid for in the deck's own
+  arithmetic: `--demo-band` is one of the terms subtracted from the viewport, so the composer stays above the
+  fold at a laptop height with the band on screen. On a phone it thins to 32px and drops its label.
 - **A finished count is not an affordance.** **Answers owed** wears the accent while answers are owed -
   blue means "there is something here for you" everywhere else on this page - and goes inert at zero: no
   accent, no dotted rule, no help cursor, no tooltip, no place in the tab order. The **Open questions**

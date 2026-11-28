@@ -145,7 +145,15 @@ in the middle of the page before there is anything to read. So the deck's own he
 else, 20rem to 46rem, and its empty end is a measurement rather than a taste: the panel is 323px tall and
 starts on the same line, so 20rem lands the composer's lower edge 3px inside the panel's foot at both window
 heights. The box then comes down 208px over the four inputs, which is exactly the room the headline above
-gives up - the descent is the same animation seen from the other end.
+gives up - the descent is the same animation seen from the other end. The demo strip moved once more after
+that, and the owner's reason was the right one: sitting in the row the quick picks vacate, at the size and
+shape of the app's own pills, it was the one thing on the screen that could honestly be read as a control of
+the page. It is now a band above the header - full-bleed, darker than the page, labelled DEMO, closed by a
+dashed rule, which is the set's own mark for "not built, not yours" - so it reads as scaffolding for whoever
+is reviewing the mockup, and the deck gets its row back. It is also the one piece of the page the deck's
+viewport arithmetic has to know about: `--demo-band` is subtracted alongside the header and the pitch, and on
+a phone it thins to 32px. The same pass noticed what the phone screenshot showed: a 16rem floor under an
+empty transcript is dead scrolling, so that floor now applies only once there is a conversation to hold.
 
 ## What the chat set deliberately does not settle
 

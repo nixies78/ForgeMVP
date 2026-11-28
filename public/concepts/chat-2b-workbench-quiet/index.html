@@ -53,6 +53,11 @@
        key's hover face the way the blue key goes from #33BFFF to #47C6FF under the pointer. */
     --rec: #BA4545;
     --rec-lift: #FD5E5E;
+    /* The mock-only demo band above the header. Its height is a variable because the conversation's own
+       height is worked out by subtracting the fixed chrome from the viewport, and the band is part of that
+       chrome: the deck's arithmetic below reads this, so the composer stays above the fold at a laptop
+       height with the band on screen. Thinner on a phone, where a strip of the screen is a real cost. */
+    --demo-band: 36px;
     --ease: cubic-bezier(.2, .7, .2, 1);
     --title: "Inter Tight", "Inter", system-ui, sans-serif;
     --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -169,12 +174,13 @@
      because a percentage of a short window is still too tall for that window: the 420px is that fixed part
      with the full pitch on screen, measured at 1440x1000 and again at 1440x780 (which is how the first
      estimate of 360 was caught being 40 short) - 72px bar, the intro at its tallest, the padding and the air
-     under it. */
+     under it - and the demo band is subtracted as its own term, because it is mock-only chrome that happens
+     to be on screen too and the fold does not care where a pixel came from. */
   .deck {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    height: clamp(calc(18rem + 2rem * var(--engage)), calc(100vh - (420px - 200px * var(--engage))), calc(20rem + 26rem * var(--engage)));
+    height: clamp(calc(18rem + 2rem * var(--engage)), calc(100vh - (420px - 200px * var(--engage)) - var(--demo-band)), calc(20rem + 26rem * var(--engage)));
   }
 
   /* Bay label: name and count as one line, the count in brackets and dim - 2c's reel labels. */
@@ -658,26 +664,44 @@
      line sits against the composer rather than floating in the middle of a void. */
   .msgs .empty { margin: 0 2px 8px; font-size: 13.5px; color: var(--dim); }
 
-  /* ---------- The scripted demo ---------- */
-  /* One line, in the row the picks vacate: what the demo is doing, which step of how many, and the one
-     control it needs. It is a status strip rather than a dialogue box - a reviewer who wants to drive the
-     tool themselves should not have to dismiss anything - and the dot is the only thing that moves. */
-  .demo { display: flex; align-items: center; gap: 9px; margin: 12px 2px 0; font-size: 12px; color: var(--dim); }
+  /* ---------- The demo band ---------- */
+  /* Mock-only chrome, and it wears the set's notation for "not built, not yours": a full-bleed band above
+     the header, on a ground darker than the page, closed by a dashed rule (dashed is the wireframe set's
+     mark for placeholder, and this is the placeholder). It used to sit in the row the quick picks vacate -
+     between the picks and the box, at the size and the shape of the app's own pills, which is the one place
+     on this screen where scaffolding could honestly be mistaken for a control of the page. It was also a row
+     out of the deck, and the deck is the column the whole layout argument is made of. Up here it is out of
+     the tool's way twice over. What it must keep is being reachable: it is the only way to stop the
+     walk-through, so it is never hidden, only ever quiet. */
+  .demo-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: var(--demo-band);
+    padding-inline: 18px;
+    background: #08080B;
+    border-bottom: 1px dashed var(--line-2);
+    font: 600 12px/1 var(--body);
+    color: var(--muted);
+  }
+  .demo-lab { flex: none; font: 700 10px/1 var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-2); }
   .demo-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
-  .demo.is-idle .demo-dot { background: var(--dim); }
-  .demo.is-typing .demo-dot { animation: demo-pulse 1.1s var(--ease) infinite; }
-  .demo b { color: var(--muted); font-weight: 600; }
+  .demo-bar.is-idle .demo-dot { background: var(--dim); }
+  .demo-bar.is-done .demo-dot { background: var(--accent-2); }
+  .demo-bar.is-typing .demo-dot { animation: demo-pulse 1.1s var(--ease) infinite; }
+  .demo-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .demo-key {
+    flex: none;
     margin-left: auto;
     font: 600 11.5px/1 var(--body);
     color: var(--muted);
-    background: rgba(255, 255, 255, .03);
+    background: rgba(255, 255, 255, .04);
     border: 1px solid var(--line-2);
     border-radius: 999px;
     padding: 6px 11px;
     cursor: pointer;
   }
-  .demo-key:hover { color: #fff; border-color: #4A4A50; background: rgba(255, 255, 255, .07); }
+  .demo-key:hover { color: #fff; border-color: #4A4A50; background: rgba(255, 255, 255, .08); }
   .demo-key:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
   @keyframes demo-pulse { 50% { opacity: .2; } }
 
@@ -688,9 +712,12 @@
   @media (max-width: 1080px) {
     .ws-body { grid-template-columns: minmax(0, 1fr); }
     .rail { position: static; }
-    /* Stacked, the conversation sets its own height from its content instead of from the viewport. */
+    /* Stacked, the conversation sets its own height from its content instead of from the viewport - but a
+       conversation needs a floor once there is a conversation, not before: an empty transcript is not worth
+       16rem of a phone either, and on one column the box is already directly under the quick picks. */
     .deck { height: auto; }
-    .msgs { min-height: clamp(16rem, 36vh, 20rem); }
+    .msgs { min-height: 0; }
+    body.is-underway .msgs { min-height: clamp(16rem, 36vh, 20rem); }
   }
   @media (max-width: 760px) {
     /* Padding and headline still ramp here: a fixed value in a media query would out-rank the ramp's rule
@@ -713,13 +740,18 @@
     .intro h1 { font-size: clamp(calc(28px - 4px * var(--engage)), calc(4.2vw - 1.8vw * var(--engage)), calc(46px - 12px * var(--engage))); }
     .lede { margin-top: calc(12px - 12px * var(--engage)); font-size: 15px; }
     .workspace { padding-block: 18px 0; }
-    .deck { height: clamp(calc(17rem + 3rem * var(--engage)), calc(100vh - (350px - 130px * var(--engage))), calc(20rem + 26rem * var(--engage))); }
+    .deck { height: clamp(calc(17rem + 3rem * var(--engage)), calc(100vh - (350px - 130px * var(--engage)) - var(--demo-band)), calc(20rem + 26rem * var(--engage))); }
   }
   @media (max-width: 520px) {
     /* A phone has no Enter key, so the keyboard hint is not advice there - it is noise in the foot of
        the one control the screen is built around. The button keeps the row to itself. */
     .composer-foot .hint { display: none; }
     .composer-foot { justify-content: flex-end; }
+    /* And a phone gives the demo band less of its screen: the label goes and the strip keeps the sentence
+       and the one key. The band is the only way to stop the walk-through, so it is never dropped. */
+    :root { --demo-band: 32px; }
+    .demo-lab { display: none; }
+    .demo-bar { padding-inline: 12px; gap: 8px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
@@ -728,6 +760,17 @@
 <link rel="stylesheet" href="../_shared/chrome.css" />
 </head>
 <body>
+
+<!-- The demo band, above everything and out of the tool. It is scaffolding for whoever is reviewing this
+     page rather than a control in the product: a band on a darker ground, closed by a dashed rule, labelled
+     DEMO, and the one key that stops the walk-through. It types the user's lines and then waits - the demo
+     never presses Send, because the loop this screen is arguing for is a person pressing it. -->
+<div class="demo-bar is-idle" id="demoBar">
+  <span class="demo-lab">Demo</span>
+  <span class="demo-dot" aria-hidden="true"></span>
+  <span class="demo-text" id="demoText" aria-live="polite">starting</span>
+  <button class="demo-key" id="demoKey" type="button">Stop</button>
+</div>
 
 <header class="wrap">
   <a class="logo-lockup" href="../../mockups/index.html" title="All mockups">
@@ -769,13 +812,9 @@
           <button class="chip" type="button" data-fill="Write the five build steps out in the order I should do them.">Order the build steps</button>
         </div>
 
-        <!-- The strip that runs the scripted walk-through. It types the user's next line and then waits: the
-             demo never presses Send, because the loop this screen is arguing for is a person pressing it. -->
-        <div class="demo is-idle" id="demoBar">
-          <span class="demo-dot" aria-hidden="true"></span>
-          <span class="demo-text" id="demoText" aria-live="polite">Scripted demo - starting</span>
-          <button class="demo-key" id="demoKey" type="button">Stop</button>
-        </div>
+        <!-- The strip that runs the scripted walk-through lives above the header now, as mock-only chrome:
+             see the .demo-bar rules. The row it used to occupy here was part of the deck, and the deck is
+             the column this whole page's layout argument is made of. -->
 
         <!-- The one object on this side of the screen. The textarea starts one line tall and grows with
              what is typed; the button that sends is the page's own pill, at the foot of the panel. -->
@@ -1284,11 +1323,12 @@
 
     function demoState(text, kind, key) {
       demoText.textContent = text;
-      demoBar.className = 'demo is-' + kind;
+      demoBar.className = 'demo-bar is-' + kind;
       demoKey.textContent = key;
     }
     function demoLabel(what) {
-      return 'Scripted demo - step ' + Math.min(demo.step + 1, SCRIPT.length) + ' of ' + SCRIPT.length + ' \u00b7 ' + what;
+      /* The band is already labelled DEMO, so the state does not repeat it: what goes here is only the step and what is happening in it. */
+      return 'step ' + Math.min(demo.step + 1, SCRIPT.length) + ' of ' + SCRIPT.length + ' \u00b7 ' + what;
     }
     function demoWait() {
       demoState(demoLabel('press Send when you are ready'), 'waiting', 'Stop');
@@ -1341,7 +1381,7 @@
            is over must not still be claiming to run. */
         demo.on = false;
         demo.typing = false;
-        demoState('Demo finished - all ' + SCRIPT.length + ' lines are in. Run it again, or drive it yourself.', 'done', 'Run again');
+        demoState('all ' + SCRIPT.length + ' lines are in - run it again, or drive it yourself.', 'done', 'Run again');
         return;
       }
       demoState(demoLabel('waiting for the bot'), 'typing', 'Stop');
@@ -1352,7 +1392,7 @@
       demo.typing = false;
       window.clearTimeout(demo.timer);
       if (say.value.trim()) send.disabled = false;
-      demoState('Demo stopped - ' + why, 'idle', 'Run again');
+      demoState('stopped - ' + why, 'idle', 'Run again');
     }
 
     demoKey.addEventListener('click', function () {
@@ -1360,7 +1400,7 @@
       resetChat();
       demo.on = true;
       demo.step = 0;
-      demoState('Scripted demo - starting', 'idle', 'Stop');
+      demoState('starting', 'idle', 'Stop');
       demo.timer = window.setTimeout(typeLine, 900);
     });
 
@@ -1474,7 +1514,7 @@
     /* And the demo starts on its own, after a pause long enough to take in what the page looks like with
        nothing in it - which is a state worth seeing, and the reason the transcript starts empty. The strip
        says what it is about to do rather than sitting there. */
-    demoState('Scripted demo - about to type your first line', 'idle', 'Stop');
+    demoState('about to type your first line', 'idle', 'Stop');
     window.setTimeout(typeLine, reduce ? 0 : 2600);
   })();
 </script>
